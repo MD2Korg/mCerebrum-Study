@@ -3,6 +3,7 @@ package org.md2k.study;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
@@ -20,8 +21,16 @@ public class FragmentService extends PreferenceFragment {
     Applications applications;
 
     @Override
+    public void onPause() {
+        mHandler.removeCallbacks(runnable);
+        super.onPause();
+
+    }
+
+    @Override
     public void onResume() {
-        this.setPreferenceScreen(loadPreferenceScreen());
+        setPreferenceScreen(loadPreferenceScreen());
+        mHandler.post(runnable);
         super.onResume();
     }
 
@@ -30,15 +39,17 @@ public class FragmentService extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         context = this.getActivity();
         applications = Applications.getInstance(context);
+        appList = loadAppList();
     }
-    ArrayList<Applications.Application> appList;
+
+    ArrayList<App> appList;
 
     private PreferenceScreen loadPreferenceScreen() {
         Log.d(TAG, "loadPreferenceScreen()");
-        appList = loadAppList();
         ArrayList<String> types = applications.getTypes(appList);
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(this.getActivity());
         screen.removeAll();
+        listPreference.clear();
         for (int t = 0; t < types.size(); t++) {
             Log.d(TAG, types.get(t));
             PreferenceCategory category = new PreferenceCategory(context);
@@ -47,11 +58,9 @@ public class FragmentService extends PreferenceFragment {
             for (int i = 0; i < appList.size(); i++) {
                 if (!appList.get(i).getType().equals(types.get(t))) continue;
                 SwitchPreference preference = new SwitchPreference(context);
-                if(Apps.isServiceRunning(context, appList.get(i).getService()))
-                    preference.setChecked(true);
-                else preference.setChecked(false);
 
                 preference.setTitle(appList.get(i).getName() + " Service");
+                preference.setKey(appList.get(i).getService());
                 final int finalI = i;
                 preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
@@ -69,41 +78,53 @@ public class FragmentService extends PreferenceFragment {
                     }
                 });
                 category.addPreference(preference);
+                listPreference.add(preference);
+
             }
         }
         return screen;
     }
 
-    private ArrayList<Applications.Application> loadAppList() {
-        ArrayList<Applications.Application> appList = applications.getApplications();
-        appList = applications.filterApplication(appList, Applications.PACKAGENAME);
-        appList = applications.filterApplication(appList, Applications.SERVICE);
-        appList = applications.filterApplication(appList, Applications.INSTALLED);
+    ArrayList<SwitchPreference> listPreference = new ArrayList<>();
+
+    void updatePreferenceSummary() {
+        long time;
+        SwitchPreference switchPreference;
+        for (int i = 0; i < listPreference.size(); i++) {
+            switchPreference = listPreference.get(i);
+            String serviceName = switchPreference.getKey();
+            time = Apps.serviceRunningTime(getActivity(), serviceName);
+            if (time < 0) {
+                switchPreference.setChecked(false);
+                switchPreference.setSummary("Not Running");
+
+            } else {
+                switchPreference.setChecked(true);
+                long runtime = time / 1000;
+                int second = (int) (runtime % 60);
+                runtime /= 60;
+                int minute = (int) (runtime % 60);
+                runtime /= 60;
+                int hour = (int) runtime;
+                switchPreference.setSummary("Running Time: " + String.format("%02d:%02d:%02d", hour, minute, second));
+            }
+        }
+    }
+
+    private ArrayList<App> loadAppList() {
+        ArrayList<App> appList = applications.getApps();
         return appList;
     }
 
-/*    void setPreferences(){
-        SwitchPreference switchPreference;
-        for(int i=0;i<apps.applications.size();i++) {
-            switchPreference = (SwitchPreference) findPreference(apps.applications.get(i).name);
-            final int finalI = i;
-            switchPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    boolean switched = !((SwitchPreference) preference)
-                            .isChecked();
-                    Intent intent = new Intent();
-                    intent.setClassName(apps.applications.get(finalI).name, apps.applications.get(finalI).service);
-
-                    if (switched) {
-                        getActivity().getApplicationContext().startService(intent);
-                    } else {
-                        getActivity().getApplicationContext().stopService(intent);
-                    }
-                    return true;
-                }
-            });
+    Handler mHandler = new Handler();
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            {
+                updatePreferenceSummary();
+                mHandler.postDelayed(this, 1000);
+            }
         }
-    }
-*/
+    };
+
 }

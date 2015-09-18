@@ -23,64 +23,65 @@ public class Applications {
     public static final int DOWNLOADLINK=4;
     public static final int INSTALLED=5;
 
-    ArrayList<Application> applications;
+    ArrayList<App> apps;
     Context context;
     public static Applications getInstance(Context context){
         if(instance==null)
             instance=new Applications(context);
         return instance;
     }
-    public ArrayList<Application> getApplications(){
-        return applications;
+    public ArrayList<App> getApps(){
+        return apps;
     }
     private Applications(Context context){
         this.context=context;
         readFile(context, Constants.FILENAME_APPINFO);
+        apps =filterApplication(apps,DOWNLOADLINK);
     }
-    boolean isMatch(Application application,int filterType){
+    boolean isMatch(App app,int filterType){
         boolean result=true;
         switch(filterType){
             case PACKAGENAME:
-                if(application.packagename==null || application.packagename.length()==0) result=false;
+                if(app.packagename==null || app.packagename.length()==0) result=false;
                 break;
             case APPLICATION:
-                if(application.application==null || application.application.length()==0) result=false;
+                if(app.application==null || app.application.length()==0) result=false;
                 break;
             case SETTINGS:
-                if(application.settings==null || application.settings.length()==0) result=false;
+                if(app.settings==null || app.settings.length()==0) result=false;
                 break;
             case SERVICE:
-                if(application.service==null || application.service.length()==0) result=false;
+                if(app.service==null || app.service.length()==0) result=false;
                 break;
             case DOWNLOADLINK:
-                if(application.downloadlink==null || application.downloadlink.length()==0) result=false;
+                if(app.downloadlink==null || app.downloadlink.length()==0) result=false;
                 break;
             case INSTALLED:
-                if (!Apps.isPackageInstalled(context, application.getPackagename())) result=false;
+                if (!Apps.isPackageInstalled(context, app.getPackagename())) result=false;
                 break;
         }
         return result;
     }
-    public ArrayList<Application> filterApplication(ArrayList<Application> applications, int filterType){
-        ArrayList<Application> selApplications=new ArrayList<>();
-        for(int i=0;i<applications.size();i++){
-            if(isMatch(applications.get(i),filterType))
-                selApplications.add(applications.get(i));
+    public ArrayList<App> filterApplication(ArrayList<App> apps, int filterType){
+        ArrayList<App> selApps =new ArrayList<>();
+        for(int i=0;i< apps.size();i++){
+            if(isMatch(apps.get(i),filterType))
+                selApps.add(apps.get(i));
         }
-        return selApplications;
+        return selApps;
     }
     public void readFile(Context context, String filename){
         BufferedReader br;
         try {
             br = new BufferedReader(new InputStreamReader(context.getAssets().open(filename)));
             Gson gson = new Gson();
-            Type collectionType = new TypeToken<List<Application>>() {}.getType();
-            applications = gson.fromJson(br, collectionType);
+            Type collectionType = new TypeToken<List<App>>() {}.getType();
+            apps = gson.fromJson(br, collectionType);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    public ArrayList<String> getTypes(ArrayList<Application> appList){
+    public ArrayList<String> getTypes(ArrayList<App> appList){
         boolean flag;
         ArrayList<String> types=new ArrayList<>();
         if(appList==null) return types;
@@ -95,41 +96,5 @@ public class Applications {
                 types.add(appList.get(i).type);
         }
         return types;
-    }
-    class Application {
-        private String name;
-        private String type;
-        private String packagename;
-        private String application;
-        private String settings;
-        private String service;
-        private String downloadlink;
-
-        public String getName() {
-            return name;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public String getPackagename() {
-            return packagename;
-        }
-
-        public String getApplication() {
-            return application;
-        }
-
-        public String getSettings() {
-            return settings;
-        }
-
-        public String getService() {
-            return service;
-        }
-        public String getDownloadlink() {
-            return downloadlink;
-        }
     }
 }

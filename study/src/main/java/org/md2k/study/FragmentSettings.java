@@ -30,7 +30,7 @@ public class FragmentSettings extends PreferenceFragment {
         applications = Applications.getInstance(context);
     }
 
-    ArrayList<Applications.Application> appList;
+    ArrayList<App> appList;
 
     private PreferenceScreen loadPreferenceScreen() {
         Log.d(TAG, "loadPreferenceScreen()");
@@ -64,8 +64,8 @@ public class FragmentSettings extends PreferenceFragment {
         return screen;
     }
 
-    private ArrayList<Applications.Application> loadAppList() {
-        ArrayList<Applications.Application> appList = applications.getApplications();
+    private ArrayList<App> loadAppList() {
+        ArrayList<App> appList = applications.getApps();
         Log.d(TAG, "appList=" + appList.size());
         appList = applications.filterApplication(appList, Applications.PACKAGENAME);
         Log.d(TAG, "appList=" + appList.size());

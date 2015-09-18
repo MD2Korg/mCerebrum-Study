@@ -29,7 +29,7 @@ public class FragmentInstallApp extends PreferenceFragment {
         context = this.getActivity();
         applications= Applications.getInstance(context);
     }
-    ArrayList<Applications.Application> appList;
+    ArrayList<App> appList;
     private PreferenceScreen loadPreferenceScreen(){
         Log.d(TAG, "loadPreferenceScreen()");
         appList=loadAppList();
@@ -37,7 +37,7 @@ public class FragmentInstallApp extends PreferenceFragment {
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(this.getActivity());
         screen.removeAll();
         for (int t = 0; t < types.size(); t++) {
-            Log.d(TAG,types.get(t));
+            Log.d(TAG, types.get(t));
             PreferenceCategory category = new PreferenceCategory(context);
             category.setTitle(types.get(t));
 
@@ -66,8 +66,8 @@ public class FragmentInstallApp extends PreferenceFragment {
         }
         return screen;
     }
-    private ArrayList<Applications.Application> loadAppList(){
-        ArrayList<Applications.Application> appList= applications.getApplications();
+    private ArrayList<App> loadAppList(){
+        ArrayList<App> appList= applications.getApps();
         Log.d(TAG,"appList="+appList.size());
         appList=applications.filterApplication(appList,Applications.PACKAGENAME);
         Log.d(TAG,"appList="+appList.size());
