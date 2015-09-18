@@ -1,0 +1,14 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:key="datakit_service"
+        android:title="DataKit Service" />
+        <SwitchPreference
+            android:key="autosense_service"
+            android:title="AutoSense Service" />
+        <SwitchPreference
+            android:key="microsoftband_service"
+            android:title="MicrosfotBand Service" />
+    <SwitchPreference
+        android:key="phonesensor_service"
+        android:title="PhoneSensor Service" />
+</PreferenceScreen>
