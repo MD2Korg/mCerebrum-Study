@@ -49,6 +49,11 @@ public class ActivitymCerebrumApp extends ActionBarActivity {
 
     @Override
     public void onResume() {
+        updateAppCount();
+        updateServiceCount();
+        super.onResume();
+    }
+    void updateAppCount(){
         int count = 0;
         ArrayList<App> applications = Applications.getInstance(this).apps;
         for (int i = 0; i < applications.size(); i++) {
@@ -61,8 +66,20 @@ public class ActivitymCerebrumApp extends ActionBarActivity {
             ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
         else
             ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
-
-
-        super.onResume();
     }
+    void updateServiceCount(){
+        int count = 0;
+        ArrayList<App> applications = Applications.getInstance(this).apps;
+        for (int i = 0; i < applications.size(); i++) {
+            if (Apps.isServiceRunning(this, applications.get(i).getService()))
+                count++;
+        }
+        ((TextView) findViewById(R.id.textView_application_required)).setText(String.valueOf(applications.size()));
+        ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
+        if (count == applications.size())
+            ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
+        else
+            ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
+    }
+
 }
