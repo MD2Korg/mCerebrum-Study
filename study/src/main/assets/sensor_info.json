@@ -1,0 +1,22 @@
+[
+  {
+    "platformtype":"AUTOSENSE_CHEST",
+    "datasourcetype":"RIP",
+    "location":"chest"
+  },
+  {
+    "platformtype":"AUTOSENSE_CHEST",
+    "datasourcetype":"ECG",
+    "location":"chest"
+  },
+  {
+    "platformtype":"MICROSOFT_BAND",
+    "datasourcetype":"BAND_CONTACT",
+    "location":"LEFT_WRIST"
+  },
+  {
+    "platformtype":"MICROSOFT_BAND",
+    "datasourcetype":"BAND_CONTACT",
+    "location":"RIGHT_WRIST"
+  }
+]

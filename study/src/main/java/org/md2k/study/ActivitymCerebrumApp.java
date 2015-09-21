@@ -1,10 +1,17 @@
 package org.md2k.study;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.md2k.utilities.Apps;
@@ -12,8 +19,7 @@ import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 
-
-public class ActivitymCerebrumApp extends ActionBarActivity {
+public class ActivitymCerebrumApp extends Activity {
     public static final String TAG = ActivitymCerebrumApp.class.getSimpleName();
 
     @Override
@@ -21,6 +27,9 @@ public class ActivitymCerebrumApp extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate()");
         setContentView(R.layout.activity_mcerebrumapp);
+        if(getActionBar()!=null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
 
     @Override
@@ -35,51 +44,65 @@ public class ActivitymCerebrumApp extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        Intent intent;
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish();
+                break;
+            case R.id.action_applications:
+                intent = new Intent(this, ActivityAppList.class);
+                startActivity(intent);
+                break;
+            case R.id.action_services:
+                intent = new Intent(this, ActivityServiceList.class);
+                startActivity(intent);
+                break;
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, ActivitymCerebrumAppSettings.class);
-            startActivity(intent);
-            return true;
+            case R.id.action_about:
+                intent = new Intent(this, ActivityAbout.class);
+                startActivity(intent);
+                break;
+            case R.id.action_copyright:
+                intent = new Intent(this, ActivityCopyright.class);
+                startActivity(intent);
+                break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onResume() {
-        updateAppCount();
-        updateServiceCount();
+        UI.createOverviewUI(this);
+        UI.updateAppCount(this);
+        UI.updateServiceCount(this);
+        UI.createDeviceUI(this);
+        UI.updateDevice(this);
         super.onResume();
     }
-    void updateAppCount(){
+
+
+
+    void updateServiceCount() {
         int count = 0;
-        ArrayList<App> applications = Applications.getInstance(this).apps;
-        for (int i = 0; i < applications.size(); i++) {
-            if (Apps.isPackageInstalled(this, applications.get(i).getPackagename()))
-                count++;
-        }
-        ((TextView) findViewById(R.id.textView_application_required)).setText(String.valueOf(applications.size()));
-        ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
-        if (count == applications.size())
-            ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
-        else
-            ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
-    }
-    void updateServiceCount(){
-        int count = 0;
-        ArrayList<App> applications = Applications.getInstance(this).apps;
+        ArrayList<Application> applications = Applications.getInstance(this).applications;
+        applications = Applications.getInstance(this).filterApplication(applications, Applications.SERVICE);
         for (int i = 0; i < applications.size(); i++) {
             if (Apps.isServiceRunning(this, applications.get(i).getService()))
                 count++;
         }
-        ((TextView) findViewById(R.id.textView_application_required)).setText(String.valueOf(applications.size()));
-        ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
-        if (count == applications.size())
-            ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
-        else
-            ((TextView) findViewById(R.id.textView_application_installed)).setText(String.valueOf(count));
-    }
+        ((TextView) findViewById(R.id.textView_service_running)).setText(String.valueOf(count)+" (out of "+String.valueOf(applications.size()+")"));
+        if (count == applications.size()) {
+            ((ImageView) findViewById(R.id.imageView_service_status)).setImageDrawable(getResources().getDrawable(R.drawable.ok));
+            findViewById(R.id.button_service_fix).setVisibility(View.INVISIBLE);
+        } else {
+            ((ImageView) findViewById(R.id.imageView_service_status)).setImageDrawable(getResources().getDrawable(R.drawable.error));
+            findViewById(R.id.button_service_fix).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
+                }
+            });
+        }
+    }
 }

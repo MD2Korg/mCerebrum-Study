@@ -3,7 +3,6 @@
     "name":"DataKit",
     "type":"core",
     "packagename":"org.md2k.datakit",
-    "application":"org.md2k.datakit.ActivityDataKit",
     "settings":"",
     "service":"org.md2k.datakit.ServiceDataKit",
     "downloadlink":"https://github.com/MD2Korg/mCerebrum-DataKit/blob/master/apk/datakit.apk?raw=true"
@@ -12,17 +11,24 @@
     "name":"AutoSense",
     "type":"sensor",
     "packagename":"org.md2k.autosense",
-    "application":"org.md2k.autosense.ActivityAutoSense",
     "settings":"org.md2k.autosense.ActivityAutoSenseSettings",
     "service":"org.md2k.autosense.antradio.connection.ServiceAutoSenses",
     "downloadlink":"https://github.com/MD2Korg/mCerebrum-AutoSense/blob/master/apk/autosense.apk?raw=true"
 
   },
   {
+    "name":"Microsoft Health",
+    "type":"sensor",
+    "packagename":"com.microsoft.kapp",
+    "settings":"",
+    "service":"",
+    "downloadlink":"market://details?id=com.microsoft.kapp"
+  },
+
+  {
     "name":"MicrosoftBand",
     "type":"sensor",
     "packagename":"org.md2k.microsoftband",
-    "application":"org.md2k.microsoftband.ActivityMicrosoftBand",
     "settings":"org.md2k.microsoftband.ActivityMicrosoftBandSettings",
     "service":"org.md2k.microsoftband.ServiceMicrosoftBands",
     "downloadlink":"https://github.com/MD2Korg/mCerebrum-MicrosoftBand/blob/master/apk/microsoftband.apk?raw=true"
@@ -31,7 +37,6 @@
     "name":"PhoneSensor",
     "type":"sensor",
     "packagename":"org.md2k.phonesensor",
-    "application":"org.md2k.phonesensor.ActivityPhoneSensor",
     "settings":"org.md2k.phonesensor.ActivityPhoneSensorSettings",
     "service":"org.md2k.phonesensor.ServicePhoneSensor",
     "downloadlink":"https://github.com/MD2Korg/mCerebrum-PhoneSensor/blob/master/apk/phonesensor.apk?raw=true"
@@ -40,7 +45,6 @@
     "name":"DataQuality",
     "type":"sensor",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":""
@@ -49,7 +53,6 @@
     "name":"cStress",
     "type":"event",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":""
@@ -58,7 +61,6 @@
     "name":"DrivingDetection",
     "type":"event",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":""
@@ -67,7 +69,6 @@
     "name":"ActivityDetection",
     "type":"event",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":""
@@ -76,7 +77,6 @@
     "name":"EMA",
     "type":"ema & intervention",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":"https://github.com/MD2Korg/mCerebrum/blob/wip/APKs/ema.apk?raw=true"
@@ -85,7 +85,6 @@
     "name":"Intervention",
     "type":"ema & intervention",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":"https://github.com/MD2Korg/mCerebrum/blob/wip/APKs/intervention.apk?raw=true"
@@ -94,16 +93,14 @@
     "name":"HeadSpace",
     "type":"ema & intervention",
     "packagename":"com.getsomeheadspace.android",
-    "application":"",
     "settings":"",
     "service":"",
-    "downloadlink":""
+    "downloadlink":"market://details?id=com.getsomeheadspace.android"
   },
   {
     "name":"MoodSurfing",
     "type":"ema & intervention",
     "packagename":"org.md2k.moodsurfing",
-    "application":"org.md2k.moodsurfing.ActivityMoodSurfingExercises",
     "settings":"",
     "service":"",
     "downloadlink":"https://github.com/MD2Korg/mCerebrum/blob/wip/APKs/moodsurfing.apk?raw=true"
@@ -112,7 +109,6 @@
     "name":"ThoughtShakeup",
     "type":"ema & intervention",
     "packagename":"org.md2k.thoughtshakeup",
-    "application":"org.md2k.thoughtshakeup.ActivityThoughtShakeup",
     "settings":"",
     "service":"",
     "downloadlink":"https://github.com/MD2Korg/mCerebrum/blob/wip/APKs/moodsurfing.apk?raw=true"
@@ -122,7 +118,6 @@
     "name":"SystemCheck",
     "type":"visualization",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":""
@@ -131,7 +126,6 @@
     "name":"Plotter",
     "type":"visualization",
     "packagename":"org.md2k.plotter",
-    "application":"org.md2k.plotter.ActivityPlotter",
     "settings":"",
     "service":"",
     "downloadlink":""
@@ -140,7 +134,6 @@
     "name":"DataUploader",
     "type":"cloud",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":""
@@ -149,7 +142,6 @@
     "name":"StatusUpdater App",
     "type":"cloud",
     "packagename":"",
-    "application":"",
     "settings":"",
     "service":"",
     "downloadlink":""

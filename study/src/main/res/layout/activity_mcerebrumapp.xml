@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -12,272 +12,269 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="10dp"
-        android:paddingTop="0dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <TextView
-            style="@style/textview_heading1_dark"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:text="Overview"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/amber_900" />
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingTop="0dp">
 
-        <View style="@style/view_divider_dark" />
+            <TextView
+                style="@style/textview_heading1_dark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:text="Overview"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/amber_900" />
 
-        <TableLayout
-            android:id="@+id/tableLayout"
+            <View style="@style/view_divider_dark" />
+
+            <TableLayout
+                android:id="@+id/tableLayout_overview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="5">
+
+                    <TextView
+                        android:layout_weight="1"
+                        android:padding="3dip"
+                        android:text="Application" />
+
+                    <TextView
+                        android:id="@+id/textView_application_installed"
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <ImageView
+                        android:id="@+id/imageView_application_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <Button
+                        android:id="@+id/button_application_fix"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/button_red"
+                        android:gravity="center"
+                        android:minHeight="40dp"
+                        android:text="Fix" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="5">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="3dip"
+                        android:text="Service" />
+
+                    <TextView
+                        android:id="@+id/textView_service_running"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+
+                    <ImageView
+                        android:id="@+id/imageView_service_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <Button
+                        android:id="@+id/button_service_fix"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_red"
+                        android:gravity="center"
+                        android:minHeight="40dp"
+                        android:text="Fix" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:stretchColumns="*">
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingTop="0dp">
 
-            <TableRow
+            <TextView
+                style="@style/textview_heading1_dark"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="5">
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:text="Devices"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/amber_900" />
 
-                <TextView
-                    android:id="@+id/textView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+            <View style="@style/view_divider_dark" />
 
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Available" />
-
-                <TextView
-                    android:id="@+id/textView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Required" />
-
-                <TextView
-                    android:id="@+id/textView4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Status" />
-
-                <TextView
-                    android:id="@+id/textView5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="To Do" />
-            </TableRow>
-
-            <TableRow
+            <TableLayout
+                android:id="@+id/tablelayout_device"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="5">
+                android:layout_height="wrap_content"
+                android:stretchColumns="*">
 
-                <TextView
-                    android:layout_weight="1"
-                    android:padding="3dip"
-                    android:text="Application" />
+            </TableLayout>
 
-                <TextView
-                    android:id="@+id/textView_application_installed"
-                    android:gravity="center"
-                    android:padding="3dip" />
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/textView_application_required"
-                    android:gravity="center"
-                    android:padding="3dip" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingTop="0dp">
 
-                <TextView
-                    android:id="@+id/application_status"
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-                <TextView
-                    android:id="@+id/application_todo"
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-            </TableRow>
-
-            <TableRow
+            <TextView
+                style="@style/textview_heading1_dark"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="5">
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:text="Sensors"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/amber_900" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="3dip"
+            <View style="@style/view_divider_dark" />
 
-                    android:text="Service" />
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*">
 
-                <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="3dip" />
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="5">
 
-                <TextView
-                    android:id="@+id/textView7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="3dip" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
 
-                <TextView
-                    android:id="@+id/textView8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="3dip" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Available" />
 
-                <TextView
-                    android:id="@+id/textView9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="3dip" />
-            </TableRow>
-        </TableLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Required" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Status" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Fix" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="5">
+
+                    <TextView
+                        android:layout_weight="1"
+                        android:padding="3dip"
+                        android:text="AutoSense-ECG" />
+
+                    <TextView
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <TextView
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <TextView
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <TextView
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="5">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="3dip"
+                        android:text="AutoSense-RIP" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="3dip" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="3dip" />
+                </TableRow>
+            </TableLayout>
+
+        </LinearLayout>
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="10dp"
-        android:paddingTop="0dp">
-
-        <TextView
-            style="@style/textview_heading1_dark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:text="Sensors"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/amber_900" />
-        <View style="@style/view_divider_dark" />
-        <TableLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:stretchColumns="*">
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="5">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Available" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Required" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Status" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="To Do" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="5">
-
-                <TextView
-                    android:layout_weight="1"
-                    android:padding="3dip"
-                    android:text="Application" />
-
-                <TextView
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-                <TextView
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-                <TextView
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-                <TextView
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="5">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="3dip"
-
-                    android:text="Service" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="3dip" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="3dip" />
-            </TableRow>
-        </TableLayout>
-
-    </LinearLayout>
-</LinearLayout>
+</ScrollView>

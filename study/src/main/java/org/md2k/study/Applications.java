@@ -15,85 +15,90 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Applications {
-    private static Applications instance=null;
-    public static final int PACKAGENAME=0;
-    public static final int APPLICATION=1;
-    public static final int SETTINGS=2;
-    public static final int SERVICE=3;
-    public static final int DOWNLOADLINK=4;
-    public static final int INSTALLED=5;
+    private static Applications instance = null;
+    public static final int PACKAGENAME = 0;
+    public static final int SETTINGS = 1;
+    public static final int SERVICE = 2;
+    public static final int DOWNLOADLINK = 3;
+    public static final int INSTALLED = 4;
 
-    ArrayList<App> apps;
+    ArrayList<Application> applications;
     Context context;
-    public static Applications getInstance(Context context){
-        if(instance==null)
-            instance=new Applications(context);
+
+    public static Applications getInstance(Context context) {
+        if (instance == null)
+            instance = new Applications(context);
         return instance;
     }
-    public ArrayList<App> getApps(){
-        return apps;
+
+    public ArrayList<Application> getApplications() {
+        return applications;
     }
-    private Applications(Context context){
-        this.context=context;
+
+    private Applications(Context context) {
+        this.context = context;
         readFile(context, Constants.FILENAME_APPINFO);
-        apps =filterApplication(apps,DOWNLOADLINK);
+        applications = filterApplication(applications, DOWNLOADLINK);
+        applications = filterApplication(applications,PACKAGENAME);
     }
-    boolean isMatch(App app,int filterType){
-        boolean result=true;
-        switch(filterType){
+
+    boolean isMatch(Application application, int filterType) {
+        boolean result = true;
+        switch (filterType) {
             case PACKAGENAME:
-                if(app.packagename==null || app.packagename.length()==0) result=false;
-                break;
-            case APPLICATION:
-                if(app.application==null || app.application.length()==0) result=false;
+                if (application.packagename == null || application.packagename.length() == 0) result = false;
                 break;
             case SETTINGS:
-                if(app.settings==null || app.settings.length()==0) result=false;
+                if (application.settings == null || application.settings.length() == 0) result = false;
                 break;
             case SERVICE:
-                if(app.service==null || app.service.length()==0) result=false;
+                if (application.service == null || application.service.length() == 0) result = false;
                 break;
             case DOWNLOADLINK:
-                if(app.downloadlink==null || app.downloadlink.length()==0) result=false;
+                if (application.downloadlink == null || application.downloadlink.length() == 0) result = false;
                 break;
             case INSTALLED:
-                if (!Apps.isPackageInstalled(context, app.getPackagename())) result=false;
+                if (!Apps.isPackageInstalled(context, application.getPackagename())) result = false;
                 break;
         }
         return result;
     }
-    public ArrayList<App> filterApplication(ArrayList<App> apps, int filterType){
-        ArrayList<App> selApps =new ArrayList<>();
-        for(int i=0;i< apps.size();i++){
-            if(isMatch(apps.get(i),filterType))
-                selApps.add(apps.get(i));
+
+    public ArrayList<Application> filterApplication(ArrayList<Application> applications, int filterType) {
+        ArrayList<Application> selApplications = new ArrayList<>();
+        for (int i = 0; i < applications.size(); i++) {
+            if (isMatch(applications.get(i), filterType))
+                selApplications.add(applications.get(i));
         }
-        return selApps;
+        return selApplications;
     }
-    public void readFile(Context context, String filename){
+
+    public void readFile(Context context, String filename) {
         BufferedReader br;
         try {
             br = new BufferedReader(new InputStreamReader(context.getAssets().open(filename)));
             Gson gson = new Gson();
-            Type collectionType = new TypeToken<List<App>>() {}.getType();
-            apps = gson.fromJson(br, collectionType);
+            Type collectionType = new TypeToken<List<Application>>() {
+            }.getType();
+            applications = gson.fromJson(br, collectionType);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    public ArrayList<String> getTypes(ArrayList<App> appList){
+
+    public ArrayList<String> getTypes(ArrayList<Application> applicationList) {
         boolean flag;
-        ArrayList<String> types=new ArrayList<>();
-        if(appList==null) return types;
-        for(int i=0;i<appList.size();i++){
-            flag=false;
-            for(int j=0;j<types.size();j++)
-                if(types.get(j).equals(appList.get(i).type)){
-                    flag=true;
+        ArrayList<String> types = new ArrayList<>();
+        if (applicationList == null) return types;
+        for (int i = 0; i < applicationList.size(); i++) {
+            flag = false;
+            for (int j = 0; j < types.size(); j++)
+                if (types.get(j).equals(applicationList.get(i).type)) {
+                    flag = true;
                     break;
                 }
-            if(!flag)
-                types.add(appList.get(i).type);
+            if (!flag)
+                types.add(applicationList.get(i).type);
         }
         return types;
     }

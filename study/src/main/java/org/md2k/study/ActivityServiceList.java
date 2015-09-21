@@ -5,18 +5,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
+import android.view.MenuItem;
 
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 
-public class FragmentService extends PreferenceFragment {
-    private static final String TAG = FragmentService.class.getSimpleName();
+public class ActivityServiceList extends PreferenceActivity {
+    private static final String TAG = ActivityServiceList.class.getSimpleName();
     Context context;
     Applications applications;
 
@@ -33,21 +35,33 @@ public class FragmentService extends PreferenceFragment {
         mHandler.post(runnable);
         super.onResume();
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        if (item.getItemId() == android.R.id.home)
+            finish();
+        return true;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = this.getActivity();
+        setContentView(R.layout.activity_services);
+        context = this;
         applications = Applications.getInstance(context);
-        appList = loadAppList();
+        applicationList = loadAppList();
+        if(getActionBar()!=null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    ArrayList<App> appList;
+    ArrayList<Application> applicationList;
 
     private PreferenceScreen loadPreferenceScreen() {
         Log.d(TAG, "loadPreferenceScreen()");
-        ArrayList<String> types = applications.getTypes(appList);
-        PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(this.getActivity());
+        ArrayList<String> types = applications.getTypes(applicationList);
+        PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(this);
         screen.removeAll();
         listPreference.clear();
         for (int t = 0; t < types.size(); t++) {
@@ -55,12 +69,12 @@ public class FragmentService extends PreferenceFragment {
             PreferenceCategory category = new PreferenceCategory(context);
             category.setTitle(types.get(t));
             screen.addPreference(category);
-            for (int i = 0; i < appList.size(); i++) {
-                if (!appList.get(i).getType().equals(types.get(t))) continue;
+            for (int i = 0; i < applicationList.size(); i++) {
+                if (!applicationList.get(i).getType().equals(types.get(t))) continue;
                 SwitchPreference preference = new SwitchPreference(context);
 
-                preference.setTitle(appList.get(i).getName() + " Service");
-                preference.setKey(appList.get(i).getService());
+                preference.setTitle(applicationList.get(i).getName() + " Service");
+                preference.setKey(applicationList.get(i).getService());
                 final int finalI = i;
                 preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
@@ -68,7 +82,7 @@ public class FragmentService extends PreferenceFragment {
                         boolean switched = !((SwitchPreference) preference)
                                 .isChecked();
                         Intent intent = new Intent();
-                        intent.setClassName(appList.get(finalI).getPackagename(), appList.get(finalI).getService());
+                        intent.setClassName(applicationList.get(finalI).getPackagename(), applicationList.get(finalI).getService());
                         if (switched) {
                             context.startService(intent);
                         } else {
@@ -93,7 +107,7 @@ public class FragmentService extends PreferenceFragment {
         for (int i = 0; i < listPreference.size(); i++) {
             switchPreference = listPreference.get(i);
             String serviceName = switchPreference.getKey();
-            time = Apps.serviceRunningTime(getActivity(), serviceName);
+            time = Apps.serviceRunningTime(this, serviceName);
             if (time < 0) {
                 switchPreference.setChecked(false);
                 switchPreference.setSummary("Not Running");
@@ -111,9 +125,11 @@ public class FragmentService extends PreferenceFragment {
         }
     }
 
-    private ArrayList<App> loadAppList() {
-        ArrayList<App> appList = applications.getApps();
-        return appList;
+    private ArrayList<Application> loadAppList() {
+        ArrayList<Application> applicationList = applications.getApplications();
+        applicationList = applications.filterApplication(applicationList,Applications.SERVICE);
+        applicationList = applications.filterApplication(applicationList,Applications.INSTALLED);
+        return applicationList;
     }
 
     Handler mHandler = new Handler();

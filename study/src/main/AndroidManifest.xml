@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.md2k.study">
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -9,7 +10,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.AppCompat" >
+        android:theme="@style/AppThemeDark" >
         <activity
             android:name="org.md2k.study.ActivitymCerebrumApp"
             android:label="@string/app_name" >
@@ -20,9 +21,28 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.md2k.study.ActivitymCerebrumAppSettings"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName="org.md2k.study.ActivitymCerebrumApp" >
+            android:name=".ActivityAppList"
+            android:label="Applications"
+            android:theme="@style/AppThemeDark">
         </activity>
+        <activity
+            android:name=".ActivityServiceList"
+            android:label="Services"
+            android:theme="@style/AppThemeDark">
+        </activity>
+
+        <activity
+            android:name=".ActivityAbout"
+            android:label="About PhoneSensor"
+            android:icon="@drawable/about"
+            android:theme="@style/AppThemeDark">
+        </activity>
+        <activity
+            android:name=".ActivityCopyright"
+            android:label="Copyright"
+            android:icon="@drawable/copyright"
+            android:theme="@style/AppThemeDark">
+        </activity>
+
     </application>
 </manifest>

@@ -8,6 +8,9 @@ import android.os.Environment;
  */
 public class Constants {
     public static String FILENAME_APPINFO="app_info.json";
+    public static String FILENAME_DEVICEINFO="device_info.json";
+    public static String FILENAME_SENSORINFO="sensor_info.json";
+
     public static String getInstallPath(Context context) {
         return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
     }
