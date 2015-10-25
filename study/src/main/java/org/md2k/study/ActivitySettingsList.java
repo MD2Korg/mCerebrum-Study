@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 
 import org.md2k.utilities.Report.Log;
@@ -14,9 +13,9 @@ import org.md2k.utilities.Report.Log;
 import java.util.ArrayList;
 
 public class ActivitySettingsList extends PreferenceActivity {
-    private static final String TAG = ActivitySettingsList.class.getSimpleName();
+/*    private static final String TAG = ActivitySettingsList.class.getSimpleName();
     Context context;
-    Applications applications;
+    AppInfoList appInfoList;
 
     @Override
     public void onResume() {
@@ -28,15 +27,15 @@ public class ActivitySettingsList extends PreferenceActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
-        applications = Applications.getInstance(context);
+        appInfoList = AppInfoList.getInstance(context);
     }
 
-    ArrayList<Application> applicationList;
+    ArrayList<AppInfo> applicationList;
 
     private PreferenceScreen loadPreferenceScreen() {
         Log.d(TAG, "loadPreferenceScreen()");
         applicationList = loadAppList();
-        ArrayList<String> types = applications.getTypes(applicationList);
+        ArrayList<String> types = appInfoList.getTypes(applicationList);
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(this);
         screen.removeAll();
         for (int t = 0; t < types.size(); t++) {
@@ -54,7 +53,7 @@ public class ActivitySettingsList extends PreferenceActivity {
                     public boolean onPreferenceClick(Preference preference) {
                         Intent intent = new Intent();
                         Log.d(TAG, "Settings=" + applicationList.get(finalI).getSettings());
-                        intent.setClassName(applicationList.get(finalI).getPackagename(), applicationList.get(finalI).getSettings());
+                        intent.setClassName(applicationList.get(finalI).getPackage_name(), applicationList.get(finalI).getSettings());
                         startActivity(intent);
                         return false;
                     }
@@ -65,12 +64,13 @@ public class ActivitySettingsList extends PreferenceActivity {
         return screen;
     }
 
-    private ArrayList<Application> loadAppList() {
-        ArrayList<Application> applicationList = applications.getApplications();
+    private ArrayList<AppInfo> loadAppList() {
+        ArrayList<AppInfo> applicationList = appInfoList.getAppInfoList();
 
-        applicationList = applications.filterApplication(applicationList, Applications.SETTINGS);
-        applicationList = applications.filterApplication(applicationList,Applications.INSTALLED);
+        applicationList = appInfoList.filterApplication(applicationList, AppInfo.SETTINGS);
+        applicationList = appInfoList.filterApplication(applicationList, AppInfo.INSTALLED);
 
         return applicationList;
     }
+    */
 }

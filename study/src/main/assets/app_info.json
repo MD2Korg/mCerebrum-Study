@@ -1,149 +1,165 @@
 [
   {
-    "name":"DataKit",
-    "type":"core",
-    "packagename":"org.md2k.datakit",
+    "name":"Study",
+    "type":"Core",
+    "package_name":"org.md2k.study",
     "settings":"",
-    "service":"org.md2k.datakit.ServiceDataKit",
-    "downloadlink":"https://github.com/MD2Korg/mCerebrum-DataKit/blob/master/apk/datakit.apk?raw=true"
+    "service":"",
+    "download_link":"https://github.com/MD2Korg/mCerebrum-Study/releases",
+    "show":true
+  },
+  {
+    "name":"DataKit",
+    "type":"Core",
+    "package_name":"org.md2k.datakit",
+    "settings":"org.md2k.datakit.ActivityDataKitSettings",
+    "service":"",
+    "download_link":"https://github.com/MD2Korg/mCerebrum-DataKit/releases",
+    "show":true
   },
   {
     "name":"AutoSense",
-    "type":"sensor",
-    "packagename":"org.md2k.autosense",
+    "type":"Sensor",
+    "package_name":"org.md2k.autosense",
     "settings":"org.md2k.autosense.ActivityAutoSenseSettings",
     "service":"org.md2k.autosense.antradio.connection.ServiceAutoSenses",
-    "downloadlink":"https://github.com/MD2Korg/mCerebrum-AutoSense/blob/master/apk/autosense.apk?raw=true"
-
+    "download_link":"https://github.com/MD2Korg/mCerebrum-AutoSense/releases",
+    "show":true
   },
   {
     "name":"Microsoft Health",
-    "type":"sensor",
-    "packagename":"com.microsoft.kapp",
+    "type":"Sensor",
+    "package_name":"com.microsoft.kapp",
     "settings":"",
     "service":"",
-    "downloadlink":"market://details?id=com.microsoft.kapp"
+    "download_link":"market://details?id=com.microsoft.kapp",
+    "show":true
   },
 
   {
     "name":"MicrosoftBand",
-    "type":"sensor",
-    "packagename":"org.md2k.microsoftband",
+    "type":"Sensor",
+    "package_name":"org.md2k.microsoftband",
     "settings":"org.md2k.microsoftband.ActivityMicrosoftBandSettings",
     "service":"org.md2k.microsoftband.ServiceMicrosoftBands",
-    "downloadlink":"https://github.com/MD2Korg/mCerebrum-MicrosoftBand/blob/master/apk/microsoftband.apk?raw=true"
+    "download_link":"https://github.com/MD2Korg/mCerebrum-MicrosoftBand/releases",
+    "show":true
   },
   {
     "name":"PhoneSensor",
-    "type":"sensor",
-    "packagename":"org.md2k.phonesensor",
+    "type":"Sensor",
+    "package_name":"org.md2k.phonesensor",
     "settings":"org.md2k.phonesensor.ActivityPhoneSensorSettings",
     "service":"org.md2k.phonesensor.ServicePhoneSensor",
-    "downloadlink":"https://github.com/MD2Korg/mCerebrum-PhoneSensor/blob/master/apk/phonesensor.apk?raw=true"
+    "download_link":"https://github.com/MD2Korg/mCerebrum-PhoneSensor/releases",
+    "show":true
   },
   {
     "name":"DataQuality",
-    "type":"sensor",
-    "packagename":"",
+    "type":"Sensor",
+    "package_name":"",
     "settings":"",
     "service":"",
-    "downloadlink":""
+    "download_link":"",
+    "show":false
   },
   {
     "name":"cStress",
-    "type":"event",
-    "packagename":"",
+    "type":"Event",
+    "package_name":"",
     "settings":"",
     "service":"",
-    "downloadlink":""
+    "download_link":"",
+    "show":false
   },
   {
     "name":"DrivingDetection",
-    "type":"event",
-    "packagename":"",
+    "type":"Event",
+    "package_name":"",
     "settings":"",
     "service":"",
-    "downloadlink":""
+    "download_link":"",
+    "show":false
   },
   {
     "name":"ActivityDetection",
-    "type":"event",
-    "packagename":"",
+    "type":"Event",
+    "package_name":"",
     "settings":"",
     "service":"",
-    "downloadlink":""
+    "download_link":"",
+    "show":false
   },
   {
     "name":"EMA",
-    "type":"ema & intervention",
-    "packagename":"",
+    "type":"EMA & Intervention",
+    "package_name":"",
     "settings":"",
     "service":"",
-    "downloadlink":"https://github.com/MD2Korg/mCerebrum/blob/wip/APKs/ema.apk?raw=true"
+    "download_link":"",
+    "show":true
   },
   {
     "name":"Intervention",
-    "type":"ema & intervention",
-    "packagename":"",
+    "type":"EMA & Intervention",
+    "package_name":"",
     "settings":"",
     "service":"",
-    "downloadlink":"https://github.com/MD2Korg/mCerebrum/blob/wip/APKs/intervention.apk?raw=true"
+    "download_link":"",
+    "show":false
   },
   {
     "name":"HeadSpace",
-    "type":"ema & intervention",
-    "packagename":"com.getsomeheadspace.android",
+    "type":"EMA & Intervention",
+    "package_name":"com.getsomeheadspace.android",
     "settings":"",
     "service":"",
-    "downloadlink":"market://details?id=com.getsomeheadspace.android"
+    "download_link":"market://details?id=com.getsomeheadspace.android",
+    "show":true
   },
   {
     "name":"MoodSurfing",
-    "type":"ema & intervention",
-    "packagename":"org.md2k.moodsurfing",
+    "type":"EMA & Intervention",
+    "package_name":"org.md2k.moodsurfing",
     "settings":"",
     "service":"",
-    "downloadlink":"https://github.com/MD2Korg/mCerebrum/blob/wip/APKs/moodsurfing.apk?raw=true"
+    "download_link":"https://github.com/MD2Korg/mCerebrum-MoodSurfing/releases",
+    "show":true
   },
   {
     "name":"ThoughtShakeup",
-    "type":"ema & intervention",
-    "packagename":"org.md2k.thoughtshakeup",
+    "type":"EMA & Intervention",
+    "package_name":"org.md2k.thoughtshakeup",
     "settings":"",
     "service":"",
-    "downloadlink":"https://github.com/MD2Korg/mCerebrum/blob/wip/APKs/moodsurfing.apk?raw=true"
-  },
-
-  {
-    "name":"SystemCheck",
-    "type":"visualization",
-    "packagename":"",
-    "settings":"",
-    "service":"",
-    "downloadlink":""
+    "download_link":"https://github.com/MD2Korg/mCerebrum-ThoughtShakeup/releases",
+    "show":true
   },
   {
     "name":"Plotter",
-    "type":"visualization",
-    "packagename":"org.md2k.plotter",
+    "type":"Visualization",
+    "package_name":"org.md2k.plotter",
     "settings":"",
     "service":"",
-    "downloadlink":""
+    "download_link":"",
+    "show":true
   },
   {
     "name":"DataUploader",
-    "type":"cloud",
-    "packagename":"",
+    "type":"Cloud",
+    "package_name":"",
     "settings":"",
     "service":"",
-    "downloadlink":""
+    "download_link":"",
+    "show":false
   },
   {
     "name":"StatusUpdater App",
-    "type":"cloud",
-    "packagename":"",
+    "type":"Cloud",
+    "package_name":"",
     "settings":"",
     "service":"",
-    "downloadlink":""
+    "download_link":"",
+    "show":false
   }
 ]

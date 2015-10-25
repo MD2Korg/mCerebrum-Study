@@ -1,21 +1,29 @@
 [
   {
+    "package_name":"org.md2k.phonesensor",
+    "settings":"org.md2k.phonesensor.ActivityPhoneSensorSettings",
     "platformtype":"PHONE",
     "location":"",
     "datasourcetype":["ACCELEROMETER","GYROSCOPE","LOCATION","BATTERY","CPU","MEMORY"]
   },
   {
+    "package_name":"org.md2k.autosense",
+    "settings":"org.md2k.autosense.ActivityAutoSenseSettings",
     "platformtype":"AUTOSENSE_CHEST",
     "location":"chest",
     "datasourcetype":["ACCELEROMETER","GYROSCOPE","LOCATION","BATTERY","CPU","MEMORY"]
   },
   {
+    "package_name":"org.md2k.microsoftband",
+    "settings":"org.md2k.microsoftband.ActivityMicrosoftBandSettings",
     "platformtype":"MICROSOFT_BAND",
     "location":"LEFT_WRIST",
     "datasourcetype":["ACCELEROMETER","GYROSCOPE","BAND_CONTACT"]
   },
 
   {
+    "package_name":"org.md2k.microsoftband",
+    "settings":"org.md2k.microsoftband.ActivityMicrosoftBandSettings",
     "platformtype":"MICROSOFT_BAND",
     "location":"RIGHT_WRIST",
     "datasourcetype":["ACCELEROMETER","GYROSCOPE","BAND_CONTACT"]
