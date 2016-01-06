@@ -1,7 +1,7 @@
-package org.md2k.study;
+package org.md2k.study.applications;
 
-import android.content.Context;
-import android.os.Environment;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,22 +29,21 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_APPINFO="app_info.json";
-    public static String FILENAME_INSTALL="install.json";
-    public static String FILENAME_SETTINGS="settings.json";
+public class Apps {
+    ArrayList<App> items;
 
-    public static String FILENAME_DEVICEINFO="device_info.json";
-    public static String FILENAME_SENSORINFO="sensor_info.json";
-    public static String PASSWORD="1234";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-    public static final String DEFAULT_FILENAME_PHONESENSOR = "default_config_phonesensor.json";
+    public Apps(){
+        items=new ArrayList<>();
+        items.add(new App("Intervention", ""));
+        items.add(new App("Report", ""));
+//        items.add(new App("Privacy Control", ""));
+        items.add(new App("Plotter",""));
+    }
+    public List<App> getAllItemObject() {
+        return items;
+    }
+    public App getApp(int position){
+        return items.get(position);
+    }
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
-    }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
-    }
-    public static final long MISSING_MILLIS=5000;
 }

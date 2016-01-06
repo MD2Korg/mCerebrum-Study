@@ -1,0 +1,26 @@
+[
+  {
+    "type":"BATTERY",
+    "frequency":"1.0 Hz"
+  },
+  {
+    "type":"LOCATION",
+    "frequency":"UI"
+  },
+  {
+    "type":"ACCELEROMETER",
+    "frequency":"UI: ~16 Hz"
+  },
+  {
+    "type":"GYROSCOPE",
+    "frequency":"UI: ~16 Hz"
+  },
+  {
+    "type":"CPU",
+    "frequency":"1.0 Hz"
+  },
+  {
+    "type":"MEMORY",
+    "frequency":"1.0 Hz"
+  }
+]

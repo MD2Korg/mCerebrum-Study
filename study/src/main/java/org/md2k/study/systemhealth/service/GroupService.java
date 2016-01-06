@@ -1,7 +1,9 @@
-package org.md2k.study;
+package org.md2k.study.systemhealth.service;
 
 import android.content.Context;
-import android.os.Environment;
+
+import org.md2k.study.systemhealth.AppInfo;
+import org.md2k.study.systemhealth.Group;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,22 +31,28 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_APPINFO="app_info.json";
-    public static String FILENAME_INSTALL="install.json";
-    public static String FILENAME_SETTINGS="settings.json";
+public class GroupService extends Group {
+    private static final String TAG = GroupService.class.getSimpleName();
+    int noService;
+    int noServiceRunning;
 
-    public static String FILENAME_DEVICEINFO="device_info.json";
-    public static String FILENAME_SENSORINFO="sensor_info.json";
-    public static String PASSWORD="1234";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-    public static final String DEFAULT_FILENAME_PHONESENSOR = "default_config_phonesensor.json";
+    public GroupService(Context context, String name) {
+        super(context, name);
+    }
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+    public void add(AppInfo appInfo) {
+        ChildService childrenService = new ChildService(context, appInfo);
+        children.add(childrenService);
+        noService=children.size();
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+    public void refresh(){
+        for(int i=0;i<children.size();i++){
+            ChildService childrenService=(ChildService) children.get(i);
+            childrenService.refresh();
+        }
     }
-    public static final long MISSING_MILLIS=5000;
+
+    public String getName(){
+        return name+" ("+noServiceRunning+"/"+noService+")";
+    }
 }

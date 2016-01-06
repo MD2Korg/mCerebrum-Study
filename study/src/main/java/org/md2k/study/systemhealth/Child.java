@@ -1,7 +1,7 @@
-package org.md2k.study;
+package org.md2k.study.systemhealth;
 
 import android.content.Context;
-import android.os.Environment;
+import android.view.View;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,22 +29,20 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_APPINFO="app_info.json";
-    public static String FILENAME_INSTALL="install.json";
-    public static String FILENAME_SETTINGS="settings.json";
-
-    public static String FILENAME_DEVICEINFO="device_info.json";
-    public static String FILENAME_SENSORINFO="sensor_info.json";
-    public static String PASSWORD="1234";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-    public static final String DEFAULT_FILENAME_PHONESENSOR = "default_config_phonesensor.json";
-
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+public class Child {
+    public String name;
+    public int status;
+    public Context context;
+    public Child(Context context, String name){
+        this.context=context;
+        this.name=name;
+        status= SystemHealthManager.RED;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+    public String getName(){
+        return name;
     }
-    public static final long MISSING_MILLIS=5000;
+
+    public View.OnClickListener onClickListener;
+    public void update(){
+    }
 }

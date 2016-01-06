@@ -4,4 +4,11 @@
     <string name="url_release">https://github.com/MD2Korg/mCerebrum-Study/releases</string>
     <string name="url_sourcecode">https://github.com/MD2Korg/mCerebrum-Study</string>
     <string name="action_settings">Settings</string>
+    <string name="title_system_health">System Health</string>
+    <string name="title_applications">Applications</string>
+    <string name="title_intervention_apps">Intervention Apps</string>
+    <string name="button_text_fix">Fix</string>
+    <string name="image_text_error">Error</string>
+    <string name="image_text_ok">Ok</string>
+    <string name="image_text_warning">Warning</string>
 </resources>

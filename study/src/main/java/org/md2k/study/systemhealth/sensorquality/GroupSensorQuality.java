@@ -1,7 +1,10 @@
-package org.md2k.study;
+package org.md2k.study.systemhealth.sensorquality;
 
 import android.content.Context;
-import android.os.Environment;
+
+import org.md2k.study.systemhealth.Group;
+import org.md2k.study.systemhealth.SensorQualityInfo;
+import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,22 +32,27 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_APPINFO="app_info.json";
-    public static String FILENAME_INSTALL="install.json";
-    public static String FILENAME_SETTINGS="settings.json";
-
-    public static String FILENAME_DEVICEINFO="device_info.json";
-    public static String FILENAME_SENSORINFO="sensor_info.json";
-    public static String PASSWORD="1234";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-    public static final String DEFAULT_FILENAME_PHONESENSOR = "default_config_phonesensor.json";
-
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+public class GroupSensorQuality extends Group {
+    int noSensor;
+    int noSensorQualityGreen;
+    int noSensorQualityYellow;
+    int noSensorQualityRed;
+    public GroupSensorQuality(Context context, String name){
+        super(context,name);
+//        super(context,name, onDataUpdated);
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+    public void setDataKitHandler(DataKitHandler dataKitHandler){
+        for(int i=0;i<children.size();i++){
+            ChildSensorQuality childrenSensorQuality=(ChildSensorQuality)children.get(i);
+            childrenSensorQuality.setDataKitHandler(dataKitHandler);
+        }
     }
-    public static final long MISSING_MILLIS=5000;
+    public void add(SensorQualityInfo sensorQualityInfo) {
+        ChildSensorQuality childrenSensorQuality = new ChildSensorQuality(context, sensorQualityInfo);
+        children.add(childrenSensorQuality);
+        noSensor=children.size();
+    }
+    public String getName(){
+        return name+" ("+ noSensorQualityGreen +"/"+noSensor+")";
+    }
 }

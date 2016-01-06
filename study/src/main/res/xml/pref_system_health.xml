@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="General" />
+    <Preference
+        android:key="key_install"
+        android:title="App Installation" />
+    <Preference
+        android:key="key_settings"
+        android:title="App Settings" />
+    <Preference
+        android:key="key_running"
+        android:title="Running" />
+    <PreferenceCategory
+        android:title="Data Quality" />
+    <Preference
+        android:key="key_rip"
+        android:title="AutoSense Respiration" />
+    <Preference
+        android:key="key_ecg"
+        android:title="AutoSense ECG" />
+    <Preference
+        android:key="key_wrist_left"
+        android:title="Wrist Left" />
+    <Preference
+        android:key="key_wrist_right"
+        android:title="Wrist Right" />
+
+</PreferenceScreen>
