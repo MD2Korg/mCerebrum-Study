@@ -1,0 +1,30 @@
+[
+  {
+    "type":"ACCELEROMETER",
+    "platform_type":"PHONE"
+  },
+  {
+    "type":"GYROSCOPE",
+    "platform_type":"PHONE"
+  },
+  {
+    "type":"RIP",
+    "platform_type":"AUTOSENSE_CHEST"
+  },
+  {
+    "type":"ECG",
+    "platform_type":"AUTOSENSE_CHEST"
+  },
+  {
+    "type":"ACCELEROMETER_X",
+    "platform_type":"AUTOSENSE_CHEST"
+  },
+  {
+    "type":"ACCELEROMETER_Y",
+    "platform_type":"AUTOSENSE_CHEST"
+  },
+  {
+    "type":"ACCELEROMETER_Z",
+    "platform_type":"AUTOSENSE_CHEST"
+  }
+]

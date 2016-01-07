@@ -5,15 +5,15 @@
   },
   {
     "type":"LOCATION",
-    "frequency":"UI"
+    "frequency":"SENSOR_DELAY_UI"
   },
   {
     "type":"ACCELEROMETER",
-    "frequency":"UI: ~16 Hz"
+    "frequency":"SENSOR_DELAY_UI"
   },
   {
     "type":"GYROSCOPE",
-    "frequency":"UI: ~16 Hz"
+    "frequency":"SENSOR_DELAY_UI"
   },
   {
     "type":"CPU",

@@ -38,7 +38,8 @@ public class Constants{
     public static String FILENAME_SENSORINFO="sensor_info.json";
     public static String PASSWORD="1234";
     public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-    public static final String DEFAULT_FILENAME_PHONESENSOR = "default_config_phonesensor.json";
+    public static final String DEFAULT_CONFIG_PHONESENSOR_FILENAME = "default_config_phonesensor.json";
+    public static final String DEFAULT_CONFIG_PLOTTER_FILENAME = "default_config_plotter.json";
 
     public static String getInstallPath(Context context) {
         return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";

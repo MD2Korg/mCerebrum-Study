@@ -1,19 +1,14 @@
 package org.md2k.study;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -52,12 +47,13 @@ public class ActivityMain extends AppCompatActivity {
     void copyDefaultSettings(){
         File directory = new File(Constants.CONFIG_DIRECTORY);
         directory.mkdirs();
-        copy(Constants.DEFAULT_FILENAME_PHONESENSOR);
+        copy(Constants.DEFAULT_CONFIG_PHONESENSOR_FILENAME);
+        copy(Constants.DEFAULT_CONFIG_PLOTTER_FILENAME);
     }
     void copy(String filename){
         AssetManager assetManager = getAssets();
-        InputStream in = null;
-        OutputStream out = null;
+        InputStream in;
+        OutputStream out;
         String outDir= Constants.CONFIG_DIRECTORY ;
         File outFile = new File(outDir, filename);
         outFile.delete();
@@ -66,12 +62,9 @@ public class ActivityMain extends AppCompatActivity {
             out = new FileOutputStream(outFile);
             copyFile(in, out);
             in.close();
-            in = null;
             out.flush();
             out.close();
-            out = null;
         } catch(IOException e) {
-//            Log.e("tag", "Failed to copy asset file: " + filename, e);
         }
     }
     private void copyFile(InputStream in, OutputStream out) throws IOException {
