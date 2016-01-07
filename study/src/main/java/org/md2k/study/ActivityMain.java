@@ -20,12 +20,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.study.applications.AppAdapter;
 import org.md2k.study.applications.Apps;
 import org.md2k.study.interventionapp.ActivityInterventionApp;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
+import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,6 +37,7 @@ import java.io.OutputStream;
 
 public class ActivityMain extends AppCompatActivity {
     public static final String TAG = ActivityMain.class.getSimpleName();
+    DataKitHandler dataKitHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,13 @@ public class ActivityMain extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setupApplications();
         setupButtonFix();
+        dataKitHandler=DataKitHandler.getInstance(ActivityMain.this);
+        dataKitHandler.connect(new OnConnectionListener() {
+            @Override
+            public void onConnected() {
+
+            }
+        });
     }
     void copyDefaultSettings(){
         File directory = new File(Constants.CONFIG_DIRECTORY);

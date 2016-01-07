@@ -1,7 +1,6 @@
-package org.md2k.study;
+package org.md2k.study.info;
 
-import android.content.Context;
-import android.os.Environment;
+import org.md2k.study.Constants;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,28 +28,19 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_APPINFO="app_info.json";
-    public static String FILENAME_INSTALL="install.json";
-    public static String FILENAME_SETTINGS="settings.json";
-
-    public static String FILENAME_DEVICEINFO="device_info.json";
-    public static String FILENAME_SENSORINFO="sensor_info.json";
-    public static String PASSWORD="1234";
-    public static String STUDY_ID="NW_SMOKING_CESSATION_STUDY";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-    public static final String DEFAULT_CONFIG_PHONESENSOR_FILENAME = "default_config_phonesensor.json";
-    public static final String DEFAULT_CONFIG_PLOTTER_FILENAME = "default_config_plotter.json";
-
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+public class StudyInfo {
+    String user_id;
+    String study_id;
+    public void set(String user_id){
+        this.user_id=user_id;
+        this.study_id= Constants.STUDY_ID;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
-    }
-    public static final long MISSING_MILLIS=5000;
 
-    public static final int STATUS_OK=0;
-    public static final int STATUS_WARNING=1;
-    public static final int STATUS_ERROR=2;
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public String getStudy_id() {
+        return study_id;
+    }
 }

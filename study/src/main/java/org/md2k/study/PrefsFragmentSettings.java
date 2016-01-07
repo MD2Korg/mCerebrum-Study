@@ -1,5 +1,6 @@
 package org.md2k.study;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.TimePickerDialog;
@@ -13,9 +14,12 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TimePicker;
 
+import org.md2k.study.info.StudyInfo;
+import org.md2k.study.info.StudyInfoManager;
 import org.md2k.study.install.ActivityAppInstall;
 import org.md2k.study.install.Apps;
 import org.md2k.study.settings.ActivityAppSettings;
@@ -52,44 +56,111 @@ import java.util.Calendar;
 public class PrefsFragmentSettings extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentSettings.class.getSimpleName();
-    String userID=null;
     long wakeupTime;
     long sleepTime;
+    Apps apps;
+    StudyInfoManager studyInfoManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        prepareApps();
+        prepareStudyInfoManager();
         addPreferencesFromResource(R.xml.pref_settings);
+
+    }
+
+    void prepareApps() {
+        apps = Apps.getInstance(getActivity());
+    }
+
+    void prepareStudyInfoManager() {
+        studyInfoManager = new StudyInfoManager(getActivity());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
+        assert v != null;
         ListView lv = (ListView) v.findViewById(android.R.id.list);
         lv.setPadding(0, 0, 0, 0);
         return v;
     }
-    void setupUserID(){
-        EditTextPreference editTextPreference= (EditTextPreference) findPreference("key_user_id");
+
+    void setupUserID() {
+        EditTextPreference editTextPreference = (EditTextPreference) findPreference("key_user_id");
+        String userID = studyInfoManager.getUserId();
+        if (userID != null) {
+            editTextPreference.setSummary(userID);
+            editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+        } else {
+            editTextPreference.setSummary("");
+            editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+
+        }
         editTextPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                userID = (String) newValue;
+                String userID = (String) newValue;
+                studyInfoManager.setUserId(userID);
                 preference.setSummary(userID);
                 return false;
             }
         });
     }
-    void setupPreference(){
+
+    void setupPreference() {
         setupPreferenceApplication();
         setupPreferenceSettings();
         setupUserID();
         setupWakeupTime();
         setupSleepTime();
+        setBackButton();
+        setSaveButton();
+        setStatus();
+
     }
-    void setupWakeupTime(){
-        Preference preference=findPreference("key_wakeup_time");
+
+    void setStatus() {
+        Preference preference = findPreference("key_status");
+        if (apps.getStatus() == Constants.STATUS_ERROR) {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+            preference.setSummary("Error: Applications not installed");
+        } else if (studyInfoManager.getStatus() == Constants.STATUS_ERROR) {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+            preference.setSummary("Error: UserID is not defined");
+        } else {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+            preference.setSummary("Status: OK");
+
+        }
+
+    }
+
+    private void setBackButton() {
+        final Button button = (Button) getActivity().findViewById(R.id.button_cancel);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                getActivity().finish();
+            }
+        });
+    }
+
+    private void setSaveButton() {
+        final Button button = (Button) getActivity().findViewById(R.id.button_save);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (studyInfoManager.getUserId() != null) {
+                    studyInfoManager.writeStudyInfoToDataKit();
+                    getActivity().finish();
+                }
+            }
+        });
+    }
+
+    void setupWakeupTime() {
+        Preference preference = findPreference("key_wakeup_time");
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -99,8 +170,9 @@ public class PrefsFragmentSettings extends PreferenceFragment {
             }
         });
     }
-    void setupSleepTime(){
-        Preference preference=findPreference("key_sleep_time");
+
+    void setupSleepTime() {
+        Preference preference = findPreference("key_sleep_time");
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -111,8 +183,8 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         });
     }
 
-    void setupPreferenceSettings(){
-        Preference preference=findPreference("key_settings");
+    void setupPreferenceSettings() {
+        Preference preference = findPreference("key_settings");
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -123,23 +195,19 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         });
 
     }
-    void setupPreferenceApplication(){
-        Preference preference=findPreference("key_app");
-        Apps apps= Apps.getInstance(getActivity());
-        int total=apps.size(getActivity());
-        int install= apps.sizeInstalled(getActivity());
-        int update=apps.sizeUpdate(getActivity());
-        if(update==0 && total==install){
-            preference.setIcon(ContextCompat.getDrawable(getActivity(),R.drawable.ic_ok_teal_50dp));
-            preference.setSummary("success");
-        }
-        else if(total!=install){
+
+    void setupPreferenceApplication() {
+        Preference preference = findPreference("key_app");
+        int status = apps.getStatus();
+        if (status == Constants.STATUS_OK) {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+            preference.setSummary("Status: OK");
+        } else if (status == Constants.STATUS_ERROR) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-            preference.setSummary("Installed:"+install+ ",   Require:"+total);
-        }
-        else{
-            preference.setIcon(ContextCompat.getDrawable(getActivity(),R.drawable.ic_warning_amber_50dp));
-            preference.setSummary("update available");
+            preference.setSummary("Installed:" + apps.sizeInstalled() + ",   Require:" + apps.size());
+        } else {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_warning_amber_50dp));
+            preference.setSummary("Update Available");
         }
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -150,28 +218,44 @@ public class PrefsFragmentSettings extends PreferenceFragment {
             }
         });
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         setupPreference();
+        setBackButton();
+        setSaveButton();
         super.onResume();
     }
-    void showTimePicker(final Preference preference){
-        Calendar mcurrentTime = Calendar.getInstance();
-        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-        int minute = mcurrentTime.get(Calendar.MINUTE);
+
+    void showTimePicker(final Preference preference) {
+        Calendar currentTime = Calendar.getInstance();
+        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+        int minute = currentTime.get(Calendar.MINUTE);
         TimePickerDialog mTimePicker;
         mTimePicker = new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                preference.setSummary(String.format("%02d:%02d",selectedHour,selectedMinute));
-                if(preference.getKey().contains("sleep"))
-                    sleepTime=selectedHour*60*60*1000+selectedMinute*60*1000;
+                preference.setSummary(formatTime(selectedHour,selectedMinute));
+                if (preference.getKey().contains("sleep"))
+                    sleepTime = selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000;
                 else
-                    wakeupTime=selectedHour*60*60*1000+selectedMinute*60*1000;
+                    wakeupTime = selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000;
             }
-        }, hour, minute, true);//Yes 24 hour time
+        }, hour, minute, false);
         mTimePicker.setTitle("Select Time");
         mTimePicker.show();
+    }
 
+    String formatTime(int hourOfDay, int minute) {
+        if (hourOfDay > 12)
+            return String.format("%02d:%02d pm",hourOfDay - 12,minute);
+        else if (hourOfDay == 12)
+            return String.format("%02d:%02d pm",12,minute);
+        else {
+            if (hourOfDay != 0)
+                return String.format("%02d:%02d am",hourOfDay,minute);
+            else
+                return String.format("%02d:%02d am",12,minute);
+        }
     }
 }

@@ -6,11 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
-import org.md2k.study.OnDataChangeListener;
-import org.md2k.study.systemhealth.AppInfo;
-import org.md2k.study.systemhealth.Group;
-import org.md2k.study.systemhealth.SystemHealthManager;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -47,6 +42,7 @@ import java.util.List;
 public class Apps {
     ArrayList<App> appList = new ArrayList<>();
     private static Apps instance;
+    Context context;
     public static Apps getInstance(Context context){
         if(instance==null)
             instance=new Apps(context);
@@ -54,15 +50,16 @@ public class Apps {
     }
 
     private Apps(Context context) {
+        this.context=context;
         appList=readFile(context);
         for(int i=0;i<appList.size();i++){
             appList.get(i).setVersionName(context);
         }
     }
-    public int size(Context context){
+    public int size(){
         return appList.size();
     }
-    public int sizeInstalled(Context context){
+    public int sizeInstalled(){
         int count=0;
         for(int i=0;i<appList.size();i++){
             if(appList.get(i).isInstalled(context))
@@ -70,7 +67,17 @@ public class Apps {
         }
         return count;
     }
-    public int sizeUpdate(Context context){
+    public int getStatus(){
+        int total = size();
+        int install = sizeInstalled();
+        int update = sizeUpdate();
+        if (update == 0 && total == install)
+            return Constants.STATUS_OK;
+        else if (total != install)
+            return Constants.STATUS_ERROR;
+        else return Constants.STATUS_WARNING;
+    }
+    public int sizeUpdate(){
         int count=0;
         for(int i=0;i<appList.size();i++){
             if(appList.get(i).isUpdateAvailable())

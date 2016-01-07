@@ -1,27 +1,32 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Study Setup Status">
+        <Preference
+            android:key="key_status"
+            android:icon="@drawable/ic_error_red_50dp"
+            android:title="Status"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Study Setup">
     <Preference
         android:key="key_app"
-        android:icon="@drawable/ic_installer_teal_48"
         android:title="Applications" />
     <Preference
         android:key="key_settings"
-        android:icon="@drawable/ic_settings_teal_48"
         android:title="Application Settings" />
     <EditTextPreference
         android:key="key_user_id"
-        android:icon="@drawable/ic_user_teal_48dp"
         android:title="User ID" />
 
     <Preference
         android:key="key_wakeup_time"
-        android:icon="@drawable/ic_wakeup_teal_48dp"
-        android:title="Setup Wakeup Time" />
+        android:title="Wakeup Time" />
     <Preference
         android:key="key_sleep_time"
-        android:icon="@drawable/ic_sleep_teal_48"
-        android:title="Setup Sleep Time" />
+        android:title="Sleep Time" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Reset Study">
     <Preference
         android:key="key_reset"
         android:icon="@drawable/ic_error_red_50dp"
         android:title="Reset Study" />
+    </PreferenceCategory>
 </PreferenceScreen>
