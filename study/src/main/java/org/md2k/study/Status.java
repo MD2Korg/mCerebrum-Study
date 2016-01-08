@@ -38,8 +38,8 @@ public class Status implements Serializable{
     public static final int APP_NOT_INSTALLED = 1;
     public static final int APP_UPDATE_AVAILABLE = 2;
     public static final int USERID_NOT_DEFINED = 3;
-    public static final int WAKEUP_NOT_DEFINED = 4;
-    public static final int SLEEP_NOT_DEFINED = 5;
+    public static final int SLEEPEND_NOT_DEFINED = 4;
+    public static final int SLEEPSTART_NOT_DEFINED = 5;
     public static final String[] message = new String[]{
             "Status: OK",
             "Error: Applications are not installed properly",

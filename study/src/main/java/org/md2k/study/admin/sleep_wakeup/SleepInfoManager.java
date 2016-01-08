@@ -2,13 +2,8 @@ package org.md2k.study.admin.sleep_wakeup;
 
 import android.content.Context;
 
-import com.google.gson.Gson;
-
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeIntArray;
-import org.md2k.datakitapi.datatype.DataTypeLong;
 import org.md2k.datakitapi.datatype.DataTypeLongArray;
-import org.md2k.datakitapi.datatype.DataTypeString;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -17,7 +12,6 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.utilities.datakit.DataKitHandler;
 
@@ -54,71 +48,82 @@ public class SleepInfoManager {
     DataKitHandler dataKitHandler;
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    long sleepStartTime=-1;
-    long sleepEndTime=-1;
+    long sleepTimeDB[];
+    long sleepTimeNew[];
 
     public SleepInfoManager(Context context) {
+        sleepTimeNew=new long[2];
+        sleepTimeNew[0]=-1;sleepTimeNew[1]=-1;
+        sleepTimeDB=new long[2];
+        sleepTimeDB[0]=-1;sleepTimeDB[1]=-1;
         dataKitHandler = DataKitHandler.getInstance(context);
         dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
     }
-    public long getSleepStartTime() {
-        return sleepStartTime;
+    public long getSleepStartTimeDB() {
+        return sleepTimeDB[0];
+    }
+    public long getSleepStartTimeNew() {
+        return sleepTimeNew[0];
     }
 
-    public void setSleepStartTime(long sleepStartTime) {
-        this.sleepStartTime = sleepStartTime;
+    public void setSleepStartTimeNew(long sleepStartTime) {
+        this.sleepTimeNew[0] = sleepStartTime;
     }
 
-    public long getSleepEndTime() {
-        return sleepEndTime;
+    public long getSleepEndTimeDB() {
+        return sleepTimeDB[1];
+    }
+    public long getSleepEndTimeNew() {
+        return sleepTimeNew[1];
     }
 
-    public void setSleepEndTime(long sleepEndTime) {
-        this.sleepEndTime = sleepEndTime;
+    public void setSleepEndTimeNew(long sleepEndTime) {
+        this.sleepTimeNew[1] = sleepEndTime;
     }
     public Status getStatus(){
-        if(sleepStartTime==-1)
-            return new Status(Status.SLEEP_NOT_DEFINED);
-        if(sleepEndTime==-1)
-            return new Status(Status.WAKEUP_NOT_DEFINED);
+        if(sleepTimeDB[0]==-1)
+            return new Status(Status.SLEEPSTART_NOT_DEFINED);
+        if(sleepTimeDB[1]==-1)
+            return new Status(Status.SLEEPEND_NOT_DEFINED);
         return new Status(Status.SUCCESS);
     }
     public Status getStatusSleepStart(){
-        if(sleepStartTime==-1)
-            return new Status(Status.SLEEP_NOT_DEFINED);
+        if(sleepTimeDB[0]==-1)
+            return new Status(Status.SLEEPSTART_NOT_DEFINED);
         return new Status(Status.SUCCESS);
     }
     public Status getStatusSleepEnd(){
-        if(sleepEndTime==-1)
-            return new Status(Status.WAKEUP_NOT_DEFINED);
+        if(sleepTimeDB[1]==-1)
+            return new Status(Status.SLEEPEND_NOT_DEFINED);
         return new Status(Status.SUCCESS);
+    }
+    public boolean isValid(){
+        if(sleepTimeNew[0]==-1 || sleepTimeNew[1]==-1) return false;
+        if(sleepTimeDB[0]==-1 || sleepTimeDB[1]==-1) return true;
+        if(sleepTimeDB[0]==sleepTimeNew[0] && sleepTimeDB[1]==sleepTimeNew[1]) return false;
+        return true;
     }
 
     private void readStudyInfoFromDataKit() {
+        sleepTimeDB[0]=-1;sleepTimeDB[1]=-1;
         if(dataKitHandler.isConnected()) {
             dataSourceClient = dataKitHandler.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitHandler.query(dataSourceClient, 1);
             if (dataTypes.size() != 0) {
                 DataTypeLongArray dataTypeLongArray = (DataTypeLongArray) dataTypes.get(0);
-                sleepStartTime=dataTypeLongArray.getSample()[0];
-                sleepEndTime=dataTypeLongArray.getSample()[1];
-            }
-            else{
-                sleepEndTime=-1;
-                sleepStartTime=-1;
+                sleepTimeDB=dataTypeLongArray.getSample();
             }
         }
     }
 
     public boolean writeToDataKit(){
         if(!dataKitHandler.isConnected()) return false;
-        long samples[]=new long[2];
-        samples[0]=sleepStartTime;
-        samples[1]=sleepEndTime;
-        DataTypeLongArray dataTypeLongArray=new DataTypeLongArray(DateTime.getDateTime(),samples);
+        if(!isValid()) return false;
+        DataTypeLongArray dataTypeLongArray=new DataTypeLongArray(DateTime.getDateTime(),sleepTimeNew);
         dataSourceClient = dataKitHandler.register(dataSourceBuilder);
         dataKitHandler.insert(dataSourceClient,dataTypeLongArray);
+        sleepTimeDB=sleepTimeNew;
         return true;
     }
     DataSourceBuilder createDataSourceBuilder() {

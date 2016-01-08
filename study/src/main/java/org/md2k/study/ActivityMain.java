@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.study.admin.ActivitySettings;
+import org.md2k.study.admin.AdminManager;
 import org.md2k.study.applications.AppAdapter;
 import org.md2k.study.applications.Apps;
 import org.md2k.study.interventionapp.ActivityInterventionApp;
@@ -88,11 +89,12 @@ public class ActivityMain extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("system_health"));
 
-        dataKitHandler=DataKitHandler.getInstance(ActivityMain.this);
+        dataKitHandler=DataKitHandler.getInstance(getBaseContext());
         if(!dataKitHandler.isConnected()) {
             dataKitHandler.connect(new OnConnectionListener() {
                 @Override
                 public void onConnected() {
+                    AdminManager.getInstance(getBaseContext()).readFromDB();
                     setupApplications();
                 }
             });
@@ -115,8 +117,8 @@ public class ActivityMain extends AppCompatActivity {
                 textViewMessage.setTextColor(ContextCompat.getColor(this,R.color.teal_700));
                 break;
             case Status.APP_NOT_INSTALLED:
-            case Status.SLEEP_NOT_DEFINED:
-            case Status.WAKEUP_NOT_DEFINED:
+            case Status.SLEEPSTART_NOT_DEFINED:
+            case Status.SLEEPEND_NOT_DEFINED:
             case Status.USERID_NOT_DEFINED:
                 imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
                 imageViewWarning.setImageResource(R.drawable.ic_warning_grey_50dp);

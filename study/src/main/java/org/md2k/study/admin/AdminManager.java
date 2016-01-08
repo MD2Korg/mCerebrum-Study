@@ -1,10 +1,7 @@
 package org.md2k.study.admin;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 
-import org.md2k.study.Constants;
-import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.admin.install.Apps;
 import org.md2k.study.admin.reset.ResetInfoManager;
@@ -43,13 +40,19 @@ public class AdminManager {
     SleepInfoManager sleepInfoManager;
     ResetInfoManager resetInfoManager;
     private static AdminManager instance;
+    Context context;
     public static AdminManager getInstance(Context context){
         if(instance==null)
             instance=new AdminManager(context);
         return instance;
     }
+    public void readFromDB(){
+        studyInfoManager = new StudyInfoManager(context);
+        sleepInfoManager=new SleepInfoManager(context);
+    }
 
     private AdminManager(Context context) {
+        this.context=context;
         apps = Apps.getInstance(context);
         studyInfoManager = new StudyInfoManager(context);
         sleepInfoManager=new SleepInfoManager(context);

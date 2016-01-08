@@ -14,13 +14,16 @@
         android:title="Application Settings" />
     <EditTextPreference
         android:key="key_user_id"
+        android:icon="@drawable/ic_error_red_50dp"
         android:title="User ID" />
 
     <Preference
         android:key="key_wakeup_time"
+        android:icon="@drawable/ic_error_red_50dp"
         android:title="Wakeup Time" />
     <Preference
         android:key="key_sleep_time"
+        android:icon="@drawable/ic_error_red_50dp"
         android:title="Sleep Time" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Reset Study"

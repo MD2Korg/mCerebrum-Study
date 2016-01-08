@@ -43,10 +43,12 @@ public class ServiceSystemHealth extends Service {
     DataKitHandler dataKitHandler;
     Context context;
     Handler handler;
+    AdminManager adminManager;
 
     public void onCreate() {
         super.onCreate();
         context=getBaseContext();
+        adminManager=AdminManager.getInstance(this);
         handler = new Handler();
         handler.post(checkStatus);
         Log.d(TAG, "onCreate()");
@@ -55,7 +57,6 @@ public class ServiceSystemHealth extends Service {
     Runnable checkStatus = new Runnable() {
         @Override
         public void run() {
-            AdminManager adminManager=AdminManager.getInstance(context);
             Status status = adminManager.getStatus();
             Intent intent = new Intent("system_health");
             intent.putExtra("status", status);

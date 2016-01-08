@@ -14,7 +14,6 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.utilities.datakit.DataKitHandler;
 
@@ -47,10 +46,11 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class StudyInfoManager {
+    private static final String TAG = StudyInfoManager.class.getSimpleName();
     DataKitHandler dataKitHandler;
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    StudyInfo studyInfoInDB;
+    StudyInfo studyInfoDB;
     StudyInfo studyInfoNew;
 
     public StudyInfoManager(Context context) {
@@ -68,8 +68,8 @@ public class StudyInfoManager {
         return new Status(Status.SUCCESS);
     }
     public String getUserIdInDB(){
-        if(studyInfoInDB==null) return null;
-        return studyInfoInDB.getUser_id();
+        if(studyInfoDB ==null) return null;
+        return studyInfoDB.getUser_id();
     }
     public String getUserIdNew(){
         if(studyInfoNew==null) return null;
@@ -77,24 +77,21 @@ public class StudyInfoManager {
     }
 
     private void readStudyInfoFromDataKit() {
-        studyInfoInDB=null;
+        studyInfoDB =null;
         if(dataKitHandler.isConnected()) {
             dataSourceClient = dataKitHandler.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitHandler.query(dataSourceClient, 1);
             if (dataTypes.size() != 0) {
                 DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
                 Gson gson = new Gson();
-                studyInfoInDB = gson.fromJson(dataTypeString.getSample(), StudyInfo.class);
+                studyInfoDB = gson.fromJson(dataTypeString.getSample(), StudyInfo.class);
                 studyInfoNew=new StudyInfo();
-                studyInfoNew.set(studyInfoInDB.getUser_id());
+                studyInfoNew.set(studyInfoDB.getUser_id());
             }
         }
     }
-    public boolean isValid(){
-        if(studyInfoNew==null) return false;
-        if(studyInfoNew.getUser_id().length()==0) return false;
-        if(studyInfoInDB==null) return true;
-        return !studyInfoInDB.getUser_id().equals(studyInfoNew.getUser_id());
+    private boolean isValid() {
+        return studyInfoNew != null && studyInfoNew.getUser_id().length() != 0 && (studyInfoDB == null || studyInfoDB.getStudy_id().length() == 0 || !studyInfoDB.getUser_id().equals(studyInfoNew.getUser_id()));
     }
 
     public boolean writeToDataKit(){
@@ -105,6 +102,7 @@ public class StudyInfoManager {
         dataSourceClient = dataKitHandler.register(dataSourceBuilder);
         DataTypeString dataTypeString=new DataTypeString(DateTime.getDateTime(),sample);
         dataKitHandler.insert(dataSourceClient,dataTypeString);
+        studyInfoDB =studyInfoNew;
         return true;
     }
     DataSourceBuilder createDataSourceBuilder() {
