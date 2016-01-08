@@ -1,29 +1,31 @@
-package org.md2k.study;
+package org.md2k.study.admin;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.v4.content.ContextCompat;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
-import org.md2k.study.info.StudyInfo;
-import org.md2k.study.info.StudyInfoManager;
-import org.md2k.study.install.ActivityAppInstall;
-import org.md2k.study.install.Apps;
-import org.md2k.study.settings.ActivityAppSettings;
+import org.md2k.study.R;
+import org.md2k.study.Status;
+import org.md2k.study.admin.install.ActivityAppInstall;
+import org.md2k.study.admin.reset.ResetInfo;
+import org.md2k.study.admin.settings.ActivityAppSettings;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.UI.AlertDialogs;
+import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.util.Calendar;
 
@@ -56,27 +58,18 @@ import java.util.Calendar;
 public class PrefsFragmentSettings extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentSettings.class.getSimpleName();
+    AdminManager adminManager;
     long wakeupTime;
     long sleepTime;
-    Apps apps;
-    StudyInfoManager studyInfoManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prepareApps();
-        prepareStudyInfoManager();
+        adminManager = AdminManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_settings);
 
     }
 
-    void prepareApps() {
-        apps = Apps.getInstance(getActivity());
-    }
-
-    void prepareStudyInfoManager() {
-        studyInfoManager = new StudyInfoManager(getActivity());
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,21 +83,33 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     void setupUserID() {
         EditTextPreference editTextPreference = (EditTextPreference) findPreference("key_user_id");
-        String userID = studyInfoManager.getUserId();
+        if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
+            editTextPreference.setEnabled(false);
+            return;
+        } else
+            editTextPreference.setEnabled(true);
+
+
+        String userID = adminManager.studyInfoManager.getUserIdInDB();
         if (userID != null) {
             editTextPreference.setSummary(userID);
             editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
         } else {
             editTextPreference.setSummary("");
             editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-
         }
         editTextPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                String userID = (String) newValue;
-                studyInfoManager.setUserId(userID);
-                preference.setSummary(userID);
+                String userID = ((String) newValue).trim();
+                if (userID.length() == 0) {
+                    preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+                    preference.setSummary("");
+                } else {
+                    adminManager.studyInfoManager.setUserIdNew(userID);
+                    preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+                    preference.setSummary(userID);
+                }
                 return false;
             }
         });
@@ -116,30 +121,113 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         setupUserID();
         setupWakeupTime();
         setupSleepTime();
+        setupReset();
         setBackButton();
         setSaveButton();
         setStatus();
 
     }
 
+    void setupReset() {
+        PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_reset");
+        preferenceCategory.removeAll();
+        for (int i = 0; i < adminManager.resetInfoManager.size(); i++) {
+            final ResetInfo resetInfo = adminManager.resetInfoManager.get(i);
+            Preference preference = new Preference(getActivity());
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_delete_red_48dp));
+            if (resetInfo.isValidFileName()) {
+                if (resetInfo.isFileExists())
+                    preference.setSummary("File Exists");
+                else preference.setSummary("File Not Available");
+            }
+            preference.setKey(resetInfo.getId());
+            preference.setTitle(resetInfo.getName());
+            preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    if (resetInfo.getClass_name() != null) {
+                        Intent intent = new Intent();
+                        intent.setClassName(resetInfo.getPackage_name(), resetInfo.getClass_name());
+                        startActivity(intent);
+                    } else if (resetInfo.getFilename() != null && resetInfo.isFileExists()) {
+                        AlertDialogs.showAlertDialogConfirm(getActivity(), "Delete File", resetInfo.getName() + " files?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == AlertDialog.BUTTON_POSITIVE) {
+                                    if (resetInfo.deleteFile())
+                                        Toast.makeText(getActivity(), "File Deleted", Toast.LENGTH_SHORT).show();
+                                    else
+                                        Toast.makeText(getActivity(), "Can't delete the file.", Toast.LENGTH_SHORT).show();
+
+                                }
+                            }
+                        });
+
+                    }
+                    return false;
+                }
+            });
+            preferenceCategory.addPreference(preference);
+        }
+//        setupClearDatabase();
+//        setupClearDevices();
+//        setupClearThoughtShakeupFile();
+    }
+
+    void setupClearDatabase() {
+        Preference preference = findPreference("key_reset_database");
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent();
+                intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
+                startActivity(intent);
+                return false;
+            }
+        });
+    }
+
+    void setupClearThoughtShakeupFile() {
+        Preference preference = findPreference("key_reset_thought_shakeup");
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent();
+                intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
+                startActivity(intent);
+                return false;
+            }
+        });
+    }
+
+    void setupClearDevices() {
+        Preference preference = findPreference("key_reset_database");
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent();
+                intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
+                startActivity(intent);
+                return false;
+            }
+        });
+    }
+
     void setStatus() {
         Preference preference = findPreference("key_status");
-        if (apps.getStatus() == Constants.STATUS_ERROR) {
+        Status status = adminManager.getStatus();
+        if (status.getStatusCode() != Status.SUCCESS) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-            preference.setSummary("Error: Applications not installed");
-        } else if (studyInfoManager.getStatus() == Constants.STATUS_ERROR) {
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-            preference.setSummary("Error: UserID is not defined");
+            preference.setSummary(status.getStatusMessage());
         } else {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-            preference.setSummary("Status: OK");
-
+            preference.setSummary(status.getStatusMessage());
         }
-
     }
 
     private void setBackButton() {
         final Button button = (Button) getActivity().findViewById(R.id.button_cancel);
+        button.setText("Close");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 getActivity().finish();
@@ -151,20 +239,34 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         final Button button = (Button) getActivity().findViewById(R.id.button_save);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (studyInfoManager.getUserId() != null) {
-                    studyInfoManager.writeStudyInfoToDataKit();
-                    getActivity().finish();
-                }
+                adminManager.studyInfoManager.writeToDataKit();
+                if (adminManager.sleepInfoManager.getStatus().getStatusCode() == Status.SUCCESS)
+                    adminManager.sleepInfoManager.writeToDataKit();
+                Toast.makeText(getActivity(), "Saved...", Toast.LENGTH_LONG).show();
+                setupPreference();
             }
         });
     }
 
     void setupWakeupTime() {
         Preference preference = findPreference("key_wakeup_time");
+        if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
+            preference.setEnabled(false);
+            return;
+        } else
+            preference.setEnabled(true);
+
+
+        Status status = adminManager.sleepInfoManager.getStatusSleepEnd();
+        if (status.getStatusCode() == Status.SUCCESS) {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+        } else {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+        }
+
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Log.d(TAG, "wakeupClick...");
                 showTimePicker(preference);
                 return false;
             }
@@ -173,6 +275,18 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     void setupSleepTime() {
         Preference preference = findPreference("key_sleep_time");
+        if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
+            preference.setEnabled(false);
+            return;
+        } else
+            preference.setEnabled(true);
+        Status status = adminManager.sleepInfoManager.getStatusSleepStart();
+        if (status.getStatusCode() == Status.SUCCESS) {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+        } else {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+        }
+
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -198,16 +312,14 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     void setupPreferenceApplication() {
         Preference preference = findPreference("key_app");
-        int status = apps.getStatus();
-        if (status == Constants.STATUS_OK) {
+        Status status = adminManager.apps.getStatus();
+        preference.setSummary(status.getStatusMessage());
+        if (status.getStatusCode() == Status.SUCCESS) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-            preference.setSummary("Status: OK");
-        } else if (status == Constants.STATUS_ERROR) {
+        } else if (status.getStatusCode() == Status.APP_NOT_INSTALLED) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-            preference.setSummary("Installed:" + apps.sizeInstalled() + ",   Require:" + apps.size());
         } else {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_warning_amber_50dp));
-            preference.setSummary("Update Available");
         }
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -235,7 +347,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         mTimePicker = new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                preference.setSummary(formatTime(selectedHour,selectedMinute));
+                preference.setSummary(formatTime(selectedHour, selectedMinute));
                 if (preference.getKey().contains("sleep"))
                     sleepTime = selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000;
                 else
@@ -248,14 +360,14 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     String formatTime(int hourOfDay, int minute) {
         if (hourOfDay > 12)
-            return String.format("%02d:%02d pm",hourOfDay - 12,minute);
+            return String.format("%02d:%02d pm", hourOfDay - 12, minute);
         else if (hourOfDay == 12)
-            return String.format("%02d:%02d pm",12,minute);
+            return String.format("%02d:%02d pm", 12, minute);
         else {
             if (hourOfDay != 0)
-                return String.format("%02d:%02d am",hourOfDay,minute);
+                return String.format("%02d:%02d am", hourOfDay, minute);
             else
-                return String.format("%02d:%02d am",12,minute);
+                return String.format("%02d:%02d am", 12, minute);
         }
     }
 }

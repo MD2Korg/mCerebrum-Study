@@ -3,8 +3,6 @@ package org.md2k.study.systemhealth;
 import android.content.Context;
 import android.util.SparseArray;
 
-import org.md2k.study.install.Apps;
-
 import java.util.ArrayList;
 
 /**

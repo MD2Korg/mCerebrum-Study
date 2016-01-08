@@ -1,6 +1,5 @@
-package org.md2k.study.install;
+package org.md2k.study.admin.install;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -8,13 +7,10 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.R;

@@ -1,7 +1,15 @@
 package org.md2k.study;
 
+import android.app.Service;
 import android.content.Context;
-import android.os.Environment;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
+
+import org.md2k.study.admin.AdminManager;
+import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,25 +37,43 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_APPINFO="app_info.json";
-    public static String FILENAME_INSTALL= "application.json";
-    public static String FILENAME_SETTINGS= "application_settings.json";
-    public static String FILENAME_RESET= "reset_study_settings.json";
 
-    public static String FILENAME_DEVICEINFO="device_info.json";
-    public static String FILENAME_SENSORINFO="sensor_info.json";
-    public static String PASSWORD="1234";
-    public static String STUDY_ID="NW_SMOKING_CESSATION_STUDY";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-    public static final String DEFAULT_CONFIG_PHONESENSOR_FILENAME = "default_config_phonesensor.json";
-    public static final String DEFAULT_CONFIG_PLOTTER_FILENAME = "default_config_plotter.json";
+public class ServiceSystemHealth extends Service {
+    private static final String TAG = ServiceSystemHealth.class.getSimpleName();
+    DataKitHandler dataKitHandler;
+    Context context;
+    Handler handler;
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+    public void onCreate() {
+        super.onCreate();
+        context=getBaseContext();
+        handler = new Handler();
+        handler.post(checkStatus);
+        Log.d(TAG, "onCreate()");
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+
+    Runnable checkStatus = new Runnable() {
+        @Override
+        public void run() {
+            AdminManager adminManager=AdminManager.getInstance(context);
+            Status status = adminManager.getStatus();
+            Intent intent = new Intent("system_health");
+            intent.putExtra("status", status);
+            LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(intent);
+            Log.d(TAG, "checkStatus...");
+
+            handler.postDelayed(checkStatus, Constants.HEALTH_CHECK_REPEAT);
+        }
+    };
+
+    @Override
+    public void onDestroy() {
+        handler.removeCallbacks(checkStatus);
+        super.onDestroy();
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 }

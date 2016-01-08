@@ -23,10 +23,6 @@
         android:key="key_sleep_time"
         android:title="Sleep Time" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Reset Study">
-    <Preference
-        android:key="key_reset"
-        android:icon="@drawable/ic_error_red_50dp"
-        android:title="Reset Study" />
-    </PreferenceCategory>
+    <PreferenceCategory android:title="Reset Study"
+        android:key="key_reset"/>
 </PreferenceScreen>

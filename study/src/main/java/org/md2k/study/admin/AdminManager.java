@@ -1,18 +1,15 @@
-package org.md2k.study.settings;
+package org.md2k.study.admin;
 
 import android.content.Context;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import android.support.v4.content.ContextCompat;
 
 import org.md2k.study.Constants;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import org.md2k.study.R;
+import org.md2k.study.Status;
+import org.md2k.study.admin.install.Apps;
+import org.md2k.study.admin.reset.ResetInfoManager;
+import org.md2k.study.admin.sleep_wakeup.SleepInfoManager;
+import org.md2k.study.admin.study_info.StudyInfoManager;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -40,31 +37,29 @@ import java.util.List;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Apps {
-    ArrayList<App> appList = new ArrayList<>();
-    private static Apps instance;
-    public static Apps getInstance(Context context){
+public class AdminManager {
+    Apps apps;
+    StudyInfoManager studyInfoManager;
+    SleepInfoManager sleepInfoManager;
+    ResetInfoManager resetInfoManager;
+    private static AdminManager instance;
+    public static AdminManager getInstance(Context context){
         if(instance==null)
-            instance=new Apps(context);
+            instance=new AdminManager(context);
         return instance;
     }
 
-    private Apps(Context context) {
-        appList=readFile(context);
+    private AdminManager(Context context) {
+        apps = Apps.getInstance(context);
+        studyInfoManager = new StudyInfoManager(context);
+        sleepInfoManager=new SleepInfoManager(context);
+        resetInfoManager=ResetInfoManager.getInstance(context);
     }
-
-    public ArrayList<App> readFile(Context context) {
-        BufferedReader br;
-        try {
-            br = new BufferedReader(new InputStreamReader(context.getAssets().open(Constants.FILENAME_SETTINGS)));
-            Gson gson = new Gson();
-            Type collectionType = new TypeToken<List<App>>() {
-            }.getType();
-            appList = gson.fromJson(br, collectionType);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return appList;
+    public Status getStatus(){
+        if (apps.getStatus().getStatusCode() == Status.APP_NOT_INSTALLED)
+            return new Status(Status.APP_NOT_INSTALLED);
+        if (studyInfoManager.getStatus().getStatusCode() == Status.USERID_NOT_DEFINED)
+            return new Status(Status.USERID_NOT_DEFINED);
+        return sleepInfoManager.getStatus();
     }
-
 }

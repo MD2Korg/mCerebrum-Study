@@ -5,9 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,9 +21,11 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.study.admin.ActivitySettings;
 import org.md2k.study.applications.AppAdapter;
 import org.md2k.study.applications.Apps;
 import org.md2k.study.interventionapp.ActivityInterventionApp;
@@ -44,15 +49,9 @@ public class ActivityMain extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         copyDefaultSettings();
         setContentView(R.layout.activity_main);
-        setupApplications();
         setupButtonFix();
-        dataKitHandler=DataKitHandler.getInstance(ActivityMain.this);
-        dataKitHandler.connect(new OnConnectionListener() {
-            @Override
-            public void onConnected() {
-
-            }
-        });
+        Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
+        startService(intent);
     }
     void copyDefaultSettings(){
         File directory = new File(Constants.CONFIG_DIRECTORY);
@@ -86,56 +85,63 @@ public class ActivityMain extends AppCompatActivity {
     }
     @Override
     protected void onResume() {
-//        IntentFilter filter = new IntentFilter();
-//        filter.setPriority(1);
-//        filter.addAction("MyPackageName.MyAction");
-//        registerReceiver(mMessageReceiver, filter);
-//        Toast.makeText(this, "I'm running....2", Toast.LENGTH_SHORT).show();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("system_health"));
+
+        dataKitHandler=DataKitHandler.getInstance(ActivityMain.this);
+        if(!dataKitHandler.isConnected()) {
+            dataKitHandler.connect(new OnConnectionListener() {
+                @Override
+                public void onConnected() {
+                    setupApplications();
+                }
+            });
+        }
         super.onResume();
     }
-    int count=0;
-    void updateSystemHealth(){
+    void updateSystemHealth(Status status){
         ImageView imageViewOk=(ImageView) findViewById(R.id.imageViewOk);
-        ImageView imageViewWarining=(ImageView) findViewById(R.id.imageViewWarning);
+        ImageView imageViewWarning=(ImageView) findViewById(R.id.imageViewWarning);
         ImageView imageViewError=(ImageView) findViewById(R.id.imageViewError);
         Button buttonFix=(Button)findViewById(R.id.button_fix);
-        switch(count%3) {
-            case 0:
+        TextView textViewMessage = (TextView) findViewById(R.id.textView_message);
+        switch(status.getStatusCode()) {
+            case Status.SUCCESS:
                 imageViewOk.setImageResource(R.drawable.ic_ok_teal_50dp);
-                imageViewWarining.setImageResource(R.drawable.ic_warning_grey_50dp);
+                imageViewWarning.setImageResource(R.drawable.ic_warning_grey_50dp);
                 imageViewError.setImageResource(R.drawable.ic_error_grey_50dp);
                 buttonFix.setVisibility(View.INVISIBLE);
+                textViewMessage.setText(status.getStatusMessage());
+                textViewMessage.setTextColor(ContextCompat.getColor(this,R.color.teal_700));
                 break;
-            case 1:
+            case Status.APP_NOT_INSTALLED:
+            case Status.SLEEP_NOT_DEFINED:
+            case Status.WAKEUP_NOT_DEFINED:
+            case Status.USERID_NOT_DEFINED:
                 imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
-                imageViewWarining.setImageResource(R.drawable.ic_warning_amber_50dp);
-                imageViewError.setImageResource(R.drawable.ic_error_grey_50dp);
-                buttonFix.setVisibility(View.VISIBLE);
-                break;
-            case 2:
-                imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
-                imageViewWarining.setImageResource(R.drawable.ic_warning_grey_50dp);
+                imageViewWarning.setImageResource(R.drawable.ic_warning_grey_50dp);
                 imageViewError.setImageResource(R.drawable.ic_error_red_50dp);
                 buttonFix.setVisibility(View.VISIBLE);
+                buttonFix.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showPasswordDialog();
+                    }
+                });
+                textViewMessage.setText(status.getStatusMessage());
+                textViewMessage.setTextColor(ContextCompat.getColor(this, R.color.red_700));
                 break;
+            default:
+            imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
+            imageViewWarning.setImageResource(R.drawable.ic_warning_amber_50dp);
+            imageViewError.setImageResource(R.drawable.ic_error_grey_50dp);
+            buttonFix.setVisibility(View.VISIBLE);
+            break;
         }
-
     }
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            count++;
-            Log.d(TAG,"count="+count);
-            updateSystemHealth();
-//            Toast.makeText(ActivityMain.this, "I'm running....3", Toast.LENGTH_SHORT).show();
-            // Extract data included in the Intent
-            // String message = intent.getStringExtra("message");
-            //update the TextView
-        }
-    };
     @Override
     protected void onPause() {
-//        unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
         super.onPause();
     }
 
@@ -148,22 +154,6 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
     }
-/*
-    void setupAlarmManager() {
-        if (!isAlarmExist()) {
-            Log.d(TAG, "Alarm ---- Not exists");
-            Intent alarmIntent = new Intent(ActivityMain.this, AlarmReceiver.class);
-            pendingIntent = PendingIntent.getBroadcast(ActivityMain.this, 0, alarmIntent, 0);
-            start();
-        }else
-            Log.d(TAG, "Alarm ----- exists");
-    }
-    boolean isAlarmExist() {
-        return (PendingIntent.getBroadcast(this, 0,
-                new Intent(this, AlarmReceiver.class),
-                PendingIntent.FLAG_NO_CREATE) != null);
-    }
-*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -171,20 +161,6 @@ public class ActivityMain extends AppCompatActivity {
         return true;
     }
 
-/*    public void start() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int interval = 8000;
-
-        manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
-        Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
-    }
-
-    public void cancel() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        manager.cancel(pendingIntent);
-        Toast.makeText(this, "Alarm Canceled", Toast.LENGTH_SHORT).show();
-    }
-*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -220,8 +196,8 @@ public class ActivityMain extends AppCompatActivity {
     public void showPasswordDialog()
     {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(ActivityMain.this);
-        alertDialog.setTitle("PASSWORD");
-        alertDialog.setMessage("Enter Password");
+        alertDialog.setTitle("PASSWORD - 1234 (will be removed)");
+        alertDialog.setMessage("Enter Password (or contact study coordinator)");
 
         final EditText input = new EditText(ActivityMain.this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -273,13 +249,13 @@ public class ActivityMain extends AppCompatActivity {
                 if (apps.getApp(position).getContent().equals("Intervention")) {
                     Intent launchIntent = new Intent(getApplicationContext(), ActivityInterventionApp.class);
                     startActivity(launchIntent);
-                }else if(apps.getApp(position).getContent().equals("Privacy Control")) {
+                } else if (apps.getApp(position).getContent().equals("Privacy Control")) {
                     Intent intent = new Intent();
                     intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityPrivacy");
                     startActivity(intent);
-                } else if(apps.getApp(position).getContent().equals("Report")) {
+                } else if (apps.getApp(position).getContent().equals("Report")) {
 
-                }else if(apps.getApp(position).getContent().equals("Report")) {
+                } else if (apps.getApp(position).getContent().equals("Report")) {
 //                    Intent intent = new Intent();
 //                    intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityPrivacy");
 //                    startActivity(intent);
@@ -287,7 +263,13 @@ public class ActivityMain extends AppCompatActivity {
                 }
             }
         });
-
     }
-
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Status status= (Status) intent.getSerializableExtra("status");
+            Log.d(TAG, "received..."+status.getStatusMessage());
+            updateSystemHealth(status);
+        }
+    };
 }

@@ -1,4 +1,4 @@
-package org.md2k.study.info;
+package org.md2k.study.admin.study_info;
 
 import org.md2k.study.Constants;
 

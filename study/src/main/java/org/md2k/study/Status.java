@@ -1,7 +1,8 @@
 package org.md2k.study;
 
-import android.content.Context;
-import android.os.Environment;
+import org.md2k.datakitapi.status.StatusCodes;
+
+import java.io.Serializable;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,25 +30,44 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_APPINFO="app_info.json";
-    public static String FILENAME_INSTALL= "application.json";
-    public static String FILENAME_SETTINGS= "application_settings.json";
-    public static String FILENAME_RESET= "reset_study_settings.json";
+public class Status implements Serializable{
+    int statusCode;
+    String statusMessage;
 
-    public static String FILENAME_DEVICEINFO="device_info.json";
-    public static String FILENAME_SENSORINFO="sensor_info.json";
-    public static String PASSWORD="1234";
-    public static String STUDY_ID="NW_SMOKING_CESSATION_STUDY";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-    public static final String DEFAULT_CONFIG_PHONESENSOR_FILENAME = "default_config_phonesensor.json";
-    public static final String DEFAULT_CONFIG_PLOTTER_FILENAME = "default_config_plotter.json";
+    public static final int SUCCESS = 0;
+    public static final int APP_NOT_INSTALLED = 1;
+    public static final int APP_UPDATE_AVAILABLE = 2;
+    public static final int USERID_NOT_DEFINED = 3;
+    public static final int WAKEUP_NOT_DEFINED = 4;
+    public static final int SLEEP_NOT_DEFINED = 5;
+    public static final String[] message = new String[]{
+            "Status: OK",
+            "Error: Applications are not installed properly",
+            "Warning: Update available for application",
+            "Error: UserID is not defined",
+            "Error: Wakeup time is not defined",
+            "Error: Sleep time is not defined"
+    };
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+    public Status(int statusCode, String statusMessage) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+
+    public Status(int statusCode) {
+        this.statusCode = statusCode;
+        this.statusMessage = message[statusCode];
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
+    public Status getStatus() {
+        return this;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
 }

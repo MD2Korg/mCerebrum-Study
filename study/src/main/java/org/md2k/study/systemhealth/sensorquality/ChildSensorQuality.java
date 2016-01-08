@@ -133,7 +133,7 @@ public class ChildSensorQuality extends Child {
                 lastSampleTime = getLastSampleTime(getDataSourceClient(createDataSourceBuilder(DataSourceType.ACCELEROMETER)));
             else
                 lastSampleTime = getLastSampleTime(getDataSourceClient(createDataSourceBuilder(dataSourceType)));
-            if (DateTime.getDateTime() - lastSampleTime > Constants.MISSING_MILLIS)
+            if (DateTime.getDateTime() - lastSampleTime > Constants.HEALTH_CHECK_REPEAT)
                 status = SystemHealthManager.RED;
             else {
                 if (platformType.equals(PlatformType.MICROSOFT_BAND)) {

@@ -17,7 +17,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="50dp"
         android:gravity="center"
         android:weightSum="4">
 
@@ -53,6 +53,18 @@
             android:text="@string/button_text_fix"
             android:layout_marginStart="20dp" />
 
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp">
+
+        <TextView
+            android:id="@+id/textView_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:gravity="center_vertical|center_horizontal" />
     </LinearLayout>
 
     <LinearLayout

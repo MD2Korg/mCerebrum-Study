@@ -1,4 +1,4 @@
-package org.md2k.study.info;
+package org.md2k.study.admin.study_info;
 
 import android.content.Context;
 
@@ -15,6 +15,7 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Constants;
+import org.md2k.study.Status;
 import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.util.ArrayList;
@@ -49,43 +50,58 @@ public class StudyInfoManager {
     DataKitHandler dataKitHandler;
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    StudyInfo studyInfo;
+    StudyInfo studyInfoInDB;
+    StudyInfo studyInfoNew;
 
     public StudyInfoManager(Context context) {
         dataKitHandler = DataKitHandler.getInstance(context);
         dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
     }
-    public void setUserId(String userId){
-        studyInfo=new StudyInfo();
-        studyInfo.set(userId);
+    public void setUserIdNew(String userId){
+        studyInfoNew=new StudyInfo();
+        studyInfoNew.set(userId);
     }
-    public int getStatus(){
-        if(getUserId()==null) return Constants.STATUS_ERROR;
-        else return Constants.STATUS_OK;
+    public Status getStatus(){
+        if(getUserIdInDB()==null)
+            return new Status(Status.USERID_NOT_DEFINED);
+        return new Status(Status.SUCCESS);
     }
-    public String getUserId(){
-        if(studyInfo==null) return null;
-        return studyInfo.getUser_id();
+    public String getUserIdInDB(){
+        if(studyInfoInDB==null) return null;
+        return studyInfoInDB.getUser_id();
+    }
+    public String getUserIdNew(){
+        if(studyInfoNew==null) return null;
+        return studyInfoNew.getUser_id();
     }
 
     private void readStudyInfoFromDataKit() {
-        studyInfo=null;
+        studyInfoInDB=null;
         if(dataKitHandler.isConnected()) {
             dataSourceClient = dataKitHandler.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitHandler.query(dataSourceClient, 1);
             if (dataTypes.size() != 0) {
                 DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
                 Gson gson = new Gson();
-                studyInfo = gson.fromJson(dataTypeString.getSample(), StudyInfo.class);
+                studyInfoInDB = gson.fromJson(dataTypeString.getSample(), StudyInfo.class);
+                studyInfoNew=new StudyInfo();
+                studyInfoNew.set(studyInfoInDB.getUser_id());
             }
         }
     }
+    public boolean isValid(){
+        if(studyInfoNew==null) return false;
+        if(studyInfoNew.getUser_id().length()==0) return false;
+        if(studyInfoInDB==null) return true;
+        return !studyInfoInDB.getUser_id().equals(studyInfoNew.getUser_id());
+    }
 
-    public boolean writeStudyInfoToDataKit(){
+    public boolean writeToDataKit(){
         if(!dataKitHandler.isConnected()) return false;
+        if(!isValid()) return false;
         Gson gson = new Gson();
-        String sample=gson.toJson(studyInfo);
+        String sample=gson.toJson(studyInfoNew);
         dataSourceClient = dataKitHandler.register(dataSourceBuilder);
         DataTypeString dataTypeString=new DataTypeString(DateTime.getDateTime(),sample);
         dataKitHandler.insert(dataSourceClient,dataTypeString);

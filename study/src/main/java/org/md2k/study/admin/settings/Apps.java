@@ -1,4 +1,4 @@
-package org.md2k.study.install;
+package org.md2k.study.admin.settings;
 
 import android.content.Context;
 
@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,7 +43,6 @@ import java.util.List;
 public class Apps {
     ArrayList<App> appList = new ArrayList<>();
     private static Apps instance;
-    Context context;
     public static Apps getInstance(Context context){
         if(instance==null)
             instance=new Apps(context);
@@ -50,46 +50,13 @@ public class Apps {
     }
 
     private Apps(Context context) {
-        this.context=context;
         appList=readFile(context);
-        for(int i=0;i<appList.size();i++){
-            appList.get(i).setVersionName(context);
-        }
-    }
-    public int size(){
-        return appList.size();
-    }
-    public int sizeInstalled(){
-        int count=0;
-        for(int i=0;i<appList.size();i++){
-            if(appList.get(i).isInstalled(context))
-                count++;
-        }
-        return count;
-    }
-    public int getStatus(){
-        int total = size();
-        int install = sizeInstalled();
-        int update = sizeUpdate();
-        if (update == 0 && total == install)
-            return Constants.STATUS_OK;
-        else if (total != install)
-            return Constants.STATUS_ERROR;
-        else return Constants.STATUS_WARNING;
-    }
-    public int sizeUpdate(){
-        int count=0;
-        for(int i=0;i<appList.size();i++){
-            if(appList.get(i).isUpdateAvailable())
-                count++;
-        }
-        return count;
     }
 
     public ArrayList<App> readFile(Context context) {
         BufferedReader br;
         try {
-            br = new BufferedReader(new InputStreamReader(context.getAssets().open(Constants.FILENAME_INSTALL)));
+            br = new BufferedReader(new InputStreamReader(context.getAssets().open(Constants.FILENAME_SETTINGS)));
             Gson gson = new Gson();
             Type collectionType = new TypeToken<List<App>>() {
             }.getType();
@@ -99,4 +66,5 @@ public class Apps {
         }
         return appList;
     }
+
 }

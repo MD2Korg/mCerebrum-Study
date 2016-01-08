@@ -1,4 +1,4 @@
-package org.md2k.study.install;
+package org.md2k.study.admin.install;
 
 import android.app.ProgressDialog;
 import android.content.Context;

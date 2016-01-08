@@ -1,4 +1,4 @@
-package org.md2k.study.settings;
+package org.md2k.study.admin.settings;
 
 
 /**

@@ -1,8 +1,10 @@
-package org.md2k.study;
+package org.md2k.study.admin;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+
+import org.md2k.study.R;
 
 public class ActivitySettings extends AppCompatActivity {
     private static final String TAG = ActivitySettings.class.getSimpleName();
