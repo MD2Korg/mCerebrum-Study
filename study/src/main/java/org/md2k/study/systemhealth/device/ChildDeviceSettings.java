@@ -80,7 +80,7 @@ public class ChildDeviceSettings extends Child {
     }
     void showAlertDialogAppNotInstalled(final Context context){
         AlertDialog alertDialog = new AlertDialog.Builder(context)
-                .setTitle("Error: App Not Installed")
+                .setTitle("Error: InstallApp Not Installed")
 //                .setIcon(R.drawable.ic_error_outline_white_24dp)
                 .setMessage(platformType + " application is not installed.\n\n Please install the application first")
                 .setNegativeButton("Ok", new DialogInterface.OnClickListener() {

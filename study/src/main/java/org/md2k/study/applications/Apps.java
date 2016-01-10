@@ -36,7 +36,7 @@ public class Apps {
         items=new ArrayList<>();
         items.add(new App("Intervention", ""));
         items.add(new App("Report", ""));
-//        items.add(new App("Privacy Control", ""));
+//        items.add(new InstallApp("Privacy Control", ""));
         items.add(new App("Plotter",""));
     }
     public List<App> getAllItemObject() {

@@ -7,15 +7,15 @@ import android.view.MenuItem;
 import org.md2k.study.R;
 import org.md2k.utilities.Report.Log;
 
-public class ActivityAppInstall extends AppCompatActivity {
-    public static final String TAG = ActivityAppInstall.class.getSimpleName();
+public class ActivityInstallApp extends AppCompatActivity {
+    public static final String TAG = ActivityInstallApp.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_install);
         getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
-                new PrefsFragmentAppInstall()).commit();
+                new PrefsFragmentInstallApp()).commit();
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

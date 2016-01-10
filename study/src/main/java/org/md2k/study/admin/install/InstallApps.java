@@ -41,30 +41,30 @@ import java.util.List;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Apps {
-    ArrayList<App> appList = new ArrayList<>();
-    private static Apps instance;
+public class InstallApps {
+    ArrayList<InstallApp> installAppList = new ArrayList<>();
+    private static InstallApps instance;
     Context context;
-    public static Apps getInstance(Context context){
+    public static InstallApps getInstance(Context context){
         if(instance==null)
-            instance=new Apps(context);
+            instance=new InstallApps(context);
         return instance;
     }
 
-    private Apps(Context context) {
+    private InstallApps(Context context) {
         this.context=context;
         readFile(context);
-        for(int i=0;i<appList.size();i++){
-            appList.get(i).setVersionName(context);
+        for(int i=0;i< installAppList.size();i++){
+            installAppList.get(i).setVersionName(context);
         }
     }
     public int size(){
-        return appList.size();
+        return installAppList.size();
     }
     public int sizeInstalled(){
         int count=0;
-        for(int i=0;i<appList.size();i++){
-            if(appList.get(i).isInstalled(context))
+        for(int i=0;i< installAppList.size();i++){
+            if(installAppList.get(i).isInstalled(context))
                 count++;
         }
         return count;
@@ -81,8 +81,8 @@ public class Apps {
     }
     public int sizeUpdate(){
         int count=0;
-        for(int i=0;i<appList.size();i++){
-            if(appList.get(i).isUpdateAvailable())
+        for(int i=0;i< installAppList.size();i++){
+            if(installAppList.get(i).isUpdateAvailable())
                 count++;
         }
         return count;
@@ -93,9 +93,9 @@ public class Apps {
         try {
             br = new BufferedReader(new InputStreamReader(context.getAssets().open(Constants.FILENAME_INSTALL)));
             Gson gson = new Gson();
-            Type collectionType = new TypeToken<List<App>>() {
+            Type collectionType = new TypeToken<List<InstallApp>>() {
             }.getType();
-            appList = gson.fromJson(br, collectionType);
+            installAppList = gson.fromJson(br, collectionType);
         } catch (IOException e) {
             e.printStackTrace();
         }

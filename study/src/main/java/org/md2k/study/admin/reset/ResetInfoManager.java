@@ -5,21 +5,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeString;
-import org.md2k.datakitapi.source.METADATA;
-import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
-import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.datakitapi.source.platform.PlatformBuilder;
-import org.md2k.datakitapi.source.platform.PlatformType;
-import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Constants;
-import org.md2k.study.Status;
-import org.md2k.study.admin.install.App;
-import org.md2k.study.admin.study_info.StudyInfo;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;

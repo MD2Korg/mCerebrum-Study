@@ -65,7 +65,7 @@ public class SystemHealthManager {
     }
 
 /*    Group createGroupApp(ArrayList<AppInfo> appInfos) {
-        Apps apps = new Apps(context, "Applications");
+        InstallApps apps = new InstallApps(context, "Applications");
         for (int i = 0; i < appInfos.size(); i++) {
             apps.add(appInfos.get(i));
         }

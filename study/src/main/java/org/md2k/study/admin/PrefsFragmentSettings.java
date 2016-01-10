@@ -21,7 +21,7 @@ import android.widget.Toast;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.study.R;
 import org.md2k.study.Status;
-import org.md2k.study.admin.install.ActivityAppInstall;
+import org.md2k.study.admin.install.ActivityInstallApp;
 import org.md2k.study.admin.reset.ResetInfo;
 import org.md2k.study.admin.settings.ActivityAppSettings;
 import org.md2k.utilities.Report.Log;
@@ -270,7 +270,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     void setupPreferenceApplication() {
         Preference preference = findPreference("key_app");
-        Status status = adminManager.apps.getStatus();
+        Status status = adminManager.installApps.getStatus();
         preference.setSummary(status.getStatusMessage());
         if (status.getStatusCode() == Status.SUCCESS) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
@@ -282,7 +282,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getActivity(), ActivityAppInstall.class);
+                Intent intent = new Intent(getActivity(), ActivityInstallApp.class);
                 startActivity(intent);
                 return false;
             }

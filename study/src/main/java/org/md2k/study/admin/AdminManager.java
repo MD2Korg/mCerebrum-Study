@@ -3,7 +3,7 @@ package org.md2k.study.admin;
 import android.content.Context;
 
 import org.md2k.study.Status;
-import org.md2k.study.admin.install.Apps;
+import org.md2k.study.admin.install.InstallApps;
 import org.md2k.study.admin.reset.ResetInfoManager;
 import org.md2k.study.admin.sleep_wakeup.SleepInfoManager;
 import org.md2k.study.admin.study_info.StudyInfoManager;
@@ -35,7 +35,7 @@ import org.md2k.study.admin.study_info.StudyInfoManager;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AdminManager {
-    Apps apps;
+    InstallApps installApps;
     StudyInfoManager studyInfoManager;
     SleepInfoManager sleepInfoManager;
     ResetInfoManager resetInfoManager;
@@ -53,13 +53,13 @@ public class AdminManager {
 
     private AdminManager(Context context) {
         this.context=context;
-        apps = Apps.getInstance(context);
+        installApps = InstallApps.getInstance(context);
         studyInfoManager = new StudyInfoManager(context);
         sleepInfoManager=new SleepInfoManager(context);
         resetInfoManager=ResetInfoManager.getInstance(context);
     }
     public Status getStatus(){
-        if (apps.getStatus().getStatusCode() == Status.APP_NOT_INSTALLED)
+        if (installApps.getStatus().getStatusCode() == Status.APP_NOT_INSTALLED)
             return new Status(Status.APP_NOT_INSTALLED);
         if (studyInfoManager.getStatus().getStatusCode() == Status.USERID_NOT_DEFINED)
             return new Status(Status.USERID_NOT_DEFINED);
