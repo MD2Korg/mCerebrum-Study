@@ -1,7 +1,6 @@
-package org.md2k.study;
+package org.md2k.study.admin.app_reset;
 
-import android.content.Context;
-import android.os.Environment;
+import java.io.File;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,21 +28,45 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_INSTALL= "application_install.json";
-    public static String FILENAME_SERVICE= "application_service.json";
-    public static String FILENAME_SETTINGS= "application_settings.json";
-    public static String FILENAME_RESET= "application_reset.json";
+public class ResetInfo {
+    String id;
+    String name;
+    String package_name;
+    String class_name;
+    String filename;
 
-    public static String PASSWORD="1234";
-    public static String STUDY_ID="NW_SMOKING_CESSATION_STUDY";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
+    public String getId() {
+        return id;
+    }
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+    public String getName() {
+        return name;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+
+    public String getPackage_name() {
+        return package_name;
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+
+    public String getClass_name() {
+        return class_name;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+    public boolean isFileExists(){
+        if(filename==null) return false;
+        File file=new File(org.md2k.utilities.Constants.DIRECTORY+filename);
+        return file.exists();
+    }
+    public boolean isValidFileName(){
+        return filename != null;
+    }
+    public boolean deleteFile(){
+        if(isFileExists()) {
+            File file=new File(org.md2k.utilities.Constants.DIRECTORY+filename);
+            return file.delete();
+        }
+        return false;
+    }
 }

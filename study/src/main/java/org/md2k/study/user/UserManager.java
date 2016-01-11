@@ -1,7 +1,9 @@
-package org.md2k.study;
+package org.md2k.study.user;
 
 import android.content.Context;
-import android.os.Environment;
+
+import org.md2k.study.Status;
+import org.md2k.study.user.service.ServiceApps;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,21 +31,23 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_INSTALL= "application_install.json";
-    public static String FILENAME_SERVICE= "application_service.json";
-    public static String FILENAME_SETTINGS= "application_settings.json";
-    public static String FILENAME_RESET= "application_reset.json";
-
-    public static String PASSWORD="1234";
-    public static String STUDY_ID="NW_SMOKING_CESSATION_STUDY";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+public class UserManager {
+    ServiceApps serviceApps;
+    private static UserManager instance=null;
+    Context context;
+    public static UserManager getInstance(Context context){
+        if(instance==null)
+            instance=new UserManager(context);
+        return instance;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+    private UserManager(Context context){
+        this.context=context;
+        serviceApps=ServiceApps.getInstance(context);
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+    public void stopDataCollection(){
+        serviceApps.stop();
+    }
+    public Status getStatus(){
+        return serviceApps.getStatus();
+    }
 }

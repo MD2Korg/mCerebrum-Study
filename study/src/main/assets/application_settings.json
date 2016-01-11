@@ -1,17 +1,16 @@
 [
   {
-    "name":"AutoSense",
-    "package_name":"org.md2k.autosense",
-    "settings":"org.md2k.autosense.ActivityAutoSenseSettings"
-  },
-  {
-    "name":"MicrosoftBand",
-    "package_name":"org.md2k.microsoftband",
-    "settings":"org.md2k.microsoftband.ActivityMicrosoftBandSettings"
-  },
-  {
     "name":"PhoneSensor",
     "package_name":"org.md2k.phonesensor",
+    "default_settings_filename":"default_config_phonesensor.json",
+    "settings_filename":"config_phonesensor.json",
     "settings":"org.md2k.phonesensor.ActivityPhoneSensorSettings"
+  },
+  {
+    "name":"AutoSense",
+    "package_name":"org.md2k.autosense",
+    "default_settings_filename":"default_config_autosense",
+    "settings_filename":"config_autosense.json",
+    "settings":"org.md2k.autosense.ActivityAutoSenseSettings.json"
   }
 ]

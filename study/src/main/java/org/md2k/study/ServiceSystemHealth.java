@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.study.admin.AdminManager;
+import org.md2k.study.user.UserManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.datakit.DataKitHandler;
 
@@ -44,11 +45,13 @@ public class ServiceSystemHealth extends Service {
     Context context;
     Handler handler;
     AdminManager adminManager;
+    UserManager userManager;
 
     public void onCreate() {
         super.onCreate();
         context=getBaseContext();
         adminManager=AdminManager.getInstance(this);
+        userManager=UserManager.getInstance(this);
         handler = new Handler();
         handler.post(checkStatus);
         Log.d(TAG, "onCreate()");
@@ -58,6 +61,8 @@ public class ServiceSystemHealth extends Service {
         @Override
         public void run() {
             Status status = adminManager.getStatus();
+            if(status.getStatusCode()==Status.SUCCESS)
+                status=userManager.getStatus();
             Intent intent = new Intent("system_health");
             intent.putExtra("status", status);
             LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(intent);

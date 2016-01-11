@@ -40,13 +40,17 @@ public class Status implements Serializable{
     public static final int USERID_NOT_DEFINED = 3;
     public static final int SLEEPEND_NOT_DEFINED = 4;
     public static final int SLEEPSTART_NOT_DEFINED = 5;
+    public static final int APP_NOT_RUNNING=6;
+    public static final int APP_CONFIG_ERROR=7;
     public static final String[] message = new String[]{
             "Status: OK",
-            "Error: Applications are not installed properly",
+            "Error: Application not installed properly",
             "Warning: Update available for application",
-            "Error: UserID is not defined",
-            "Error: Wakeup time is not defined",
-            "Error: Sleep time is not defined"
+            "Error: UserID not defined",
+            "Error: Wakeup time not defined",
+            "Error: Sleep time not defined",
+            "Error: Application not running",
+            "Error: Application not configured properly"
     };
 
     public Status(int statusCode, String statusMessage) {

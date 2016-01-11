@@ -3,8 +3,9 @@ package org.md2k.study.admin;
 import android.content.Context;
 
 import org.md2k.study.Status;
-import org.md2k.study.admin.install.InstallApps;
-import org.md2k.study.admin.reset.ResetInfoManager;
+import org.md2k.study.admin.app_install.InstallApps;
+import org.md2k.study.admin.app_reset.ResetInfoManager;
+import org.md2k.study.admin.app_settings.SettingsApps;
 import org.md2k.study.admin.sleep_wakeup.SleepInfoManager;
 import org.md2k.study.admin.study_info.StudyInfoManager;
 
@@ -37,6 +38,7 @@ import org.md2k.study.admin.study_info.StudyInfoManager;
 public class AdminManager {
     InstallApps installApps;
     StudyInfoManager studyInfoManager;
+    SettingsApps settingsApps;
     SleepInfoManager sleepInfoManager;
     ResetInfoManager resetInfoManager;
     private static AdminManager instance;
@@ -46,21 +48,27 @@ public class AdminManager {
             instance=new AdminManager(context);
         return instance;
     }
+    private AdminManager(Context context) {
+        this.context=context;
+        reset();
+    }
+    public void reset(){
+        installApps = InstallApps.getInstance(context);
+        settingsApps=SettingsApps.getInstance(context);
+        studyInfoManager = new StudyInfoManager(context);
+        sleepInfoManager=new SleepInfoManager(context);
+        resetInfoManager=ResetInfoManager.getInstance(context);
+    }
     public void readFromDB(){
         studyInfoManager = new StudyInfoManager(context);
         sleepInfoManager=new SleepInfoManager(context);
     }
 
-    private AdminManager(Context context) {
-        this.context=context;
-        installApps = InstallApps.getInstance(context);
-        studyInfoManager = new StudyInfoManager(context);
-        sleepInfoManager=new SleepInfoManager(context);
-        resetInfoManager=ResetInfoManager.getInstance(context);
-    }
     public Status getStatus(){
         if (installApps.getStatus().getStatusCode() == Status.APP_NOT_INSTALLED)
             return new Status(Status.APP_NOT_INSTALLED);
+        if(settingsApps.getStatus().getStatusCode()==Status.APP_CONFIG_ERROR)
+            return new Status(Status.APP_CONFIG_ERROR);
         if (studyInfoManager.getStatus().getStatusCode() == Status.USERID_NOT_DEFINED)
             return new Status(Status.USERID_NOT_DEFINED);
         return sleepInfoManager.getStatus();

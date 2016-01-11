@@ -1,6 +1,7 @@
 package org.md2k.study.admin;
 
 import android.app.AlertDialog;
+import android.app.Service;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,10 +21,12 @@ import android.widget.Toast;
 
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.study.R;
+import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
-import org.md2k.study.admin.install.ActivityInstallApp;
-import org.md2k.study.admin.reset.ResetInfo;
-import org.md2k.study.admin.settings.ActivityAppSettings;
+import org.md2k.study.admin.app_install.ActivityInstallApp;
+import org.md2k.study.admin.app_reset.ResetInfo;
+import org.md2k.study.admin.app_settings.ActivityAppSettings;
+import org.md2k.study.user.UserManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.AlertDialogs;
 import org.md2k.utilities.datakit.DataKitHandler;
@@ -61,10 +64,17 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     private static final String TAG = PrefsFragmentSettings.class.getSimpleName();
     DataKitHandler dataKitHandler;
     AdminManager adminManager;
+    Boolean isDatabaseCleaned=false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dataKitHandler=DataKitHandler.getInstance(getActivity());
+        UserManager.getInstance(getActivity()).stopDataCollection();
+        Intent intent = new Intent(getActivity().getApplicationContext(), ServiceSystemHealth.class);
+        getActivity().stopService(intent);
+
+
+        dataKitHandler = DataKitHandler.getInstance(getActivity());
         adminManager = AdminManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_settings);
     }
@@ -83,31 +93,31 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         EditTextPreference editTextPreference = (EditTextPreference) findPreference("key_user_id");
         if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
             editTextPreference.setEnabled(false);
-            return;
-        } else
+        } else {
             editTextPreference.setEnabled(true);
-        if(adminManager.studyInfoManager.getUserIdInDB()==null && adminManager.studyInfoManager.getUserIdNew()==null){
-            editTextPreference.setSummary("");
-            editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-        }else if(adminManager.studyInfoManager.getUserIdNew()!=null){
-            editTextPreference.setSummary(adminManager.studyInfoManager.getUserIdNew());
-            editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-        }else {
-            editTextPreference.setSummary(adminManager.studyInfoManager.getUserIdInDB());
-            editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-        }
-        editTextPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                String userID = ((String) newValue).trim();
-                if (userID.length() == 0) {
-                    adminManager.studyInfoManager.setUserIdNew(userID);
-                    preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-                    preference.setSummary(userID);
-                }
-                return false;
+            if (adminManager.studyInfoManager.getUserIdInDB() == null && adminManager.studyInfoManager.getUserIdNew() == null) {
+                editTextPreference.setSummary("");
+                editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+            } else if (adminManager.studyInfoManager.getUserIdNew() != null) {
+                editTextPreference.setSummary(adminManager.studyInfoManager.getUserIdNew());
+                editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+            } else {
+                editTextPreference.setSummary(adminManager.studyInfoManager.getUserIdInDB());
+                editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
             }
-        });
+            editTextPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    String userID = ((String) newValue).trim();
+                    if (userID.length() != 0) {
+                        adminManager.studyInfoManager.setUserIdNew(userID);
+                        preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+                        preference.setSummary(userID);
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     void setupPreference() {
@@ -141,6 +151,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     if (resetInfo.getClass_name() != null) {
+                        if("org.md2k.datakit.ActivityDataKitSettings".equals(resetInfo.getClass_name())) isDatabaseCleaned=true;
                         Intent intent = new Intent();
                         intent.setClassName(resetInfo.getPackage_name(), resetInfo.getClass_name());
                         startActivity(intent);
@@ -153,7 +164,6 @@ public class PrefsFragmentSettings extends PreferenceFragment {
                                         Toast.makeText(getActivity(), "File Deleted", Toast.LENGTH_SHORT).show();
                                     else
                                         Toast.makeText(getActivity(), "Can't delete the file.", Toast.LENGTH_SHORT).show();
-
                                 }
                             }
                         });
@@ -179,7 +189,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     private void setBackButton() {
-        final Button button = (Button) getActivity().findViewById(R.id.button_cancel);
+        final Button button = (Button) getActivity().findViewById(R.id.button_2);
         button.setText("Close");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -189,7 +199,8 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     private void setSaveButton() {
-        final Button button = (Button) getActivity().findViewById(R.id.button_save);
+        final Button button = (Button) getActivity().findViewById(R.id.button_1);
+        button.setText("Save");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 adminManager.studyInfoManager.writeToDataKit();
@@ -199,31 +210,31 @@ public class PrefsFragmentSettings extends PreferenceFragment {
             }
         });
     }
+
     void setupWakeupTime() {
         Preference preference = findPreference("key_wakeup_time");
         if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
             preference.setEnabled(false);
-            return;
-        } else
+        } else {
             preference.setEnabled(true);
-        if(adminManager.sleepInfoManager.getSleepEndTimeDB()==-1 && adminManager.sleepInfoManager.getSleepEndTimeNew()==-1) {
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-            preference.setSummary("");
-        }
-        else if(adminManager.sleepInfoManager.getSleepEndTimeNew()!=-1){
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-            preference.setSummary(formatTime(adminManager.sleepInfoManager.getSleepEndTimeNew()));
-        }else{
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-            preference.setSummary(formatTime(adminManager.sleepInfoManager.getSleepEndTimeDB()));
-        }
-        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                showTimePicker(preference);
-                return false;
+            if (adminManager.sleepInfoManager.getSleepEndTimeDB() == -1 && adminManager.sleepInfoManager.getSleepEndTimeNew() == -1) {
+                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+                preference.setSummary("");
+            } else if (adminManager.sleepInfoManager.getSleepEndTimeNew() != -1) {
+                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+                preference.setSummary(formatTime(adminManager.sleepInfoManager.getSleepEndTimeNew()));
+            } else {
+                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+                preference.setSummary(formatTime(adminManager.sleepInfoManager.getSleepEndTimeDB()));
             }
-        });
+            preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    showTimePicker(preference);
+                    return false;
+                }
+            });
+        }
     }
 
     void setupSleepTime() {
@@ -233,14 +244,13 @@ public class PrefsFragmentSettings extends PreferenceFragment {
             return;
         } else
             preference.setEnabled(true);
-        if(adminManager.sleepInfoManager.getSleepStartTimeDB()==-1 && adminManager.sleepInfoManager.getSleepStartTimeNew()==-1) {
+        if (adminManager.sleepInfoManager.getSleepStartTimeDB() == -1 && adminManager.sleepInfoManager.getSleepStartTimeNew() == -1) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
             preference.setSummary("");
-        }
-        else if(adminManager.sleepInfoManager.getSleepStartTimeNew()!=-1){
+        } else if (adminManager.sleepInfoManager.getSleepStartTimeNew() != -1) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
             preference.setSummary(formatTime(adminManager.sleepInfoManager.getSleepStartTimeNew()));
-        }else{
+        } else {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
             preference.setSummary(formatTime(adminManager.sleepInfoManager.getSleepStartTimeDB()));
         }
@@ -257,6 +267,15 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     void setupPreferenceSettings() {
         Preference preference = findPreference("key_settings");
+        Status status = adminManager.settingsApps.getStatus();
+        preference.setSummary(status.getStatusMessage());
+        if (status.getStatusCode() == Status.SUCCESS) {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+        } else if (status.getStatusCode() == Status.APP_CONFIG_ERROR) {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+        } else {
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_warning_amber_50dp));
+        }
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -291,12 +310,15 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     @Override
     public void onResume() {
+        if(isDatabaseCleaned) {
+            AdminManager.getInstance(getActivity().getBaseContext()).reset();
+            isDatabaseCleaned=false;
+        }
         setupPreference();
-        if(!dataKitHandler.isConnected()) {
+        if (!dataKitHandler.isConnected()) {
             dataKitHandler.connect(new OnConnectionListener() {
                 @Override
                 public void onConnected() {
-                    AdminManager.getInstance(getActivity().getBaseContext()).readFromDB();
                     setupPreference();
                 }
             });
@@ -305,9 +327,15 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     void showTimePicker(final Preference preference) {
-        Calendar currentTime = Calendar.getInstance();
-        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-        int minute = currentTime.get(Calendar.MINUTE);
+        int hour, minute;
+        if(preference.getKey().contains("sleep")){
+            hour=22;minute=0;
+        }else{
+            hour=8;minute=0;
+        }
+//        Calendar currentTime = Calendar.getInstance();
+//        int hour = 8;//currentTime.get(Calendar.HOUR_OF_DAY);
+//        int minute = currentTime.get(Calendar.MINUTE);
         TimePickerDialog mTimePicker;
         mTimePicker = new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
             @Override
@@ -316,8 +344,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
                     adminManager.sleepInfoManager.setSleepStartTimeNew(selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000);
                     preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
                     preference.setSummary(formatTime(adminManager.sleepInfoManager.getSleepStartTimeNew()));
-                }
-                else {
+                } else {
                     adminManager.sleepInfoManager.setSleepEndTimeNew(selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000);
                     preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
                     preference.setSummary(formatTime(adminManager.sleepInfoManager.getSleepEndTimeNew()));
@@ -330,10 +357,10 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     String formatTime(long timestamp) {
         long hourOfDay, minute;
-        timestamp=timestamp/(60*1000);
-        minute=timestamp%60;
-        timestamp/=60;
-        hourOfDay=timestamp;
+        timestamp = timestamp / (60 * 1000);
+        minute = timestamp % 60;
+        timestamp /= 60;
+        hourOfDay = timestamp;
         if (hourOfDay > 12)
             return String.format("%02d:%02d pm", hourOfDay - 12, minute);
         else if (hourOfDay == 12)
@@ -344,5 +371,11 @@ public class PrefsFragmentSettings extends PreferenceFragment {
             else
                 return String.format("%02d:%02d am", 12, minute);
         }
+    }
+    @Override
+    public void onStop(){
+        Intent intent = new Intent(getActivity().getApplicationContext(), ServiceSystemHealth.class);
+        getActivity().startService(intent);
+        super.onStop();
     }
 }

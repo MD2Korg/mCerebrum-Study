@@ -1,0 +1,12 @@
+[
+  {
+    "name":"AutoSense",
+    "package_name":"org.md2k.autosense",
+    "service":"org.md2k.autosense.antradio.connection.ServiceAutoSenses"
+  },
+  {
+    "name":"PhoneSensor",
+    "package_name":"org.md2k.phonesensor",
+    "service":"org.md2k.phonesensor.ServicePhoneSensor"
+  }
+]

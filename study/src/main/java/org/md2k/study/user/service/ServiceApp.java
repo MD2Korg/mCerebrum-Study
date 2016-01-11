@@ -1,7 +1,11 @@
-package org.md2k.study;
+package org.md2k.study.user.service;
 
 import android.content.Context;
-import android.os.Environment;
+import android.content.Intent;
+
+import org.md2k.study.Status;
+import org.md2k.utilities.Apps;
+
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,21 +33,46 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_INSTALL= "application_install.json";
-    public static String FILENAME_SERVICE= "application_service.json";
-    public static String FILENAME_SETTINGS= "application_settings.json";
-    public static String FILENAME_RESET= "application_reset.json";
+public class ServiceApp {
+    private static final String TAG = ServiceApp.class.getSimpleName();
+    private String name;
+    private String package_name;
+    private String service;
 
-    public static String PASSWORD="1234";
-    public static String STUDY_ID="NW_SMOKING_CESSATION_STUDY";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+    public void start(Context context) {
+        if(!isInstalled(context)) return;
+        if(isRunning(context)) return;
+        Intent intent = new Intent();
+        intent.setClassName(package_name, service);
+            context.startService(intent);
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+    public void stop(Context context){
+        if(!isInstalled(context)) return;
+        if(!isRunning(context)) return;
+        Intent intent = new Intent();
+        intent.setClassName(package_name, service);
+        context.stopService(intent);
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+    public Status getStatus(Context context){
+        if(!isInstalled(context)) return new Status(Status.APP_NOT_INSTALLED);
+        if(!isRunning(context)) return new Status(Status.APP_NOT_RUNNING);
+        return new Status(Status.SUCCESS);
+    }
+
+    public boolean isInstalled(Context context) {
+        return Apps.isPackageInstalled(context, package_name);
+    }
+    public boolean isRunning(Context context){
+        return Apps.isServiceRunning(context, service);
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPackage_name() {
+        return package_name;
+    }
 }

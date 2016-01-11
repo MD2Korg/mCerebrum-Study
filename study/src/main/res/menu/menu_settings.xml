@@ -1,11 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:installApp="http://schemas.android.com/apk/res-auto"
+    xmlns:serviceApp="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".AutoSenseActivity">
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_48dp"
-        installApp:showAsAction="ifRoom"
+        serviceApp:showAsAction="ifRoom"
         android:title="Settings" />
     <item
         android:id="@+id/action_about"

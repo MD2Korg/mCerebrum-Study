@@ -1,30 +1,49 @@
 [
   {
-    "type":"ACCELEROMETER",
-    "platform_type":"PHONE"
+    "platform":{
+      "type":"PHONE"
+    },
+    "type":"ACCELEROMETER"
   },
   {
-    "type":"GYROSCOPE",
-    "platform_type":"PHONE"
+    "platform":{
+      "type":"PHONE"
+    },
+    "type":"GYROSCOPE"
   },
   {
-    "type":"RIP",
-    "platform_type":"AUTOSENSE_CHEST"
+    "platform":{
+      "type":"AUTOSENSE_CHEST",
+      "id":"CHEST"
+    },
+    "type":"RESPIRATION"
   },
   {
-    "type":"ECG",
-    "platform_type":"AUTOSENSE_CHEST"
+    "platform":{
+      "type":"AUTOSENSE_CHEST",
+      "id":"CHEST"
+    },
+    "type":"ECG"
   },
   {
-    "type":"ACCELEROMETER_X",
-    "platform_type":"AUTOSENSE_CHEST"
+    "platform":{
+      "type":"AUTOSENSE_CHEST",
+      "id":"CHEST"
+    },
+    "type":"ACCELEROMETER_X"
   },
   {
-    "type":"ACCELEROMETER_Y",
-    "platform_type":"AUTOSENSE_CHEST"
+    "platform":{
+      "type":"AUTOSENSE_CHEST",
+      "id":"CHEST"
+    },
+    "type":"ACCELEROMETER_Y"
   },
   {
-    "type":"ACCELEROMETER_Z",
-    "platform_type":"AUTOSENSE_CHEST"
+    "platform":{
+      "type":"AUTOSENSE_CHEST",
+      "id":"CHEST"
+    },
+    "type":"ACCELEROMETER_Z"
   }
 ]

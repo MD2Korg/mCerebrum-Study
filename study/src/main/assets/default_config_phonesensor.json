@@ -1,26 +1,56 @@
 [
   {
-    "type":"BATTERY",
-    "frequency":"1.0 Hz"
+    "platform":{
+      "type":"PHONE"
+    },
+    "metadata":{
+      "FREQUENCY":"1.0 Hz"
+    },
+    "type":"BATTERY"
   },
   {
-    "type":"LOCATION",
-    "frequency":"SENSOR_DELAY_UI"
+    "platform":{
+      "type":"PHONE"
+    },
+    "metadata":{
+      "FREQUENCY":"SENSOR_DELAY_UI"
+    },
+    "type":"LOCATION"
   },
   {
-    "type":"ACCELEROMETER",
-    "frequency":"SENSOR_DELAY_UI"
+    "platform":{
+      "type":"PHONE"
+    },
+    "metadata":{
+      "FREQUENCY":"SENSOR_DELAY_UI"
+    },
+    "type":"ACCELEROMETER"
   },
   {
-    "type":"GYROSCOPE",
-    "frequency":"SENSOR_DELAY_UI"
+    "platform":{
+      "type":"PHONE"
+    },
+    "metadata":{
+      "FREQUENCY":"SENSOR_DELAY_UI"
+    },
+    "type":"GYROSCOPE"
   },
   {
-    "type":"CPU",
-    "frequency":"1.0 Hz"
+    "platform":{
+      "type":"PHONE"
+    },
+    "metadata":{
+      "FREQUENCY":"1.0 Hz"
+    },
+    "type":"CPU"
   },
   {
-    "type":"MEMORY",
-    "frequency":"1.0 Hz"
+    "platform":{
+      "type":"PHONE"
+    },
+    "metadata":{
+      "FREQUENCY":"1.0 Hz"
+    },
+    "type":"MEMORY"
   }
 ]

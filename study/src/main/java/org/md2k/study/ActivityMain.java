@@ -27,9 +27,10 @@ import android.widget.Toast;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.study.admin.ActivitySettings;
 import org.md2k.study.admin.AdminManager;
-import org.md2k.study.applications.AppAdapter;
-import org.md2k.study.applications.Apps;
-import org.md2k.study.interventionapp.ActivityInterventionApp;
+import org.md2k.study.user.application.AppAdapter;
+import org.md2k.study.user.application.Apps;
+import org.md2k.study.user.application.interventionapp.ActivityInterventionApp;
+import org.md2k.study.user.service.ActivityService;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
@@ -48,48 +49,17 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        copyDefaultSettings();
         setContentView(R.layout.activity_main);
-        setupButtonFix();
+        dataKitHandler=DataKitHandler.getInstance(getBaseContext());
         Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
         startService(intent);
     }
-    void copyDefaultSettings(){
-        File directory = new File(Constants.CONFIG_DIRECTORY);
-        directory.mkdirs();
-        copy(Constants.DEFAULT_CONFIG_PHONESENSOR_FILENAME);
-        copy(Constants.DEFAULT_CONFIG_PLOTTER_FILENAME);
-    }
-    void copy(String filename){
-        AssetManager assetManager = getAssets();
-        InputStream in;
-        OutputStream out;
-        String outDir= Constants.CONFIG_DIRECTORY ;
-        File outFile = new File(outDir, filename);
-        outFile.delete();
-        try {
-            in = assetManager.open(filename);
-            out = new FileOutputStream(outFile);
-            copyFile(in, out);
-            in.close();
-            out.flush();
-            out.close();
-        } catch(IOException e) {
-        }
-    }
-    private void copyFile(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = in.read(buffer)) != -1) {
-            out.write(buffer, 0, read);
-        }
-    }
+
     @Override
     protected void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("system_health"));
 
-        dataKitHandler=DataKitHandler.getInstance(getBaseContext());
         if(!dataKitHandler.isConnected()) {
             dataKitHandler.connect(new OnConnectionListener() {
                 @Override
@@ -120,6 +90,7 @@ public class ActivityMain extends AppCompatActivity {
             case Status.SLEEPSTART_NOT_DEFINED:
             case Status.SLEEPEND_NOT_DEFINED:
             case Status.USERID_NOT_DEFINED:
+            case Status.APP_CONFIG_ERROR:
                 imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
                 imageViewWarning.setImageResource(R.drawable.ic_warning_grey_50dp);
                 imageViewError.setImageResource(R.drawable.ic_error_red_50dp);
@@ -128,6 +99,21 @@ public class ActivityMain extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         showPasswordDialog();
+                    }
+                });
+                textViewMessage.setText(status.getStatusMessage());
+                textViewMessage.setTextColor(ContextCompat.getColor(this, R.color.red_700));
+                break;
+            case Status.APP_NOT_RUNNING:
+                imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
+                imageViewWarning.setImageResource(R.drawable.ic_warning_grey_50dp);
+                imageViewError.setImageResource(R.drawable.ic_error_red_50dp);
+                buttonFix.setVisibility(View.VISIBLE);
+                buttonFix.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent=new Intent(ActivityMain.this, ActivityService.class);
+                        startActivity(intent);
                     }
                 });
                 textViewMessage.setText(status.getStatusMessage());
@@ -147,15 +133,6 @@ public class ActivityMain extends AppCompatActivity {
         super.onPause();
     }
 
-    void setupButtonFix() {
-        (findViewById(R.id.button_fix)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ActivitySystemHealth.class);
-                startActivity(intent);
-            }
-        });
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -199,7 +176,7 @@ public class ActivityMain extends AppCompatActivity {
     {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(ActivityMain.this);
         alertDialog.setTitle("PASSWORD - 1234 (will be removed)");
-        alertDialog.setMessage("Enter Password (or contact study coordinator)");
+        alertDialog.setMessage("Enter Password\n\n (or, contact study coordinator)");
 
         final EditText input = new EditText(ActivityMain.this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -218,7 +195,6 @@ public class ActivityMain extends AppCompatActivity {
                                         "Password Matched", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(ActivityMain.this, ActivitySettings.class);
                                 startActivity(intent);
-//                                startActivityForResult(myIntent1, 0);
                             } else {
                                 Toast.makeText(getApplicationContext(),
                                         "Wrong Password!", Toast.LENGTH_SHORT).show();

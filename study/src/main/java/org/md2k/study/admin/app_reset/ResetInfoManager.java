@@ -1,7 +1,18 @@
-package org.md2k.study;
+package org.md2k.study.admin.app_reset;
 
 import android.content.Context;
-import android.os.Environment;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.md2k.study.Constants;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,21 +40,35 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_INSTALL= "application_install.json";
-    public static String FILENAME_SERVICE= "application_service.json";
-    public static String FILENAME_SETTINGS= "application_settings.json";
-    public static String FILENAME_RESET= "application_reset.json";
-
-    public static String PASSWORD="1234";
-    public static String STUDY_ID="NW_SMOKING_CESSATION_STUDY";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+public class ResetInfoManager {
+    ArrayList<ResetInfo> resetInfos;
+    private static ResetInfoManager instance;
+    Context context;
+    public static ResetInfoManager getInstance(Context context){
+        if(instance==null)
+            instance=new ResetInfoManager(context);
+        return instance;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+    private ResetInfoManager(Context context) {
+        this.context=context;
+        readFile(context);
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+    public int size(){
+        return resetInfos.size();
+    }
+    public ResetInfo get(int i){
+        return resetInfos.get(i);
+    }
+    public void readFile(Context context) {
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new InputStreamReader(context.getAssets().open(Constants.FILENAME_RESET)));
+            Gson gson = new Gson();
+            Type collectionType = new TypeToken<List<ResetInfo>>() {
+            }.getType();
+            resetInfos = gson.fromJson(br, collectionType);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
