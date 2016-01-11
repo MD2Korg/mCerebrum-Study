@@ -2,12 +2,26 @@ package org.md2k.study.admin;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.md2k.study.Constants;
 import org.md2k.study.Status;
+import org.md2k.study.admin.app_install.InstallApp;
 import org.md2k.study.admin.app_install.InstallApps;
 import org.md2k.study.admin.app_reset.ResetInfoManager;
 import org.md2k.study.admin.app_settings.SettingsApps;
+import org.md2k.study.admin.config.ConfigManager;
 import org.md2k.study.admin.sleep_wakeup.SleepInfoManager;
 import org.md2k.study.admin.study_info.StudyInfoManager;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -41,6 +55,7 @@ public class AdminManager {
     SettingsApps settingsApps;
     SleepInfoManager sleepInfoManager;
     ResetInfoManager resetInfoManager;
+    ConfigManager configManager;
     private static AdminManager instance;
     Context context;
     public static AdminManager getInstance(Context context){
@@ -52,12 +67,14 @@ public class AdminManager {
         this.context=context;
         reset();
     }
+
     public void reset(){
         installApps = InstallApps.getInstance(context);
         settingsApps=SettingsApps.getInstance(context);
         studyInfoManager = new StudyInfoManager(context);
         sleepInfoManager=new SleepInfoManager(context);
         resetInfoManager=ResetInfoManager.getInstance(context);
+        configManager=ConfigManager.getInstance(context);
     }
     public void readFromDB(){
         studyInfoManager = new StudyInfoManager(context);

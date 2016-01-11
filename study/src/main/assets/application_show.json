@@ -1,0 +1,24 @@
+[
+  {
+    "id":"intervention",
+    "name":"Intervention",
+    "class_name":"org.md2k.study.user.application.interventionapp.ActivityInterventionApp"
+  },
+  {
+    "id":"smoking_self_report",
+    "name":"Smoking Report",
+    "class_name":"org.md2k.study.user.application.selfreport.ActivitySelfReport"
+  },
+  {
+    "id":"plotter",
+    "name":"Visualize Signal",
+    "package_name":"org.md2k.plotter"
+  },
+  {
+    "id":"stop_data_collection",
+    "name":"Stop Data Collection",
+    "class_name":"org.md2k.study.user.service.ActivityService"
+  }
+
+
+]

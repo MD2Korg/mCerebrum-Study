@@ -1,7 +1,12 @@
-package org.md2k.study;
+package org.md2k.study.user.application.selfreport;
 
-import android.content.Context;
-import android.os.Environment;
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.widget.Toast;
+
+import org.md2k.utilities.UI.AlertDialogs;
+
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,23 +34,15 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static String FILENAME_INSTALL= "application_install.json";
-    public static String FILENAME_SERVICE= "application_service.json";
-    public static String FILENAME_SETTINGS= "application_settings.json";
-    public static String FILENAME_RESET= "application_reset.json";
-    public static String FILENAME_CONFIG="configuration_files.json";
-    public static String FILENAME_APPLICATION_SHOW="application_show.json";
-
-    public static String PASSWORD="1234";
-    public static String STUDY_ID="NW_SMOKING_CESSATION_STUDY";
-    public static String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/config/";
-
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
-    }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
-    }
-    public static final long HEALTH_CHECK_REPEAT=5000;
-}
+public class ActivitySelfReport extends Activity{
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        AlertDialogs.showAlertDialogConfirm(ActivitySelfReport.this, "Smoking Self Report", "Have you just smoked?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_POSITIVE)
+                    Toast.makeText(ActivitySelfReport.this,"event saved...",Toast.LENGTH_LONG).show();
+            }
+        });
+    }}

@@ -9,8 +9,8 @@
   {
     "name":"AutoSense",
     "package_name":"org.md2k.autosense",
-    "default_settings_filename":"default_config_autosense",
+    "default_settings_filename":"config_autosense.json",
     "settings_filename":"config_autosense.json",
-    "settings":"org.md2k.autosense.ActivityAutoSenseSettings.json"
+    "settings":"org.md2k.autosense.ActivityAutoSenseSettings"
   }
 ]

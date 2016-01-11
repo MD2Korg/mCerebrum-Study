@@ -27,7 +27,7 @@
             android:label="Applications" />
         <activity
             android:name=".user.service.ActivityService"
-            android:label="Running Applications" />
+            android:label="Run Applications" />
         <activity
             android:name=".admin.app_settings.ActivityAppSettings"
             android:label="Application Settings" />
@@ -37,6 +37,9 @@
         <activity
             android:name=".admin.ActivitySettings"
             android:label="@string/settings" />
+        <activity
+            android:name=".user.application.selfreport.ActivitySelfReport"
+            android:label="Self Report" />
         <service
             android:name=".ServiceSystemHealth"
             android:enabled="true"

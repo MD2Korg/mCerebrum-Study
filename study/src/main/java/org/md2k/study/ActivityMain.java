@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -28,7 +27,7 @@ import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.study.admin.ActivitySettings;
 import org.md2k.study.admin.AdminManager;
 import org.md2k.study.user.application.AppAdapter;
-import org.md2k.study.user.application.Apps;
+import org.md2k.study.user.application.ShowApps;
 import org.md2k.study.user.application.interventionapp.ActivityInterventionApp;
 import org.md2k.study.user.service.ActivityService;
 import org.md2k.utilities.Report.Log;
@@ -36,20 +35,16 @@ import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
 import org.md2k.utilities.datakit.DataKitHandler;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 public class ActivityMain extends AppCompatActivity {
     public static final String TAG = ActivityMain.class.getSimpleName();
     DataKitHandler dataKitHandler;
+    ShowApps showApps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        showApps=ShowApps.getInstance(ActivityMain.this);
         dataKitHandler=DataKitHandler.getInstance(getBaseContext());
         Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
         startService(intent);
@@ -68,6 +63,9 @@ public class ActivityMain extends AppCompatActivity {
                     setupApplications();
                 }
             });
+        }
+        else{
+            setupApplications();
         }
         super.onResume();
     }
@@ -212,34 +210,43 @@ public class ActivityMain extends AppCompatActivity {
         alertDialog.show();
     }
 
-
-
     void setupApplications() {
         GridView gridview = (GridView) findViewById(R.id.gridview);
-        final Apps apps = new Apps();
 
-        AppAdapter appAdapter = new AppAdapter(ActivityMain.this, apps.getAllItemObject());
+        AppAdapter appAdapter = new AppAdapter(ActivityMain.this, showApps.getAllItemObject());
         gridview.setAdapter(appAdapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (apps.getApp(position).getContent().equals("Intervention")) {
+                if(showApps.getApp(position).getPackage_name()!=null){
+                    Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(showApps.getApp(position).getPackage_name());
+                    startActivity(LaunchIntent);
+                }else if(showApps.getApp(position).getClass_name()!=null){
+                    try {
+                        Class<?> c=Class.forName(showApps.getApp(position).getClass_name());
+                        Intent intent=new Intent(ActivityMain.this,c);
+                        startActivity(intent);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+/*                if (showApps.getApp(position).getContent().equals("Intervention")) {
                     Intent launchIntent = new Intent(getApplicationContext(), ActivityInterventionApp.class);
                     startActivity(launchIntent);
-                } else if (apps.getApp(position).getContent().equals("Privacy Control")) {
+                } else if (showApps.getApp(position).getContent().equals("Privacy Control")) {
                     Intent intent = new Intent();
                     intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityPrivacy");
                     startActivity(intent);
-                } else if (apps.getApp(position).getContent().equals("Report")) {
+                } else if (showApps.getApp(position).getContent().equals("Report")) {
 
-                } else if (apps.getApp(position).getContent().equals("Report")) {
+                } else if (showApps.getApp(position).getContent().equals("Report")) {
 //                    Intent intent = new Intent();
 //                    intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityPrivacy");
 //                    startActivity(intent);
 
                 }
-            }
+*/            }
         });
     }
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {

@@ -1,13 +1,13 @@
-package org.md2k.study.admin.app_settings;
+package org.md2k.study.admin.config;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
-import org.md2k.study.Status;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,41 +46,70 @@ import java.util.List;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class SettingsApps {
-    ArrayList<SettingsApp> settingsAppList = new ArrayList<>();
-    private static SettingsApps instance;
+public class ConfigManager {
+    private static ConfigManager instance;
     Context context;
+    ArrayList<ConfigurationFile> configurationFileArrayList;
 
-    public static SettingsApps getInstance(Context context) {
-        if (instance == null)
-            instance = new SettingsApps(context);
+    public static ConfigManager getInstance(Context context){
+        if(instance==null)
+            instance=new ConfigManager(context);
         return instance;
     }
 
-    public Status getStatus() {
-        for (int i = 0; i < settingsAppList.size(); i++)
-            if (!settingsAppList.get(i).isEqual())
-                return new Status(Status.APP_CONFIG_ERROR);
-        return new Status(Status.SUCCESS);
+    private ConfigManager(Context context) {
+        this.context=context;
+        readFile();
+        copyConfigFiles();
+    }
+    void copyConfigFiles(){
+        File outDir = new File(Constants.CONFIG_DIRECTORY);
+        outDir.mkdirs();
+        if(configurationFileArrayList==null) return;
+        for(int i=0;i<configurationFileArrayList.size();i++){
+            copy(Constants.CONFIG_DIRECTORY,configurationFileArrayList.get(i).filename);
+
+        }
+    }
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
+        }
     }
 
-    private SettingsApps(Context context) {
-        this.context = context;
-        settingsAppList = readFile(context);
+    void copy(String outDir,String filename){
+        AssetManager assetManager = context.getAssets();
+        InputStream in;
+        OutputStream out;
+        File outFile = new File(outDir, filename);
+        outFile.delete();
+        try {
+            in = assetManager.open(filename);
+            out = new FileOutputStream(outFile);
+            copyFile(in, out);
+            in.close();
+            out.flush();
+            out.close();
+        } catch(IOException ignored) {
+        }
     }
 
-
-    public ArrayList<SettingsApp> readFile(Context context) {
+    public void readFile() {
         BufferedReader br;
         try {
-            br = new BufferedReader(new InputStreamReader(context.getAssets().open(Constants.FILENAME_SETTINGS)));
+            br = new BufferedReader(new InputStreamReader(context.getAssets().open(Constants.FILENAME_CONFIG)));
             Gson gson = new Gson();
-            Type collectionType = new TypeToken<List<SettingsApp>>() {
+            Type collectionType = new TypeToken<List<ConfigurationFile>>() {
             }.getType();
-            settingsAppList = gson.fromJson(br, collectionType);
+            configurationFileArrayList = gson.fromJson(br, collectionType);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return settingsAppList;
+    }
+
+    class ConfigurationFile{
+        String filename;
     }
 }

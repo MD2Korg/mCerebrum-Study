@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import org.md2k.study.user.application.App;
+import org.md2k.study.user.application.ShowApp;
 import org.md2k.study.R;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ActivityInterventionApp extends AppCompatActivity {
     public static final String TAG = ActivityInterventionApp.class.getSimpleName();
-    List<App> items = new ArrayList<>();
+    List<ShowApp> items = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,14 +28,14 @@ public class ActivityInterventionApp extends AppCompatActivity {
         setContentView(R.layout.activity_intervention_app);
         GridView gridview = (GridView) findViewById(R.id.gridview);
 
-        List<App> allItems = getAllItemObject();
+        List<ShowApp> allItems = getAllItemObject();
         AdapterIntervention adapterIntervention = new AdapterIntervention(ActivityInterventionApp.this, allItems);
         gridview.setAdapter(adapterIntervention);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent launchIntent = getPackageManager().getLaunchIntentForPackage(items.get(position).getPackageName());
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage(items.get(position).getPackage_name());
                 startActivity(launchIntent);
 //                Toast.makeText(MainActivity.this, "Position: " + position, Toast.LENGTH_SHORT).show();
             }
@@ -80,10 +80,10 @@ public class ActivityInterventionApp extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    private List<App> getAllItemObject() {
-        items.add(new App("Mood Surfing", "org.md2k.moodsurfing"));
-        items.add(new App("Thought Shakeup", "org.md2k.thoughtshakeup"));
-        items.add(new App("Head Space", "com.getsomeheadspace.android"));
+    private List<ShowApp> getAllItemObject() {
+        items.add(new ShowApp("mood_surfing","Mood Surfing",null, "org.md2k.moodsurfing"));
+        items.add(new ShowApp("thought_shakeup","Thought Shakeup", null,"org.md2k.thoughtshakeup"));
+        items.add(new ShowApp("head_space","Head Space",null, "com.getsomeheadspace.android"));
         return items;
     }
 

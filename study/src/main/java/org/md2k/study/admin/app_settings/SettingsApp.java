@@ -133,29 +133,4 @@ public class SettingsApp {
             return false;
         }
     }
-    void copy(Context context){
-        AssetManager assetManager = context.getAssets();
-        InputStream in;
-        OutputStream out;
-        String outDir= Constants.CONFIG_DIRECTORY ;
-        File outFile = new File(outDir, default_settings_filename);
-        outFile.delete();
-        try {
-            in = assetManager.open(default_settings_filename);
-            out = new FileOutputStream(outFile);
-            copyFile(in, out);
-            in.close();
-            out.flush();
-            out.close();
-        } catch(IOException ignored) {
-        }
-    }
-    private void copyFile(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = in.read(buffer)) != -1) {
-            out.write(buffer, 0, read);
-        }
-    }
-
 }

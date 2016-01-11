@@ -2,6 +2,7 @@ package org.md2k.study.user.service;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -50,6 +51,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
     private static final String TAG = PrefsFragmentServiceApp.class.getSimpleName();
     Context context;
     ServiceApps serviceApps;
+    Handler handler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
         addPreferencesFromResource(R.xml.pref_app_service);
         setupServiceApp();
         setupButtons();
+        handler=new Handler();
     }
 
     @Override
@@ -87,7 +90,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
             }
         });
         final Button button2 = (Button) getActivity().findViewById(R.id.button_2);
-        button2.setText("Start All");
+        button2.setText("Stop All");
         button2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 serviceApps.stop();
@@ -144,5 +147,23 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
             preferenceCategory.addPreference(switchPreference);
             updatePreference(i);
         }
+    }
+    Runnable serviceRunning=new Runnable() {
+        @Override
+        public void run() {
+            for(int i=0;i<serviceApps.serviceAppList.size();i++)
+                updatePreference(i);
+            handler.postDelayed(serviceRunning,1000);
+        }
+    };
+    @Override
+    public void onResume(){
+        handler.post(serviceRunning);
+        super.onResume();
+    }
+    @Override
+    public void onPause(){
+        handler.removeCallbacks(serviceRunning);
+        super.onPause();
     }
 }

@@ -23,10 +23,10 @@ public class AppAdapter extends BaseAdapter {
 
     private static final String TAG = AppAdapter.class.getSimpleName();
     private LayoutInflater layoutinflater;
-    private List<App> listStorage;
+    private List<ShowApp> listStorage;
     private Context context;
 
-    public AppAdapter(Context context, List<App> customizedListView) {
+    public AppAdapter(Context context, List<ShowApp> customizedListView) {
         this.context = context;
         layoutinflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         listStorage = customizedListView;
@@ -61,25 +61,21 @@ public class AppAdapter extends BaseAdapter {
             listViewHolder = (ViewHolder) convertView.getTag();
         }
 
-        listViewHolder.textInListView.setText(listStorage.get(position).getContent());
+        listViewHolder.textInListView.setText(listStorage.get(position).getName());
 
-        listViewHolder.imageInListView.setImageDrawable(getIconFromApplication(listStorage.get(position).getContent()));
+        listViewHolder.imageInListView.setImageDrawable(getIconFromApplication(listStorage.get(position).getId()));
 
         return convertView;
     }
 
-    private Drawable getIconFromApplication(String name) {
-        Log.d(TAG, "name=" + name);
-        if (name.equals("Intervention"))
+    private Drawable getIconFromApplication(String id) {
+        if (id.equals("intervention"))
             return ContextCompat.getDrawable(context, R.drawable.ic_intervention_48dp);
-            else if(name.equals("Privacy Control"))
-            return ContextCompat.getDrawable(context, R.drawable.ic_lock_teal_48dp);
-        else if(name.equals("Report"))
-            return ContextCompat.getDrawable(context,R.drawable.ic_smoking_teal_48dp);
-        else if(name.equals("Plotter")){
-            return ContextCompat.getDrawable(context,R.drawable.ic_plot_teal_48dp);
-        }
-        else return null;
+        else if (id.equals("smoking_self_report"))
+            return ContextCompat.getDrawable(context, R.drawable.ic_smoking_teal_48dp);
+        else if (id.equals("plotter")) {
+            return ContextCompat.getDrawable(context, R.drawable.ic_plot_teal_48dp);
+        } else return null;
     }
 
     static class ViewHolder {
