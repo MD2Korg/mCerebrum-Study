@@ -5,6 +5,7 @@ package org.md2k.study.user.application;
  */
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -15,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.md2k.study.R;
-import org.md2k.utilities.Report.Log;
 
 import java.util.List;
 
@@ -23,18 +23,18 @@ public class AppAdapter extends BaseAdapter {
 
     private static final String TAG = AppAdapter.class.getSimpleName();
     private LayoutInflater layoutinflater;
-    private List<ShowApp> listStorage;
+    private List<UserApp> userApps;
     private Context context;
 
-    public AppAdapter(Context context, List<ShowApp> customizedListView) {
+    public AppAdapter(Context context, List<UserApp> customizedListView) {
         this.context = context;
         layoutinflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        listStorage = customizedListView;
+        userApps = customizedListView;
     }
 
     @Override
     public int getCount() {
-        return listStorage.size();
+        return userApps.size();
     }
 
     @Override
@@ -61,21 +61,17 @@ public class AppAdapter extends BaseAdapter {
             listViewHolder = (ViewHolder) convertView.getTag();
         }
 
-        listViewHolder.textInListView.setText(listStorage.get(position).getName());
+        listViewHolder.textInListView.setText(userApps.get(position).getName());
 
-        listViewHolder.imageInListView.setImageDrawable(getIconFromApplication(listStorage.get(position).getId()));
+        listViewHolder.imageInListView.setImageDrawable(getIconFromApplication(userApps.get(position).getIcon()));
 
         return convertView;
     }
 
-    private Drawable getIconFromApplication(String id) {
-        if (id.equals("intervention"))
-            return ContextCompat.getDrawable(context, R.drawable.ic_intervention_48dp);
-        else if (id.equals("smoking_self_report"))
-            return ContextCompat.getDrawable(context, R.drawable.ic_smoking_teal_48dp);
-        else if (id.equals("plotter")) {
-            return ContextCompat.getDrawable(context, R.drawable.ic_plot_teal_48dp);
-        } else return null;
+    private Drawable getIconFromApplication(String icon) {
+        Resources resources=context.getResources();
+        int resourceId=resources.getIdentifier(icon,"drawable",context.getPackageName());
+        return resources.getDrawable(resourceId);
     }
 
     static class ViewHolder {

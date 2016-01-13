@@ -8,5 +8,7 @@
   {
     "id":"clear_all_configuration",
     "name":"Clear All Configuration",
+    "package_name":"org.md2k.datakit",
+    "class_name":"org.md2k.datakit.ActivityDataKitSettings"
   }
 ]

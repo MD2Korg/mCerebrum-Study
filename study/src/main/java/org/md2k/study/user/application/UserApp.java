@@ -1,16 +1,17 @@
 package org.md2k.study.user.application;
 
-public class ShowApp {
+public class UserApp {
 
     private String id;
     private String name;
+    private String icon;
     private String class_name;
     private String package_name;
-    ShowApp(){
+    UserApp(){
 
     }
 
-    public ShowApp(String id, String name, String class_name, String package_name) {
+    public UserApp(String id, String name, String class_name, String package_name) {
         this.id = id;
         this.name = name;
         this.class_name = class_name;
@@ -19,6 +20,9 @@ public class ShowApp {
 
     public String getId() {
         return id;
+    }
+    public String getIcon(){
+        return icon;
     }
 
     public String getName() {

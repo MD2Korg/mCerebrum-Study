@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
-import org.md2k.study.admin.app_settings.SettingsApp;
+import org.md2k.utilities.Files;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,38 +41,38 @@ import java.util.List;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ShowApps {
-    ArrayList<ShowApp> showApps;
-    private static ShowApps instance;
+public class UserApps {
+    ArrayList<UserApp> userApps;
+    private static UserApps instance;
     Context context;
-    public static ShowApps getInstance(Context context) {
+    public static UserApps getInstance(Context context) {
         if (instance == null)
-            instance = new ShowApps(context);
+            instance = new UserApps(context);
         return instance;
     }
-    private ShowApps(Context context) {
+    private UserApps(Context context) {
         this.context = context;
-        showApps = readFile(context);
+        userApps = readFile(context);
     }
 
-    public List<ShowApp> getAllItemObject() {
-        return showApps;
+    public List<UserApp> getAllItemObject() {
+        return userApps;
     }
-    public ShowApp getApp(int position){
-        return showApps.get(position);
+    public UserApp getApp(int position){
+        return userApps.get(position);
     }
-    public ArrayList<ShowApp> readFile(Context context) {
+    public ArrayList<UserApp> readFile(Context context) {
         BufferedReader br;
         try {
             br = new BufferedReader(new InputStreamReader(context.getAssets().open(Constants.FILENAME_APPLICATION_SHOW)));
             Gson gson = new Gson();
-            Type collectionType = new TypeToken<List<ShowApp>>() {
+            Type collectionType = new TypeToken<List<UserApp>>() {
             }.getType();
-            showApps = gson.fromJson(br, collectionType);
+            userApps = gson.fromJson(br, collectionType);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return showApps;
+        return userApps;
     }
 
 }

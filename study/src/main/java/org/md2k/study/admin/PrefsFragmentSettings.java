@@ -20,6 +20,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.study.Manager;
 import org.md2k.study.R;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
@@ -63,19 +64,17 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentSettings.class.getSimpleName();
     DataKitHandler dataKitHandler;
-    AdminManager adminManager;
+    Manager manager;
     Boolean isDatabaseCleaned=false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UserManager.getInstance(getActivity()).stopDataCollection();
+        manager=Manager.getInstance(getActivity());
+        manager.getUserManager().stopDataCollection();
         Intent intent = new Intent(getActivity().getApplicationContext(), ServiceSystemHealth.class);
         getActivity().stopService(intent);
-
-
         dataKitHandler = DataKitHandler.getInstance(getActivity());
-        adminManager = AdminManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_settings);
     }
 
@@ -90,7 +89,8 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     void setupUserID() {
-        EditTextPreference editTextPreference = (EditTextPreference) findPreference("key_user_id");
+        final AdminManager adminManager=manager.getAdminManager();
+        final EditTextPreference editTextPreference = (EditTextPreference) findPreference("key_user_id");
         if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
             editTextPreference.setEnabled(false);
         } else {
@@ -129,11 +129,10 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         setupReset();
         setBackButton();
         setSaveButton();
-        setStatus();
-
     }
 
     void setupReset() {
+        AdminManager adminManager=manager.getAdminManager();
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_reset");
         preferenceCategory.removeAll();
         for (int i = 0; i < adminManager.resetInfoManager.size(); i++) {
@@ -176,18 +175,6 @@ public class PrefsFragmentSettings extends PreferenceFragment {
         }
     }
 
-    void setStatus() {
-        Preference preference = findPreference("key_status");
-        Status status = adminManager.getStatus();
-        if (status.getStatusCode() != Status.SUCCESS) {
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-            preference.setSummary(status.getStatusMessage());
-        } else {
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-            preference.setSummary(status.getStatusMessage());
-        }
-    }
-
     private void setBackButton() {
         final Button button = (Button) getActivity().findViewById(R.id.button_2);
         button.setText("Close");
@@ -199,6 +186,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     private void setSaveButton() {
+        final AdminManager adminManager=manager.getAdminManager();
         final Button button = (Button) getActivity().findViewById(R.id.button_1);
         button.setText("Save");
         button.setOnClickListener(new View.OnClickListener() {
@@ -212,6 +200,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     void setupWakeupTime() {
+        AdminManager adminManager=manager.getAdminManager();
         Preference preference = findPreference("key_wakeup_time");
         if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
             preference.setEnabled(false);
@@ -238,6 +227,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     void setupSleepTime() {
+        AdminManager adminManager=manager.getAdminManager();
         Preference preference = findPreference("key_sleep_time");
         if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
             preference.setEnabled(false);
@@ -266,6 +256,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     void setupPreferenceSettings() {
+        AdminManager adminManager=manager.getAdminManager();
         Preference preference = findPreference("key_settings");
         Status status = adminManager.settingsApps.getStatus();
         preference.setSummary(status.getStatusMessage());
@@ -288,6 +279,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
     }
 
     void setupPreferenceApplication() {
+        AdminManager adminManager=manager.getAdminManager();
         Preference preference = findPreference("key_app");
         Status status = adminManager.installApps.getStatus();
         preference.setSummary(status.getStatusMessage());
@@ -310,8 +302,9 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     @Override
     public void onResume() {
+        AdminManager adminManager=manager.getAdminManager();
         if(isDatabaseCleaned) {
-            AdminManager.getInstance(getActivity().getBaseContext()).reset();
+            adminManager.reset();
             isDatabaseCleaned=false;
         }
         setupPreference();
@@ -328,6 +321,7 @@ public class PrefsFragmentSettings extends PreferenceFragment {
 
     void showTimePicker(final Preference preference) {
         int hour, minute;
+        final AdminManager adminManager=manager.getAdminManager();
         if(preference.getKey().contains("sleep")){
             hour=22;minute=0;
         }else{

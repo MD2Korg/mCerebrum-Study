@@ -1,31 +1,34 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="Study Setup Status">
+    <PreferenceCategory
+        android:key="study_setup"
+        android:title="Study Setup">
         <Preference
-            android:key="key_status"
+            android:key="key_default_config"
+            android:title="Default Configuration" />
+        <Preference
+            android:key="key_app"
+            android:title="Install Application" />
+        <Preference
+            android:key="key_app"
+            android:title="Install Application" />
+        <Preference
+            android:key="key_settings"
+            android:title="Application Settings" />
+        <EditTextPreference
             android:icon="@drawable/ic_error_red_50dp"
-            android:title="Status"/>
-    </PreferenceCategory>
-    <PreferenceCategory android:title="Study Setup">
-    <Preference
-        android:key="key_app"
-        android:title="Applications" />
-    <Preference
-        android:key="key_settings"
-        android:title="Application Settings" />
-    <EditTextPreference
-        android:key="key_user_id"
-        android:icon="@drawable/ic_error_red_50dp"
-        android:title="User ID" />
+            android:key="key_user_id"
+            android:title="User ID" />
 
-    <Preference
-        android:key="key_wakeup_time"
-        android:icon="@drawable/ic_error_red_50dp"
-        android:title="Wakeup Time" />
-    <Preference
-        android:key="key_sleep_time"
-        android:icon="@drawable/ic_error_red_50dp"
-        android:title="Sleep Time" />
+        <Preference
+            android:icon="@drawable/ic_error_red_50dp"
+            android:key="key_wakeup_time"
+            android:title="Wakeup Time" />
+        <Preference
+            android:icon="@drawable/ic_error_red_50dp"
+            android:key="key_sleep_time"
+            android:title="Sleep Time" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Reset Study"
-        android:key="key_reset"/>
+    <PreferenceCategory
+        android:key="key_reset"
+        android:title="Reset Study" />
 </PreferenceScreen>

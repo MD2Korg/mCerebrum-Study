@@ -1,10 +1,9 @@
-package org.md2k.study.user;
+package org.md2k.study;
 
 import android.content.Context;
 
-import org.md2k.study.Status;
-import org.md2k.study.user.application.UserApps;
-import org.md2k.study.user.service.ServiceApps;
+import org.md2k.study.admin.AdminManager;
+import org.md2k.study.user.UserManager;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -32,20 +31,39 @@ import org.md2k.study.user.service.ServiceApps;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class UserManager {
-    UserApps userApps;
-    ServiceApps serviceApps;
-    public UserManager(Context context){
-        serviceApps=ServiceApps.getInstance(context);
-        userApps = UserApps.getInstance(context);
+public class Manager {
+    UserManager userManager;
+    AdminManager adminManager;
+    private static Manager instance=null;
+    Context context;
+    public static Manager getInstance(Context context){
+        if(instance==null)
+            instance=new Manager(context);
+        return instance;
     }
-    public UserApps getUserApps(){
-        return userApps;
-    }
-    public void stopDataCollection(){
-        serviceApps.stop();
+    private Manager(Context context){
+        this.context=context;
+        userManager=new UserManager(context);
+        adminManager=new AdminManager(context);
     }
     public Status getStatus(){
-        return serviceApps.getStatus();
+        Status status=adminManager.getStatus();
+        if(status.getStatusCode()==Status.SUCCESS)
+            return userManager.getStatus();
+        else return status;
+    }
+    public Status getStatusAdmin(){
+        return adminManager.getStatus();
+    }
+    public Status getStatusUser(){
+        return userManager.getStatus();
+    }
+
+    public UserManager getUserManager() {
+        return userManager;
+    }
+
+    public AdminManager getAdminManager() {
+        return adminManager;
     }
 }

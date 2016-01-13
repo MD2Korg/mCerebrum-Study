@@ -18,17 +18,14 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.study.admin.ActivitySettings;
 import org.md2k.study.admin.AdminManager;
+import org.md2k.study.user.UserManager;
 import org.md2k.study.user.application.AppAdapter;
-import org.md2k.study.user.application.ShowApps;
-import org.md2k.study.user.application.interventionapp.ActivityInterventionApp;
 import org.md2k.study.user.service.ActivityService;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
@@ -38,38 +35,29 @@ import org.md2k.utilities.datakit.DataKitHandler;
 public class ActivityMain extends AppCompatActivity {
     public static final String TAG = ActivityMain.class.getSimpleName();
     DataKitHandler dataKitHandler;
-    ShowApps showApps;
+    Manager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        manager=Manager.getInstance(ActivityMain.this);
         setContentView(R.layout.activity_main);
-        showApps = ShowApps.getInstance(ActivityMain.this);
         dataKitHandler = DataKitHandler.getInstance(getBaseContext());
-        Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-        startService(intent);
+        showApplication();
     }
 
     @Override
     protected void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("system_health"));
-
-        if (!dataKitHandler.isConnected()) {
-            dataKitHandler.connect(new OnConnectionListener() {
-                @Override
-                public void onConnected() {
-                    AdminManager.getInstance(getBaseContext()).readFromDB();
-                    setupApplications();
-                }
-            });
-        } else {
-            setupApplications();
+        if(manager.getStatusAdmin().getStatusCode()==Status.SUCCESS){
+            Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
+            startService(intent);
         }
+        updateStatus(manager.getStatus());
         super.onResume();
     }
-
-    void updateSystemHealth(Status status) {
+    void updateStatus(Status status) {
         TextView textView_status = (TextView) findViewById(R.id.textView_status);
         Button button = (Button) findViewById(R.id.button_status);
         int imgResource;
@@ -211,43 +199,33 @@ public class ActivityMain extends AppCompatActivity {
         alertDialog.show();
     }
 
-    void setupApplications() {
+    void showApplication() {
+        UserManager userManager=manager.getUserManager();
         GridView gridview = (GridView) findViewById(R.id.gridview);
 
-        AppAdapter appAdapter = new AppAdapter(ActivityMain.this, showApps.getAllItemObject());
+        AppAdapter appAdapter = new AppAdapter(ActivityMain.this, userManager.getUserApps().getAllItemObject());
         gridview.setAdapter(appAdapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (showApps.getApp(position).getPackage_name() != null) {
-                    Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(showApps.getApp(position).getPackage_name());
-                    startActivity(LaunchIntent);
-                } else if (showApps.getApp(position).getClass_name() != null) {
-                    try {
-                        Class<?> c = Class.forName(showApps.getApp(position).getClass_name());
-                        Intent intent = new Intent(ActivityMain.this, c);
-                        startActivity(intent);
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
+                if(manager.getStatusAdmin().getStatusCode()!=Status.SUCCESS){
+                    Toast.makeText(ActivityMain.this,"Please configure the study first...",Toast.LENGTH_LONG).show();
+                }else {
+                    UserManager userManager=manager.getUserManager();
+                    if (userManager.getUserApps().getApp(position).getPackage_name() != null) {
+                        Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(userManager.getUserApps().getApp(position).getPackage_name());
+                        startActivity(LaunchIntent);
+                    } else if (userManager.getUserApps().getApp(position).getClass_name() != null) {
+                        try {
+                            Class<?> c = Class.forName(userManager.getUserApps().getApp(position).getClass_name());
+                            Intent intent = new Intent(ActivityMain.this, c);
+                            startActivity(intent);
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-/*                if (showApps.getApp(position).getContent().equals("Intervention")) {
-                    Intent launchIntent = new Intent(getApplicationContext(), ActivityInterventionApp.class);
-                    startActivity(launchIntent);
-                } else if (showApps.getApp(position).getContent().equals("Privacy Control")) {
-                    Intent intent = new Intent();
-                    intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityPrivacy");
-                    startActivity(intent);
-                } else if (showApps.getApp(position).getContent().equals("Report")) {
-
-                } else if (showApps.getApp(position).getContent().equals("Report")) {
-//                    Intent intent = new Intent();
-//                    intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityPrivacy");
-//                    startActivity(intent);
-
-                }
-*/
             }
         });
     }
@@ -257,7 +235,7 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Status status = (Status) intent.getSerializableExtra("status");
             Log.d(TAG, "received..." + status.getStatusMessage());
-            updateSystemHealth(status);
+            updateStatus(status);
         }
     };
 }

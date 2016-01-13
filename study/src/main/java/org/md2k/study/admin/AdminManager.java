@@ -56,14 +56,8 @@ public class AdminManager {
     SleepInfoManager sleepInfoManager;
     ResetInfoManager resetInfoManager;
     ConfigManager configManager;
-    private static AdminManager instance;
     Context context;
-    public static AdminManager getInstance(Context context){
-        if(instance==null)
-            instance=new AdminManager(context);
-        return instance;
-    }
-    private AdminManager(Context context) {
+    public AdminManager(Context context) {
         this.context=context;
         reset();
     }

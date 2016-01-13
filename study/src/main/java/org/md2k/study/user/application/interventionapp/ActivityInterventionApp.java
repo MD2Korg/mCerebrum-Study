@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import org.md2k.study.user.application.ShowApp;
+import org.md2k.study.user.application.UserApp;
 import org.md2k.study.R;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ActivityInterventionApp extends AppCompatActivity {
     public static final String TAG = ActivityInterventionApp.class.getSimpleName();
-    List<ShowApp> items = new ArrayList<>();
+    List<UserApp> items = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class ActivityInterventionApp extends AppCompatActivity {
         setContentView(R.layout.activity_intervention_app);
         GridView gridview = (GridView) findViewById(R.id.gridview);
 
-        List<ShowApp> allItems = getAllItemObject();
+        List<UserApp> allItems = getAllItemObject();
         AdapterIntervention adapterIntervention = new AdapterIntervention(ActivityInterventionApp.this, allItems);
         gridview.setAdapter(adapterIntervention);
 
@@ -80,10 +80,10 @@ public class ActivityInterventionApp extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    private List<ShowApp> getAllItemObject() {
-        items.add(new ShowApp("mood_surfing","Mood Surfing",null, "org.md2k.moodsurfing"));
-        items.add(new ShowApp("thought_shakeup","Thought Shakeup", null,"org.md2k.thoughtshakeup"));
-        items.add(new ShowApp("head_space","Head Space",null, "com.getsomeheadspace.android"));
+    private List<UserApp> getAllItemObject() {
+        items.add(new UserApp("mood_surfing","Mood Surfing",null, "org.md2k.moodsurfing"));
+        items.add(new UserApp("thought_shakeup","Thought Shakeup", null,"org.md2k.thoughtshakeup"));
+        items.add(new UserApp("head_space","Head Space",null, "com.getsomeheadspace.android"));
         return items;
     }
 
