@@ -44,8 +44,8 @@ public class ActivityMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        showApps=ShowApps.getInstance(ActivityMain.this);
-        dataKitHandler=DataKitHandler.getInstance(getBaseContext());
+        showApps = ShowApps.getInstance(ActivityMain.this);
+        dataKitHandler = DataKitHandler.getInstance(getBaseContext());
         Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
         startService(intent);
     }
@@ -55,7 +55,7 @@ public class ActivityMain extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("system_health"));
 
-        if(!dataKitHandler.isConnected()) {
+        if (!dataKitHandler.isConnected()) {
             dataKitHandler.connect(new OnConnectionListener() {
                 @Override
                 public void onConnected() {
@@ -63,68 +63,69 @@ public class ActivityMain extends AppCompatActivity {
                     setupApplications();
                 }
             });
-        }
-        else{
+        } else {
             setupApplications();
         }
         super.onResume();
     }
-    void updateSystemHealth(Status status){
-        ImageView imageViewOk=(ImageView) findViewById(R.id.imageViewOk);
-        ImageView imageViewWarning=(ImageView) findViewById(R.id.imageViewWarning);
-        ImageView imageViewError=(ImageView) findViewById(R.id.imageViewError);
-        Button buttonFix=(Button)findViewById(R.id.button_fix);
-        TextView textViewMessage = (TextView) findViewById(R.id.textView_message);
-        switch(status.getStatusCode()) {
+
+    void updateSystemHealth(Status status) {
+        TextView textView_status = (TextView) findViewById(R.id.textView_status);
+        Button button = (Button) findViewById(R.id.button_status);
+        int imgResource;
+        LinearLayout linearLayout=(LinearLayout)findViewById(R.id.layout_health);
+
+
+        switch (status.getStatusCode()) {
             case Status.SUCCESS:
-                imageViewOk.setImageResource(R.drawable.ic_ok_teal_50dp);
-                imageViewWarning.setImageResource(R.drawable.ic_warning_grey_50dp);
-                imageViewError.setImageResource(R.drawable.ic_error_grey_50dp);
-                buttonFix.setVisibility(View.INVISIBLE);
-                textViewMessage.setText(status.getStatusMessage());
-                textViewMessage.setTextColor(ContextCompat.getColor(this,R.color.teal_700));
+                linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.teal_50));
+                textView_status.setText(status.getStatusMessage());
+                textView_status.setTextColor(ContextCompat.getColor(this, R.color.teal_700));
+                imgResource = R.drawable.ic_ok_teal_50dp;
+                button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_teal));
+                button.setCompoundDrawablesWithIntrinsicBounds(0, 0, imgResource, 0);
+                button.setText("OK");
                 break;
             case Status.APP_NOT_INSTALLED:
             case Status.SLEEPSTART_NOT_DEFINED:
             case Status.SLEEPEND_NOT_DEFINED:
             case Status.USERID_NOT_DEFINED:
             case Status.APP_CONFIG_ERROR:
-                imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
-                imageViewWarning.setImageResource(R.drawable.ic_warning_grey_50dp);
-                imageViewError.setImageResource(R.drawable.ic_error_red_50dp);
-                buttonFix.setVisibility(View.VISIBLE);
-                buttonFix.setOnClickListener(new View.OnClickListener() {
+                linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.red_200));
+                textView_status.setText(status.getStatusMessage());
+                textView_status.setTextColor(ContextCompat.getColor(this, R.color.red_900));
+                imgResource = R.drawable.ic_error_grey_50dp;
+                button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_red));
+                button.setCompoundDrawablesWithIntrinsicBounds(0, 0, imgResource, 0);
+                button.setText("FIX");
+                button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         showPasswordDialog();
                     }
                 });
-                textViewMessage.setText(status.getStatusMessage());
-                textViewMessage.setTextColor(ContextCompat.getColor(this, R.color.red_700));
                 break;
             case Status.APP_NOT_RUNNING:
-                imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
-                imageViewWarning.setImageResource(R.drawable.ic_warning_grey_50dp);
-                imageViewError.setImageResource(R.drawable.ic_error_red_50dp);
-                buttonFix.setVisibility(View.VISIBLE);
-                buttonFix.setOnClickListener(new View.OnClickListener() {
+                linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.red_200));
+                textView_status.setText(status.getStatusMessage());
+                textView_status.setTextColor(ContextCompat.getColor(this, R.color.red_900));
+                imgResource = R.drawable.ic_error_grey_50dp;
+                button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_red));
+                button.setCompoundDrawablesWithIntrinsicBounds(0, 0, imgResource, 0);
+                button.setText("FIX");
+                button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent=new Intent(ActivityMain.this, ActivityService.class);
+                        Intent intent = new Intent(ActivityMain.this, ActivityService.class);
                         startActivity(intent);
                     }
                 });
-                textViewMessage.setText(status.getStatusMessage());
-                textViewMessage.setTextColor(ContextCompat.getColor(this, R.color.red_700));
                 break;
             default:
-            imageViewOk.setImageResource(R.drawable.ic_ok_grey_50dp);
-            imageViewWarning.setImageResource(R.drawable.ic_warning_amber_50dp);
-            imageViewError.setImageResource(R.drawable.ic_error_grey_50dp);
-            buttonFix.setVisibility(View.VISIBLE);
-            break;
+                break;
         }
     }
+
     @Override
     protected void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
@@ -170,8 +171,8 @@ public class ActivityMain extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    public void showPasswordDialog()
-    {
+
+    public void showPasswordDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(ActivityMain.this);
         alertDialog.setTitle("PASSWORD - 1234 (will be removed)");
         alertDialog.setMessage("Enter Password\n\n (or, contact study coordinator)");
@@ -188,16 +189,16 @@ public class ActivityMain extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String password = input.getText().toString();
-                            if (Constants.PASSWORD.equals(password)) {
-                                Toast.makeText(getApplicationContext(),
-                                        "Password Matched", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(ActivityMain.this, ActivitySettings.class);
-                                startActivity(intent);
-                            } else {
-                                Toast.makeText(getApplicationContext(),
-                                        "Wrong Password!", Toast.LENGTH_SHORT).show();
-                            }
+                        if (Constants.PASSWORD.equals(password)) {
+                            Toast.makeText(getApplicationContext(),
+                                    "Password Matched", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(ActivityMain.this, ActivitySettings.class);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Wrong Password!", Toast.LENGTH_SHORT).show();
                         }
+                    }
                 });
 
         alertDialog.setNegativeButton("Cancel",
@@ -219,13 +220,13 @@ public class ActivityMain extends AppCompatActivity {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(showApps.getApp(position).getPackage_name()!=null){
+                if (showApps.getApp(position).getPackage_name() != null) {
                     Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(showApps.getApp(position).getPackage_name());
                     startActivity(LaunchIntent);
-                }else if(showApps.getApp(position).getClass_name()!=null){
+                } else if (showApps.getApp(position).getClass_name() != null) {
                     try {
-                        Class<?> c=Class.forName(showApps.getApp(position).getClass_name());
-                        Intent intent=new Intent(ActivityMain.this,c);
+                        Class<?> c = Class.forName(showApps.getApp(position).getClass_name());
+                        Intent intent = new Intent(ActivityMain.this, c);
                         startActivity(intent);
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
@@ -246,14 +247,16 @@ public class ActivityMain extends AppCompatActivity {
 //                    startActivity(intent);
 
                 }
-*/            }
+*/
+            }
         });
     }
+
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Status status= (Status) intent.getSerializableExtra("status");
-            Log.d(TAG, "received..."+status.getStatusMessage());
+            Status status = (Status) intent.getSerializableExtra("status");
+            Log.d(TAG, "received..." + status.getStatusMessage());
             updateSystemHealth(status);
         }
     };

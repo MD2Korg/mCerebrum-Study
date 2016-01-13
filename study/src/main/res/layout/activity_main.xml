@@ -17,68 +17,37 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:gravity="center"
-        android:weightSum="4"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_health">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="4">
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-                <ImageView
-                    android:id="@+id/imageViewOk"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_ok_teal_50dp"
-                    android:contentDescription="@string/image_text_ok" />
-
-                <ImageView
-                    android:id="@+id/imageViewWarning"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_warning_amber_50dp"
-                    android:contentDescription="@string/image_text_warning" />
-
-                <ImageView
-                    android:id="@+id/imageViewError"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_error_red_50dp"
-                    android:contentDescription="@string/image_text_error" />
-            </LinearLayout>
+            android:layout_height="match_parent">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableRight="@drawable/ic_error_red_50dp"
+                android:background="@drawable/button_red"
+                android:text="Fix"
+                android:id="@+id/button_status"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true" />
 
             <TextView
-                android:id="@+id/textView_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:gravity="center_vertical|center_horizontal" />
-        </LinearLayout>
+                android:text="New Text"
+                android:id="@+id/textView_status"
+                android:layout_alignParentTop="false"
+                android:layout_toStartOf="@+id/button_status"
+                android:layout_alignParentEnd="false"
+                android:layout_alignParentStart="false"
+                android:layout_alignParentBottom="false"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/button_fix"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:background="@drawable/button_red"
-            android:text="@string/button_text_fix"
-            android:layout_marginStart="20dp" />
-
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="10dp">
+        </RelativeLayout>
 
     </LinearLayout>
 

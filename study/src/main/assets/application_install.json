@@ -10,45 +10,9 @@
     "download_link":"https://github.com/MD2Korg/mCerebrum-DataKit/releases"
   },
   {
-    "name":"AutoSense",
-    "package_name":"org.md2k.autosense",
-    "download_link":"https://github.com/MD2Korg/mCerebrum-AutoSense/releases"
-  },
-  {
-    "name":"Microsoft Health",
-    "package_name":"com.microsoft.kapp",
-    "download_link":"market://details?id=com.microsoft.kapp"
-  },
-
-  {
-    "name":"MicrosoftBand",
-    "package_name":"org.md2k.microsoftband",
-    "download_link":"https://github.com/MD2Korg/mCerebrum-MicrosoftBand/releases"
-  },
-  {
     "name":"PhoneSensor",
     "package_name":"org.md2k.phonesensor",
     "download_link":"https://github.com/MD2Korg/mCerebrum-PhoneSensor/releases"
-  },
-  {
-    "name":"EMA",
-    "package_name":"org.md2k.ema",
-    "download_link":"https://github.com/MD2Korg/mCerebrum-EMA/releases"
-  },
-  {
-    "name":"HeadSpace",
-    "package_name":"com.getsomeheadspace.android",
-    "download_link":"market://details?id=com.getsomeheadspace.android"
-  },
-  {
-    "name":"MoodSurfing",
-    "package_name":"org.md2k.moodsurfing",
-    "download_link":"https://github.com/MD2Korg/mCerebrum-MoodSurfing/releases"
-  },
-  {
-    "name":"ThoughtShakeup",
-    "package_name":"org.md2k.thoughtshakeup",
-    "download_link":"https://github.com/MD2Korg/mCerebrum-ThoughtShakeup/releases"
   },
   {
     "name":"Plotter",

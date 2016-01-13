@@ -121,8 +121,8 @@ public class SettingsApp {
         if(settings.equals(default_settings_filename)) return true;
         String outDir= Constants.CONFIG_DIRECTORY ;
         try {
-            ArrayList<DataSource> dataSourcesDefault = Files.readDataSourceFromFile(outDir+default_settings_filename);
-            ArrayList<DataSource> dataSources = Files.readDataSourceFromFile(outDir+settings_filename);
+            ArrayList<DataSource> dataSourcesDefault = Files.readJSONArray(outDir,default_settings_filename,DataSource.class);
+            ArrayList<DataSource> dataSources = Files.readJSONArray(outDir,settings_filename,DataSource.class);
             if(dataSources.size()!=dataSourcesDefault.size()) return false;
             for(int i=0;i<dataSources.size();i++){
                 if(!isDataSourceMatch(dataSources.get(i), dataSourcesDefault))

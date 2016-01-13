@@ -6,18 +6,7 @@
     "class_name":"org.md2k.datakit.ActivityDataKitSettings"
   },
   {
-    "id":"clear_thought_shakeup",
-    "name":"Clear ThoughShakeupApp History",
-    "filename":"thoughtshakeup/history.csv"
-  },
-  {
-    "id":"clear_phone_config",
-    "name":"Delete PhoneSensor Settings",
-    "filename":"config/config_phonesensor.json"
-  },
-  {
-    "id":"clear_autosense_config",
-    "name":"Delete AutoSense Device Settings",
-    "filename":"config/config_autosense.json"
+    "id":"clear_all_configuration",
+    "name":"Clear All Configuration",
   }
 ]
