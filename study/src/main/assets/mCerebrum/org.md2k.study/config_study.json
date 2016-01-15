@@ -42,6 +42,21 @@
       "download_link": "https://github.com/MD2Korg/mCerebrum-EMA/releases"
     },
     {
+      "name": "MoodSurfing",
+      "package_name": "org.md2k.moodsurfing",
+      "download_link": "https://github.com/MD2Korg/mCerebrum-MoodSurfing/releases"
+    },
+    {
+      "name": "ThoughtShakeup",
+      "package_name": "org.md2k.thoughtshakeup",
+      "download_link": "https://github.com/MD2Korg/mCerebrum-ThoughtShakeup/releases"
+    },
+    {
+      "name": "HeadSpace",
+      "package_name": "com.getsomeheadspace.android",
+      "download_link": "market://details?id=com.getsomeheadspace.android"
+    },
+    {
       "name": "Plotter",
       "package_name": "org.md2k.plotter",
       "default_config": "default_config.json",
