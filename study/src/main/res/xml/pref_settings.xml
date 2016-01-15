@@ -1,34 +1,45 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="config_info"
+        android:icon="@drawable/ic_ok_teal_50dp"
+        android:title="Configuration" />
+    <Preference
+        android:key="study_info"
+        android:icon="@drawable/ic_error_red_50dp"
+        android:title="Study" />
     <PreferenceCategory
         android:key="study_setup"
         android:title="Study Setup">
         <Preference
-            android:key="key_default_config"
-            android:title="Default Configuration" />
-        <Preference
-            android:key="key_app"
+            android:key="app_install"
+            android:icon="@drawable/ic_error_red_50dp"
             android:title="Install Application" />
         <Preference
-            android:key="key_app"
-            android:title="Install Application" />
-        <Preference
-            android:key="key_settings"
+            android:key="app_settings"
+            android:icon="@drawable/ic_error_red_50dp"
             android:title="Application Settings" />
         <EditTextPreference
             android:icon="@drawable/ic_error_red_50dp"
-            android:key="key_user_id"
+            android:key="user_id"
             android:title="User ID" />
 
         <Preference
             android:icon="@drawable/ic_error_red_50dp"
-            android:key="key_wakeup_time"
+            android:key="wakeup_time"
             android:title="Wakeup Time" />
         <Preference
             android:icon="@drawable/ic_error_red_50dp"
-            android:key="key_sleep_time"
+            android:key="sleep_time"
             android:title="Sleep Time" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:key="key_reset"
         android:title="Reset Study" />
+    <Preference
+        android:icon="@drawable/ic_error_red_50dp"
+        android:key="clear_data"
+        android:title="Clear All Data" />
+    <Preference
+        android:icon="@drawable/ic_error_red_50dp"
+        android:key="clear_config"
+        android:title="Clear Configuration" />
 </PreferenceScreen>

@@ -1,7 +1,17 @@
-package org.md2k.study;
+package org.md2k.study.config;
 
 import android.content.Context;
-import android.os.Environment;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.md2k.study.Constants;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,17 +39,37 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static final String FILENAME_CONFIG_STUDY= "config_study.json";
+public class ConfigManager {
+    private static ConfigManager instance;
+    Context context;
+    ConfigList configList;
 
-    public static final String PASSWORD="1234";
-    public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/";
+    public static ConfigManager getInstance(Context context) {
+        if (instance == null)
+            instance = new ConfigManager(context);
+        return instance;
+    }
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+    private ConfigManager(Context context) {
+        this.context = context;
+        read();
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+
+    private void read() {
+        String filename=Constants.CONFIG_DIRECTORY+context.getPackageName()+ File.separator+Constants.FILENAME_CONFIG_STUDY;
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+            Gson gson = new Gson();
+            Type collectionType = new TypeToken<ConfigList>() {
+            }.getType();
+            configList = gson.fromJson(br, collectionType);
+        } catch (IOException e) {
+            configList =null;
+        }
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+
+    public ConfigList getConfigList() {
+        return configList;
+    }
 }

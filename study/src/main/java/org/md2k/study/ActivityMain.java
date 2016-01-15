@@ -22,27 +22,30 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.md2k.study.admin.ActivitySettings;
-import org.md2k.study.admin.AdminManager;
-import org.md2k.study.user.UserManager;
-import org.md2k.study.user.application.AppAdapter;
-import org.md2k.study.user.service.ActivityService;
+import org.md2k.study.config.ConfigManager;
+import org.md2k.study.default_config.DefaultConfigManager;
+import org.md2k.study.operation.OperationManager;
+import org.md2k.study.view.service.ActivityService;
+import org.md2k.study.view.user.AppAdapter;
+import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 public class ActivityMain extends AppCompatActivity {
     public static final String TAG = ActivityMain.class.getSimpleName();
-    DataKitHandler dataKitHandler;
-    Manager manager;
+    OperationManager operationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        manager=Manager.getInstance(ActivityMain.this);
+        if (!DefaultConfigManager.prepareConfig(getApplicationContext())) {
+            Toast.makeText(ActivityMain.this, "Configuration failure...", Toast.LENGTH_LONG).show();
+            finish();
+        }
+        ConfigManager.getInstance(getApplicationContext());
+        operationManager = OperationManager.getInstance(getApplicationContext());
         setContentView(R.layout.activity_main);
-        dataKitHandler = DataKitHandler.getInstance(getBaseContext());
         showApplication();
     }
 
@@ -50,18 +53,17 @@ public class ActivityMain extends AppCompatActivity {
     protected void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("system_health"));
-        if(manager.getStatusAdmin().getStatusCode()==Status.SUCCESS){
-            Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-            startService(intent);
-        }
-        updateStatus(manager.getStatus());
+        Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
+        startService(intent);
+        updateStatus(operationManager.getStatus());
         super.onResume();
     }
+
     void updateStatus(Status status) {
         TextView textView_status = (TextView) findViewById(R.id.textView_status);
         Button button = (Button) findViewById(R.id.button_status);
         int imgResource;
-        LinearLayout linearLayout=(LinearLayout)findViewById(R.id.layout_health);
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.layout_health);
 
 
         switch (status.getStatusCode()) {
@@ -73,12 +75,16 @@ public class ActivityMain extends AppCompatActivity {
                 button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_teal));
                 button.setCompoundDrawablesWithIntrinsicBounds(0, 0, imgResource, 0);
                 button.setText("OK");
+                button.setOnClickListener(null);
                 break;
             case Status.APP_NOT_INSTALLED:
             case Status.SLEEPSTART_NOT_DEFINED:
             case Status.SLEEPEND_NOT_DEFINED:
             case Status.USERID_NOT_DEFINED:
             case Status.APP_CONFIG_ERROR:
+            case Status.CONFIG_FILE_NOT_EXIST:
+            case Status.CLEAR_OLD_DATA:
+            case Status.DATAKIT_NOT_INSTALLED:
                 linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.red_200));
                 textView_status.setText(status.getStatusMessage());
                 textView_status.setTextColor(ContextCompat.getColor(this, R.color.red_900));
@@ -129,12 +135,8 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         Intent intent;
         switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 finish();
                 break;
@@ -162,9 +164,8 @@ public class ActivityMain extends AppCompatActivity {
 
     public void showPasswordDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(ActivityMain.this);
-        alertDialog.setTitle("PASSWORD - 1234 (will be removed)");
-        alertDialog.setMessage("Enter Password\n\n (or, contact study coordinator)");
-
+        alertDialog.setTitle("PASSWORD");
+        alertDialog.setMessage("Enter Password\n\n (or,\n\nContact Study Coordinator)");
         final EditText input = new EditText(ActivityMain.this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -180,7 +181,7 @@ public class ActivityMain extends AppCompatActivity {
                         if (Constants.PASSWORD.equals(password)) {
                             Toast.makeText(getApplicationContext(),
                                     "Password Matched", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(ActivityMain.this, ActivitySettings.class);
+                            Intent intent = new Intent(ActivityMain.this, ActivityAdmin.class);
                             startActivity(intent);
                         } else {
                             Toast.makeText(getApplicationContext(),
@@ -195,30 +196,33 @@ public class ActivityMain extends AppCompatActivity {
                         dialog.cancel();
                     }
                 });
-
         alertDialog.show();
     }
 
     void showApplication() {
-        UserManager userManager=manager.getUserManager();
         GridView gridview = (GridView) findViewById(R.id.gridview);
 
-        AppAdapter appAdapter = new AppAdapter(ActivityMain.this, userManager.getUserApps().getAllItemObject());
+        AppAdapter appAdapter = new AppAdapter(ActivityMain.this, operationManager.userApps.getApp());
         gridview.setAdapter(appAdapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(manager.getStatusAdmin().getStatusCode()!=Status.SUCCESS){
-                    Toast.makeText(ActivityMain.this,"Please configure the study first...",Toast.LENGTH_LONG).show();
-                }else {
-                    UserManager userManager=manager.getUserManager();
-                    if (userManager.getUserApps().getApp(position).getPackage_name() != null) {
-                        Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(userManager.getUserApps().getApp(position).getPackage_name());
+                if (!operationManager.isStudySetupValid()) {
+                    Toast.makeText(ActivityMain.this, "Please configure the study first...", Toast.LENGTH_LONG).show();
+                } else {
+                    String packageName=operationManager.userApps.getApp(position).getPackage_name();
+                    String className=operationManager.userApps.getApp(position).getClass_name();
+                    if (packageName != null && className != null) {
+                        Intent intent = new Intent();
+                        intent.setClassName(packageName, className);
+                        startActivity(intent);
+                    } else if (packageName != null) {
+                        Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
                         startActivity(LaunchIntent);
-                    } else if (userManager.getUserApps().getApp(position).getClass_name() != null) {
+                    } else if (className != null) {
                         try {
-                            Class<?> c = Class.forName(userManager.getUserApps().getApp(position).getClass_name());
+                            Class<?> c = Class.forName(className);
                             Intent intent = new Intent(ActivityMain.this, c);
                             startActivity(intent);
                         } catch (ClassNotFoundException e) {
@@ -238,4 +242,9 @@ public class ActivityMain extends AppCompatActivity {
             updateStatus(status);
         }
     };
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }

@@ -1,7 +1,13 @@
-package org.md2k.study;
+package org.md2k.study.config;
 
 import android.content.Context;
-import android.os.Environment;
+import android.content.Intent;
+
+import org.md2k.study.Constants;
+import org.md2k.utilities.Apps;
+import org.md2k.utilities.Files;
+
+import java.io.File;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,17 +35,40 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static final String FILENAME_CONFIG_STUDY= "config_study.json";
+public class Application {
+    String name;
+    String package_name;
+    String service;
+    String settings;
+    String config;
+    String default_config;
+    String download_link;
 
-    public static final String PASSWORD="1234";
-    public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/";
+    public String getName() {
+        return name;
+    }
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+    public String getPackage_name() {
+        return package_name;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+
+    public String getService() {
+        return service;
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
-}
+
+    public String getSettings() {
+        return settings;
+    }
+
+    public String getConfig() {
+        return config;
+    }
+
+    public String getDefault_config() {
+        return default_config;
+    }
+
+    public String getDownload_link() {
+        return download_link;
+    }
+};

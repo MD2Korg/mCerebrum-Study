@@ -1,7 +1,14 @@
-package org.md2k.study;
+package org.md2k.study.operation.config;
 
 import android.content.Context;
-import android.os.Environment;
+
+import org.md2k.study.Constants;
+import org.md2k.study.Status;
+import org.md2k.study.config.AdminSettings;
+import org.md2k.study.config.ConfigInfo;
+import org.md2k.utilities.Files;
+
+import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,17 +36,49 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static final String FILENAME_CONFIG_STUDY= "config_study.json";
-
-    public static final String PASSWORD="1234";
-    public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/";
-
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+public class ConfigManager {
+    String id;
+    String name;
+    String version;
+    ArrayList<String> files;
+    private static ConfigManager instance;
+    public static ConfigManager getInstance(Context context){
+        if(instance==null) instance=new ConfigManager(context);
+        return instance;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+    public static void clear(){
+        instance=null;
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+
+    public ConfigManager(Context context) {
+        ConfigInfo configInfo=org.md2k.study.config.ConfigManager.getInstance(context).getConfigList().getConfig_info();
+        this.id = configInfo.getId();
+        this.name =configInfo.getName();
+        this.version = configInfo.getVersion();
+        this.files = configInfo.getFiles();
+    }
+    public Status getStatus(){
+        String directory= Constants.CONFIG_DIRECTORY;
+        for(int i=0;i<files.size();i++){
+            if(!Files.isExist(directory+files.get(i)))
+                return new Status(Status.CONFIG_FILE_NOT_EXIST);
+        }
+        return new Status(Status.SUCCESS);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public ArrayList<String> getFiles() {
+        return files;
+    }
 }

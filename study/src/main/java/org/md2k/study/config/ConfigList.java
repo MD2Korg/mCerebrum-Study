@@ -1,7 +1,6 @@
-package org.md2k.study;
+package org.md2k.study.config;
 
-import android.content.Context;
-import android.os.Environment;
+import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,17 +28,31 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static final String FILENAME_CONFIG_STUDY= "config_study.json";
+public class ConfigList {
+    ConfigInfo config_info;
+    Study study;
+    ArrayList<Application> application;
+    ArrayList<AdminSettings> admin_settings;
+    ArrayList<UserSettings> user_settings;
 
-    public static final String PASSWORD="1234";
-    public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/";
+    public ConfigInfo getConfig_info() {
+        return config_info;
+    }
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+    public Study getStudy() {
+        return study;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+
+    public ArrayList<Application> getApplication() {
+        return application;
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+
+    public ArrayList<AdminSettings> getAdmin_settings() {
+        return admin_settings;
+    }
+
+    public ArrayList<UserSettings> getUser_settings() {
+        return user_settings;
+    }
+
 }

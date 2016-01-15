@@ -1,15 +1,12 @@
-package org.md2k.study;
+package org.md2k.study.operation.app_settings;
 
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.md2k.study.operation.OperationManager;
-import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.datakit.DataKitHandler;
+import org.md2k.study.Status;
+import org.md2k.study.config.Application;
+import org.md2k.study.config.ConfigManager;
+
+import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -37,44 +34,40 @@ import org.md2k.utilities.datakit.DataKitHandler;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-public class ServiceSystemHealth extends Service {
-    private static final String TAG = ServiceSystemHealth.class.getSimpleName();
-    DataKitHandler dataKitHandler;
+public class AppsSettings {
+    ArrayList<AppSettings> appSettingsList;
+    private static AppsSettings instance;
     Context context;
-    Handler handler;
-    OperationManager operationManager;
-
-    public void onCreate() {
-        super.onCreate();
-        context=getApplicationContext();
-        operationManager = OperationManager.getInstance(context);
-        handler = new Handler();
-        handler.post(checkStatus);
-        Log.d(TAG, "onCreate()");
+    public static AppsSettings getInstance(Context context){
+        if(instance==null)
+            instance=new AppsSettings(context);
+        return instance;
+    }
+    public static void clear(){
+        instance=null;
     }
 
-    Runnable checkStatus = new Runnable() {
-        @Override
-        public void run() {
-            Status status = operationManager.getStatus();
-            Intent intent = new Intent("system_health");
-            intent.putExtra("status", status);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            Log.d(TAG, "checkStatus...");
+    public Status getStatus() {
+        for (int i = 0; i < appSettingsList.size(); i++)
+            if (!appSettingsList.get(i).isEqual())
+                return new Status(Status.APP_CONFIG_ERROR);
+        return new Status(Status.SUCCESS);
+    }
 
-            handler.postDelayed(checkStatus, Constants.HEALTH_CHECK_REPEAT);
+    private AppsSettings(Context context) {
+        this.context = context;
+        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfigList().getApplication();
+        appSettingsList=new ArrayList<>();
+        for(int i=0;i<applications.size();i++){
+            if(applications.get(i).getSettings()!=null){
+                Application application=applications.get(i);
+                AppSettings appSettings=new AppSettings(application.getName(),application.getPackage_name(),application.getDefault_config(),application.getConfig(),application.getSettings());
+                appSettingsList.add(appSettings);
+            }
         }
-    };
-
-    @Override
-    public void onDestroy() {
-        handler.removeCallbacks(checkStatus);
-        super.onDestroy();
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    public ArrayList<AppSettings> getAppSettingsList() {
+        return appSettingsList;
     }
 }

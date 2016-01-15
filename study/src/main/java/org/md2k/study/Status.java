@@ -42,6 +42,9 @@ public class Status implements Serializable{
     public static final int SLEEPSTART_NOT_DEFINED = 5;
     public static final int APP_NOT_RUNNING=6;
     public static final int APP_CONFIG_ERROR=7;
+    public static final int CONFIG_FILE_NOT_EXIST=8;
+    public static final int CLEAR_OLD_DATA=9;
+    public static final int DATAKIT_NOT_INSTALLED=10;
     public static final String[] message = new String[]{
             "Status: OK",
             "Error: Application not installed properly",
@@ -50,7 +53,10 @@ public class Status implements Serializable{
             "Error: Wakeup time not defined",
             "Error: Sleep time not defined",
             "Error: Application not running",
-            "Error: Application not configured properly"
+            "Error: Application not configured properly",
+            "Error: Missing configuration files",
+            "Error: Clear Old Data",
+            "Error: DataKit not installed"
     };
 
     public Status(int statusCode, String statusMessage) {

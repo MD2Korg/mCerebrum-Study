@@ -23,22 +23,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".admin.app_install.ActivityInstallApp"
-            android:label="Applications" />
+            android:name=".view.app_install.ActivityInstallApp"
+            android:label="Install Application" />
         <activity
-            android:name=".user.service.ActivityService"
-            android:label="Run Applications" />
+            android:name=".view.service.ActivityService"
+            android:label="Run Application" />
         <activity
-            android:name=".admin.app_settings.ActivityAppSettings"
+            android:name=".view.app_settings.ActivityAppSettings"
             android:label="Application Settings" />
         <activity
-            android:name=".user.application.interventionapp.ActivityInterventionApp"
+            android:name=".view.intervention.ActivityInterventionApp"
             android:label="@string/title_intervention_apps" />
         <activity
-            android:name=".admin.ActivitySettings"
+            android:name=".view.admin.ActivityAdmin"
             android:label="@string/settings" />
         <activity
-            android:name=".user.application.selfreport.ActivitySelfReport"
+            android:name=".view.selfreport.ActivitySelfReport"
             android:label="Self Report" />
         <service
             android:name=".ServiceSystemHealth"

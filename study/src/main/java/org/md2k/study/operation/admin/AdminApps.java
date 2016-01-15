@@ -1,7 +1,13 @@
-package org.md2k.study;
+package org.md2k.study.operation.admin;
 
 import android.content.Context;
-import android.os.Environment;
+
+import org.md2k.study.config.AdminSettings;
+import org.md2k.study.config.ConfigManager;
+import org.md2k.utilities.Report.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,17 +35,34 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants{
-    public static final String FILENAME_CONFIG_STUDY= "config_study.json";
-
-    public static final String PASSWORD="1234";
-    public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/";
-
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
+public class AdminApps {
+    private static final String TAG = AdminApps.class.getSimpleName();
+    ArrayList<AdminApp> adminApps;
+    Context context;
+    private static AdminApps instance;
+    public static AdminApps getInstance(Context context){
+        if(instance==null)
+            instance=new AdminApps(context);
+        return instance;
     }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
+
+    private AdminApps(Context context) {
+        this.context = context;
+        ArrayList<AdminSettings> admin_settings=ConfigManager.getInstance(context).getConfigList().getAdmin_settings();
+        adminApps =new ArrayList<>();
+        for(int i=0;i<admin_settings.size();i++){
+            if(admin_settings.get(i).isValue()) {
+                AdminApp adminApp=new AdminApp(admin_settings.get(i).getId(),admin_settings.get(i).isValue());
+                adminApps.add(adminApp);
+            }
+        }
+        Log.d(TAG, "adminApps=" + adminApps.size());
     }
-    public static final long HEALTH_CHECK_REPEAT=5000;
+
+    public List<AdminApp> getApp() {
+        return adminApps;
+    }
+    public AdminApp getApp(int position){
+        return adminApps.get(position);
+    }
 }
