@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeString;
 import org.md2k.datakitapi.source.METADATA;
@@ -15,7 +16,6 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.util.ArrayList;
 
@@ -46,30 +46,19 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class UserInfoManager {
-    DataKitHandler dataKitHandler;
-    DataSourceBuilder dataSourceBuilder;
-    DataSourceClient dataSourceClient;
+    DataKitAPI dataKitAPI;
     UserInfo userInfo;
-    boolean isDB;
-    private static UserInfoManager instance;
-    Context context;
+    boolean isInDatabase;
 
-    public static UserInfoManager getInstance(Context context) {
-        if (instance == null)
-            instance = new UserInfoManager(context);
-        return instance;
+    public UserInfoManager(Context context) {
+        reset(context);
     }
-
-    public static void clear() {
-        instance = null;
-    }
-
-    private UserInfoManager(Context context) {
-        isDB = false;
+    public void reset(Context context){
+        isInDatabase = false;
         userInfo = new UserInfo();
-        dataKitHandler = DataKitHandler.getInstance(context);
-        dataSourceBuilder = createDataSourceBuilder();
+        dataKitAPI = DataKitAPI.getInstance(context);
         readFromDataKit();
+
     }
 
     public void setUserId(String userId) {
@@ -79,35 +68,35 @@ public class UserInfoManager {
         return userInfo.user_id;
     }
     public Status getStatus() {
-        if (!dataKitHandler.isConnected()) return new Status(Status.DATAKIT_NOT_INSTALLED);
-        if (isDB) return new Status(Status.SUCCESS);
+        if (!dataKitAPI.isConnected()) return new Status(Status.DATAKIT_NOT_AVAILABLE);
+        if (isInDatabase) return new Status(Status.SUCCESS);
         return new Status(Status.USERID_NOT_DEFINED);
     }
 
     private void readFromDataKit() {
-        if (!dataKitHandler.isConnected()) return;
-        dataSourceClient = dataKitHandler.register(dataSourceBuilder);
-        ArrayList<DataType> dataTypes = dataKitHandler.query(dataSourceClient, 1);
+        if (!dataKitAPI.isConnected()) return;
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
         if (dataTypes.size() != 0) {
             DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
             Gson gson = new Gson();
             userInfo = gson.fromJson(dataTypeString.getSample(), UserInfo.class);
-            isDB = true;
+            isInDatabase = true;
         }
     }
 
     public boolean writeToDataKit() {
-        if (!dataKitHandler.isConnected()) return false;
-        if (isDB == true) return false;
+        if (!dataKitAPI.isConnected()) return false;
+        if (isInDatabase) return false;
         if (userInfo == null) return false;
         if(userInfo.user_id==null) return false;
         if(userInfo.user_id.length()==0) return false;
         Gson gson = new Gson();
         String sample = gson.toJson(userInfo);
-        dataSourceClient = dataKitHandler.register(dataSourceBuilder);
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), sample);
-        dataKitHandler.insert(dataSourceClient, dataTypeString);
-        isDB = true;
+        dataKitAPI.insert(dataSourceClient, dataTypeString);
+        isInDatabase = true;
         return true;
     }
 

@@ -1,6 +1,8 @@
 package org.md2k.study.view.app_install;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -50,12 +52,14 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentInstallApp.class.getSimpleName();
     Context context;
+    AppsInstall appsInstall;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context=getActivity();
+        context = getActivity();
         addPreferencesFromResource(R.xml.pref_app_install);
+        appsInstall = OperationManager.getInstance(getActivity()).appsInstall;
         setupButtons();
     }
 
@@ -88,14 +92,13 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     void updateAppInstall() {
         Log.d(TAG, "updateAppInstall()...");
-        AppsInstall appsInstall = AppsInstall.getInstance(context);
         for (int i = 0; i < appsInstall.getAppInstallList().size(); i++) {
             final int finalI = i;
-            appsInstall.getAppInstallList().get(i).refresh(context, new OnDataChangeListener() {
+            appsInstall.getAppInstallList().get(i).setLatestVersionName(context, new OnDataChangeListener() {
                 @Override
                 public void onDataChange(String str) {
                     Log.d(TAG, "updateAppInstall()..." + str);
-                    updatePreference(AppsInstall.getInstance(context).getAppInstallList().get(finalI));
+                    updatePreference(appsInstall.getAppInstallList().get(finalI));
                 }
             });
         }
@@ -103,9 +106,11 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     void updatePreference(AppInstall appInstall) {
         Preference preference = findPreference(appInstall.getName());
-        if (!appInstall.isInstalled(context)) {
+        if (!appInstall.isInstalled()) {
             preference.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_error_red_50dp));
             preference.setSummary("Not Installed");
+            if(appInstall.getLatestVersion()!=null)
+                preference.setSummary("Not Installed (Version available:"+appInstall.getLatestVersion()+")");
         } else if (appInstall.isUpdateAvailable()) {
             preference.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_warning_amber_50dp));
             preference.setSummary(appInstall.getCurVersion() + " (Update Available: " + appInstall.getLatestVersion() + ")");
@@ -115,20 +120,21 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         }
         setEntries((ListPreference) preference, appInstall);
     }
-    void setEntries(ListPreference listPreference, AppInstall appInstall){
-        if (!appInstall.isInstalled(context)) {
-            String options[]={"Install"};
+
+    void setEntries(ListPreference listPreference, AppInstall appInstall) {
+        if (!appInstall.isInstalled()) {
+            String options[] = {"Install"};
             listPreference.setEntries(options);
             listPreference.setEntryValues(options);
             listPreference.setDefaultValue("Install");
 
         } else if (appInstall.isUpdateAvailable()) {
-            String options[]={"Update","Run"};
+            String options[] = {"Update", "Uninstall","Run"};
             listPreference.setEntries(options);
             listPreference.setEntryValues(options);
             listPreference.setDefaultValue("Run");
         } else {
-            String options[]={"Run"};
+            String options[] = {"Uninstall", "Run"};
             listPreference.setEntries(options);
             listPreference.setEntryValues(options);
             listPreference.setDefaultValue("Run");
@@ -137,8 +143,6 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
     }
 
     void setupAppInstall() {
-        OperationManager.getInstance(getActivity()).reset();
-        AppsInstall appsInstall = AppsInstall.getInstance(context);
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_app");
         preferenceCategory.removeAll();
         for (int i = 0; i < appsInstall.getAppInstallList().size(); i++) {
@@ -150,12 +154,15 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
             listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    String optionSelected = (String) newValue;
-                    AppInstall appInstall = AppsInstall.getInstance(context).getAppInstallList().get(finalI);
+                    AppInstall appInstall = appsInstall.getAppInstallList().get(finalI);
                     if (newValue.equals("Install") || newValue.equals("Update")) {
                         appInstall.downloadAndInstallApp(getActivity());
                     } else if (newValue.equals("Run")) {
                         appInstall.run(context);
+                    } else if (newValue.equals("Uninstall")) {
+                        Intent uninstallIntent = new Intent(Intent.ACTION_DELETE,
+                                Uri.parse("package:"+appInstall.getPackage_name()));
+                        startActivity(uninstallIntent);
                     }
                     return false;
                 }
@@ -164,9 +171,13 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
             updatePreference(appsInstall.getAppInstallList().get(i));
         }
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
+        Log.d(TAG,"onResume()...");
+        appsInstall.reset();
         setupAppInstall();
+        OperationManager.getInstance(context).connect();
         super.onResume();
     }
 }

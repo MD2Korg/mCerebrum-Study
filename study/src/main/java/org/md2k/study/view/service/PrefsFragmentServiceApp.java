@@ -16,6 +16,7 @@ import android.widget.ListView;
 
 import org.md2k.study.R;
 import org.md2k.study.Status;
+import org.md2k.study.operation.OperationManager;
 import org.md2k.study.operation.service.AppsService;
 import org.md2k.utilities.Report.Log;
 
@@ -56,7 +57,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context=getActivity().getApplicationContext();
-        appsService =AppsService.getInstance(context);
+        appsService = OperationManager.getInstance(context).appsService;
         addPreferencesFromResource(R.xml.pref_app_service);
         setupServiceApp();
         setupButtons();

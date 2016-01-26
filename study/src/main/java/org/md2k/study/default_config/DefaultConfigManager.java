@@ -39,10 +39,8 @@ import java.io.OutputStream;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class DefaultConfigManager {
-    public static boolean prepareConfig(Context context){
-        if(!isExist(context))
-            return copy(context);
-        return true;
+    public static boolean prepareConfig(Context context) {
+        return isExist(context) || copy(context);
     }
     public static boolean isExist(Context context){
         String directory= Constants.CONFIG_DIRECTORY+context.getPackageName();
@@ -61,7 +59,7 @@ public class DefaultConfigManager {
         OutputStream out;
         File outFile = new File(outDir, Constants.FILENAME_CONFIG_STUDY);
         try {
-            in = assetManager.open(Constants.FILENAME_CONFIG_STUDY);
+            in = assetManager.open("mCerebrum"+File.separator+context.getPackageName()+File.separator+Constants.FILENAME_CONFIG_STUDY);
             out = new FileOutputStream(outFile);
             byte[] buffer = new byte[1024];
             int read;
@@ -72,7 +70,7 @@ public class DefaultConfigManager {
             out.flush();
             out.close();
             return true;
-        } catch(IOException ignored) {
+        } catch(IOException e) {
             return false;
         }
     }

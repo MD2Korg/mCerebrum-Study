@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.StudyConfigManager;
 import org.md2k.study.default_config.DefaultConfigManager;
 import org.md2k.study.operation.OperationManager;
 import org.md2k.study.view.service.ActivityService;
@@ -43,20 +44,23 @@ public class ActivityMain extends AppCompatActivity {
             Toast.makeText(ActivityMain.this, "Configuration failure...", Toast.LENGTH_LONG).show();
             finish();
         }
-        ConfigManager.getInstance(getApplicationContext());
+        StudyConfigManager.getInstance(getApplicationContext());
         operationManager = OperationManager.getInstance(getApplicationContext());
         setContentView(R.layout.activity_main);
-        showApplication();
     }
 
     @Override
-    protected void onResume() {
+    protected void onStart() {
+        StudyConfigManager.getInstance(getApplicationContext());
+        operationManager = OperationManager.getInstance(getApplicationContext());
+        showApplication();
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("system_health"));
-        Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-        startService(intent);
+        operationManager.connect(this);
+//        Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
+//        startService(intent);
         updateStatus(operationManager.getStatus());
-        super.onResume();
+        super.onStart();
     }
 
     void updateStatus(Status status) {
@@ -84,7 +88,7 @@ public class ActivityMain extends AppCompatActivity {
             case Status.APP_CONFIG_ERROR:
             case Status.CONFIG_FILE_NOT_EXIST:
             case Status.CLEAR_OLD_DATA:
-            case Status.DATAKIT_NOT_INSTALLED:
+            case Status.DATAKIT_NOT_AVAILABLE:
                 linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.red_200));
                 textView_status.setText(status.getStatusMessage());
                 textView_status.setTextColor(ContextCompat.getColor(this, R.color.red_900));
@@ -121,9 +125,10 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
+    protected void onStop() {
+        Log.d(TAG, "onStop()...");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-        super.onPause();
+        super.onStop();
     }
 
     @Override
@@ -164,8 +169,8 @@ public class ActivityMain extends AppCompatActivity {
 
     public void showPasswordDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(ActivityMain.this);
-        alertDialog.setTitle("PASSWORD");
-        alertDialog.setMessage("Enter Password\n\n (or,\n\nContact Study Coordinator)");
+        alertDialog.setTitle("PASSWORD (Admin Access)");
+        alertDialog.setMessage("Enter Password");
         final EditText input = new EditText(ActivityMain.this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -196,7 +201,11 @@ public class ActivityMain extends AppCompatActivity {
                         dialog.cancel();
                     }
                 });
-        alertDialog.show();
+//        alertDialog.show();
+        AlertDialog dialog = alertDialog.show();
+        TextView messageText = (TextView)dialog.findViewById(android.R.id.message);
+        messageText.setGravity(Gravity.CENTER);
+        dialog.show();
     }
 
     void showApplication() {
@@ -245,6 +254,8 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        Log.d(TAG,"onDestroy()...");
+        operationManager.close();
         super.onDestroy();
     }
 }

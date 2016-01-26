@@ -1,21 +1,26 @@
 package org.md2k.study.operation;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.datakitapi.messagehandler.OnExceptionListener;
 import org.md2k.study.Status;
 import org.md2k.study.operation.app_install.AppsInstall;
 import org.md2k.study.operation.app_settings.AppsSettings;
 import org.md2k.study.operation.clear_config.AppsClear;
-import org.md2k.study.operation.config.ConfigManager;
+import org.md2k.study.operation.app_config.AppConfigManager;
 import org.md2k.study.operation.service.AppsService;
 import org.md2k.study.operation.study_info.StudyInfoManager;
 import org.md2k.study.operation.user.UserApps;
 import org.md2k.study.operation.user_info.UserInfoManager;
 import org.md2k.study.operation.wakeup_sleep_time.SleepInfoManager;
-import org.md2k.utilities.datakit.DataKitHandler;
+import org.md2k.utilities.Report.Log;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -44,11 +49,12 @@ import org.md2k.utilities.datakit.DataKitHandler;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class OperationManager {
+    private static final String TAG = OperationManager.class.getSimpleName();
     private static OperationManager instance=null;
-    DataKitHandler dataKitHandler;
+    DataKitAPI dataKitAPI;
     Context context;
 
-    public ConfigManager configManager;
+    public AppConfigManager appConfigManager;
     public AppsInstall appsInstall;
     public AppsSettings appsSettings;
     public UserInfoManager userInfoManager;
@@ -57,6 +63,7 @@ public class OperationManager {
     public AppsClear appsClear;
     public UserApps userApps;
     public AppsService appsService;
+    ProgressDialog mProgressDialog;
 
     public static OperationManager getInstance(Context context){
         if(instance==null)
@@ -65,53 +72,81 @@ public class OperationManager {
     }
     private OperationManager(Context context){
         this.context=context;
-        dataKitHandler=DataKitHandler.getInstance(context);
-        reset();
+        dataKitAPI =DataKitAPI.getInstance(context);
+        create();
     }
-    private void clear(){
-        ConfigManager.clear();
-        AppsInstall.clear();
-        AppsSettings.clear();
-        StudyInfoManager.clear();
-        UserInfoManager.clear();
-        SleepInfoManager.clear();
-        AppsClear.clear();
-        UserApps.clear();
-        AppsService.clear();
+    public void close(){
+        if(dataKitAPI.isConnected())
+            dataKitAPI.disconnect();
+        dataKitAPI.close();
+        instance=null;
     }
     private void create(){
-        configManager=ConfigManager.getInstance(context);
-        appsInstall = AppsInstall.getInstance(context);
-        appsSettings =AppsSettings.getInstance(context);
-        studyInfoManager = StudyInfoManager.getInstance(context);
-        userInfoManager = UserInfoManager.getInstance(context);
-        sleepInfoManager=SleepInfoManager.getInstance(context);
-        appsClear=AppsClear.getInstance(context);
-        userApps=UserApps.getInstance(context);
-        appsService=AppsService.getInstance(context);
-    }
-
-    public void reset(){
-        clear();
-        create();
-        connect();
+        appConfigManager = new AppConfigManager(context);
+        appsInstall = new AppsInstall(context);
+        appsSettings =new AppsSettings(context);
+        studyInfoManager = new StudyInfoManager(context);
+        userInfoManager = new UserInfoManager(context);
+        sleepInfoManager= new SleepInfoManager(context);
+        appsClear=new AppsClear(context);
+        userApps=new UserApps(context);
+        appsService=new AppsService(context);
     }
     public void connect(){
-      if(!dataKitHandler.isConnected()) {
-          dataKitHandler.connect(new OnConnectionListener() {
+        if(!dataKitAPI.isConnected()) {
+            dataKitAPI.connect(new OnConnectionListener() {
+                @Override
+                public void onConnected() {
+                    Log.d(TAG, "datakit connected");
+                    userInfoManager.reset(context);
+                    sleepInfoManager.reset(context);
+                    studyInfoManager.reset(context);
+                    Status status = getStatus();
+                    Intent intent = new Intent("system_health");
+                    intent.putExtra("status", status);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                }
+            }, new OnExceptionListener() {
+                @Override
+                public void onException(org.md2k.datakitapi.status.Status status) {
+//                  Toast.makeText(context, "DataKit Connection Error. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+
+    public void connect(Activity activity){
+      if(!dataKitAPI.isConnected()) {
+          mProgressDialog = ProgressDialog.show(activity,
+                  "Connecting...", " Connecting DataKit...");
+          mProgressDialog.setCancelable(true);
+          mProgressDialog.show();
+
+          dataKitAPI.connect(new OnConnectionListener() {
               @Override
               public void onConnected() {
-                  reset();
+                  Log.d(TAG, "datakit connected");
+                  userInfoManager.reset(context);
+                  sleepInfoManager.reset(context);
+                  studyInfoManager.reset(context);
                   Status status = getStatus();
                   Intent intent = new Intent("system_health");
                   intent.putExtra("status", status);
                   LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                  mProgressDialog.dismiss();
+              }
+          }, new OnExceptionListener() {
+              @Override
+              public void onException(org.md2k.datakitapi.status.Status status) {
+                  mProgressDialog.dismiss();
+//                  Toast.makeText(context, "DataKit Connection Error. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
               }
           });
       }
     }
     public Status getStatus(){
-        Status status=configManager.getStatus();
+        Status status= appConfigManager.getStatus();
         if(status.getStatusCode()!=Status.SUCCESS) return status;
         status=studyInfoManager.getStatus();
         if(status.getStatusCode()!=Status.SUCCESS) return status;
@@ -128,7 +163,7 @@ public class OperationManager {
         return new Status(Status.SUCCESS);
     }
     public boolean isStudySetupValid(){
-        Status status=configManager.getStatus();
+        Status status= appConfigManager.getStatus();
         if(status.getStatusCode()!=Status.SUCCESS) return false;
         status=studyInfoManager.getStatus();
         if(status.getStatusCode()!=Status.SUCCESS) return false;

@@ -1,16 +1,17 @@
 {
-  "config_info":{
-      "id":"ST001",
-      "name":"NorthWestern Smoking Study",
-      "version":"0.1",
-      "files":[
-        "org.md2k.phonesensor/default_config.json",
-        "org.md2k.plotter/default_config.json",
-        "org.md2k.ema/config_ema.json",
-        "org.md2k.ema/end_of_day_recording.json",
-        "org.md2k.ema/event_contingent_recording.json",
-        "org.md2k.ema/random_experience_sampling.json"
-      ]
+  "config_info": {
+    "id": "ST001",
+    "name": "NorthWestern Smoking Study",
+    "version": "0.1",
+    "required_files": [
+      "org.md2k.phonesensor/default_config.json",
+      "org.md2k.autosense/default_config.json",
+      "org.md2k.plotter/default_config.json",
+      "org.md2k.ema/config_ema.json",
+      "org.md2k.ema/end_of_day_recording.json",
+      "org.md2k.ema/event_contingent_recording.json",
+      "org.md2k.ema/random_experience_sampling.json"
+    ]
   },
   "study": {
     "id": "ST001",
@@ -33,7 +34,6 @@
       "service": "org.md2k.phonesensor.ServicePhoneSensor",
       "settings": "org.md2k.phonesensor.ActivityPhoneSensorSettings",
       "config": "config.json",
-      "default_config": "default_config.json",
       "download_link": "https://github.com/MD2Korg/mCerebrum-PhoneSensor/releases"
     },
     {
@@ -59,48 +59,47 @@
     {
       "name": "Plotter",
       "package_name": "org.md2k.plotter",
-      "default_config": "default_config.json",
       "download_link": "https://github.com/MD2Korg/mCerebrum-Plotter/releases"
     }
   ],
   "admin_settings": [
-      {
-        "id": "study_id",
-        "value": true
-      },
-      {
-        "id": "default_config",
-        "value": true
-      },
-      {
-        "id": "app_install",
-        "value": true
-      },
-      {
-        "id": "app_settings",
-        "value": true
-      },
-      {
-        "id": "user_id",
-        "value": true
-      },
-      {
-        "id": "wakeup_time",
-        "value": true
-      },
-      {
-        "id": "sleep_time",
-        "value": true
-      },
-      {
-        "id": "clear_database",
-        "value": true
-      },
-      {
-        "id": "clear_config",
-        "value": true
-      }
-    ],
+    {
+      "id": "study_id",
+      "value": true
+    },
+    {
+      "id": "default_config",
+      "value": true
+    },
+    {
+      "id": "app_install",
+      "value": true
+    },
+    {
+      "id": "app_settings",
+      "value": true
+    },
+    {
+      "id": "user_id",
+      "value": true
+    },
+    {
+      "id": "wakeup_time",
+      "value": true
+    },
+    {
+      "id": "sleep_time",
+      "value": true
+    },
+    {
+      "id": "clear_database",
+      "value": true
+    },
+    {
+      "id": "clear_config",
+      "value": true
+    }
+  ],
   "user_settings": [
     {
       "id": "privacy",

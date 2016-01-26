@@ -68,9 +68,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
 
-        android:horizontalSpacing="40dp"
+        android:horizontalSpacing="20dp"
         android:numColumns="2"
-        android:padding="40dp"
-        android:verticalSpacing="40dp" />
+        android:verticalSpacing="20dp"
+        android:paddingLeft="20dp"
+        android:paddingTop="20dp"
+        android:paddingRight="20dp" />
 
 </LinearLayout>

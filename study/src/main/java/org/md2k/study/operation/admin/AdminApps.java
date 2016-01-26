@@ -3,7 +3,7 @@ package org.md2k.study.operation.admin;
 import android.content.Context;
 
 import org.md2k.study.config.AdminSettings;
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.StudyConfigManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class AdminApps {
 
     private AdminApps(Context context) {
         this.context = context;
-        ArrayList<AdminSettings> admin_settings=ConfigManager.getInstance(context).getConfigList().getAdmin_settings();
+        ArrayList<AdminSettings> admin_settings= StudyConfigManager.getInstance(context).getStudyConfig().getAdmin_settings();
         adminApps =new ArrayList<>();
         for(int i=0;i<admin_settings.size();i++){
             if(admin_settings.get(i).isValue()) {

@@ -2,7 +2,7 @@ package org.md2k.study.operation.user;
 
 import android.content.Context;
 
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.StudyConfigManager;
 import org.md2k.study.config.UserSettings;
 import org.md2k.utilities.Report.Log;
 
@@ -39,19 +39,10 @@ public class UserApps {
     private static final String TAG = UserApps.class.getSimpleName();
     ArrayList<UserApp> userApps;
     Context context;
-    private static UserApps instance;
-    public static UserApps getInstance(Context context){
-        if(instance==null)
-            instance=new UserApps(context);
-        return instance;
-    }
-    public static void clear(){
-        instance=null;
-    }
 
-    private UserApps(Context context) {
+    public UserApps(Context context) {
         this.context = context;
-        ArrayList<UserSettings> userSettings=ConfigManager.getInstance(context).getConfigList().getUser_settings();
+        ArrayList<UserSettings> userSettings= StudyConfigManager.getInstance(context).getStudyConfig().getUser_settings();
         userApps=new ArrayList<>();
         for(int i=0;i<userSettings.size();i++){
             if(userSettings.get(i).isValue()) {

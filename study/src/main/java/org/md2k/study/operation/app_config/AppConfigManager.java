@@ -1,17 +1,14 @@
-package org.md2k.study.config;
+package org.md2k.study.operation.app_config;
 
 import android.content.Context;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import org.md2k.study.Constants;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
+import org.md2k.study.Status;
+import org.md2k.study.config.ConfigInfo;
+import org.md2k.study.config.StudyConfigManager;
+import org.md2k.utilities.Files;
+
+import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -39,37 +36,42 @@ import java.lang.reflect.Type;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigManager {
-    private static ConfigManager instance;
-    Context context;
-    ConfigList configList;
+public class AppConfigManager {
+    String id;
+    String name;
+    String version;
+    ArrayList<String> required_files;
 
-    public static ConfigManager getInstance(Context context) {
-        if (instance == null)
-            instance = new ConfigManager(context);
-        return instance;
+    public AppConfigManager(Context context) {
+        ConfigInfo configInfo= StudyConfigManager.getInstance(context).getStudyConfig().getConfig_info();
+        this.id = configInfo.getId();
+        this.name =configInfo.getName();
+        this.version = configInfo.getVersion();
+        this.required_files = configInfo.getRequired_files();
     }
-
-    private ConfigManager(Context context) {
-        this.context = context;
-        read();
-    }
-
-    private void read() {
-        String filename=Constants.CONFIG_DIRECTORY+context.getPackageName()+ File.separator+Constants.FILENAME_CONFIG_STUDY;
-        BufferedReader br;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-            Gson gson = new Gson();
-            Type collectionType = new TypeToken<ConfigList>() {
-            }.getType();
-            configList = gson.fromJson(br, collectionType);
-        } catch (IOException e) {
-            configList =null;
+    public Status getStatus(){
+        String directory= Constants.CONFIG_DIRECTORY;
+        if(required_files ==null || required_files.size()==0) return new Status(Status.SUCCESS);
+        for(int i=0;i< required_files.size();i++){
+            if(!Files.isExist(directory+ required_files.get(i)))
+                return new Status(Status.CONFIG_FILE_NOT_EXIST);
         }
+        return new Status(Status.SUCCESS);
     }
 
-    public ConfigList getConfigList() {
-        return configList;
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public ArrayList<String> getRequired_files() {
+        return required_files;
     }
 }

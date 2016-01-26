@@ -9,7 +9,6 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.study.operation.OperationManager;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -40,7 +39,6 @@ import org.md2k.utilities.datakit.DataKitHandler;
 
 public class ServiceSystemHealth extends Service {
     private static final String TAG = ServiceSystemHealth.class.getSimpleName();
-    DataKitHandler dataKitHandler;
     Context context;
     Handler handler;
     OperationManager operationManager;

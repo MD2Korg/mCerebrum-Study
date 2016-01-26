@@ -14,6 +14,7 @@ import android.widget.ListView;
 
 import org.md2k.study.R;
 import org.md2k.study.Status;
+import org.md2k.study.operation.OperationManager;
 import org.md2k.study.operation.app_settings.AppSettings;
 import org.md2k.study.operation.app_settings.AppsSettings;
 
@@ -46,6 +47,7 @@ import org.md2k.study.operation.app_settings.AppsSettings;
 public class PrefsFragmentAppSettings extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentAppSettings.class.getSimpleName();
+    AppsSettings appsSettings;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,18 +82,18 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     }
 
     void setupAppSettings(){
-        AppsSettings settingsApps = AppsSettings.getInstance(getActivity());
+        appsSettings = OperationManager.getInstance(getActivity()).appsSettings;
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_settings");
         preferenceCategory.removeAll();
-        for (int i = 0; i < settingsApps.getAppSettingsList().size(); i++) {
+        for (int i = 0; i < appsSettings.getAppSettingsList().size(); i++) {
             Preference preference = new Preference(getActivity());
-            preference.setTitle(settingsApps.getAppSettingsList().get(i).getName());
-            preference.setKey(settingsApps.getAppSettingsList().get(i).getName());
+            preference.setTitle(appsSettings.getAppSettingsList().get(i).getName());
+            preference.setKey(appsSettings.getAppSettingsList().get(i).getName());
             final int finalI = i;
             preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    AppSettings settingsApp = AppsSettings.getInstance(getActivity()).getAppSettingsList().get(finalI);
+                    AppSettings settingsApp = appsSettings.getAppSettingsList().get(finalI);
                     Intent intent = new Intent();
                     intent.setClassName(settingsApp.getPackage_name(), settingsApp.getSettings());
                     startActivity(intent);
@@ -99,7 +101,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
                 }
             });
             preferenceCategory.addPreference(preference);
-            updatePreference(settingsApps.getAppSettingsList().get(i));
+            updatePreference(appsSettings.getAppSettingsList().get(i));
 
         }
     }

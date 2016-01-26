@@ -4,7 +4,7 @@ import android.content.Context;
 
 import org.md2k.study.Status;
 import org.md2k.study.config.Application;
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.StudyConfigManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -38,20 +38,11 @@ import java.util.ArrayList;
 public class AppsService {
     private static final String TAG = AppsService.class.getSimpleName();
     public ArrayList<AppService> appServiceList;
-    private static AppsService instance;
     Context context;
-    public static AppsService getInstance(Context context){
-        if(instance==null)
-            instance=new AppsService(context);
-        return instance;
-    }
-    public static void clear(){
-        instance=null;
-    }
 
-    private AppsService(Context context) {
+    public AppsService(Context context) {
         this.context=context;
-        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfigList().getApplication();
+        ArrayList<Application> applications= StudyConfigManager.getInstance(context).getStudyConfig().getApplication();
         appServiceList=new ArrayList<>();
         for(int i=0;i<applications.size();i++){
             if(applications.get(i).getService()!=null) {

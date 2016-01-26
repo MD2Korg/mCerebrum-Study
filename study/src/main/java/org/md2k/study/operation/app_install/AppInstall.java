@@ -1,5 +1,6 @@
 package org.md2k.study.operation.app_install;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -43,10 +44,20 @@ public class AppInstall {
     private String download_link;
     private String curVersion = null;
     private String latestVersion = null;
-    AppInstall(String name, String package_name, String download_link){
-        this.name=name;
-        this.package_name=package_name;
-        this.download_link=download_link;
+    private boolean installed;
+    Context context;
+
+    AppInstall(Context context, String name, String package_name, String download_link) {
+        this.context=context;
+        this.name = name;
+        this.package_name = package_name;
+        this.download_link = download_link;
+        reset();
+    }
+    public void reset(){
+        installed=Apps.isPackageInstalled(context, package_name);
+        setVersionName();
+        Log.d(TAG, "reset()...packageName=" + package_name + " installed=" + installed + " version=" + curVersion);
     }
 
     public void downloadAndInstallApp(final Context context) {
@@ -55,19 +66,19 @@ public class AppInstall {
                     .setData(Uri.parse(download_link));
             context.startActivity(goToMarket);
         } else {
-            if(latestVersion==null){
-                setLatestVersionName(context,new OnDataChangeListener() {
+            if (latestVersion == null) {
+                setLatestVersionName(context, new OnDataChangeListener() {
                     @Override
                     public void onDataChange(String str) {
                         download(context);
                     }
                 });
-            }
-            else
+            } else
                 download(context);
         }
     }
-    private void download(Context context){
+
+    private void download(Context context) {
         String downloadLinkName = download_link +
                 "/download/" + latestVersion +
                 "/" + name.toLowerCase() +
@@ -80,17 +91,17 @@ public class AppInstall {
 
     public void run(Context context) {
         Intent LaunchIntent = context.getPackageManager().getLaunchIntentForPackage(getPackage_name());
-        context.startActivity( LaunchIntent );
+        context.startActivity(LaunchIntent);
     }
 
-    public boolean isInstalled(Context context) {
-        return Apps.isPackageInstalled(context, package_name);
+    public boolean isInstalled() {
+        return installed;
     }
 
     public void setLatestVersionName(Context context, final OnDataChangeListener onDataChangeListener) {
-        if (latestVersion != null) onDataChangeListener.onDataChange(latestVersion);
+//        if (latestVersion != null) onDataChangeListener.onDataChange(latestVersion);
         if (!package_name.startsWith("market")) {
-            DownloadVersion downloadVersion = new DownloadVersion(context,new OnTaskCompleted() {
+            DownloadVersion downloadVersion = new DownloadVersion(context, new OnTaskCompleted() {
                 @Override
                 public void onTaskCompleted(String versionName) {
                     latestVersion = versionName;
@@ -103,24 +114,16 @@ public class AppInstall {
         }
     }
 
-    public void refresh(Context context, OnDataChangeListener onDataChangeListener) {
-        Log.d(TAG, "app=" + name + " refresh()...");
-        curVersion = null;
-        latestVersion = null;
-        setVersionName(context);
-        setLatestVersionName(context,onDataChangeListener);
-    }
-
     public boolean isUpdateAvailable() {
         if (curVersion == null) return false;
         if (latestVersion == null) return false;
         return !curVersion.equals(latestVersion);
     }
 
-    public void setVersionName(Context context) {
-        if (curVersion == null)
-            if (isInstalled(context))
-                curVersion = Apps.getVersionName(context, package_name);
+    public void setVersionName() {
+        if (installed)
+            curVersion = Apps.getVersionName(context, package_name);
+        else curVersion=null;
     }
 
     public String getName() {

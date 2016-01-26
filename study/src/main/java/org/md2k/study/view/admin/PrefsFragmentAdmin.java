@@ -17,16 +17,14 @@ import android.widget.ListView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.study.R;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.operation.OperationManager;
-import org.md2k.study.operation.clear_config.AppsClear;
-import org.md2k.study.operation.service.AppsService;
 import org.md2k.study.view.app_install.ActivityInstallApp;
 import org.md2k.study.view.app_settings.ActivityAppSettings;
 import org.md2k.utilities.UI.AlertDialogs;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -59,16 +57,17 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     private static final String TAG = PrefsFragmentAdmin.class.getSimpleName();
     OperationManager operationManager;
     boolean isRefresh = false;
-    DataKitHandler dataKitHandler;
+    DataKitAPI dataKitAPI;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         operationManager = OperationManager.getInstance(getActivity());
-        dataKitHandler = DataKitHandler.getInstance(getActivity());
-        AppsService.getInstance(getActivity()).stop();
-        Intent intent = new Intent(getActivity().getApplicationContext(), ServiceSystemHealth.class);
-        getActivity().stopService(intent);
+        dataKitAPI = DataKitAPI.getInstance(getActivity());
+        operationManager.appsService.stop();
+        //TODO: service stop
+//        Intent intent = new Intent(getActivity().getApplicationContext(), ServiceSystemHealth.class);
+//        getActivity().stopService(intent);
         addPreferencesFromResource(R.xml.pref_settings);
     }
 
@@ -85,7 +84,9 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     @Override
     public void onResume() {
         if (isRefresh) {
-            operationManager.reset();
+            operationManager.sleepInfoManager.reset(getActivity());
+            operationManager.userInfoManager.reset(getActivity());
+            operationManager.studyInfoManager.reset(getActivity());
             isRefresh = false;
         }
         setupPreference();
@@ -116,9 +117,9 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     void setupConfiguration() {
         Preference preference = findPreference("config_info");
-        Status status = operationManager.configManager.getStatus();
+        Status status = operationManager.appConfigManager.getStatus();
         setupIcon(preference, status);
-        preference.setSummary("" + operationManager.configManager.getVersion() + "  (" + status.getStatusMessage() + ")");
+        preference.setSummary("" + operationManager.appConfigManager.getVersion() + "  (" + status.getStatusMessage() + ")");
     }
 
     void setupIcon(Preference preference, Status status) {
@@ -132,7 +133,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     void setupUserID() {
         final EditTextPreference editTextPreference = (EditTextPreference) findPreference("user_id");
         Status status = operationManager.userInfoManager.getStatus();
-        if (status.getStatusCode() == Status.DATAKIT_NOT_INSTALLED) {
+        if (status.getStatusCode() == Status.DATAKIT_NOT_AVAILABLE) {
             editTextPreference.setSummary(status.getStatusMessage());
             editTextPreference.setEnabled(false);
             editTextPreference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
@@ -173,7 +174,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == AlertDialog.BUTTON_POSITIVE) {
-                            AppsClear.getInstance(getActivity()).delete();
+                            operationManager.appsClear.delete();
                             Toast.makeText(getActivity(), "File Deleted", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -202,7 +203,6 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         button.setText("Close");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                operationManager.reset();
                 getActivity().finish();
             }
         });
@@ -224,7 +224,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     void setupWakeupTime() {
         Preference preference = findPreference("wakeup_time");
         Status status = operationManager.sleepInfoManager.getStatus();
-        if (status.getStatusCode() == Status.DATAKIT_NOT_INSTALLED) {
+        if (status.getStatusCode() == Status.DATAKIT_NOT_AVAILABLE) {
             preference.setSummary(status.getStatusMessage());
             preference.setEnabled(false);
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
@@ -252,7 +252,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     void setupSleepTime() {
         Preference preference = findPreference("sleep_time");
-        if (!DataKitHandler.getInstance(getActivity()).isConnected()) {
+        if (!DataKitAPI.getInstance(getActivity()).isConnected()) {
             preference.setEnabled(false);
             return;
         } else
@@ -367,8 +367,9 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     @Override
     public void onStop(){
-        Intent intent = new Intent(getActivity().getApplicationContext(), ServiceSystemHealth.class);
-        getActivity().startService(intent);
+        //TODO: service start??
+//        Intent intent = new Intent(getActivity().getApplicationContext(), ServiceSystemHealth.class);
+//        getActivity().startService(intent);
         super.onStop();
     }
 }

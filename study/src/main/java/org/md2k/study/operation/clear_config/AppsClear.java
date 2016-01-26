@@ -3,7 +3,7 @@ package org.md2k.study.operation.clear_config;
 import android.content.Context;
 
 import org.md2k.study.config.Application;
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.StudyConfigManager;
 
 import java.util.ArrayList;
 
@@ -35,16 +35,7 @@ import java.util.ArrayList;
  */
 public class AppsClear {
     ArrayList<AppClear> appClearList;
-    private static AppsClear instance;
     Context context;
-    public static AppsClear getInstance(Context context){
-        if(instance==null)
-            instance=new AppsClear(context);
-        return instance;
-    }
-    public static void clear(){
-        instance=null;
-    }
 
     public boolean isExists(){
         for(int i=0;i< appClearList.size();i++)
@@ -57,9 +48,9 @@ public class AppsClear {
             appClearList.get(i).delete();
     }
 
-    private AppsClear(Context context) {
+    public AppsClear(Context context) {
         this.context = context;
-        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfigList().getApplication();
+        ArrayList<Application> applications= StudyConfigManager.getInstance(context).getStudyConfig().getApplication();
         appClearList=new ArrayList<>();
         for(int i=0;i<applications.size();i++){
             if(applications.get(i).getConfig()!=null){

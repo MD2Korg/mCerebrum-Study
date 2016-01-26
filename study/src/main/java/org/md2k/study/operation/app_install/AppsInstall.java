@@ -4,7 +4,7 @@ import android.content.Context;
 
 import org.md2k.study.Status;
 import org.md2k.study.config.Application;
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.StudyConfigManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -38,29 +38,18 @@ import java.util.ArrayList;
 public class AppsInstall{
     private static final String TAG = AppsInstall.class.getSimpleName() ;
     ArrayList<AppInstall> appInstallList;
-    private static AppsInstall instance;
     Context context;
-    public static AppsInstall getInstance(Context context){
-        if(instance==null)
-            instance=new AppsInstall(context);
-        return instance;
-    }
-    public static void clear(){
-        instance=null;
-    }
-
     public ArrayList<AppInstall> getAppInstallList() {
         return appInstallList;
     }
 
-    private AppsInstall(Context context) {
+    public AppsInstall(Context context) {
         this.context=context;
-        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfigList().getApplication();
+        ArrayList<Application> applications= StudyConfigManager.getInstance(context).getStudyConfig().getApplication();
         appInstallList=new ArrayList<>();
         for(int i=0;i<applications.size();i++){
-            AppInstall appInstall =new AppInstall(applications.get(i).getName(),applications.get(i).getPackage_name(),applications.get(i).getDownload_link());
+            AppInstall appInstall =new AppInstall(context,applications.get(i).getName(),applications.get(i).getPackage_name(),applications.get(i).getDownload_link());
             appInstallList.add(appInstall);
-            appInstallList.get(i).setVersionName(context);
         }
         Log.d(TAG, "appinstall=" + appInstallList.size());
     }
@@ -70,7 +59,7 @@ public class AppsInstall{
     public int sizeInstalled(){
         int count=0;
         for(int i=0;i< appInstallList.size();i++){
-            if(appInstallList.get(i).isInstalled(context))
+            if(appInstallList.get(i).isInstalled())
                 count++;
         }
         return count;
@@ -92,5 +81,9 @@ public class AppsInstall{
                 count++;
         }
         return count;
+    }
+    public void reset(){
+        for(int i=0;i<appInstallList.size();i++)
+            appInstallList.get(i).reset();
     }
 }

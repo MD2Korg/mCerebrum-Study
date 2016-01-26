@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeString;
 import org.md2k.datakitapi.source.METADATA;
@@ -15,9 +16,8 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.StudyConfigManager;
 import org.md2k.study.config.Study;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.util.ArrayList;
 
@@ -48,47 +48,41 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class StudyInfoManager {
-    DataKitHandler dataKitHandler;
+    DataKitAPI dataKitAPI;
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
     StudyInfo studyInfoDB;
     StudyInfo studyInfoFile;
-    private static StudyInfoManager instance;
     Context context;
-    public static StudyInfoManager getInstance(Context context){
-        if(instance==null)
-            instance=new StudyInfoManager(context);
-        return instance;
-    }
-    public static void clear(){
-        instance=null;
-    }
 
-    private StudyInfoManager(Context context) {
-        dataKitHandler = DataKitHandler.getInstance(context);
+    public StudyInfoManager(Context context) {
+        dataKitAPI = DataKitAPI.getInstance(context);
         dataSourceBuilder = createDataSourceBuilder();
+        reset(context);
+    }
+    public void reset(Context context){
         readFromDataKit();
         readFromConfig();
         if(studyInfoDB==null) writeToDataKit();
     }
 
      public Status getStatus() {
-         if(studyInfoDB==null) return new Status(Status.DATAKIT_NOT_INSTALLED);
+         if(studyInfoDB==null) return new Status(Status.DATAKIT_NOT_AVAILABLE);
          if(!studyInfoDB.study_id.equals(studyInfoFile.study_id) || !studyInfoDB.study_name.equals(studyInfoFile.study_name))
              return new Status(Status.CLEAR_OLD_DATA);
         return new Status(Status.SUCCESS);
     }
     private void readFromConfig(){
-        Study study=ConfigManager.getInstance(context).getConfigList().getStudy();
+        Study study= StudyConfigManager.getInstance(context).getStudyConfig().getStudy();
         studyInfoFile=new StudyInfo();
         studyInfoFile.study_id=study.getId();
         studyInfoFile.study_name=study.getName();
     }
 
     private void readFromDataKit() {
-        if (!dataKitHandler.isConnected()) return;
-        dataSourceClient = dataKitHandler.register(dataSourceBuilder);
-        ArrayList<DataType> dataTypes = dataKitHandler.query(dataSourceClient, 1);
+        if (!dataKitAPI.isConnected()) return;
+        dataSourceClient = dataKitAPI.register(dataSourceBuilder);
+        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
         if (dataTypes.size() != 0) {
             DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
             Gson gson = new Gson();
@@ -97,12 +91,12 @@ public class StudyInfoManager {
     }
 
     public boolean writeToDataKit() {
-        if (!dataKitHandler.isConnected()) return false;
+        if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
         String sample = gson.toJson(studyInfoFile);
-        dataSourceClient = dataKitHandler.register(dataSourceBuilder);
+        dataSourceClient = dataKitAPI.register(dataSourceBuilder);
         DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), sample);
-        dataKitHandler.insert(dataSourceClient, dataTypeString);
+        dataKitAPI.insert(dataSourceClient, dataTypeString);
         return true;
     }
     DataSourceBuilder createDataSourceBuilder() {

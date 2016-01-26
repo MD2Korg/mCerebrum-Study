@@ -32,7 +32,7 @@ public class ConfigInfo {
     String id;
     String name;
     String version;
-    ArrayList<String> files;
+    ArrayList<String> required_files;
 
     public String getId() {
         return id;
@@ -46,7 +46,7 @@ public class ConfigInfo {
         return version;
     }
 
-    public ArrayList<String> getFiles() {
-        return files;
+    public ArrayList<String> getRequired_files() {
+        return required_files;
     }
 }

@@ -4,7 +4,7 @@ import android.content.Context;
 
 import org.md2k.study.Status;
 import org.md2k.study.config.Application;
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.StudyConfigManager;
 
 import java.util.ArrayList;
 
@@ -36,16 +36,7 @@ import java.util.ArrayList;
  */
 public class AppsSettings {
     ArrayList<AppSettings> appSettingsList;
-    private static AppsSettings instance;
     Context context;
-    public static AppsSettings getInstance(Context context){
-        if(instance==null)
-            instance=new AppsSettings(context);
-        return instance;
-    }
-    public static void clear(){
-        instance=null;
-    }
 
     public Status getStatus() {
         for (int i = 0; i < appSettingsList.size(); i++)
@@ -53,13 +44,12 @@ public class AppsSettings {
                 return new Status(Status.APP_CONFIG_ERROR);
         return new Status(Status.SUCCESS);
     }
-
-    private AppsSettings(Context context) {
+    public AppsSettings(Context context) {
         this.context = context;
-        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfigList().getApplication();
+        ArrayList<Application> applications= StudyConfigManager.getInstance(context).getStudyConfig().getApplication();
         appSettingsList=new ArrayList<>();
         for(int i=0;i<applications.size();i++){
-            if(applications.get(i).getSettings()!=null){
+            if(applications.get(i).getSettings()!=null && applications.get(i).getSettings().trim().length()!=0){
                 Application application=applications.get(i);
                 AppSettings appSettings=new AppSettings(application.getName(),application.getPackage_name(),application.getDefault_config(),application.getConfig(),application.getSettings());
                 appSettingsList.add(appSettings);

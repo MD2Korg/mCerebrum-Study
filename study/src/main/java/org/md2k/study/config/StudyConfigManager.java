@@ -1,14 +1,17 @@
-package org.md2k.study.operation.config;
+package org.md2k.study.config;
 
 import android.content.Context;
 
-import org.md2k.study.Constants;
-import org.md2k.study.Status;
-import org.md2k.study.config.AdminSettings;
-import org.md2k.study.config.ConfigInfo;
-import org.md2k.utilities.Files;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
+import org.md2k.study.Constants;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -36,49 +39,37 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigManager {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> files;
-    private static ConfigManager instance;
-    public static ConfigManager getInstance(Context context){
-        if(instance==null) instance=new ConfigManager(context);
+public class StudyConfigManager {
+    private static StudyConfigManager instance;
+    Context context;
+    StudyConfig studyConfig;
+
+    public static StudyConfigManager getInstance(Context context) {
+        if (instance == null)
+            instance = new StudyConfigManager(context);
         return instance;
     }
-    public static void clear(){
-        instance=null;
+
+    private StudyConfigManager(Context context) {
+        this.context = context;
+        read();
     }
 
-    public ConfigManager(Context context) {
-        ConfigInfo configInfo=org.md2k.study.config.ConfigManager.getInstance(context).getConfigList().getConfig_info();
-        this.id = configInfo.getId();
-        this.name =configInfo.getName();
-        this.version = configInfo.getVersion();
-        this.files = configInfo.getFiles();
-    }
-    public Status getStatus(){
-        String directory= Constants.CONFIG_DIRECTORY;
-        for(int i=0;i<files.size();i++){
-            if(!Files.isExist(directory+files.get(i)))
-                return new Status(Status.CONFIG_FILE_NOT_EXIST);
+    private void read() {
+        String filename=Constants.CONFIG_DIRECTORY+context.getPackageName()+ File.separator+Constants.FILENAME_CONFIG_STUDY;
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+            Gson gson = new Gson();
+            Type collectionType = new TypeToken<StudyConfig>() {
+            }.getType();
+            studyConfig = gson.fromJson(br, collectionType);
+        } catch (IOException e) {
+            studyConfig =null;
         }
-        return new Status(Status.SUCCESS);
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public ArrayList<String> getFiles() {
-        return files;
+    public StudyConfig getStudyConfig() {
+        return studyConfig;
     }
 }
