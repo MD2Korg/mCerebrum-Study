@@ -76,6 +76,7 @@ public class OperationManager {
         create();
     }
     public void close(){
+        Log.d(TAG,"OperationManager...close()...");
         if(dataKitAPI.isConnected())
             dataKitAPI.disconnect();
         dataKitAPI.close();
