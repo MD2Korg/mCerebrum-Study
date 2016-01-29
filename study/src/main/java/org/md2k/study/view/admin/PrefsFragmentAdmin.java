@@ -24,6 +24,7 @@ import org.md2k.study.Status;
 import org.md2k.study.operation.OperationManager;
 import org.md2k.study.view.app_install.ActivityInstallApp;
 import org.md2k.study.view.app_settings.ActivityAppSettings;
+import org.md2k.utilities.Apps;
 import org.md2k.utilities.UI.AlertDialogs;
 
 /**
@@ -84,9 +85,9 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     @Override
     public void onResume() {
         if (isRefresh) {
-            operationManager.sleepInfoManager.reset(getActivity());
-            operationManager.userInfoManager.reset(getActivity());
-            operationManager.studyInfoManager.reset(getActivity());
+//            operationManager.sleepInfoManager.reset(getActivity());
+//            operationManager.userInfoManager.reset(getActivity());
+//            operationManager.studyInfoManager.reset(getActivity());
             isRefresh = false;
         }
         setupPreference();
@@ -170,7 +171,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                AlertDialogs.showAlertDialogConfirm(getActivity(),"Delete Configuration Files", "Delete All Configuration File? These can't be recoverd after delete.", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+                AlertDialogs.showAlertDialogConfirm(getActivity(), "Delete Configuration Files", "Delete All Configuration File? These can't be recoverd after delete.", "Yes", "Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == AlertDialog.BUTTON_POSITIVE) {
@@ -189,7 +190,11 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                isRefresh=true;
+                if (!Apps.isPackageInstalled(getActivity(), "org.md2k.datakit")) {
+                    Toast.makeText(getActivity(), "ERROR: Please install \"DataKit\" app first...", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                isRefresh = true;
                 Intent intent = new Intent();
                 intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
                 startActivity(intent);
@@ -252,9 +257,11 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     void setupSleepTime() {
         Preference preference = findPreference("sleep_time");
-        if (!DataKitAPI.getInstance(getActivity()).isConnected()) {
+        Status status = operationManager.sleepInfoManager.getStatus();
+        if (status.getStatusCode() == Status.DATAKIT_NOT_AVAILABLE) {
+            preference.setSummary(status.getStatusMessage());
             preference.setEnabled(false);
-            return;
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
         } else
             preference.setEnabled(true);
         if (operationManager.sleepInfoManager.getSleepStartTimeDB() == -1 && operationManager.sleepInfoManager.getSleepStartTimeNew() == -1) {

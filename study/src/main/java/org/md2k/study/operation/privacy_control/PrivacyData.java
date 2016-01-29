@@ -1,12 +1,6 @@
-package org.md2k.study.operation.user;
-
-import android.content.Context;
-
-import org.md2k.study.config.StudyConfigManager;
-import org.md2k.study.config.UserSettings;
+package org.md2k.study.operation.privacy_control;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -34,32 +28,41 @@ import java.util.List;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class UserApps {
-//    private static final String TAG = UserApps.class.getSimpleName();
-    ArrayList<UserApp> userApps;
-    Context context;
+public class PrivacyData {
+    Duration duration;
+    ArrayList<PrivacyType> privacyTypes;
+    long startTimeStamp;
+    boolean status;
 
-    public UserApps(Context context) {
-        this.context = context;
-        ArrayList<UserSettings> userSettings= StudyConfigManager.getInstance(context).getStudyConfig().getUser_settings();
-        userApps=new ArrayList<>();
-        for(int i=0;i<userSettings.size();i++){
-            if(userSettings.get(i).isValue()) {
-                UserApp userApp=new UserApp(userSettings.get(i).getId(),userSettings.get(i).isValue());
-                userApps.add(userApp);
-            }
-        }
-    }
-    public UserApp find(String id){
-        for(int i=0;i<userApps.size();i++)
-            if(userApps.get(i).getId().equals(id)) return userApps.get(i);
-        return null;
+    public Duration getDuration() {
+        return duration;
     }
 
-    public List<UserApp> getApp() {
-        return userApps;
+    public void setDuration(Duration duration) {
+        this.duration = duration;
     }
-    public UserApp getApp(int position){
-        return userApps.get(position);
+
+    public ArrayList<PrivacyType> getPrivacyTypes() {
+        return privacyTypes;
+    }
+
+    public void setPrivacyTypes(ArrayList<PrivacyType> privacyTypes) {
+        this.privacyTypes = privacyTypes;
+    }
+
+    public long getStartTimeStamp() {
+        return startTimeStamp;
+    }
+
+    public void setStartTimeStamp(long startTimeStamp) {
+        this.startTimeStamp = startTimeStamp;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }

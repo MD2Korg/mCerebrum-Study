@@ -11,12 +11,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.operation.OperationManager;
 import org.md2k.study.operation.app_settings.AppSettings;
 import org.md2k.study.operation.app_settings.AppsSettings;
+import org.md2k.utilities.Apps;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -64,10 +66,11 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
         lv.setPadding(0, 0, 0, 0);
         return v;
     }
+
     void updatePreference(AppSettings settingsApp) {
         Preference preference = findPreference(settingsApp.getName());
         Status status = settingsApp.getStatus();
-        if (status.getStatusCode()==Status.APP_CONFIG_ERROR) {
+        if (status.getStatusCode() == Status.APP_CONFIG_ERROR) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
             preference.setSummary(status.getStatusMessage());
         } else {
@@ -75,13 +78,14 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
             preference.setSummary(status.getStatusMessage());
         }
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         setupAppSettings();
         super.onResume();
     }
 
-    void setupAppSettings(){
+    void setupAppSettings() {
         appsSettings = OperationManager.getInstance(getActivity()).appsSettings;
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_settings");
         preferenceCategory.removeAll();
@@ -94,6 +98,10 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     AppSettings settingsApp = appsSettings.getAppSettingsList().get(finalI);
+                    if (!Apps.isPackageInstalled(getActivity(), settingsApp.getPackage_name())) {
+                        Toast.makeText(getActivity(),"ERROR: Please install \""+settingsApp.getName()+"\" app first...", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
                     Intent intent = new Intent();
                     intent.setClassName(settingsApp.getPackage_name(), settingsApp.getSettings());
                     startActivity(intent);
@@ -105,6 +113,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
 
         }
     }
+
     void setupButtons() {
         final Button button1 = (Button) getActivity().findViewById(R.id.button_1);
         button1.setText("Close");

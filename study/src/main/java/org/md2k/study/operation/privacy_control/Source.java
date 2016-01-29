@@ -1,12 +1,4 @@
-package org.md2k.study.operation.user;
-
-import android.content.Context;
-
-import org.md2k.study.config.StudyConfigManager;
-import org.md2k.study.config.UserSettings;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.md2k.study.operation.privacy_control;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -34,32 +26,15 @@ import java.util.List;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class UserApps {
-//    private static final String TAG = UserApps.class.getSimpleName();
-    ArrayList<UserApp> userApps;
-    Context context;
+public class Source {
+    String platform_type;
+    String datasource_type;
 
-    public UserApps(Context context) {
-        this.context = context;
-        ArrayList<UserSettings> userSettings= StudyConfigManager.getInstance(context).getStudyConfig().getUser_settings();
-        userApps=new ArrayList<>();
-        for(int i=0;i<userSettings.size();i++){
-            if(userSettings.get(i).isValue()) {
-                UserApp userApp=new UserApp(userSettings.get(i).getId(),userSettings.get(i).isValue());
-                userApps.add(userApp);
-            }
-        }
-    }
-    public UserApp find(String id){
-        for(int i=0;i<userApps.size();i++)
-            if(userApps.get(i).getId().equals(id)) return userApps.get(i);
-        return null;
+    public String getPlatform_type() {
+        return platform_type;
     }
 
-    public List<UserApp> getApp() {
-        return userApps;
+    public String getDatasource_type() {
+        return datasource_type;
     }
-    public UserApp getApp(int position){
-        return userApps.get(position);
-    }
-}
+};

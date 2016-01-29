@@ -62,7 +62,6 @@ public class SleepInfoManager {
         sleepTimeNew[0]=-1;sleepTimeNew[1]=-1;
         sleepTimeDB[0]=-1;sleepTimeDB[1]=-1;
         readStudyInfoFromDataKit();
-
     }
     public long getSleepStartTimeDB() {
         return sleepTimeDB[0];

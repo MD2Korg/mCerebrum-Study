@@ -18,6 +18,7 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
 import org.md2k.study.config.StudyConfigManager;
 import org.md2k.study.config.Study;
+import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 
@@ -48,6 +49,7 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class StudyInfoManager {
+    private static final String TAG = StudyInfoManager.class.getSimpleName();
     DataKitAPI dataKitAPI;
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
@@ -61,9 +63,11 @@ public class StudyInfoManager {
         reset(context);
     }
     public void reset(Context context){
-        readFromDataKit();
-        readFromConfig();
-        if(studyInfoDB==null) writeToDataKit();
+        studyInfoDB=readFromDataKit();
+        studyInfoFile=readFromConfig();
+        if(studyInfoDB==null && studyInfoFile!=null) {
+            writeToDataKit();
+        }
     }
 
      public Status getStatus() {
@@ -72,31 +76,43 @@ public class StudyInfoManager {
              return new Status(Status.CLEAR_OLD_DATA);
         return new Status(Status.SUCCESS);
     }
-    private void readFromConfig(){
+    private StudyInfo readFromConfig(){
+        StudyInfo studyInfoFile=null;
         Study study= StudyConfigManager.getInstance(context).getStudyConfig().getStudy();
-        studyInfoFile=new StudyInfo();
-        studyInfoFile.study_id=study.getId();
-        studyInfoFile.study_name=study.getName();
+        if(study!=null) {
+            studyInfoFile = new StudyInfo();
+            studyInfoFile.study_id = study.getId();
+            studyInfoFile.study_name = study.getName();
+        }
+        return studyInfoFile;
     }
 
-    private void readFromDataKit() {
-        if (!dataKitAPI.isConnected()) return;
-        dataSourceClient = dataKitAPI.register(dataSourceBuilder);
-        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-        if (dataTypes.size() != 0) {
-            DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
-            Gson gson = new Gson();
-            studyInfoDB = gson.fromJson(dataTypeString.getSample(), StudyInfo.class);
+    private StudyInfo readFromDataKit() {
+        StudyInfo studyInfo=null;
+
+        if (dataKitAPI.isConnected()) {
+            dataSourceClient = dataKitAPI.register(dataSourceBuilder);
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
+                Gson gson = new Gson();
+                studyInfo = gson.fromJson(dataTypeString.getSample(), StudyInfo.class);
+            }
         }
+        return studyInfo;
     }
 
     public boolean writeToDataKit() {
+        Log.d(TAG,"StudyInfoManager...writeToDataKit()");
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
         String sample = gson.toJson(studyInfoFile);
         dataSourceClient = dataKitAPI.register(dataSourceBuilder);
         DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClient, dataTypeString);
+        studyInfoDB=new StudyInfo();
+        studyInfoDB.study_id=studyInfoFile.study_id;
+        studyInfoDB.study_name=studyInfoFile.study_name;
         return true;
     }
     DataSourceBuilder createDataSourceBuilder() {

@@ -1,7 +1,10 @@
 package org.md2k.study.operation.user;
 
+import org.md2k.utilities.Report.Log;
+
 public class UserApp {
 
+    private static final String TAG = UserApp.class.getSimpleName();
     private String id;
     private boolean value;
     private String name;
@@ -13,6 +16,12 @@ public class UserApp {
         this.name=name;
         this.class_name=class_name;
         this.package_name=package_name;
+    }
+    public void setIcon(boolean active){
+        if(active)
+            icon="ic_lock_red_48dp";
+        else icon="ic_unlock_teal_48dp";
+        Log.d(TAG, "icon=" + icon);
     }
 
     public UserApp(String id, boolean value) {

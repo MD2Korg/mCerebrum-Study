@@ -43,6 +43,7 @@ public class Status implements Serializable{
     public static final int CONFIG_FILE_NOT_EXIST=8;
     public static final int CLEAR_OLD_DATA=9;
     public static final int DATAKIT_NOT_AVAILABLE =10;
+    public static final int PRIVACY_ACTIVE=11;
     public static final String[] message = new String[]{
             "Status: OK",
             "Error: Application not installed properly",
@@ -53,8 +54,9 @@ public class Status implements Serializable{
             "Error: Application not running",
             "Error: Application not configured properly",
             "Error: Missing configuration files",
-            "Error: Clear Old Data",
-            "Error: DataKit not available"
+            "Error: Clear old Data",
+            "Error: DataKit not available",
+            "Status: Privacy control activated"
     };
 
     public Status(int statusCode, String statusMessage) {

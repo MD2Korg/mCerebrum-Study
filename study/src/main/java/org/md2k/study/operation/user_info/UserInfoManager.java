@@ -58,7 +58,6 @@ public class UserInfoManager {
         userInfo = new UserInfo();
         dataKitAPI = DataKitAPI.getInstance(context);
         readFromDataKit();
-
     }
 
     public void setUserId(String userId) {

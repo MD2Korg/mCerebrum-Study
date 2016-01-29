@@ -23,9 +23,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.study.config.StudyConfigManager;
 import org.md2k.study.default_config.DefaultConfigManager;
 import org.md2k.study.operation.OperationManager;
+import org.md2k.study.operation.user.UserApp;
 import org.md2k.study.view.service.ActivityService;
 import org.md2k.study.view.user.AppAdapter;
 import org.md2k.study.view.admin.ActivityAdmin;
@@ -44,23 +46,20 @@ public class ActivityMain extends AppCompatActivity {
             Toast.makeText(ActivityMain.this, "Configuration failure...", Toast.LENGTH_LONG).show();
             finish();
         }
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("system_health"));
         StudyConfigManager.getInstance(getApplicationContext());
         operationManager = OperationManager.getInstance(getApplicationContext());
+        operationManager.connect();
         setContentView(R.layout.activity_main);
     }
 
     @Override
-    protected void onStart() {
+    protected void onResume() {
         StudyConfigManager.getInstance(getApplicationContext());
-        operationManager = OperationManager.getInstance(getApplicationContext());
         showApplication();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter("system_health"));
-        operationManager.connect(this);
-//        Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-//        startService(intent);
         updateStatus(operationManager.getStatus());
-        super.onStart();
+        super.onResume();
     }
 
     void updateStatus(Status status) {
@@ -125,10 +124,9 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
+    protected void onPause() {
         Log.d(TAG, "onStop()...");
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-        super.onStop();
+        super.onPause();
     }
 
     @Override
@@ -203,13 +201,27 @@ public class ActivityMain extends AppCompatActivity {
                 });
 //        alertDialog.show();
         AlertDialog dialog = alertDialog.show();
-        TextView messageText = (TextView)dialog.findViewById(android.R.id.message);
+        TextView messageText = (TextView) dialog.findViewById(android.R.id.message);
         messageText.setGravity(Gravity.CENTER);
         dialog.show();
     }
 
+    boolean isPrivacyControlActive() {
+        if (operationManager.privacyControlManager.getStatus().getStatusCode() == Status.SUCCESS) {
+            Log.d(TAG, "isPrivacyControlActive()...false");
+            return false;
+        } else {
+            Log.d(TAG, "isPrivacyControlActive()...true");
+            return true;
+        }
+    }
+
     void showApplication() {
         GridView gridview = (GridView) findViewById(R.id.gridview);
+        UserApp userApp = operationManager.userApps.find("privacy");
+        if (userApp != null) {
+            userApp.setIcon(isPrivacyControlActive());
+        }
 
         AppAdapter appAdapter = new AppAdapter(ActivityMain.this, operationManager.userApps.getApp());
         gridview.setAdapter(appAdapter);
@@ -218,10 +230,10 @@ public class ActivityMain extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (!operationManager.isStudySetupValid()) {
-                    Toast.makeText(ActivityMain.this, "Please configure the study first...", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ActivityMain.this, "Please configure the study first...", Toast.LENGTH_SHORT).show();
                 } else {
-                    String packageName=operationManager.userApps.getApp(position).getPackage_name();
-                    String className=operationManager.userApps.getApp(position).getClass_name();
+                    String packageName = operationManager.userApps.getApp(position).getPackage_name();
+                    String className = operationManager.userApps.getApp(position).getClass_name();
                     if (packageName != null && className != null) {
                         Intent intent = new Intent();
                         intent.setClassName(packageName, className);
@@ -254,7 +266,8 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG,"onDestroy()...");
+        Log.d(TAG, "onDestroy()...");
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
         operationManager.close();
         super.onDestroy();
     }
