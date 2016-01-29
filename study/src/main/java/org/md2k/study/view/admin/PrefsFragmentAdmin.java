@@ -176,6 +176,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == AlertDialog.BUTTON_POSITIVE) {
                             operationManager.appsClear.delete();
+                            isRefresh=true;
                             Toast.makeText(getActivity(), "File Deleted", Toast.LENGTH_SHORT).show();
                         }
                     }
