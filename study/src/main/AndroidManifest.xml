@@ -24,21 +24,27 @@
         </activity>
         <activity
             android:name=".view.app_install.ActivityInstallApp"
+            android:screenOrientation="portrait"
             android:label="Install Application" />
         <activity
             android:name=".view.service.ActivityService"
+            android:screenOrientation="portrait"
             android:label="Run Application" />
         <activity
             android:name=".view.app_settings.ActivityAppSettings"
+            android:screenOrientation="portrait"
             android:label="Application Settings" />
         <activity
             android:name=".view.intervention.ActivityInterventionApp"
+            android:screenOrientation="portrait"
             android:label="@string/title_intervention_apps" />
         <activity
             android:name=".view.admin.ActivityAdmin"
+            android:screenOrientation="portrait"
             android:label="@string/settings" />
         <activity
             android:name=".view.selfreport.ActivitySelfReport"
+            android:screenOrientation="portrait"
             android:label="Self Report" />
         <service
             android:name=".ServiceSystemHealth"
