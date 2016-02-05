@@ -46,12 +46,12 @@ public class ActivityMain extends AppCompatActivity {
             Toast.makeText(ActivityMain.this, "Configuration failure...", Toast.LENGTH_LONG).show();
             finish();
         }
+        setContentView(R.layout.activity_main);
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("system_health"));
         StudyConfigManager.getInstance(getApplicationContext());
         operationManager = OperationManager.getInstance(getApplicationContext());
         operationManager.connect();
-        setContentView(R.layout.activity_main);
     }
 
     @Override
