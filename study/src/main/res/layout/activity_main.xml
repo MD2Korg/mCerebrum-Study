@@ -91,7 +91,7 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="20dp"
-                    android:id="@+id/imageView5"
+                    android:id="@+id/imageView_respiration"
                     android:src="@drawable/ic_ok_teal_50dp" />
             </LinearLayout>
 
@@ -112,7 +112,7 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="20dp"
-                    android:id="@+id/imageView2"
+                    android:id="@+id/imageView_ecg"
                     android:src="@drawable/ic_error_red_50dp" />
             </LinearLayout>
 
@@ -127,13 +127,12 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:text="Wrist 1"
-                    android:id="@+id/textView4"
                     android:gravity="center_horizontal" />
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="20dp"
-                    android:id="@+id/imageView3"
+                    android:id="@+id/imageView_autosense_wrist"
                     android:src="@drawable/ic_warning_amber_50dp" />
             </LinearLayout>
 
@@ -154,7 +153,7 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="20dp"
-                    android:id="@+id/imageView4"
+                    android:id="@+id/imageView_microsoftband"
                     android:src="@drawable/ic_error_red_50dp" />
             </LinearLayout>
         </LinearLayout>

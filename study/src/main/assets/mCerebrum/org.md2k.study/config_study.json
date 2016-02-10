@@ -62,6 +62,29 @@
       "download_link": "https://github.com/MD2Korg/mCerebrum-Plotter/releases"
     }
   ],
+  "data_quality":[
+    {
+      "data_source":  {
+        "platform":{
+          "type":"AUTOSENSE_CHEST",
+          "id":"CHEST"
+        },
+        "type":"RESPIRATION"
+      },
+      "restart_time":30000,
+      "check_time":5000
+    },
+    {
+      "datasource":  {
+        "platform":{
+          "type":"MICROSOFT_BAND"
+        },
+        "type":"ACCELEROMETER"
+      },
+      "restart_time":30000,
+      "check_time":5000
+    }
+  ],
   "admin_settings": [
     {
       "id": "study_id",

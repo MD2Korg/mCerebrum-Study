@@ -11,7 +11,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.md2k.study.R;
-import org.md2k.study.operation.user.UserApp;
+import org.md2k.study.operation.user_app.UserApp;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
 

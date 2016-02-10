@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.study.R;
-import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.operation.OperationManager;
 import org.md2k.study.view.app_install.ActivityInstallApp;
@@ -380,4 +379,11 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 //        getActivity().startService(intent);
         super.onStop();
     }
+    @Override
+    public void onDestroy(){
+        if(operationManager.isStudySetupValid())
+            operationManager.appsService.start();
+        super.onDestroy();
+    }
+
 }

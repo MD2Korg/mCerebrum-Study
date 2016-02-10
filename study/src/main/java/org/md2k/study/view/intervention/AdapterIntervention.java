@@ -15,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.md2k.study.R;
-import org.md2k.study.operation.user.UserApp;
+import org.md2k.study.operation.user_app.UserApp;
 
 import java.util.List;
 

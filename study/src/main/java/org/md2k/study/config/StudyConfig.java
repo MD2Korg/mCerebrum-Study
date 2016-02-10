@@ -1,5 +1,7 @@
 package org.md2k.study.config;
 
+import org.md2k.datakitapi.source.datasource.DataSource;
+
 import java.util.ArrayList;
 
 /**
@@ -34,6 +36,7 @@ public class StudyConfig {
     ArrayList<Application> application;
     ArrayList<AdminSettings> admin_settings;
     ArrayList<UserSettings> user_settings;
+    ArrayList<DataSource> data_quality;
 
     public ConfigInfo getConfig_info() {
         return config_info;
@@ -55,4 +58,7 @@ public class StudyConfig {
         return user_settings;
     }
 
+    public ArrayList<DataSource> getData_quality() {
+        return data_quality;
+    }
 }

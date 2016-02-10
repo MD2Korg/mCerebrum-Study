@@ -1,9 +1,6 @@
 package org.md2k.study.operation;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -15,10 +12,11 @@ import org.md2k.study.operation.app_install.AppsInstall;
 import org.md2k.study.operation.app_settings.AppsSettings;
 import org.md2k.study.operation.clear_config.AppsClear;
 import org.md2k.study.operation.app_config.AppConfigManager;
+import org.md2k.study.operation.data_quality.DataQualityManager;
 import org.md2k.study.operation.privacy_control.PrivacyControlManager;
 import org.md2k.study.operation.service.AppsService;
 import org.md2k.study.operation.study_info.StudyInfoManager;
-import org.md2k.study.operation.user.UserApps;
+import org.md2k.study.operation.user_app.UserApps;
 import org.md2k.study.operation.user_info.UserInfoManager;
 import org.md2k.study.operation.wakeup_sleep_time.SleepInfoManager;
 import org.md2k.utilities.Report.Log;
@@ -65,6 +63,7 @@ public class OperationManager {
     public UserApps userApps;
     public AppsService appsService;
     public PrivacyControlManager privacyControlManager;
+    public DataQualityManager dataQualityManager;
 
     public static OperationManager getInstance(Context context) {
         if (instance == null)
@@ -80,8 +79,10 @@ public class OperationManager {
 
     public void close() {
         Log.d(TAG, "OperationManager...close()...");
-        if (dataKitAPI.isConnected())
+        if (dataKitAPI.isConnected()) {
+            dataQualityManager.stop();
             dataKitAPI.disconnect();
+        }
         dataKitAPI.close();
         instance = null;
     }
@@ -97,6 +98,7 @@ public class OperationManager {
         userApps = new UserApps(context);
         appsService = new AppsService(context);
         privacyControlManager = new PrivacyControlManager(context);
+        dataQualityManager = new DataQualityManager(context);
     }
 
     public boolean isConnected() {
@@ -114,6 +116,7 @@ public class OperationManager {
                     sleepInfoManager.reset(context);
                     studyInfoManager.reset(context);
                     privacyControlManager.reset(context);
+                    dataQualityManager.start();
                     Status status = getStatus();
                     Intent intent = new Intent("system_health");
                     intent.putExtra("status", status);

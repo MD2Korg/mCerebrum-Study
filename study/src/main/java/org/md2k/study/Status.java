@@ -44,6 +44,11 @@ public class Status implements Serializable{
     public static final int CLEAR_OLD_DATA=9;
     public static final int DATAKIT_NOT_AVAILABLE =10;
     public static final int PRIVACY_ACTIVE=11;
+    public static final int DATAQUALITY_GOOD=12;
+    public static final int DATAQUALITY_OFF=13;
+    public static final int DATAQUALITY_LOOSE=14;
+    public static final int DATAQUALITY_NOISY=15;
+    public static final int DATAQUALITY_NOT_WORN=16;
     public static final String[] message = new String[]{
             "Status: OK",
             "Error: Application not installed properly",
@@ -56,7 +61,12 @@ public class Status implements Serializable{
             "Error: Missing configuration files",
             "Error: Clear old Data",
             "Error: DataKit not available",
-            "Status: Privacy control activated"
+            "Status: Privacy control activated",
+            "Status: OK",
+            "ERROR: Device is off/Not connected",
+            "WARNING: Belt is loose",
+            "WARNING: Device data is noisy",
+            "ERROR: Device is not worn"
     };
 
     public Status(int statusCode, String statusMessage) {

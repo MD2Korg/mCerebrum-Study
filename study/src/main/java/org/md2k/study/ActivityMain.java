@@ -19,21 +19,25 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.source.datasource.DataSource;
+import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.study.config.StudyConfigManager;
 import org.md2k.study.default_config.DefaultConfigManager;
 import org.md2k.study.operation.OperationManager;
-import org.md2k.study.operation.user.UserApp;
+import org.md2k.study.operation.user_app.UserApp;
 import org.md2k.study.view.service.ActivityService;
 import org.md2k.study.view.user.AppAdapter;
 import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
+import org.md2k.utilities.data_format.DATA_QUALITY;
 
 public class ActivityMain extends AppCompatActivity {
     public static final String TAG = ActivityMain.class.getSimpleName();
@@ -49,6 +53,9 @@ public class ActivityMain extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("system_health"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverDataQuality,
+                new IntentFilter("data_quality"));
+
         StudyConfigManager.getInstance(getApplicationContext());
         operationManager = OperationManager.getInstance(getApplicationContext());
         operationManager.connect();
@@ -263,11 +270,53 @@ public class ActivityMain extends AppCompatActivity {
             updateStatus(status);
         }
     };
+    private void updateDataQuality(ImageView imageView, int status){
+        switch(status){
+            case DATA_QUALITY.GOOD:
+                imageView.setImageResource(R.drawable.ic_ok_teal_50dp);
+                break;
+            case DATA_QUALITY.BAND_OFF:
+                imageView.setImageResource(R.drawable.ic_error_red_50dp);
+                break;
+            case DATA_QUALITY.NOT_WORN:
+            case DATA_QUALITY.BAND_LOOSE:
+            case DATA_QUALITY.NOISE:
+                imageView.setImageResource(R.drawable.ic_warning_amber_50dp);
+                break;
+        }
+
+    }
+    private BroadcastReceiver mMessageReceiverDataQuality = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG,"onReceive ... DataQuality()...");
+            DataSource dataSource = (DataSource) intent.getSerializableExtra("datasource");
+            ImageView imageView;
+            int sample[]=intent.getIntArrayExtra("sample");
+            Log.d(TAG,"platformtype="+ dataSource.getPlatform().getType()+" datasource_type="+dataSource.getType()+" sample="+sample[0]);
+            switch(dataSource.getPlatform().getType()){
+                case PlatformType.MICROSOFT_BAND:
+                    imageView= (ImageView) findViewById(R.id.imageView_microsoftband);
+                    updateDataQuality(imageView,sample[0]);
+                    break;
+                case PlatformType.AUTOSENSE_CHEST:
+                    imageView= (ImageView) findViewById(R.id.imageView_respiration);
+                    updateDataQuality(imageView,sample[0]);
+                    imageView= (ImageView) findViewById(R.id.imageView_ecg);
+                    updateDataQuality(imageView,sample[1]);
+                    break;
+                case PlatformType.AUTOSENSE_WRIST:
+                    imageView= (ImageView) findViewById(R.id.imageView_autosense_wrist);
+                    updateDataQuality(imageView,sample[0]);
+            }
+        }
+    };
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverDataQuality);
         operationManager.close();
         super.onDestroy();
     }
