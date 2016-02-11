@@ -92,7 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="20dp"
                     android:id="@+id/imageView_respiration"
-                    android:src="@drawable/ic_ok_teal_50dp" />
+                    android:src="@drawable/ic_error_red_50dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -126,14 +126,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Wrist 1"
+                    android:text="Wrist-AS"
+                    android:id="@+id/imageView_wrist1"
                     android:gravity="center_horizontal" />
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="20dp"
                     android:id="@+id/imageView_autosense_wrist"
-                    android:src="@drawable/ic_warning_amber_50dp" />
+                    android:src="@drawable/ic_error_red_50dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -146,8 +147,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="MSBand"
-                    android:id="@+id/textView5"
+                    android:text="Wrist-MSBand"
+                    android:id="@+id/imageView_wrist2"
                     android:gravity="center_horizontal" />
 
                 <ImageView
