@@ -6,11 +6,11 @@ public class UserApp {
 
     private static final String TAG = UserApp.class.getSimpleName();
     private String id;
-    private boolean value;
     private String name;
     private String icon;
-    private String class_name;
     private String package_name;
+    private String class_name;
+    private boolean show;
     public UserApp(String id, String name, String class_name, String package_name){
         this.id=id;
         this.name=name;
@@ -24,36 +24,13 @@ public class UserApp {
         Log.d(TAG, "icon=" + icon);
     }
 
-    public UserApp(String id, boolean value) {
-        this.id = id;
-        this.value=value;
-        switch(id){
-            case "intervention":
-                name="Intervention";
-                icon="ic_intervention_48dp";
-                class_name="org.md2k.study.view.intervention.ActivityInterventionApp";
-                break;
-            case "smoking_self_report":
-                name="Smoking Report";
-                icon="ic_smoking_teal_48dp";
-                class_name="org.md2k.study.view.selfreport.ActivitySelfReport";
-                break;
-            case "plotter":
-                name="Plotter";
-                icon="ic_plot_teal_48dp";
-                package_name= "org.md2k.plotter";
-                break;
-            case "privacy":
-                name="Privacy Control";
-                icon="ic_lock_red_48dp";
-                package_name="org.md2k.datakit";
-                class_name="org.md2k.datakit.ActivityPrivacy";
-                break;
-            case "stop":
-                name="Stop";
-                icon="ic_stop_teal_48dp";
-                class_name="org.md2k.study.view.service.ActivityService";
-        }
+    public UserApp(org.md2k.study.config.UserApp userApp) {
+        this.id=userApp.getId();
+        this.class_name=userApp.getClass_name();
+        this.package_name=userApp.getPackage_name();
+        this.show =userApp.isShow();
+        this.name=userApp.getText();
+        this.icon=userApp.getIcon();
     }
 
     public String getId() {
