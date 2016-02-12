@@ -65,9 +65,6 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         operationManager = OperationManager.getInstance(getActivity());
         dataKitAPI = DataKitAPI.getInstance(getActivity());
         operationManager.appsService.stop();
-        //TODO: service stop
-//        Intent intent = new Intent(getActivity().getApplicationContext(), ServiceSystemHealth.class);
-//        getActivity().stopService(intent);
         addPreferencesFromResource(R.xml.pref_settings);
     }
 
@@ -84,9 +81,9 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     @Override
     public void onResume() {
         if (isRefresh) {
-//            operationManager.sleepInfoManager.reset(getActivity());
-//            operationManager.userInfoManager.reset(getActivity());
-//            operationManager.studyInfoManager.reset(getActivity());
+            operationManager.sleepInfoManager.reset(getActivity());
+            operationManager.userInfoManager.reset(getActivity());
+            operationManager.studyInfoManager.reset(getActivity());
             isRefresh = false;
         }
         setupPreference();

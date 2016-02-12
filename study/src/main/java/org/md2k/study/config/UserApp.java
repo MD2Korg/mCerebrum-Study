@@ -26,15 +26,35 @@ package org.md2k.study.config;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class UserSettings {
+public class UserApp {
     String id;
-    boolean value;
+    String text;
+    String icon;
+    String package_name;
+    String class_name;
+    boolean show;
 
     public String getId() {
         return id;
     }
 
-    public boolean isValue() {
-        return value;
+    public boolean isShow() {
+        return show;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public String getPackage_name() {
+        return package_name;
+    }
+
+    public String getClass_name() {
+        return class_name;
     }
 }

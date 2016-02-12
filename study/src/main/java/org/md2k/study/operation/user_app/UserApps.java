@@ -3,7 +3,6 @@ package org.md2k.study.operation.user_app;
 import android.content.Context;
 
 import org.md2k.study.config.StudyConfigManager;
-import org.md2k.study.config.UserSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,11 +40,11 @@ public class UserApps {
 
     public UserApps(Context context) {
         this.context = context;
-        ArrayList<UserSettings> userSettings= StudyConfigManager.getInstance(context).getStudyConfig().getUser_settings();
+        ArrayList<org.md2k.study.config.UserApp> user_apps= StudyConfigManager.getInstance(context).getStudyConfig().getUser_apps();
         userApps=new ArrayList<>();
-        for(int i=0;i<userSettings.size();i++){
-            if(userSettings.get(i).isValue()) {
-                UserApp userApp=new UserApp(userSettings.get(i).getId(),userSettings.get(i).isValue());
+        for(int i=0;i<user_apps.size();i++){
+            if(user_apps.get(i).isShow()) {
+                UserApp userApp=new UserApp(user_apps.get(i));
                 userApps.add(userApp);
             }
         }

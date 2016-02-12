@@ -35,7 +35,7 @@ public class StudyConfig {
     Study study;
     ArrayList<Application> application;
     ArrayList<AdminSettings> admin_settings;
-    ArrayList<UserSettings> user_settings;
+    ArrayList<UserApp> user_apps;
     ArrayList<DataSource> data_quality;
 
     public ConfigInfo getConfig_info() {
@@ -54,8 +54,8 @@ public class StudyConfig {
         return admin_settings;
     }
 
-    public ArrayList<UserSettings> getUser_settings() {
-        return user_settings;
+    public ArrayList<UserApp> getUser_apps() {
+        return user_apps;
     }
 
     public ArrayList<DataSource> getData_quality() {
