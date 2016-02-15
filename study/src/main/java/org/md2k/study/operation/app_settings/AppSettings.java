@@ -102,6 +102,10 @@ public class AppSettings {
     boolean isEqual(){
         if(default_config==null) return true;
         if(config==null) return false;
+        if(!(package_name.equals("org.md2k.phonesensor") || package_name.equals("org.md2k.autosense") || package_name.equals("org.md2k.microsoftband") || package_name.equals("org.md2k.plotter"))) {
+            //TODO: need to clear the code
+            return true;
+        }
         String outDir= Constants.CONFIG_DIRECTORY+package_name+ File.separator;
         try {
             ArrayList<DataSource> dataSourcesDefault = Files.readJSONArray(outDir,default_config,DataSource.class);
@@ -114,6 +118,8 @@ public class AppSettings {
             return true;
         } catch (FileNotFoundException e) {
             return false;
+        }catch (IllegalStateException e){
+            return true;
         }
     }
 

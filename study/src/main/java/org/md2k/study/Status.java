@@ -1,6 +1,8 @@
 package org.md2k.study;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,7 +30,7 @@ import java.io.Serializable;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Status implements Serializable{
+public class Status implements Parcelable {
     int statusCode;
     String statusMessage;
 
@@ -49,6 +51,7 @@ public class Status implements Serializable{
     public static final int DATAQUALITY_LOOSE=14;
     public static final int DATAQUALITY_NOISY=15;
     public static final int DATAQUALITY_NOT_WORN=16;
+    public static final int DATAQUALITY_BAD=17;
     public static final String[] message = new String[]{
             "Status: OK",
             "Error: Application not installed properly",
@@ -79,6 +82,23 @@ public class Status implements Serializable{
         this.statusMessage = message[statusCode];
     }
 
+    protected Status(Parcel in) {
+        statusCode = in.readInt();
+        statusMessage = in.readString();
+    }
+
+    public static final Creator<Status> CREATOR = new Creator<Status>() {
+        @Override
+        public Status createFromParcel(Parcel in) {
+            return new Status(in);
+        }
+
+        @Override
+        public Status[] newArray(int size) {
+            return new Status[size];
+        }
+    };
+
     public String getStatusMessage() {
         return statusMessage;
     }
@@ -89,5 +109,16 @@ public class Status implements Serializable{
 
     public int getStatusCode() {
         return statusCode;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(statusCode);
+        dest.writeString(statusMessage);
     }
 }

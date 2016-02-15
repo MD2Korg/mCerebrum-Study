@@ -2,6 +2,7 @@ package org.md2k.study.operation.data_quality;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.datakitapi.DataKitAPI;
@@ -71,7 +72,7 @@ public class Sensor {
                     Log.d(TAG,"OnReceive()...");
                     lastSample=((DataTypeIntArray)dataType).getSample();
                     Intent intent=new Intent("data_quality");
-                    intent.putExtra("datasource",dataSourceClient.getDataSource());
+                    intent.putExtra("datasource",(Parcelable) dataSourceClient.getDataSource());
                     intent.putExtra("sample",lastSample);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }

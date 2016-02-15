@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,7 +42,14 @@ import org.md2k.utilities.data_format.DATA_QUALITY;
 
 public class ActivityMain extends AppCompatActivity {
     public static final String TAG = ActivityMain.class.getSimpleName();
+    public static final int RIP=0;
+    public static final int ECG=1;
+    public static final int ASWRIST=2;
+    public static final int MSBAND=3;
     OperationManager operationManager;
+    int lastStatus;
+    int dataQuality[]=new int[4];
+    String dataQualityName[]={"RIP","ECG","AS-WRIST","MSBAND"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +73,8 @@ public class ActivityMain extends AppCompatActivity {
     protected void onResume() {
         StudyConfigManager.getInstance(getApplicationContext());
         showApplication();
+        Status status=operationManager.getStatus();
+        lastStatus=status.getStatusCode();
         updateStatus(operationManager.getStatus());
         super.onResume();
     }
@@ -86,6 +96,7 @@ public class ActivityMain extends AppCompatActivity {
                 button.setCompoundDrawablesWithIntrinsicBounds(0, 0, imgResource, 0);
                 button.setText("OK");
                 button.setOnClickListener(null);
+                lastStatus=Status.SUCCESS;
                 break;
             case Status.APP_NOT_INSTALLED:
             case Status.SLEEPSTART_NOT_DEFINED:
@@ -95,6 +106,8 @@ public class ActivityMain extends AppCompatActivity {
             case Status.CONFIG_FILE_NOT_EXIST:
             case Status.CLEAR_OLD_DATA:
             case Status.DATAKIT_NOT_AVAILABLE:
+
+            case Status.DATAQUALITY_BAD:
                 linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.red_200));
                 textView_status.setText(status.getStatusMessage());
                 textView_status.setTextColor(ContextCompat.getColor(this, R.color.red_900));
@@ -177,6 +190,8 @@ public class ActivityMain extends AppCompatActivity {
         alertDialog.setTitle("PASSWORD (Admin Access)");
         alertDialog.setMessage("Enter Password");
         final EditText input = new EditText(ActivityMain.this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT |
+                InputType.TYPE_TEXT_VARIATION_PASSWORD);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
@@ -265,8 +280,9 @@ public class ActivityMain extends AppCompatActivity {
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Status status = (Status) intent.getSerializableExtra("status");
+            Status status = (Status) intent.getParcelableExtra("status");
             Log.d(TAG, "received..." + status.getStatusMessage());
+            lastStatus=status.getStatusCode();
             updateStatus(status);
         }
     };
@@ -284,19 +300,54 @@ public class ActivityMain extends AppCompatActivity {
                 imageView.setImageResource(R.drawable.ic_warning_amber_50dp);
                 break;
         }
+        updateStatusDataQuality();
+    }
+    public void updateStatusDataQuality(){
+        String msg="";
+        int flag=0;
+        if(lastStatus!=Status.SUCCESS) return;
+        for(int i=0;i<4;i++) {
+            if (dataQuality[i] != DATA_QUALITY.GOOD) {
+                flag = 1;
+                msg = dataQualityName[i];
+                switch (dataQuality[i]) {
+                    case DATA_QUALITY.BAND_OFF:
+                        msg = msg + " - not connected.";
+                        break;
+                    case DATA_QUALITY.NOT_WORN:
+                        msg = msg + " - not worn.";
+                        break;
+                    case DATA_QUALITY.BAND_LOOSE:
+                        msg = msg + " - band is not worn properly";
+                        break;
+                    case DATA_QUALITY.NOISE:
+                        msg = msg + " - band is not worn properly";
+                        break;
+                }
+                break;
+            }
+        }
+
+        if(flag==0)
+            updateStatus(new Status(Status.SUCCESS));
+        else{
+            updateStatus(new Status(Status.DATAQUALITY_BAD,msg));
+        }
+
 
     }
     private BroadcastReceiver mMessageReceiverDataQuality = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG,"onReceive ... DataQuality()...");
-            DataSource dataSource = (DataSource) intent.getSerializableExtra("datasource");
+            DataSource dataSource = (DataSource) intent.getParcelableExtra("datasource");
             ImageView imageView;
             int sample[]=intent.getIntArrayExtra("sample");
-            Log.d(TAG,"platformtype="+ dataSource.getPlatform().getType()+" datasource_type="+dataSource.getType()+" sample="+sample[0]);
+            Log.d(TAG, "platformtype=" + dataSource.getPlatform().getType() + " datasource_type=" + dataSource.getType()+" sample="+sample[0]);
             switch(dataSource.getPlatform().getType()){
                 case PlatformType.MICROSOFT_BAND:
                     imageView= (ImageView) findViewById(R.id.imageView_microsoftband);
+                    dataQuality[MSBAND]=sample[0];
                     updateDataQuality(imageView,sample[0]);
                     break;
                 case PlatformType.AUTOSENSE_CHEST:
@@ -304,10 +355,13 @@ public class ActivityMain extends AppCompatActivity {
                     updateDataQuality(imageView,sample[0]);
                     imageView= (ImageView) findViewById(R.id.imageView_ecg);
                     updateDataQuality(imageView,sample[1]);
+                    dataQuality[RIP]=sample[0];
+                    dataQuality[ECG]=sample[1];
                     break;
                 case PlatformType.AUTOSENSE_WRIST:
                     imageView= (ImageView) findViewById(R.id.imageView_autosense_wrist);
                     updateDataQuality(imageView,sample[0]);
+                    dataQuality[ASWRIST]=sample[0];
             }
         }
     };
