@@ -47,6 +47,10 @@
             android:name=".view.selfreport.ActivitySelfReport"
             android:screenOrientation="portrait"
             android:label="Self Report" />
+        <activity
+            android:name=".view.sleep.ActivitySleep"
+            android:screenOrientation="portrait"
+            android:label="Going to bed" />
         <service
             android:name=".ServiceSystemHealth"
             android:enabled="true"
