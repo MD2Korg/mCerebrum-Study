@@ -156,7 +156,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         mWakeLock.release();
         mProgressDialog.dismiss();
         if (result != null)
-            Toast.makeText(context, "Download error: " + result, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Download error: Please check the internet connection", Toast.LENGTH_LONG).show();
         else {
             Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Intent.ACTION_VIEW);

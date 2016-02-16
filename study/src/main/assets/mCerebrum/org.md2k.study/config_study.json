@@ -1,21 +1,12 @@
 {
   "config_info": {
-    "id": "ST001",
-    "name": "NorthWestern Smoking Study",
-    "version": "0.1",
-    "required_files": [
-      "org.md2k.phonesensor/default_config.json",
-      "org.md2k.autosense/default_config.json",
-      "org.md2k.plotter/default_config.json",
-      "org.md2k.ema/config_ema.json",
-      "org.md2k.ema/end_of_day_recording.json",
-      "org.md2k.ema/event_contingent_recording.json",
-      "org.md2k.ema/random_experience_sampling.json"
-    ]
+    "id": "STU00201566",
+    "name": "Demo Study",
+    "version": "1.0"
   },
   "study": {
-    "id": "ST001",
-    "name": "NorthWestern Smoking Study"
+    "id": "demo_study",
+    "name": "Demo Study"
   },
   "application": [
     {
@@ -35,6 +26,40 @@
       "settings": "org.md2k.phonesensor.ActivityPhoneSensorSettings",
       "config": "config.json",
       "download_link": "https://github.com/MD2Korg/mCerebrum-PhoneSensor/releases"
+    },
+    {
+      "name": "AutoSense",
+      "package_name": "org.md2k.autosense",
+      "service": "org.md2k.autosense.antradio.connection.ServiceAutoSenses",
+      "settings": "org.md2k.autosense.ActivityAutoSenseSettings",
+      "config": "config.json",
+      "download_link": "https://github.com/MD2Korg/mCerebrum-AutoSense/releases"
+    },
+    {
+      "name": "MicrosoftHealth",
+      "package_name":"com.microsoft.kapp",
+      "download_link":"market://details?id=com.microsoft.kapp"
+    },
+    {
+      "name": "MicrosoftBand",
+      "package_name": "org.md2k.microsoftband",
+      "service": "org.md2k.microsoftband.ServiceMicrosoftBands",
+      "settings": "org.md2k.microsoftband.ActivityMicrosoftBandSettings",
+      "config": "config.json",
+      "download_link": "https://github.com/MD2Korg/mCerebrum-MicrosoftBand/releases"
+    },
+    {
+      "name": "StreamProcessor",
+      "package_name": "org.md2k.streamprocessor",
+      "service": "org.md2k.streamprocessor.ServiceStreamProcessor",
+      "download_link": "https://github.com/MD2Korg/mCerebrum-StreamProcessor/releases"
+    },
+    {
+      "name": "NotificationManager",
+      "package_name": "org.md2k.notificationmanager",
+      "service": "org.md2k.notificationmanager.ServiceNotificationManager",
+      "config": "config.json",
+      "download_link": "https://github.com/MD2Korg/mCerebrum-NotificationManager/releases"
     },
     {
       "name": "EMA",
@@ -60,29 +85,13 @@
       "name": "Plotter",
       "package_name": "org.md2k.plotter",
       "download_link": "https://github.com/MD2Korg/mCerebrum-Plotter/releases"
-    }
-  ],
-  "data_quality":[
-    {
-      "data_source":  {
-        "platform":{
-          "type":"AUTOSENSE_CHEST",
-          "id":"CHEST"
-        },
-        "type":"RESPIRATION"
-      },
-      "restart_time":30000,
-      "check_time":5000
     },
     {
-      "datasource":  {
-        "platform":{
-          "type":"MICROSOFT_BAND"
-        },
-        "type":"ACCELEROMETER"
-      },
-      "restart_time":30000,
-      "check_time":5000
+      "name": "CerebralCortex",
+      "package_name": "org.md2k.cerebralcortex",
+      "settings": "org.md2k.cerebralcortex.ActivityDataExporterSettings",
+      "config": "config.json",
+      "download_link": "https://github.com/MD2Korg/mCerebrum-CerebralCortex/releases"
     }
   ],
   "admin_settings": [
@@ -123,26 +132,73 @@
       "value": true
     }
   ],
-  "user_settings": [
+  "user_apps": [
     {
       "id": "privacy",
-      "value": true
+      "text":"Privacy Control",
+      "icon_name":"ic_lock_red_48dp",
+      "package_name":"org.md2k.datakit",
+      "class_name":"org.md2k.datakit.ActivityPrivacy",
+      "show": true
     },
     {
       "id": "intervention",
-      "value": true
+      "text":"Intervention",
+      "icon":"ic_intervention_48dp",
+      "package_name":"org.md2k.study",
+      "class_name":"org.md2k.study.view.intervention.ActivityInterventionApp",
+      "show": true
     },
     {
       "id": "smoking_self_report",
-      "value": true
+      "text":"Smoking Report",
+      "icon":"ic_smoking_teal_48dp",
+      "package_name":"org.md2k.study",
+      "class_name":"org.md2k.study.view.selfreport.ActivitySelfReport",
+      "show": true
     },
     {
       "id": "plotter",
-      "value": true
+      "text":"Plotter",
+      "icon":"ic_plot_teal_48dp",
+      "package_name": "org.md2k.plotter",
+      "show": true
     },
     {
-      "id": "stop",
-      "value": true
+      "id":"notification_test",
+      "text":"Notification Test",
+      "icon":"ic_notification_teal_48dp",
+      "package_name": "org.md2k.notificationmanager",
+      "show":true
+    },
+    {
+      "id": "wakeup_sleep",
+      "text":"Going to Sleep",
+      "icon":"ic_sleep_teal_48dp",
+      "package_name":"org.md2k.study",
+      "class_name":"org.md2k.study.view.sleep.ActivitySleep",
+      "show": true
+    }
+  ],
+  "data_quality":[
+    {
+      "platform": {
+        "type": "MICROSOFT_BAND"
+      },
+      "type": "STATUS"
+    },
+    {
+      "platform": {
+        "type": "AUTOSENSE_CHEST",
+        "id":"CHEST"
+      },
+      "type": "STATUS"
+    },
+    {
+      "platform": {
+        "type": "AUTOSENSE_WRIST"
+      },
+      "type": "STATUS"
     }
   ]
 }

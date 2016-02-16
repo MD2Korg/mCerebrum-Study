@@ -16,8 +16,11 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
+import org.md2k.study.operation.OperationManager;
+import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -46,14 +49,18 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class UserInfoManager {
+    private static final String TAG = UserInfoManager.class.getSimpleName() ;
     DataKitAPI dataKitAPI;
     UserInfo userInfo;
     boolean isInDatabase;
+    Context context;
 
     public UserInfoManager(Context context) {
+        this.context=context;
         reset(context);
     }
-    public void reset(Context context){
+
+    public void reset(Context context) {
         isInDatabase = false;
         userInfo = new UserInfo();
         dataKitAPI = DataKitAPI.getInstance(context);
@@ -62,10 +69,16 @@ public class UserInfoManager {
 
     public void setUserId(String userId) {
         userInfo.user_id = userId;
+        String study_id=OperationManager.getInstance(context).studyInfoManager.getStudy_id();
+        UUID userUUID=new UUID(study_id.hashCode(),userId.hashCode());
+        userInfo.uuid= userUUID.toString();
+        Log.d(TAG, "usrInfo.uuid="+userInfo.uuid);
     }
-    public String getUserId(){
+
+    public String getUserId() {
         return userInfo.user_id;
     }
+
     public Status getStatus() {
         if (!dataKitAPI.isConnected()) return new Status(Status.DATAKIT_NOT_AVAILABLE);
         if (isInDatabase) return new Status(Status.SUCCESS);
@@ -88,8 +101,8 @@ public class UserInfoManager {
         if (!dataKitAPI.isConnected()) return false;
         if (isInDatabase) return false;
         if (userInfo == null) return false;
-        if(userInfo.user_id==null) return false;
-        if(userInfo.user_id.length()==0) return false;
+        if (userInfo.user_id == null) return false;
+        if (userInfo.user_id.length() == 0) return false;
         Gson gson = new Gson();
         String sample = gson.toJson(userInfo);
         DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
@@ -110,9 +123,11 @@ public class UserInfoManager {
 
     class UserInfo {
         String user_id;
+        String uuid;
 
         UserInfo() {
             user_id = null;
+            uuid = null;
         }
     }
 }
