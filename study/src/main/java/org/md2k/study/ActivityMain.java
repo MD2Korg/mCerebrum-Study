@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.study.config.StudyConfigManager;
@@ -42,18 +42,22 @@ import org.md2k.utilities.data_format.DATA_QUALITY;
 
 public class ActivityMain extends AppCompatActivity {
     public static final String TAG = ActivityMain.class.getSimpleName();
-    public static final int RIP=0;
-    public static final int ECG=1;
-    public static final int ASWRIST=2;
-    public static final int MSBAND=3;
+    public static final int RIP = 0;
+    public static final int ECG = 1;
+    public static final int ASWRIST = 2;
+    public static final int MSBAND = 3;
+    public static final int SYSTEM_CHECK_TIMER = 5000;
     OperationManager operationManager;
-    int lastStatus;
-    int dataQuality[]=new int[4];
-    String dataQualityName[]={"RIP","ECG","AS-WRIST","MSBAND"};
+    Status lastStatusSystem;
+    Status lastStatusDataQuality;
+    int dataQuality[] = new int[4];
+    String dataQualityName[] = {"Respiration", "ECG", "WRIST(AutoSense)", "Wrist(MicrosoftBand"};
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        handler = new Handler();
         if (!DefaultConfigManager.prepareConfig(getApplicationContext())) {
             Toast.makeText(ActivityMain.this, "Configuration failure...", Toast.LENGTH_LONG).show();
             finish();
@@ -69,34 +73,46 @@ public class ActivityMain extends AppCompatActivity {
         operationManager.connect();
     }
 
+    private Runnable updateStatusScreen = new Runnable() {
+        @Override
+        public void run() {
+            Status status = operationManager.getStatus();
+            if (lastStatusSystem == null || lastStatusSystem.getStatusCode() != status.getStatusCode()) {
+                lastStatusSystem = status;
+                updateStatus();
+            } else if (lastStatusSystem != null && lastStatusSystem.getStatusCode() == Status.SUCCESS) {
+                updateStatusDataQuality();
+
+            }
+            handler.postDelayed(updateStatusScreen, SYSTEM_CHECK_TIMER);
+        }
+    };
+
     @Override
     protected void onResume() {
         StudyConfigManager.getInstance(getApplicationContext());
         showApplication();
-        Status status=operationManager.getStatus();
-        lastStatus=status.getStatusCode();
-        updateStatus(operationManager.getStatus());
+        handler.post(updateStatusScreen);
         super.onResume();
     }
 
-    void updateStatus(Status status) {
+    void updateStatus() {
         TextView textView_status = (TextView) findViewById(R.id.textView_status);
         Button button = (Button) findViewById(R.id.button_status);
         int imgResource;
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.layout_health);
 
 
-        switch (status.getStatusCode()) {
+        switch (lastStatusSystem.getStatusCode()) {
             case Status.SUCCESS:
                 linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.teal_50));
-                textView_status.setText(status.getStatusMessage());
+                textView_status.setText(lastStatusSystem.getStatusMessage());
                 textView_status.setTextColor(ContextCompat.getColor(this, R.color.teal_700));
                 imgResource = R.drawable.ic_ok_teal_50dp;
                 button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_teal));
                 button.setCompoundDrawablesWithIntrinsicBounds(0, 0, imgResource, 0);
                 button.setText("OK");
                 button.setOnClickListener(null);
-                lastStatus=Status.SUCCESS;
                 break;
             case Status.APP_NOT_INSTALLED:
             case Status.SLEEPSTART_NOT_DEFINED:
@@ -107,9 +123,8 @@ public class ActivityMain extends AppCompatActivity {
             case Status.CLEAR_OLD_DATA:
             case Status.DATAKIT_NOT_AVAILABLE:
 
-            case Status.DATAQUALITY_BAD:
                 linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.red_200));
-                textView_status.setText(status.getStatusMessage());
+                textView_status.setText(lastStatusSystem.getStatusMessage());
                 textView_status.setTextColor(ContextCompat.getColor(this, R.color.red_900));
                 imgResource = R.drawable.ic_error_grey_50dp;
                 button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_red));
@@ -124,7 +139,7 @@ public class ActivityMain extends AppCompatActivity {
                 break;
             case Status.APP_NOT_RUNNING:
                 linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.red_200));
-                textView_status.setText(status.getStatusMessage());
+                textView_status.setText(lastStatusSystem.getStatusMessage());
                 textView_status.setTextColor(ContextCompat.getColor(this, R.color.red_900));
                 imgResource = R.drawable.ic_error_grey_50dp;
                 button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_red));
@@ -282,12 +297,90 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Status status = (Status) intent.getParcelableExtra("status");
             Log.d(TAG, "received..." + status.getStatusMessage());
-            lastStatus=status.getStatusCode();
-            updateStatus(status);
+            lastStatusSystem = status;
+            updateStatus();
         }
     };
-    private void updateDataQuality(ImageView imageView, int status){
-        switch(status){
+
+    public void updateStatusDataQuality() {
+        String msg = "";
+        int flag = 0;
+        for (int i = 0; i < 4; i++) {
+            if (dataQuality[i] != DATA_QUALITY.GOOD) {
+                flag = 1;
+                msg = dataQualityName[i];
+                switch (dataQuality[i]) {
+                    case DATA_QUALITY.BAND_OFF:
+                        msg = msg + " - not connected.";
+                        break;
+                    case DATA_QUALITY.NOT_WORN:
+                        msg = msg + " - not worn.";
+                        break;
+                    case DATA_QUALITY.BAND_LOOSE:
+                        msg = msg + " - not worn properly";
+                        break;
+                    case DATA_QUALITY.NOISE:
+                        msg = msg + " - not attached properly";
+                        break;
+                }
+                break;
+            }
+        }
+        if (lastStatusSystem == null || lastStatusSystem.getStatusCode() != Status.SUCCESS) return;
+        TextView textView_status = (TextView) findViewById(R.id.textView_status);
+        Button button = (Button) findViewById(R.id.button_status);
+        int imgResource;
+        if (flag == 1) {
+            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.layout_health);
+            linearLayout.setBackground(ContextCompat.getDrawable(this, R.color.red_200));
+            textView_status.setText(msg);
+            textView_status.setTextColor(ContextCompat.getColor(this, R.color.red_900));
+            imgResource = R.drawable.ic_error_grey_50dp;
+            button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_red));
+            button.setCompoundDrawablesWithIntrinsicBounds(0, 0, imgResource, 0);
+            button.setText("FIX");
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                }
+            });
+        }else{
+                updateStatus();
+        }
+    }
+
+private BroadcastReceiver mMessageReceiverDataQuality = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "onReceive ... DataQuality()...");
+        DataSource dataSource = (DataSource) intent.getParcelableExtra("datasource");
+        ImageView imageView;
+        int sample[] = intent.getIntArrayExtra("sample");
+        Log.d(TAG, "platformtype=" + dataSource.getPlatform().getType() + " datasource_type=" + dataSource.getType() + " sample=" + sample[0]);
+        switch (dataSource.getPlatform().getType()) {
+            case PlatformType.MICROSOFT_BAND:
+                imageView = (ImageView) findViewById(R.id.imageView_microsoftband);
+                dataQuality[MSBAND] = sample[0];
+                updateDataQuality(imageView, sample[0]);
+                break;
+            case PlatformType.AUTOSENSE_CHEST:
+                imageView = (ImageView) findViewById(R.id.imageView_respiration);
+                updateDataQuality(imageView, sample[0]);
+                imageView = (ImageView) findViewById(R.id.imageView_ecg);
+                updateDataQuality(imageView, sample[1]);
+                dataQuality[RIP] = sample[0];
+                dataQuality[ECG] = sample[1];
+                break;
+            case PlatformType.AUTOSENSE_WRIST:
+                imageView = (ImageView) findViewById(R.id.imageView_autosense_wrist);
+                updateDataQuality(imageView, sample[0]);
+                dataQuality[ASWRIST] = sample[0];
+        }
+    }
+};
+
+    private void updateDataQuality(ImageView imageView, int status) {
+        switch (status) {
             case DATA_QUALITY.GOOD:
                 imageView.setImageResource(R.drawable.ic_ok_teal_50dp);
                 break;
@@ -302,69 +395,6 @@ public class ActivityMain extends AppCompatActivity {
         }
         updateStatusDataQuality();
     }
-    public void updateStatusDataQuality(){
-        String msg="";
-        int flag=0;
-        if(lastStatus!=Status.SUCCESS) return;
-        for(int i=0;i<4;i++) {
-            if (dataQuality[i] != DATA_QUALITY.GOOD) {
-                flag = 1;
-                msg = dataQualityName[i];
-                switch (dataQuality[i]) {
-                    case DATA_QUALITY.BAND_OFF:
-                        msg = msg + " - not connected.";
-                        break;
-                    case DATA_QUALITY.NOT_WORN:
-                        msg = msg + " - not worn.";
-                        break;
-                    case DATA_QUALITY.BAND_LOOSE:
-                        msg = msg + " - band is not worn properly";
-                        break;
-                    case DATA_QUALITY.NOISE:
-                        msg = msg + " - band is not worn properly";
-                        break;
-                }
-                break;
-            }
-        }
-
-        if(flag==0)
-            updateStatus(new Status(Status.SUCCESS));
-        else{
-            updateStatus(new Status(Status.DATAQUALITY_BAD,msg));
-        }
-
-
-    }
-    private BroadcastReceiver mMessageReceiverDataQuality = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG,"onReceive ... DataQuality()...");
-            DataSource dataSource = (DataSource) intent.getParcelableExtra("datasource");
-            ImageView imageView;
-            int sample[]=intent.getIntArrayExtra("sample");
-            Log.d(TAG, "platformtype=" + dataSource.getPlatform().getType() + " datasource_type=" + dataSource.getType()+" sample="+sample[0]);
-            switch(dataSource.getPlatform().getType()){
-                case PlatformType.MICROSOFT_BAND:
-                    imageView= (ImageView) findViewById(R.id.imageView_microsoftband);
-                    dataQuality[MSBAND]=sample[0];
-                    updateDataQuality(imageView,sample[0]);
-                    break;
-                case PlatformType.AUTOSENSE_CHEST:
-                    imageView= (ImageView) findViewById(R.id.imageView_respiration);
-                    updateDataQuality(imageView,sample[0]);
-                    imageView= (ImageView) findViewById(R.id.imageView_ecg);
-                    updateDataQuality(imageView,sample[1]);
-                    dataQuality[RIP]=sample[0];
-                    dataQuality[ECG]=sample[1];
-                    break;
-                case PlatformType.AUTOSENSE_WRIST:
-                    imageView= (ImageView) findViewById(R.id.imageView_autosense_wrist);
-                    updateDataQuality(imageView,sample[0]);
-                    dataQuality[ASWRIST]=sample[0];
-            }
-        }
-    };
 
     @Override
     public void onDestroy() {
