@@ -174,71 +174,78 @@
     </LinearLayout>
 
     <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
         <LinearLayout
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_weight=".75">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Day Starts:"
-                android:id="@+id/textView4"
-                android:layout_weight="0.02"
-                android:layout_marginLeft="10dp" />
+                android:layout_weight=".5">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Small Text"
-                android:id="@+id/textView6"
-                android:layout_weight=".30" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Day Starts:"
+                    android:id="@+id/textView4"
+                    android:layout_weight="0.02"
+                    android:layout_marginLeft="10dp"
+                    android:textStyle="bold" />
 
-            <Button
-                style="@style/app_theme_teal_light.button"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text=""
+                    android:id="@+id/textView6"
+                    android:layout_weight=".30" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Start Day"
-                android:id="@+id/button"
-                android:layout_weight="0.001" />
+                android:layout_weight=".5">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Day Ends:  "
+                    android:id="@+id/textView5"
+                    android:layout_weight="0.02"
+                    android:layout_marginLeft="10dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text=""
+                    android:id="@+id/textView7"
+                    android:layout_weight=".30" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <Button
+            style="@style/app_theme_teal_light.button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Day"
+            android:id="@+id/button"
+            android:layout_weight="0.001" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Day Ends:  "
-                android:id="@+id/textView5"
-                android:layout_weight="0.02"
-                android:layout_marginLeft="10dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Small Text"
-                android:id="@+id/textView7"
-                android:layout_weight=".30" />
-
-            <Button
-                style="@style/app_theme_teal_light.button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="End Day"
-                android:id="@+id/button2"
-                android:layout_weight="0.001" />
-        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

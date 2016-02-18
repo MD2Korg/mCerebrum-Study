@@ -31,8 +31,14 @@ import android.os.Parcelable;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Status implements Parcelable {
+    int statusType;
     int statusCode;
     String statusMessage;
+
+    public static final int STATUS_TYPE_SUCCESS=0;
+    public static final int STATUS_TYPE_SETTINGS_ERROR=1;
+    public static final int STATUS_TYPE_SYSTEM_ERROR=2;
+    public static final int STATUS_TYPE_DATA_ERROR=3;
 
     public static final int SUCCESS = 0;
     public static final int APP_NOT_INSTALLED = 1;
@@ -72,17 +78,42 @@ public class Status implements Parcelable {
             "ERROR: Device is not worn"
     };
 
-    public Status(int statusCode, String statusMessage) {
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-    }
-
     public Status(int statusCode) {
         this.statusCode = statusCode;
         this.statusMessage = message[statusCode];
+        switch(statusCode){
+            case APP_NOT_INSTALLED:
+            case APP_UPDATE_AVAILABLE:
+            case USERID_NOT_DEFINED:
+            case SLEEPEND_NOT_DEFINED:
+            case SLEEPSTART_NOT_DEFINED:
+            case APP_CONFIG_ERROR:
+            case CONFIG_FILE_NOT_EXIST:
+            case CLEAR_OLD_DATA:
+            case DATAKIT_NOT_AVAILABLE:
+            this.statusType=STATUS_TYPE_SETTINGS_ERROR;
+            break;
+            case APP_NOT_RUNNING:
+                this.statusType=STATUS_TYPE_SYSTEM_ERROR;
+                break;
+            case DATAQUALITY_GOOD:
+            case DATAQUALITY_OFF:
+            case DATAQUALITY_LOOSE:
+            case DATAQUALITY_NOISY:
+            case DATAQUALITY_NOT_WORN:
+            case DATAQUALITY_BAD:
+                this.statusType=STATUS_TYPE_DATA_ERROR;
+                break;
+            case PRIVACY_ACTIVE:
+                this.statusType=STATUS_TYPE_SUCCESS;
+            default:
+                this.statusType=STATUS_TYPE_SUCCESS;
+
+        }
     }
 
     protected Status(Parcel in) {
+        statusType=in.readInt();
         statusCode = in.readInt();
         statusMessage = in.readString();
     }
@@ -118,6 +149,7 @@ public class Status implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(statusType);
         dest.writeInt(statusCode);
         dest.writeString(statusMessage);
     }

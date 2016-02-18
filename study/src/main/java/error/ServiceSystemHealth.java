@@ -1,4 +1,4 @@
-package org.md2k.study;
+package error;
 
 import android.app.Service;
 import android.content.Context;
@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 
+import org.md2k.study.Constants;
+import org.md2k.study.Status;
 import org.md2k.study.operation.OperationManager;
 import org.md2k.utilities.Report.Log;
 

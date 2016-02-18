@@ -52,7 +52,7 @@
             android:screenOrientation="portrait"
             android:label="Going to bed" />
         <service
-            android:name=".ServiceSystemHealth"
+            android:name="error.ServiceSystemHealth"
             android:enabled="true"
             android:exported="true" />
     </application>

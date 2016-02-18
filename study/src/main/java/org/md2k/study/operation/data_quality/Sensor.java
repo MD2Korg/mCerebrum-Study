@@ -72,7 +72,7 @@ public class Sensor {
                     Log.d(TAG,"OnReceive()...");
                     lastSample=((DataTypeIntArray)dataType).getSample();
                     Intent intent=new Intent("data_quality");
-                    intent.putExtra("datasource",(Parcelable) dataSourceClient.getDataSource());
+                    intent.putExtra("datasource", dataSourceClient.getDataSource());
                     intent.putExtra("sample",lastSample);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
