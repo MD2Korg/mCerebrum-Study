@@ -22,6 +22,7 @@ import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.study_info.StudyInfoManager;
 import org.md2k.utilities.data_format.UserInfo;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -69,8 +70,10 @@ public class UserInfoManager extends Model {
 
     public void setUserId(String userId) {
         userInfo.setUser_id(userId);
+
         String study_id= ((StudyInfoManager)ModelManager.getInstance(context).getModel(ModelManager.MODEL_STUDY_INFO)).getStudy_id();
-        UUID userUUID=new UUID(study_id.hashCode(),userId.hashCode());
+        UUID userUUID=UUID.nameUUIDFromBytes((study_id+userId).getBytes());
+
         userInfo.setUuid(userUUID.toString());
     }
 

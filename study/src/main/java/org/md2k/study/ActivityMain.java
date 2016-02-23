@@ -19,7 +19,6 @@ import android.widget.Toast;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.Model;
-import org.md2k.study.model.app_service.AppServiceManager;
 import org.md2k.study.model.day_start_end.DayStartEndInfoManager;
 import org.md2k.study.model.study_info.StudyInfoManager;
 import org.md2k.study.view.user.AppAdapter;
@@ -66,7 +65,7 @@ public class ActivityMain extends ActivityDataQuality {
         gridViewApplication.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (lastStatus.getStatusCode() != Status.SUCCESS)
+                if (lastStatus.getStatusCode() != Status.SUCCESS && lastStatus.getStatusCode()!=Status.DAY_START_NOT_AVAILABLE)
                     Toast.makeText(ActivityMain.this, "Please configure the study first...", Toast.LENGTH_SHORT).show();
                 else {
                     String packageName = userApps.get(position).getOperation().getPackage_name();
@@ -104,7 +103,7 @@ public class ActivityMain extends ActivityDataQuality {
     }
     public String getDateTime(long timestamp){
         Date date = new Date (timestamp);
-        return new SimpleDateFormat("hh-mm-ss a").format(date);
+        return new SimpleDateFormat("hh:mm:ss a").format(date);
     }
     public void updateDayStartEnd(Status status){
         final DayStartEndInfoManager dayStartEndInfoManager= (DayStartEndInfoManager) userManager.getModels(ModelManager.MODEL_DAY_START_END);
@@ -178,12 +177,13 @@ public class ActivityMain extends ActivityDataQuality {
     public void updateStatus(Status status) {
         ((TextView) findViewById(R.id.textView_status)).setText(status.getStatusMessage());
         Button button = (Button) findViewById(R.id.button_status);
-        if (status.getStatusCode() == Status.SUCCESS) {
+        if (status.getStatusCode() == Status.SUCCESS || status.getStatusCode()==Status.DAY_COMPLETED) {
             findViewById(R.id.layout_health).setBackground(ContextCompat.getDrawable(this, R.color.teal_50));
             ((TextView) findViewById(R.id.textView_status)).setTextColor(ContextCompat.getColor(this, R.color.teal_700));
             button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_teal));
             button.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_ok_teal_50dp, 0);
             button.setText("OK");
+            button.setEnabled(false);
             button.setOnClickListener(null);
 
         } else {
@@ -192,12 +192,18 @@ public class ActivityMain extends ActivityDataQuality {
             button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_red));
             button.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_error_grey_50dp, 0);
             button.setText("FIX");
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showPasswordDialog();
-                }
-            });
+            if (status.getStatusCode() == Status.DAY_START_NOT_AVAILABLE) {
+                button.setEnabled(false);
+
+            } else {
+                button.setEnabled(true);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showPasswordDialog();
+                    }
+                });
+            }
         }
     }
 

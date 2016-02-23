@@ -72,7 +72,8 @@ public class ServiceSystemHealth extends Service {
     AppServiceManager appServiceManager;
     public Status[] dataQuality;
     public long lastPrivacyTime=0;
-    public Status lastStatus;
+    public Status lastStatus=new Status(Status.SUCCESS);
+    public Status lastDayStatus=new Status(Status.SUCCESS);
 
     public void onCreate() {
         super.onCreate();
@@ -88,7 +89,7 @@ public class ServiceSystemHealth extends Service {
         handler.post(system_health);
         Log.d(TAG, "onCreate()");
     }
-    void checkAdminHealth(){
+    Status checkAdminHealth(){
         Status status = modelManager.getStatus();
         if (status.getStatusCode() == Status.SUCCESS)
             status = adminManager.getStatus();
@@ -96,11 +97,7 @@ public class ServiceSystemHealth extends Service {
         if(status.getStatusCode()!=Status.SUCCESS)
             if(status.getStatusCode()==Status.APP_NOT_RUNNING)
                 ((AppServiceManager)modelManager.getModel(ModelManager.MODEL_APP_SERVICE)).start();
-        lastStatus=status;
-        Intent intent=new Intent(ActivityMain.INTENT_NAME);
-        intent.putExtra(ActivityMain.TYPE, ActivityMain.STATUS);
-        intent.putExtra(ActivityMain.VALUE, status);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        return status;
     }
     void checkDataQuality(){
         if(dataQuality==null) return;
@@ -131,30 +128,49 @@ public class ServiceSystemHealth extends Service {
             }
         }
     }
-    void checkDayStartEnd(){
+    Status checkDayStartEnd(){
+        Status curDayStatus=null;
         DayStartEndInfoManager dayStartEndInfoManager= (DayStartEndInfoManager) userManager.getModels(ModelManager.MODEL_DAY_START_END);
         if(dayStartEndInfoManager!=null) {
-            Status status = dayStartEndInfoManager.getStatus();
+            curDayStatus = dayStartEndInfoManager.getStatus();
+        }
+        return curDayStatus;
+    }
+    public void sendMessage(Status curStatus, Status curDayStatus){
+ /*       if(curStatus.getStatusCode()==lastStatus.getStatusCode() && curStatus.getStatusMessage().equals(lastStatus.getStatusMessage())
+                && curDayStatus.getStatusCode()==lastDayStatus.getStatusCode() && curDayStatus.getStatusMessage().equals(lastDayStatus.getStatusMessage()))
+            return;
+*/
+        if(curStatus.getStatusCode()==Status.SUCCESS){
+            lastStatus=curDayStatus;
+            Intent intent=new Intent(ActivityMain.INTENT_NAME);
+            intent.putExtra(ActivityMain.TYPE, ActivityMain.STATUS);
+            intent.putExtra(ActivityMain.VALUE, lastStatus);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        }else{
+            lastStatus=curStatus;
+            Intent intent=new Intent(ActivityMain.INTENT_NAME);
+            intent.putExtra(ActivityMain.TYPE, ActivityMain.STATUS);
+            intent.putExtra(ActivityMain.VALUE, lastStatus);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+        }
+        if(lastDayStatus.getStatusCode()!=curDayStatus.getStatusCode()) {
+            lastDayStatus=curDayStatus;
             Intent intent = new Intent(ActivityMain.INTENT_NAME);
             intent.putExtra(ActivityMain.TYPE, ActivityMain.DAY_START_END);
-            if(lastStatus.getStatusCode()==Status.SUCCESS) {
-                intent.putExtra(ActivityMain.VALUE, status);
-
-            }else{
-                intent.putExtra(ActivityMain.VALUE,new Status(Status.DAY_ERROR));
-            }
+            intent.putExtra(ActivityMain.VALUE, lastDayStatus);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }
-
-
     Runnable system_health = new Runnable() {
         @Override
         public void run() {
-            checkAdminHealth();
             checkDataQuality();
             checkPrivacy();
-            checkDayStartEnd();
+            Status curStatus=checkAdminHealth();
+            Status curDayStatus=checkDayStartEnd();
+            sendMessage(curStatus, curDayStatus);
             handler.postDelayed(system_health, Constants.HEALTH_CHECK_REPEAT);
         }
     };

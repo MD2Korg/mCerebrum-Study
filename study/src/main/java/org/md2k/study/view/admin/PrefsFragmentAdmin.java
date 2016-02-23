@@ -116,6 +116,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     @Override
     public void onResume() {
         if (isRefresh) {
+            ((AppServiceManager)ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE)).stop();
             adminManager.reset();
             isRefresh = false;
         }
