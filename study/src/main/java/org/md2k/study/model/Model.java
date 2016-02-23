@@ -1,6 +1,10 @@
-package org.md2k.study.config;
+package org.md2k.study.model;
 
-import java.util.ArrayList;
+import android.content.Context;
+
+import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.study.Status;
+import org.md2k.study.config.Operation;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,22 +32,30 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
-    public String getId() {
-        return id;
+public abstract class Model {
+    protected Operation operation;
+    protected DataKitAPI dataKitAPI;
+    protected Context context;
+    public abstract Status getStatus();
+    public abstract void reset();
+    public Model(Context context, DataKitAPI dataKitAPI, Operation operation){
+        this.context=context;
+        this.dataKitAPI=dataKitAPI;
+        this.operation=operation;
     }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+    public void save(){
+
     }
 
-    public String getName() {
-        return name;
+    public Operation getOperation() {
+        return operation;
+    }
+
+    public DataKitAPI getDataKitAPI() {
+        return dataKitAPI;
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

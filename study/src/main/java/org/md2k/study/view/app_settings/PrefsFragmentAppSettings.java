@@ -6,6 +6,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +16,12 @@ import android.widget.Toast;
 
 import org.md2k.study.R;
 import org.md2k.study.Status;
-import org.md2k.study.operation.OperationManager;
-import org.md2k.study.operation.app_settings.AppSettings;
-import org.md2k.study.operation.app_settings.AppsSettings;
+import org.md2k.study.controller.ModelManager;
+import org.md2k.study.model.app_settings.AppSettings;
+import org.md2k.study.model.app_settings.AppSettingsManager;
 import org.md2k.utilities.Apps;
+
+import org.md2k.study.system_health.ServiceSystemHealth;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -49,7 +52,7 @@ import org.md2k.utilities.Apps;
 public class PrefsFragmentAppSettings extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentAppSettings.class.getSimpleName();
-    AppsSettings appsSettings;
+    AppSettingsManager appSettingsManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,18 +89,18 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     }
 
     void setupAppSettings() {
-        appsSettings = OperationManager.getInstance(getActivity()).appsSettings;
+        appSettingsManager = (AppSettingsManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SETTINGS);
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_settings");
         preferenceCategory.removeAll();
-        for (int i = 0; i < appsSettings.getAppSettingsList().size(); i++) {
+        for (int i = 0; i < appSettingsManager.getAppSettingsList().size(); i++) {
             Preference preference = new Preference(getActivity());
-            preference.setTitle(appsSettings.getAppSettingsList().get(i).getName());
-            preference.setKey(appsSettings.getAppSettingsList().get(i).getName());
+            preference.setTitle(appSettingsManager.getAppSettingsList().get(i).getName());
+            preference.setKey(appSettingsManager.getAppSettingsList().get(i).getName());
             final int finalI = i;
             preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    AppSettings settingsApp = appsSettings.getAppSettingsList().get(finalI);
+                    AppSettings settingsApp = appSettingsManager.getAppSettingsList().get(finalI);
                     if (!Apps.isPackageInstalled(getActivity(), settingsApp.getPackage_name())) {
                         Toast.makeText(getActivity(),"ERROR: Please install \""+settingsApp.getName()+"\" app first...", Toast.LENGTH_SHORT).show();
                         return false;
@@ -109,7 +112,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
                 }
             });
             preferenceCategory.addPreference(preference);
-            updatePreference(appsSettings.getAppSettingsList().get(i));
+            updatePreference(appSettingsManager.getAppSettingsList().get(i));
 
         }
     }
@@ -122,6 +125,13 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
                 getActivity().finish();
             }
         });
+    }
+    @Override
+    public void onStop(){
+        Intent intent = new Intent(ServiceSystemHealth.INTENT_NAME);
+        intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.SETTINGS);
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        super.onStop();
     }
 
 }

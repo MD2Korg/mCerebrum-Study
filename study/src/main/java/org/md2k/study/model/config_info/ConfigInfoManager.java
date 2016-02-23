@@ -1,4 +1,15 @@
-package org.md2k.study.config;
+package org.md2k.study.model.config_info;
+
+import android.content.Context;
+
+import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.study.Constants;
+import org.md2k.study.Status;
+import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.ConfigInfo;
+import org.md2k.study.config.Operation;
+import org.md2k.study.model.Model;
+import org.md2k.utilities.Files;
 
 import java.util.ArrayList;
 
@@ -28,22 +39,38 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
-    public String getId() {
-        return id;
-    }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+public class ConfigInfoManager extends Model {
+    ConfigInfo configInfo;
+
+    public ConfigInfoManager(Context context,DataKitAPI dataKitAPI, Operation operation) {
+        super(context, dataKitAPI, operation);
+        this.configInfo = ConfigManager.getInstance(context).getConfig().getConfig_info();
     }
 
-    public String getName() {
-        return name;
+    public Status getStatus() {
+        if (configInfo.getRequired_files() == null || configInfo.getRequired_files().size() == 0)
+            return new Status(Status.SUCCESS);
+        for (int i = 0; i < configInfo.getRequired_files().size(); i++) {
+            if (!Files.isExist(Constants.CONFIG_DIRECTORY_BASE + configInfo.getRequired_files().get(i)))
+                return new Status(Status.CONFIG_FILE_NOT_EXIST);
+        }
+        return new Status(Status.SUCCESS);
+    }
+
+    @Override
+    public void reset() {
+
+    }
+
+    public String getId() {
+        return configInfo.getId();
+    }
+
+    public String getVersion() {
+        return configInfo.getVersion();
+    }
+
+    public ArrayList<String> getRequired_files() {
+        return configInfo.getRequired_files();
     }
 }

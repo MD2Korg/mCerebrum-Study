@@ -1,5 +1,7 @@
 package org.md2k.study.config;
 
+import org.md2k.datakitapi.source.datasource.DataSource;
+
 import java.util.ArrayList;
 
 /**
@@ -28,22 +30,45 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
-    public String getId() {
-        return id;
-    }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+public class Config {
+    ConfigInfo config_info;
+    StudyInfo study_info;
+    ArrayList<Application> application;
+    ArrayList<Operation> operation;
+    Admin admin;
+    User user;
+    ArrayList<DataSource> data_quality;
+
+    public ConfigInfo getConfig_info() {
+        return config_info;
     }
 
-    public String getName() {
-        return name;
+    public ArrayList<Application> getApplication() {
+        return application;
+    }
+
+    public StudyInfo getStudy_info() {
+        return study_info;
+    }
+
+    public Admin getAdmin() {
+        return admin;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public ArrayList<DataSource> getData_quality() {
+        return data_quality;
+    }
+
+    public ArrayList<Operation> getOperation() {
+        return operation;
+    }
+    public Operation getOperation(String id){
+        for(int i=0;i<operation.size();i++)
+            if(operation.get(i).getId().equals(id)) return operation.get(i);
+        return null;
     }
 }

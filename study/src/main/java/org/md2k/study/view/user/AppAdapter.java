@@ -7,6 +7,7 @@ package org.md2k.study.view.user;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +15,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.R;
-import org.md2k.study.operation.user_app.UserApp;
+import org.md2k.study.Status;
+import org.md2k.study.controller.ModelManager;
+import org.md2k.study.model.Model;
+import org.md2k.study.model.privacy_control.PrivacyControlManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.List;
@@ -24,18 +29,18 @@ public class AppAdapter extends BaseAdapter {
 
     private static final String TAG = AppAdapter.class.getSimpleName();
     private LayoutInflater layoutinflater;
-    private List<UserApp> userApps;
+    private List<Model> models;
     private Context context;
 
-    public AppAdapter(Context context, List<UserApp> customizedListView) {
+    public AppAdapter(Context context, List<Model> customizedListView) {
         this.context = context;
         layoutinflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        userApps = customizedListView;
+        models = customizedListView;
     }
 
     @Override
     public int getCount() {
-        return userApps.size();
+        return models.size();
     }
 
     @Override
@@ -61,11 +66,21 @@ public class AppAdapter extends BaseAdapter {
         } else {
             listViewHolder = (ViewHolder) convertView.getTag();
         }
-
-        listViewHolder.textInListView.setText(userApps.get(position).getName());
-
-        listViewHolder.imageInListView.setImageDrawable(getIconFromApplication(userApps.get(position).getIcon()));
-
+        listViewHolder.textInListView.setText(models.get(position).getOperation().getName());
+        listViewHolder.imageInListView.setImageDrawable(getIconFromApplication(models.get(position).getOperation().getIcon()));
+        if(models.get(position).getOperation().getId().equals(ModelManager.MODEL_PRIVACY)){
+            PrivacyControlManager privacyControlManager=(PrivacyControlManager)models.get(position);
+            if(privacyControlManager.getStatus().getStatusCode()== Status.PRIVACY_ACTIVE){
+                long remainingTime=privacyControlManager.getPrivacyData().getStartTimeStamp()+privacyControlManager.getPrivacyData().getDuration().getValue()- DateTime.getDateTime();
+                if(remainingTime>0) {
+                    remainingTime/=1000;
+                    int sec= (int) (remainingTime%60);
+                    int min= (int) (remainingTime/60);
+                    listViewHolder.imageInListView.setImageDrawable(getIconFromApplication("ic_lock_red_48dp"));
+                    listViewHolder.textInListView.setText("Privacy\n" + String.format("%02d:%02d", min, sec));
+                }
+            }
+        }
         return convertView;
     }
 

@@ -1,7 +1,5 @@
 package org.md2k.study.config;
 
-import java.util.ArrayList;
-
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -28,22 +26,45 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
+public class Operation {
     String id;
+    String type;
     String name;
-    String version;
-    ArrayList<String> required_files;
+    String icon;
+    String package_name;
+    String class_name;
+    public Operation(){}
+
+    public Operation(String id, String type, String name, String icon, String package_name, String class_name) {
+        this.id = id;
+        this.type=type;
+        this.name = name;
+        this.icon = icon;
+        this.package_name = package_name;
+        this.class_name = class_name;
+    }
+
     public String getId() {
         return id;
-    }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public String getPackage_name() {
+        return package_name;
+    }
+
+    public String getClass_name() {
+        return class_name;
+    }
+
+    public String getType() {
+        return type;
     }
 }

@@ -1,6 +1,4 @@
-package org.md2k.study.config;
-
-import java.util.ArrayList;
+package org.md2k.study.model.privacy_control;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,22 +26,35 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
+public class Duration {
     String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
+    String title;
+    String summary;
+    long value;
+    long min_value;
+    long max_value;
+
     public String getId() {
         return id;
     }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+
+    public String getTitle() {
+        return title;
     }
 
-    public String getName() {
-        return name;
+    public String getSummary() {
+        return summary;
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public long getMin_value() {
+        return min_value;
+    }
+
+    public long getMax_value() {
+        return max_value;
     }
 }

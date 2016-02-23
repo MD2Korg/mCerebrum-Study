@@ -11,7 +11,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.md2k.study.R;
-import org.md2k.study.operation.user_app.UserApp;
+import org.md2k.study.config.Operation;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
 
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ActivityInterventionApp extends AppCompatActivity {
     public static final String TAG = ActivityInterventionApp.class.getSimpleName();
-    List<UserApp> items = new ArrayList<>();
+    List<Operation> items = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class ActivityInterventionApp extends AppCompatActivity {
         setContentView(R.layout.activity_intervention_app);
         GridView gridview = (GridView) findViewById(R.id.gridview);
 
-        List<UserApp> allItems = getAllItemObject();
+        List<Operation> allItems = getAllItemObject();
         AdapterIntervention adapterIntervention = new AdapterIntervention(ActivityInterventionApp.this, allItems);
         gridview.setAdapter(adapterIntervention);
 
@@ -80,10 +80,10 @@ public class ActivityInterventionApp extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    private List<UserApp> getAllItemObject() {
-        items.add(new UserApp("mood_surfing","Mood Surfing",null, "org.md2k.moodsurfing"));
-        items.add(new UserApp("thought_shakeup","Thought Shakeup", null,"org.md2k.thoughtshakeup"));
-        items.add(new UserApp("head_space","Head Space",null, "com.getsomeheadspace.android"));
+    private List<Operation> getAllItemObject() {
+        items.add(new Operation("mood_surfing",null,"Mood Surfing",null, "org.md2k.moodsurfing", null));
+        items.add(new Operation("thought_shakeup",null,"Thought Shakeup", null,"org.md2k.thoughtshakeup", null));
+        items.add(new Operation("head_space",null, "Head Space",null, "com.getsomeheadspace.android", null));
         return items;
     }
 

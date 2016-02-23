@@ -1,5 +1,15 @@
-package org.md2k.study.config;
+package org.md2k.study.model.clear_config;
 
+import android.content.Context;
+
+import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.study.Status;
+import org.md2k.study.config.Application;
+import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.Operation;
+import org.md2k.study.model.Model;
+
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -28,22 +38,36 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
-    public String getId() {
-        return id;
-    }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+public class ClearConfigManager extends Model {
+    ArrayList<ClearConfig> clearConfigList;
+    int statusCode;
+
+    public void delete(){
+        statusCode=Status.CONFIG_FILE_NOT_EXIST;
+        for(int i=0;i< clearConfigList.size();i++)
+            clearConfigList.get(i).delete();
+        statusCode=Status.SUCCESS;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public Status getStatus() {
+        return new Status(statusCode);
+    }
+
+    @Override
+    public void reset() {
+
+    }
+
+    public ClearConfigManager(Context context, DataKitAPI dataKitAPI, Operation operation){
+        super(context,dataKitAPI,operation);
+        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfig().getApplication();
+        clearConfigList =new ArrayList<>();
+        for(int i=0;i<applications.size();i++){
+            if(applications.get(i).getConfig()!=null){
+                ClearConfig clearConfig =new ClearConfig(applications.get(i));
+                clearConfigList.add(clearConfig);
+            }
+        }
     }
 }

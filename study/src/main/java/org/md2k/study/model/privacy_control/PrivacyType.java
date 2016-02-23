@@ -1,4 +1,4 @@
-package org.md2k.study.config;
+package org.md2k.study.model.privacy_control;
 
 import java.util.ArrayList;
 
@@ -28,22 +28,25 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
+public class PrivacyType {
     String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
+    String title;
+    String summary;
+    ArrayList<Source> source;
+
     public String getId() {
         return id;
     }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+
+    public String getTitle() {
+        return title;
     }
 
-    public String getName() {
-        return name;
+    public String getSummary() {
+        return summary;
     }
-}
+
+    public ArrayList<Source> getSource() {
+        return source;
+    }
+};

@@ -1,6 +1,14 @@
-package org.md2k.study.config;
+package org.md2k.study.model.app_run;
 
-import java.util.ArrayList;
+import android.content.Context;
+
+import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.study.Status;
+import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.Operation;
+import org.md2k.study.model.Model;
+
+import java.io.FileNotFoundException;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,22 +36,16 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
-    public String getId() {
-        return id;
+public class AppRunManager extends Model {
+    public AppRunManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
+        super(context,dataKitAPI, operation);
     }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+    public Status getStatus(){
+        return new Status(Status.SUCCESS);
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public void reset() {
+
     }
 }

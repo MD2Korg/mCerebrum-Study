@@ -1,6 +1,6 @@
-package org.md2k.study.config;
+package org.md2k.study.system_health;
 
-import java.util.ArrayList;
+import org.md2k.study.Status;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,22 +28,9 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
-    public String getId() {
-        return id;
-    }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
-    }
-
-    public String getName() {
-        return name;
+public class HandleError {
+    Status[] statusType;
+    public HandleError(){
+        statusType=new Status[4];
     }
 }

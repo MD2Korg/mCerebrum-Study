@@ -1,13 +1,11 @@
-package org.md2k.study.config;
+package org.md2k.study.model.app_service;
 
 import android.content.Context;
 import android.content.Intent;
 
-import org.md2k.study.Constants;
+import org.md2k.study.Status;
 import org.md2k.utilities.Apps;
-import org.md2k.utilities.Files;
 
-import java.io.File;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -35,18 +33,44 @@ import java.io.File;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Application {
-    String id;
-    String name;
-    String package_name;
-    String service;
-    String settings;
-    String config;
-    String default_config;
-    String download_link;
+public class AppService {
+    private static final String TAG = AppService.class.getSimpleName();
+    private String name;
+    private String package_name;
+    private String service;
 
-    public String getId() {
-        return id;
+    public AppService(String name, String package_name, String service) {
+        this.name = name;
+        this.package_name = package_name;
+        this.service = service;
+    }
+
+    public void start(Context context) {
+        if(!isInstalled(context)) return;
+        if(isRunning(context)) return;
+        Intent intent = new Intent();
+        intent.setClassName(package_name, service);
+            context.startService(intent);
+    }
+    public void stop(Context context){
+        if(!isInstalled(context)) return;
+        if(!isRunning(context)) return;
+        Intent intent = new Intent();
+        intent.setClassName(package_name, service);
+        context.stopService(intent);
+    }
+    public Status getStatus(Context context){
+        if(!isInstalled(context)) return new Status(Status.APP_NOT_INSTALLED);
+        if(!isRunning(context)) return new Status(Status.APP_NOT_RUNNING);
+        return new Status(Status.SUCCESS);
+    }
+
+    public boolean isInstalled(Context context) {
+        return Apps.isPackageInstalled(context, package_name);
+    }
+    public boolean isRunning(Context context){
+        return Apps.isServiceRunning(context, service);
+
     }
 
     public String getName() {
@@ -56,24 +80,4 @@ public class Application {
     public String getPackage_name() {
         return package_name;
     }
-
-    public String getService() {
-        return service;
-    }
-
-    public String getSettings() {
-        return settings;
-    }
-
-    public String getConfig() {
-        return config;
-    }
-
-    public String getDefault_config() {
-        return default_config;
-    }
-
-    public String getDownload_link() {
-        return download_link;
-    }
-};
+}

@@ -1,6 +1,18 @@
 package org.md2k.study.config;
 
-import java.util.ArrayList;
+import android.content.Context;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.md2k.study.Constants;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,22 +40,36 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
-    public String getId() {
-        return id;
-    }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+public class ConfigManager {
+    private static ConfigManager instance;
+    Context context;
+    Config config;
+
+    public static ConfigManager getInstance(Context context) {
+        if (instance == null)
+            instance = new ConfigManager(context);
+        return instance;
     }
 
-    public String getName() {
-        return name;
+    private ConfigManager(Context context) {
+        this.context = context;
+    }
+
+    public boolean read() {
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(Constants.CONFIG_DIRECTORY+Constants.CONFIG_FILENAME)));
+            Gson gson = new Gson();
+            Type collectionType = new TypeToken<Config>() {
+            }.getType();
+            config = gson.fromJson(br, collectionType);
+            return true;
+        } catch (FileNotFoundException e) {
+            return false;
+        }
+    }
+
+    public Config getConfig() {
+        return config;
     }
 }

@@ -15,17 +15,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.md2k.study.R;
-import org.md2k.study.operation.user_app.UserApp;
+import org.md2k.study.config.Operation;
 
 import java.util.List;
 
 public class AdapterIntervention extends BaseAdapter {
 
     private LayoutInflater layoutinflater;
-    private List<UserApp> listStorage;
+    private List<Operation> listStorage;
     private Context context;
 
-    public AdapterIntervention(Context context, List<UserApp> customizedListView) {
+    public AdapterIntervention(Context context, List<Operation> customizedListView) {
         this.context = context;
         layoutinflater =(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         listStorage = customizedListView;
@@ -73,10 +73,8 @@ public class AdapterIntervention extends BaseAdapter {
             return null;
         }
     }
-
     static class ViewHolder{
         TextView textInListView;
         ImageView imageInListView;
     }
-
 }

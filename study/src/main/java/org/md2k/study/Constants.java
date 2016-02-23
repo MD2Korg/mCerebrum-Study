@@ -30,10 +30,11 @@ import android.os.Environment;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Constants{
-    public static final String FILENAME_CONFIG_STUDY= "config_study.json";
+    public static final String CONFIG_FILENAME = "config.json";
 
     public static final String PASSWORD="1234";
-    public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/";
+    public static final String CONFIG_DIRECTORY_BASE= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/";
+    public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/org.md2k.study/";
 
     public static String getInstallPath(Context context) {
         return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";

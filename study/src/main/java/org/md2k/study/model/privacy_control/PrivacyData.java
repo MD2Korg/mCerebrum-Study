@@ -1,4 +1,4 @@
-package org.md2k.study.config;
+package org.md2k.study.model.privacy_control;
 
 import java.util.ArrayList;
 
@@ -28,22 +28,41 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigInfo {
-    String id;
-    String name;
-    String version;
-    ArrayList<String> required_files;
-    public String getId() {
-        return id;
-    }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
+public class PrivacyData {
+    Duration duration;
+    ArrayList<PrivacyType> privacyTypes;
+    long startTimeStamp;
+    boolean status;
+
+    public Duration getDuration() {
+        return duration;
     }
 
-    public String getName() {
-        return name;
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public ArrayList<PrivacyType> getPrivacyTypes() {
+        return privacyTypes;
+    }
+
+    public void setPrivacyTypes(ArrayList<PrivacyType> privacyTypes) {
+        this.privacyTypes = privacyTypes;
+    }
+
+    public long getStartTimeStamp() {
+        return startTimeStamp;
+    }
+
+    public void setStartTimeStamp(long startTimeStamp) {
+        this.startTimeStamp = startTimeStamp;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }

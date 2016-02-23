@@ -9,6 +9,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +18,12 @@ import android.widget.ListView;
 
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.R;
-import org.md2k.study.operation.OperationManager;
-import org.md2k.study.operation.app_install.AppInstall;
-import org.md2k.study.operation.app_install.AppsInstall;
+import org.md2k.study.controller.ModelManager;
+import org.md2k.study.model.app_install.AppInstall;
+import org.md2k.study.model.app_install.AppInstallManager;
 import org.md2k.utilities.Report.Log;
+
+import org.md2k.study.system_health.ServiceSystemHealth;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -52,14 +55,14 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentInstallApp.class.getSimpleName();
     Context context;
-    AppsInstall appsInstall;
+    AppInstallManager appInstallManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
         addPreferencesFromResource(R.xml.pref_app_install);
-        appsInstall = OperationManager.getInstance(getActivity()).appsInstall;
+        appInstallManager = (AppInstallManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_INSTALL);
         setupButtons();
     }
 
@@ -92,13 +95,13 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     void updateAppInstall() {
         Log.d(TAG, "updateAppInstall()...");
-        for (int i = 0; i < appsInstall.getAppInstallList().size(); i++) {
+        for (int i = 0; i < appInstallManager.getAppInstallList().size(); i++) {
             final int finalI = i;
-            appsInstall.getAppInstallList().get(i).setLatestVersionName(context, new OnDataChangeListener() {
+            appInstallManager.getAppInstallList().get(i).setLatestVersionName(context, new OnDataChangeListener() {
                 @Override
                 public void onDataChange(String str) {
                     Log.d(TAG, "updateAppInstall()..." + str);
-                    updatePreference(appsInstall.getAppInstallList().get(finalI));
+                    updatePreference(appInstallManager.getAppInstallList().get(finalI));
                 }
             });
         }
@@ -145,16 +148,16 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
     void setupAppInstall() {
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_app");
         preferenceCategory.removeAll();
-        for (int i = 0; i < appsInstall.getAppInstallList().size(); i++) {
+        for (int i = 0; i < appInstallManager.getAppInstallList().size(); i++) {
             ListPreference listPreference = new ListPreference(getActivity());
-            listPreference.setTitle(appsInstall.getAppInstallList().get(i).getName());
-            listPreference.setKey(appsInstall.getAppInstallList().get(i).getName());
-            setEntries(listPreference, appsInstall.getAppInstallList().get(i));
+            listPreference.setTitle(appInstallManager.getAppInstallList().get(i).getName());
+            listPreference.setKey(appInstallManager.getAppInstallList().get(i).getName());
+            setEntries(listPreference, appInstallManager.getAppInstallList().get(i));
             final int finalI = i;
             listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    AppInstall appInstall = appsInstall.getAppInstallList().get(finalI);
+                    AppInstall appInstall = appInstallManager.getAppInstallList().get(finalI);
                     if (newValue.equals("Install") || newValue.equals("Update")) {
                         appInstall.downloadAndInstallApp(getActivity());
                     } else if (newValue.equals("Run")) {
@@ -168,16 +171,21 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
                 }
             });
             preferenceCategory.addPreference(listPreference);
-            updatePreference(appsInstall.getAppInstallList().get(i));
+            updatePreference(appInstallManager.getAppInstallList().get(i));
         }
     }
-
     @Override
     public void onResume() {
-        Log.d(TAG,"onResume()...");
-        appsInstall.reset();
+        appInstallManager.reset();
         setupAppInstall();
-        OperationManager.getInstance(context).connect();
+        ModelManager.getInstance(context).connect();
         super.onResume();
+    }
+    @Override
+    public void onStop(){
+        Intent intent = new Intent(ServiceSystemHealth.INTENT_NAME);
+        intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.INSTALL);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        super.onStop();
     }
 }

@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.md2k.study"
-    >
+    package="org.md2k.study">
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/app_theme_teal_light" >
+        android:theme="@style/app_theme_teal_light">
         <activity
-            android:name="org.md2k.study.ActivityMain"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name" >
+            android:name=".ActivityMain"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,35 +26,37 @@
         </activity>
         <activity
             android:name=".view.app_install.ActivityInstallApp"
-            android:screenOrientation="portrait"
-            android:label="Install Application" />
+            android:label="Install Application"
+            android:screenOrientation="portrait" />
         <activity
-            android:name=".view.service.ActivityService"
-            android:screenOrientation="portrait"
-            android:label="Run Application" />
+            android:name=".view.app_service.ActivityService"
+            android:label="Run Application"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".view.app_settings.ActivityAppSettings"
-            android:screenOrientation="portrait"
-            android:label="Application Settings" />
+            android:label="Application Settings"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".view.intervention.ActivityInterventionApp"
-            android:screenOrientation="portrait"
-            android:label="@string/title_intervention_apps" />
+            android:label="@string/title_intervention_apps"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".view.admin.ActivityAdmin"
-            android:screenOrientation="portrait"
-            android:label="@string/settings" />
+            android:label="@string/settings"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".view.selfreport.ActivitySelfReport"
-            android:screenOrientation="portrait"
-            android:label="Self Report" />
+            android:label="Self Report"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".view.sleep.ActivitySleep"
-            android:screenOrientation="portrait"
-            android:label="Going to bed" />
+            android:label="Going to bed"
+            android:screenOrientation="portrait" />
+
         <service
-            android:name="error.ServiceSystemHealth"
+            android:name=".system_health.ServiceSystemHealth"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"></service>
     </application>
+
 </manifest>
