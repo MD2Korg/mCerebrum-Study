@@ -39,8 +39,6 @@ public class ActivityBase extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         configManager = ConfigManager.getInstance(getApplicationContext());
         if(configManager.read()) {
-            intentServiceSystemHealth = new Intent(this, ServiceSystemHealth.class);
-            startService(intentServiceSystemHealth);
             modelManager = ModelManager.getInstance(getApplicationContext());
             adminManager = AdminManager.getInstance(getApplicationContext());
             userManager = UserManager.getInstance(getApplicationContext());
@@ -131,8 +129,6 @@ public class ActivityBase extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        if(!isError)
-            stopService(intentServiceSystemHealth);
         super.onDestroy();
     }
 

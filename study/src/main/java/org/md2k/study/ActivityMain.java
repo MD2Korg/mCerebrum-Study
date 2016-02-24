@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.AvoidXfermode;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
@@ -20,7 +22,9 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.Model;
 import org.md2k.study.model.day_start_end.DayStartEndInfoManager;
+import org.md2k.study.model.privacy_control.PrivacyControlManager;
 import org.md2k.study.model.study_info.StudyInfoManager;
+import org.md2k.study.system_health.ServiceSystemHealth;
 import org.md2k.study.view.user.AppAdapter;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.AlertDialogs;
@@ -44,19 +48,49 @@ public class ActivityMain extends ActivityDataQuality {
     public AppAdapter appAdapter;
     Status lastStatus=new Status(Status.SUCCESS);
     ArrayList<Model> userApps;
+    Handler handler;
+    PrivacyControlManager privacyControlManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(isError) finish();
         else {
+            handler=new Handler();
             setTitle(((StudyInfoManager) ModelManager.getInstance(this).getModel(ModelManager.MODEL_STUDY_INFO)).getStudy_name());
             LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                     new IntentFilter(INTENT_NAME));
             initializeDayStartEnd();
-            initializeUserApp();
+            updateUserApp();
+            if(userManager.getModels(ModelManager.MODEL_PRIVACY)!=null)
+                privacyControlManager=(PrivacyControlManager)userManager.getModels(ModelManager.MODEL_PRIVACY);
+
+            else privacyControlManager=null;
+
+            intentServiceSystemHealth = new Intent(this, ServiceSystemHealth.class);
+            startService(intentServiceSystemHealth);
         }
     }
+/*
+    Runnable runnablePrivacy=new Runnable() {
+
+        @Override
+        public void run() {
+            initializeUserApp();
+            if(privacyControlManager!=null){
+                if(privacyControlManager.getStatus().getStatusCode()==Status.PRIVACY_ACTIVE)
+                    handler.postDelayed(runnablePrivacy, 1000);
+            }
+        }
+    };
+    void updateUserApp(){
+        handler.post(runnablePrivacy);
+    }
+
+*/
+void  updateUserApp(){
+    initializeUserApp();
+}
     void initializeUserApp(){
         userApps=getModels(userManager.getModels());
         gridViewApplication = (GridView) findViewById(R.id.gridview);
@@ -65,7 +99,7 @@ public class ActivityMain extends ActivityDataQuality {
         gridViewApplication.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (lastStatus.getStatusCode() != Status.SUCCESS && lastStatus.getStatusCode()!=Status.DAY_START_NOT_AVAILABLE)
+                if (lastStatus.getStatusCode() != Status.SUCCESS && lastStatus.getStatusCode()!=Status.DAY_START_NOT_AVAILABLE && lastStatus.getStatusCode()!=Status.DAY_COMPLETED)
                     Toast.makeText(ActivityMain.this, "Please configure the study first...", Toast.LENGTH_SHORT).show();
                 else {
                     String packageName = userApps.get(position).getOperation().getPackage_name();
@@ -115,8 +149,8 @@ public class ActivityMain extends ActivityDataQuality {
         else if(status.getStatusCode()==Status.DAY_START_NOT_AVAILABLE){
             button.setText("Start Day");
             button.setEnabled(true);
-            ((TextView)findViewById(R.id.text_view_day_start)).setText("x");
-            ((TextView)findViewById(R.id.text_view_day_end)).setText("x");
+            ((TextView)findViewById(R.id.text_view_day_start)).setText("N/A");
+            ((TextView)findViewById(R.id.text_view_day_end)).setText("N/A");
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -126,7 +160,7 @@ public class ActivityMain extends ActivityDataQuality {
                             if (which == AlertDialog.BUTTON_POSITIVE) {
                                 dayStartEndInfoManager.setDayStartTime(DateTime.getDateTime());
                                 dayStartEndInfoManager.saveDayStart();
-                                startService(intentServiceSystemHealth);
+                                sendMessage();
                                 Toast.makeText(ActivityMain.this, "Your day started...thank you", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -153,7 +187,7 @@ public class ActivityMain extends ActivityDataQuality {
                             if (which == AlertDialog.BUTTON_POSITIVE) {
                                 dayStartEndInfoManager.setDayEndTime(DateTime.getDateTime());
                                 dayStartEndInfoManager.saveDayEnd();
-                                startService(intentServiceSystemHealth);
+                                sendMessage();
                                 Toast.makeText(ActivityMain.this, "Your day ended...see you tomorrow", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -162,6 +196,12 @@ public class ActivityMain extends ActivityDataQuality {
                 }
             });
         }
+    }
+    void sendMessage(){
+        Intent intent=new Intent(ServiceSystemHealth.INTENT_NAME);
+        intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.DAY_START_END);
+        LocalBroadcastManager.getInstance(ActivityMain.this).sendBroadcast(intent);
+
     }
 
     private ArrayList<Model> getModels(ArrayList<Model> all) {
@@ -182,7 +222,7 @@ public class ActivityMain extends ActivityDataQuality {
             ((TextView) findViewById(R.id.textView_status)).setTextColor(ContextCompat.getColor(this, R.color.teal_700));
             button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_teal));
             button.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_ok_teal_50dp, 0);
-            button.setText("OK");
+            button.setText("");
             button.setEnabled(false);
             button.setOnClickListener(null);
 
@@ -215,12 +255,15 @@ public class ActivityMain extends ActivityDataQuality {
                     updateDataQuality((Status[]) intent.getParcelableArrayExtra(VALUE));
                     break;
                 case PRIVACY:
-                    initializeUserApp();
+                    updateUserApp();
                     break;
                 case STATUS:
-                    lastStatus=intent.getParcelableExtra(VALUE);
-                    updateStatus(lastStatus);
-                    initializeUserApp();
+                    Status curStatus=intent.getParcelableExtra(VALUE);
+                    if(lastStatus==null || curStatus.getStatusCode()!=lastStatus.getStatusCode() || !curStatus.getStatusMessage().equals(lastStatus.getStatusMessage())) {
+                        lastStatus=curStatus;
+                        updateStatus(lastStatus);
+                        updateUserApp();
+                    }
                     break;
                 case DAY_START_END:
                     updateDayStartEnd(intent.<Status>getParcelableExtra(VALUE));
@@ -232,8 +275,10 @@ public class ActivityMain extends ActivityDataQuality {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
-        if (!isError)
+        if (!isError) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+            stopService(intentServiceSystemHealth);
+        }
         super.onDestroy();
     }
 }

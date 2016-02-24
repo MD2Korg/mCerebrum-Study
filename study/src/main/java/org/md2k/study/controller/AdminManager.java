@@ -84,4 +84,11 @@ public class AdminManager{
     public ArrayList<Model> getModels() {
         return models;
     }
+    public Model getModel(String id){
+        for(int i=0;i<models.size();i++)
+            if(models.get(i).getOperation().getId().equals(id))
+                return models.get(i);
+        return null;
+
+    }
 }

@@ -14,6 +14,7 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
+import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.Model;
 import org.md2k.study.system_health.ServiceSystemHealth;
 import org.md2k.utilities.Report.Log;
@@ -52,36 +53,22 @@ public class DataQualityManager extends Model {
     private static final String TAG = DataQualityManager.class.getSimpleName();
     ArrayList<DataQuality> dataQualities;
     Status[] dataQuality;
-
+    ArrayList<DataSource> dataSources;
     public DataQualityManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
         super(context, dataKitAPI, operation);
         dataQualities = new ArrayList<>();
-        ArrayList<DataSource> dataSources = ConfigManager.getInstance(context).getConfig().getData_quality();
+        dataSources = ConfigManager.getInstance(context).getConfig().getData_quality();
         dataQuality=new Status[dataSources.size()];
         for (int i = 0; i < dataSources.size(); i++)
             dataQualities.add(new DataQuality(context, dataKitAPI, dataSources.get(i)));
         for(int i=0;i<dataSources.size();i++)
-            dataQuality[i]=new Status(DATA_QUALITY.BAND_OFF,"Band Off");
+            dataQuality[i]=new Status(Status.DATAQUALITY_OFF);
     }
 
     public void reset() {
         stop();
         start();
     }
-    String getMessage(int sample){
-        switch (sample) {
-            case DATA_QUALITY.BAND_OFF:
-                return "Not Connected";
-            case DATA_QUALITY.NOT_WORN:
-            case DATA_QUALITY.NOISE:
-            case DATA_QUALITY.BAND_LOOSE:
-                return "Bad Quality";
-            case DATA_QUALITY.GOOD:
-                return  "Good";
-        }
-        return "";
-    }
-
     public void start() {
         Log.d(TAG, "dataquality=start");
         for (int i = 0; i < dataQualities.size(); i++) {
@@ -89,15 +76,23 @@ public class DataQualityManager extends Model {
             dataQualities.get(i).start(new ReceiveCallBack() {
                 @Override
                 public void onReceive(DataSource dataSource, int sample[]) {
+                    Status curStatus;
                     if(sample.length==1){
-                        String message = dataQualities.get(finalI).getName() + "-"+getMessage(sample[0]);
-                        dataQuality[finalI] = new Status(sample[0], message);
+                        curStatus=translate(sample[0]);
+                        dataQuality[finalI] = new Status(curStatus.getStatusCode(), dataQualities.get(finalI).getName()+" - "+curStatus.getStatusMessage());
 
                     }else{
-                        String message="Respiration - "+getMessage(sample[0]);
-                        dataQuality[0] = new Status(sample[0], message);
-                        message="ECG - "+getMessage(sample[1]);
-                        dataQuality[1] = new Status(sample[1], message);
+                        for(int i=0;i<dataSources.size();i++) {
+                            if (dataSources.get(i).getType() != null) {
+                                if (dataSources.get(i).getType().equals(DataSourceType.RESPIRATION)) {
+                                    curStatus=translate(sample[0]);
+                                    dataQuality[i] = new Status(curStatus.getStatusCode(),"Respiration - "+curStatus.getStatusMessage());
+                                } else if (dataSources.get(i).getType().equals(DataSourceType.ECG)) {
+                                    curStatus=translate(sample[1]);
+                                    dataQuality[i] = new Status(curStatus.getStatusCode(), "ECG - "+curStatus.getStatusMessage());
+                                }
+                            }
+                        }
                     }
                     Intent intent=new Intent(ServiceSystemHealth.INTENT_NAME);
                     intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.DATA_QUALITY);
@@ -106,6 +101,22 @@ public class DataQualityManager extends Model {
 
                 }
             });
+        }
+    }
+    Status translate(int value){
+        switch(value){
+            case DATA_QUALITY.GOOD:
+                return new Status(Status.DATAQUALITY_GOOD);
+            case DATA_QUALITY.BAND_OFF:
+                return new Status(Status.DATAQUALITY_OFF);
+            case DATA_QUALITY.BAND_LOOSE:
+                return new Status(Status.DATAQUALITY_LOOSE);
+            case DATA_QUALITY.NOISE:
+                return new Status(Status.DATAQUALITY_LOOSE);
+            case DATA_QUALITY.NOT_WORN:
+                return new Status(Status.DATAQUALITY_NOT_WORN);
+            default:
+                return new Status(Status.DATAQUALITY_OFF);
         }
     }
 

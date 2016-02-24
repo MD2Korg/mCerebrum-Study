@@ -25,10 +25,13 @@ import org.md2k.study.Status;
 import org.md2k.study.config.Operation;
 import org.md2k.study.controller.AdminManager;
 import org.md2k.study.controller.ModelManager;
+import org.md2k.study.controller.UserManager;
 import org.md2k.study.model.Model;
 import org.md2k.study.model.app_service.AppServiceManager;
 import org.md2k.study.model.clear_config.ClearConfigManager;
+import org.md2k.study.model.clear_data.ClearDataManager;
 import org.md2k.study.model.config_info.ConfigInfoManager;
+import org.md2k.study.model.data_quality.DataQualityManager;
 import org.md2k.study.model.sleep_info.SleepInfoManager;
 import org.md2k.study.model.study_info.StudyInfoManager;
 import org.md2k.study.model.user_info.UserInfoManager;
@@ -70,12 +73,14 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentAdmin.class.getSimpleName();
     AdminManager adminManager;
+    UserManager userManager;
     boolean isRefresh = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adminManager = AdminManager.getInstance(getActivity());
+        userManager=UserManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_settings);
         createPreference();
     }
@@ -115,9 +120,14 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     @Override
     public void onResume() {
+        Model model=adminManager.getModel(ModelManager.MODEL_CLEAR_DATABASE);
+        if(model!=null) {
+            ((ClearDataManager)model).setStatus(new Status(Status.SUCCESS));
+        }
         if (isRefresh) {
-            ((AppServiceManager)ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE)).stop();
             adminManager.reset();
+            userManager.reset();
+
             isRefresh = false;
         }
         updatePreference();
@@ -248,6 +258,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     }
 
     void setupClearData(Model model) {
+        final ClearDataManager clearDataManager=(ClearDataManager) model;
         Preference preference = findPreference(model.getOperation().getId());
         preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_delete_blue_48dp));
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -258,9 +269,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                     return false;
                 }
                 isRefresh = true;
-                Intent intent = new Intent();
-                intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
-                startActivity(intent);
+                clearDataManager.delete(getActivity());
                 return false;
             }
         });
@@ -302,14 +311,11 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         button.setText("Save");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                for(int i=0;i<adminManager.getModels().size();i++){
+                for (int i = 0; i < adminManager.getModels().size(); i++) {
                     adminManager.getModels().get(i).save();
                 }
                 Toast.makeText(getActivity(), "Saved...", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(ServiceSystemHealth.INTENT_NAME);
-                intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.USERINFO_WAKEUP_SLEEP);
-                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-                isRefresh=true;
+                isRefresh = true;
             }
         });
     }
@@ -481,16 +487,5 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
             else
                 return String.format("%02d:%02d am", 12, minute);
         }
-    }
-    @Override
-    public void onStop(){
-        Intent intent = new Intent(ServiceSystemHealth.INTENT_NAME);
-        intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.ADMIN);
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-        super.onStop();
-    }
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
     }
 }

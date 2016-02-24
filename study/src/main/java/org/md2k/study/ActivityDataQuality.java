@@ -1,6 +1,7 @@
 package org.md2k.study;
 
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,7 +14,6 @@ import org.md2k.datakitapi.source.platform.PlatformId;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.data_quality.DataQualityManager;
-import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
 
@@ -92,20 +92,20 @@ public class ActivityDataQuality extends ActivityBase {
         Status curStatus = status[0];
         for (int i = 0; i < status.length; i++) {
             switch (status[i].getStatusCode()) {
-                case DATA_QUALITY.GOOD:
+                case Status.DATAQUALITY_GOOD:
                     imageView[i].setImageResource(R.drawable.ic_ok_teal_50dp);
                     break;
-                case DATA_QUALITY.BAND_OFF:
+                case Status.DATAQUALITY_OFF:
                     imageView[i].setImageResource(R.drawable.ic_error_red_50dp);
                     curStatus = status[i];
                     break;
-                case DATA_QUALITY.NOT_WORN:
-                    if (curStatus.getStatusCode() != DATA_QUALITY.BAND_OFF)
+                case Status.DATAQUALITY_NOT_WORN:
+                    if (curStatus.getStatusCode() != Status.DATAQUALITY_OFF)
                         curStatus = status[i];
-                case DATA_QUALITY.BAND_LOOSE:
-                case DATA_QUALITY.NOISE:
-                    if(curStatus.getStatusCode()!=DATA_QUALITY.BAND_OFF && curStatus.getStatusCode()!=DATA_QUALITY.NOT_WORN) {
-                        if (curStatus.getStatusCode() != DATA_QUALITY.BAND_OFF)
+                case Status.DATAQUALITY_LOOSE:
+                case Status.DATAQUALITY_NOISY:
+                    if (curStatus.getStatusCode() != Status.DATAQUALITY_OFF && curStatus.getStatusCode() != Status.DATAQUALITY_NOT_WORN) {
+                        if (curStatus.getStatusCode() != Status.DATAQUALITY_OFF)
                             curStatus = status[i];
                     }
                     imageView[i].setImageResource(R.drawable.ic_warning_amber_50dp);
@@ -113,6 +113,10 @@ public class ActivityDataQuality extends ActivityBase {
             }
         }
         ((TextView) findViewById(R.id.text_view_data_quality_message)).setText(curStatus.getStatusMessage());
+        if (curStatus.getStatusCode() == Status.DATAQUALITY_GOOD)
+            ((TextView) findViewById(R.id.text_view_data_quality_message)).setTextColor(ContextCompat.getColor(this,R.color.teal_700));
+        else
+            ((TextView) findViewById(R.id.text_view_data_quality_message)).setTextColor(ContextCompat.getColor(this,R.color.red_900));
     }
 
     @Override

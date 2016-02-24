@@ -58,6 +58,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.pref_app_settings);
+        appSettingsManager = (AppSettingsManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SETTINGS);
         setupButtons();
     }
 
@@ -84,12 +85,12 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
 
     @Override
     public void onResume() {
+        appSettingsManager.reset();
         setupAppSettings();
         super.onResume();
     }
 
     void setupAppSettings() {
-        appSettingsManager = (AppSettingsManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SETTINGS);
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_settings");
         preferenceCategory.removeAll();
         for (int i = 0; i < appSettingsManager.getAppSettingsList().size(); i++) {
@@ -128,9 +129,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     }
     @Override
     public void onStop(){
-        Intent intent = new Intent(ServiceSystemHealth.INTENT_NAME);
-        intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.SETTINGS);
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        appSettingsManager.reset();
         super.onStop();
     }
 

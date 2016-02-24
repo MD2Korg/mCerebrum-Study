@@ -48,8 +48,6 @@ import java.util.HashMap;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class DayStartEndInfoManager extends Model {
-    public static final int DAY_START=0;
-    public static final int DAY_END=1;
     DataSourceBuilder dataSourceBuilderDayStart;
     DataSourceClient dataSourceClientDayStart;
     DataSourceBuilder dataSourceBuilderDayEnd;

@@ -39,9 +39,10 @@ import java.io.FileNotFoundException;
 public class AppRunManager extends Model {
     public AppRunManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
         super(context,dataKitAPI, operation);
+        lastStatus=new Status(Status.SUCCESS);
     }
     public Status getStatus(){
-        return new Status(Status.SUCCESS);
+        return lastStatus;
     }
 
     @Override

@@ -52,6 +52,7 @@ public class AppServiceManager extends Model {
                 appServiceList.add(appService);
             }
         }
+        lastStatus=new Status(Status.SUCCESS);
     }
     public int size(){
         return appServiceList.size();
@@ -65,18 +66,7 @@ public class AppServiceManager extends Model {
             appServiceList.get(i).stop(context);
     }
     public Status getStatus(){
-        int status=Status.SUCCESS;
-        for(int i=0;i< appServiceList.size();i++){
-            Status curStatus= appServiceList.get(i).getStatus(context);
-            if(curStatus.getStatusCode()==Status.APP_NOT_INSTALLED) {
-                status = Status.APP_NOT_INSTALLED;
-                break;
-            }else if(curStatus.getStatusCode()==Status.APP_NOT_RUNNING){
-                status=Status.APP_NOT_RUNNING;
-            }
-        }
-        Log.d(TAG, "AppServiceManager ... Status="+status);
-        return new Status(status);
+        return lastStatus;
     }
 
     @Override

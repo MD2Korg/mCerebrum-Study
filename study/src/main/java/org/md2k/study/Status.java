@@ -3,6 +3,8 @@ package org.md2k.study;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.md2k.datakitapi.time.DateTime;
+
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -33,6 +35,7 @@ import android.os.Parcelable;
 public class Status implements Parcelable {
     int statusCode;
     String statusMessage;
+    long timestamp;
 
     public static final int SUCCESS = 0;
     public static final int APP_NOT_INSTALLED = 1;
@@ -55,6 +58,7 @@ public class Status implements Parcelable {
     public static final int DAY_START_NOT_AVAILABLE=18;
     public static final int DAY_COMPLETED=19;
     public static final int DAY_ERROR=20;
+    public static final int DATABASE_NOT_AVAILABLE=21;
     public static final String[] message = new String[]{
             "Status: OK",
             "Error: Application not installed properly",
@@ -65,32 +69,36 @@ public class Status implements Parcelable {
             "Error: Application not running",
             "Error: Application not configured properly",
             "Error: Missing configuration files",
-            "Error: Clear old Data",
+            "Error: Incorrect Study Name. Clear old Data",
             "Error: DataKit not available",
             "Status: Privacy control activated",
-            "Status: OK",
-            "ERROR: Device is off/Not connected",
-            "WARNING: Belt is loose",
-            "WARNING: Device data is noisy",
-            "ERROR: Device is not worn",
-            "WARNING: Data Quality BAD",
+            "OK",
+            "Device is off/Not connected",
+            "Belt Loose",
+            "Noisy",
+            "Not Worn",
+            "Bad Quality",
             "Warning: Day is not started",
             "Ok: Day is completed",
-            "ERROR: System Error"
+            "ERROR: System Error",
+            "ERROR: Database not available"
     };
 
     public Status(int statusCode) {
         this.statusCode = statusCode;
         this.statusMessage = message[statusCode];
+        this.timestamp= DateTime.getDateTime();
     }
     public Status(int statusCode, String message) {
         this.statusCode = statusCode;
         this.statusMessage = message;
+        this.timestamp=DateTime.getDateTime();
     }
 
     protected Status(Parcel in) {
         statusCode = in.readInt();
         statusMessage = in.readString();
+        timestamp=in.readLong();
     }
 
     public static final Creator<Status> CREATOR = new Creator<Status>() {
@@ -117,6 +125,10 @@ public class Status implements Parcelable {
         return statusCode;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -126,5 +138,6 @@ public class Status implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(statusCode);
         dest.writeString(statusMessage);
+        dest.writeLong(timestamp);
     }
 }

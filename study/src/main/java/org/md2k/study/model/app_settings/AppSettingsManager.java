@@ -54,25 +54,23 @@ public class AppSettingsManager extends Model {
                 appSettingsList.add(appSettings);
             }
         }
+        reset();
     }
 
     public ArrayList<AppSettings> getAppSettingsList() {
         return appSettingsList;
     }
-    public Status refresh(){
+    @Override
+    public void reset(){
         for (int i = 0; i < appSettingsList.size(); i++)
             if (!appSettingsList.get(i).isEqual()) {
-                return new Status(Status.APP_CONFIG_ERROR);
+                lastStatus= new Status(Status.APP_CONFIG_ERROR);
             }
 
-        return new Status(Status.SUCCESS);
+        lastStatus=new Status(Status.SUCCESS);
     }
     public Status getStatus() {
-        return refresh();
+        return lastStatus;
     }
 
-    @Override
-    public void reset() {
-
-    }
 }

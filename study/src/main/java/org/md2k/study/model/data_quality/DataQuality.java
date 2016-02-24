@@ -2,6 +2,7 @@ package org.md2k.study.model.data_quality;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.datakitapi.DataKitAPI;
@@ -52,11 +53,14 @@ public class DataQuality {
     int lastSample;
     Context context;
     String name;
+    Handler handler;
+    ReceiveCallBack receiveCallBack;
 
     public DataQuality(Context context, DataKitAPI dataKitAPI, DataSource dataSource) {
         this.dataKitAPI = dataKitAPI;
         this.dataSource = dataSource;
         this.context = context;
+        handler=new Handler();
         if (dataSource.getType() != null && dataSource.getType().equals(DataSourceType.RESPIRATION))
             name = "Respiration";
         if (dataSource.getType() != null && dataSource.getType().equals(DataSourceType.ECG))
@@ -73,34 +77,35 @@ public class DataQuality {
         return dataSourceBuilder.build();
     }
 
-    int getLastSample(int[] sample) {
-        if (dataSource.getPlatform().getId() != null)
-            return sample[0];
-        if (dataSource.getType().equals(DataSourceType.ECG))
-            return sample[1];
-        return sample[0];
+    public void start(ReceiveCallBack receiveCallBack) {
+        this.receiveCallBack=receiveCallBack;
+        handler.post(runnableStart);
     }
+    Runnable runnableStart=new Runnable() {
+        @Override
+        public void run() {
+            ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
+            Log.d(TAG, "start: platformType=" + dataSource.getPlatform().getType() + " dataSource=" + dataSource.getType() + " size=" + dataSourceClientArrayList.size());
 
-    public void start(final ReceiveCallBack receiveCallBack) {
-        ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
-        Log.d(TAG, "start: platformType=" + dataSource.getPlatform().getType()+" dataSource="+dataSource.getType()+" size="+dataSourceClientArrayList.size());
-
-        if (dataSourceClientArrayList.size() == 1) {
-            dataSourceClient = dataSourceClientArrayList.get(0);
-            Log.d(TAG, "id=" + dataSourceClient.getDs_id() + " platformType=" + dataSourceClient.getDataSource().getPlatform().getType());
-            dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
-                @Override
-                public void onReceived(DataType dataType) {
-                    Log.d(TAG, "onReceive .. id=" + dataSourceClient.getDs_id() + " platformType=" + dataSource.getPlatform().getType()+" dataSource="+dataSource.getType());
-                    //lastSample = getLastSample(((DataTypeIntArray) dataType).getSample());
+            if (dataSourceClientArrayList.size() !=0) {
+                dataSourceClient = dataSourceClientArrayList.get(0);
+                Log.d(TAG, "id=" + dataSourceClient.getDs_id() + " platformType=" + dataSourceClient.getDataSource().getPlatform().getType());
+                dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
+                    @Override
+                    public void onReceived(DataType dataType) {
+                        Log.d(TAG, "onReceive .. id=" + dataSourceClient.getDs_id() + " platformType=" + dataSource.getPlatform().getType()+" dataSource="+dataSource.getType());
+                        //lastSample = getLastSample(((DataTypeIntArray) dataType).getSample());
 //                    receiveCallBack.onReceive(dataSource, lastSample);
-                    receiveCallBack.onReceive(dataSource,((DataTypeIntArray) dataType).getSample());
-                }
-            });
+                        receiveCallBack.onReceive(dataSource,((DataTypeIntArray) dataType).getSample());
+                    }
+                });
+            }else
+                handler.postDelayed(runnableStart,5000);
         }
-    }
+    };
 
     public void stop() {
+        handler.removeCallbacks(runnableStart);
         if (dataSourceClient != null)
             dataKitAPI.unsubscribe(dataSourceClient);
     }

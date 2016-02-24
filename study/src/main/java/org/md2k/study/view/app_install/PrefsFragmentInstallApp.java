@@ -9,7 +9,6 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -183,9 +182,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
     }
     @Override
     public void onStop(){
-        Intent intent = new Intent(ServiceSystemHealth.INTENT_NAME);
-        intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.INSTALL);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        appInstallManager.reset();
         super.onStop();
     }
 }

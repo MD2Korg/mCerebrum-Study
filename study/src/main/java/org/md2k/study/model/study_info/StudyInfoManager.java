@@ -68,14 +68,17 @@ public class StudyInfoManager extends Model {
         studyInfoDB=readFromDataKit();
         if(studyInfoDB==null && studyInfoFile!=null) {
             writeToDataKit();
+            studyInfoDB=readFromDataKit();
         }
+        if(studyInfoDB==null) lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+        else if(!studyInfoDB.getId().equals(studyInfoFile.getId()) || !studyInfoDB.getName().equals(studyInfoFile.getName()))
+            lastStatus= new Status(Status.CLEAR_OLD_DATA);
+        else lastStatus= new Status(Status.SUCCESS);
+
     }
 
      public Status getStatus() {
-         if(studyInfoDB==null) return new Status(Status.DATAKIT_NOT_AVAILABLE);
-         if(!studyInfoDB.getId().equals(studyInfoFile.getId()) || !studyInfoDB.getName().equals(studyInfoFile.getName()))
-             return new Status(Status.CLEAR_OLD_DATA);
-        return new Status(Status.SUCCESS);
+         return lastStatus;
     }
 
     private StudyInfo readFromDataKit() {

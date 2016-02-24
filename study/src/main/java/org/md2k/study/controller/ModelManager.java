@@ -15,6 +15,7 @@ import org.md2k.study.model.app_install.AppInstallManager;
 import org.md2k.study.model.app_run.AppRunManager;
 import org.md2k.study.model.app_settings.AppSettingsManager;
 import org.md2k.study.model.clear_config.ClearConfigManager;
+import org.md2k.study.model.clear_data.ClearDataManager;
 import org.md2k.study.model.config_info.ConfigInfoManager;
 import org.md2k.study.model.data_quality.DataQualityManager;
 import org.md2k.study.model.day_start_end.DayStartEndInfoManager;
@@ -24,6 +25,7 @@ import org.md2k.study.model.sleep_info.SleepInfoManager;
 import org.md2k.study.model.study_info.StudyInfoManager;
 import org.md2k.study.model.user_info.UserInfoManager;
 import org.md2k.study.model.wakeup_info.WakeupInfoManager;
+import org.md2k.utilities.Apps;
 import org.md2k.utilities.Report.Log;
 
 import java.util.HashMap;
@@ -86,10 +88,10 @@ public class ModelManager {
         return instance;
     }
     private ModelManager(Context context) {
+        Log.d(TAG,"ModelManager()...");
         this.context = context;
         modelHashMap=new HashMap<>();
         dataKitAPI = DataKitAPI.getInstance(context);
-        connect();
     }
     public Model getModel(String id){
         if(!modelHashMap.containsKey(id)) {
@@ -115,11 +117,18 @@ public class ModelManager {
         if(isConnected()) return new Status(Status.SUCCESS);
         return new Status(Status.DATAKIT_NOT_AVAILABLE);
     }
+    public boolean isInstalled(){
+        return Apps.isPackageInstalled(context,"org.md2k.datakit");
+    }
     public void connect() {
+        Log.d(TAG,"connect...");
         if (!dataKitAPI.isConnected()) {
+            Log.d(TAG,"not connected...");
+
             dataKitAPI.connect(new OnConnectionListener() {
                 @Override
                 public void onConnected() {
+                    Log.d(TAG,"connected...");
                     Intent intent = new Intent(ServiceSystemHealth.INTENT_NAME);
                     intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.CONNECTED);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
@@ -149,7 +158,7 @@ public class ModelManager {
             case MODEL_SLEEP_INFO: return new SleepInfoManager(context, dataKitAPI, operation);
             case MODEL_CLEAR_CONFIG: return new ClearConfigManager(context, dataKitAPI, operation);
             case MODEL_DATA_QUALITY: return new DataQualityManager(context, dataKitAPI, operation);
-            case MODEL_CLEAR_DATABASE:
+            case MODEL_CLEAR_DATABASE:return new ClearDataManager(context, dataKitAPI, operation);
             case MODEL_INTERVENTION:
             case MODEL_SMOKING_SELF_REPORT:
             case MODEL_PLOTTER:

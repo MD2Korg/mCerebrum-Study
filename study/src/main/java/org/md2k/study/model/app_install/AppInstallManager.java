@@ -53,7 +53,7 @@ public class AppInstallManager extends Model {
             AppInstall appInstall =new AppInstall(context,applications.get(i));
             appInstallList.add(appInstall);
         }
-        Log.d(TAG, "appinstall=" + appInstallList.size());
+        reset();
     }
     public int size(){
         return appInstallList.size();
@@ -67,14 +67,7 @@ public class AppInstallManager extends Model {
         return count;
     }
     public Status getStatus(){
-        int total = size();
-        int install = sizeInstalled();
-        int update = sizeUpdate();
-        if (update == 0 && total == install)
-            return new Status(Status.SUCCESS);
-        else if (total != install)
-            return new Status(Status.APP_NOT_INSTALLED);
-        else return new Status(Status.APP_UPDATE_AVAILABLE);
+        return lastStatus;
     }
     public int sizeUpdate(){
         int count=0;
@@ -87,5 +80,13 @@ public class AppInstallManager extends Model {
     public void reset(){
         for(int i=0;i<appInstallList.size();i++)
             appInstallList.get(i).reset();
+        int total = size();
+        int install = sizeInstalled();
+        int update = sizeUpdate();
+        if (update == 0 && total == install)
+            lastStatus= new Status(Status.SUCCESS);
+        else if (total != install)
+            lastStatus= new Status(Status.APP_NOT_INSTALLED);
+        else lastStatus= new Status(Status.APP_UPDATE_AVAILABLE);
     }
 }

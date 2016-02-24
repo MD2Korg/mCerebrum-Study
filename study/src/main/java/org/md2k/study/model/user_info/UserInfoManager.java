@@ -65,7 +65,12 @@ public class UserInfoManager extends Model {
     public void reset() {
         isInDatabase = false;
         userInfo = new UserInfo();
-        readFromDataKit();
+        if (!dataKitAPI.isConnected()) lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+        else {
+            readFromDataKit();
+            if (isInDatabase) lastStatus = new Status(Status.SUCCESS);
+            else lastStatus = new Status(Status.USERID_NOT_DEFINED);
+        }
     }
 
     public void setUserId(String userId) {
@@ -82,9 +87,7 @@ public class UserInfoManager extends Model {
     }
 
     public Status getStatus() {
-        if (!dataKitAPI.isConnected()) return new Status(Status.DATAKIT_NOT_AVAILABLE);
-        if (isInDatabase) return new Status(Status.SUCCESS);
-        return new Status(Status.USERID_NOT_DEFINED);
+        return lastStatus;
     }
 
     private void readFromDataKit() {
@@ -100,6 +103,7 @@ public class UserInfoManager extends Model {
     }
     public void save(){
         writeToDataKit();
+        reset();
     }
 
     private boolean writeToDataKit() {

@@ -45,20 +45,22 @@ public class ConfigInfoManager extends Model {
     public ConfigInfoManager(Context context,DataKitAPI dataKitAPI, Operation operation) {
         super(context, dataKitAPI, operation);
         this.configInfo = ConfigManager.getInstance(context).getConfig().getConfig_info();
+        reset();
     }
 
     public Status getStatus() {
-        if (configInfo.getRequired_files() == null || configInfo.getRequired_files().size() == 0)
-            return new Status(Status.SUCCESS);
-        for (int i = 0; i < configInfo.getRequired_files().size(); i++) {
-            if (!Files.isExist(Constants.CONFIG_DIRECTORY_BASE + configInfo.getRequired_files().get(i)))
-                return new Status(Status.CONFIG_FILE_NOT_EXIST);
-        }
-        return new Status(Status.SUCCESS);
+        return lastStatus;
     }
 
     @Override
     public void reset() {
+        if (configInfo.getRequired_files() == null || configInfo.getRequired_files().size() == 0)
+            lastStatus= new Status(Status.SUCCESS);
+        for (int i = 0; i < configInfo.getRequired_files().size(); i++) {
+            if (!Files.isExist(Constants.CONFIG_DIRECTORY_BASE + configInfo.getRequired_files().get(i)))
+                lastStatus=new Status(Status.CONFIG_FILE_NOT_EXIST);
+        }
+        lastStatus= new Status(Status.SUCCESS);
 
     }
 

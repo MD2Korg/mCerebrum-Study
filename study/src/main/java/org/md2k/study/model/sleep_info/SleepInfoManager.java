@@ -63,13 +63,14 @@ public class SleepInfoManager extends Model {
         sleepTimeNew = -1;
         sleepTimeDB = -1;
         readStudyInfoFromDataKit();
+        if (!dataKitAPI.isConnected()) lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+        if (sleepTimeDB == -1)
+            lastStatus= new Status(Status.SLEEP_NOT_DEFINED);
+        lastStatus= new Status(Status.SUCCESS);
     }
 
     public Status getStatus() {
-        if (!dataKitAPI.isConnected()) return new Status(Status.DATAKIT_NOT_AVAILABLE);
-        if (sleepTimeDB == -1)
-            return new Status(Status.SLEEP_NOT_DEFINED);
-        return new Status(Status.SUCCESS);
+        return lastStatus;
     }
 
     public boolean isValid() {
@@ -127,7 +128,7 @@ public class SleepInfoManager extends Model {
         return dataDescriptor;
     }
     public void save(){
-        writeToDataKit();
+        writeToDataKit();reset();
     }
 
     public long getSleepTimeDB() {

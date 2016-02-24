@@ -62,13 +62,14 @@ public class WakeupInfoManager extends Model {
         wakeupTimeNew = -1;
         wakeupTimeDB = -1;
         readStudyInfoFromDataKit();
+        if (!dataKitAPI.isConnected()) lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+        if (wakeupTimeDB == -1)
+            lastStatus= new Status(Status.WAKEUP_NOT_DEFINED);
+        lastStatus= new Status(Status.SUCCESS);
     }
 
     public Status getStatus() {
-        if (!dataKitAPI.isConnected()) return new Status(Status.DATAKIT_NOT_AVAILABLE);
-        if (wakeupTimeDB == -1)
-            return new Status(Status.WAKEUP_NOT_DEFINED);
-        return new Status(Status.SUCCESS);
+        return lastStatus;
     }
 
     public boolean isValid() {
@@ -129,6 +130,7 @@ public class WakeupInfoManager extends Model {
     }
     public void save(){
         writeToDataKit();
+        reset();
     }
 
     public long getWakeupTimeDB() {

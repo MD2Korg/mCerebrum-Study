@@ -36,14 +36,19 @@ public abstract class Model {
     protected Operation operation;
     protected DataKitAPI dataKitAPI;
     protected Context context;
+    protected Status lastStatus;
+
     public abstract Status getStatus();
+
     public abstract void reset();
-    public Model(Context context, DataKitAPI dataKitAPI, Operation operation){
-        this.context=context;
-        this.dataKitAPI=dataKitAPI;
-        this.operation=operation;
+
+    public Model(Context context, DataKitAPI dataKitAPI, Operation operation) {
+        this.context = context;
+        this.dataKitAPI = dataKitAPI;
+        this.operation = operation;
     }
-    public void save(){
+
+    public void save() {
 
     }
 

@@ -1,6 +1,20 @@
-package org.md2k.study.system_health;
+package org.md2k.study.model.clear_data;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.study.Status;
+import org.md2k.study.config.Application;
+import org.md2k.study.config.ConfigManager;
+import org.md2k.study.config.Operation;
+import org.md2k.study.controller.ModelManager;
+import org.md2k.study.model.Model;
+import org.md2k.study.model.app_service.AppServiceManager;
+import org.md2k.study.model.clear_config.ClearConfig;
+
+import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,9 +42,32 @@ import org.md2k.study.Status;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class HandleError {
-    Status[] statusType;
-    public HandleError(){
-        statusType=new Status[4];
+public class ClearDataManager extends Model {
+
+    public void delete(Activity activity) {
+        lastStatus = new Status(Status.DATABASE_NOT_AVAILABLE);
+        ((AppServiceManager) ModelManager.getInstance(activity).getModel(ModelManager.MODEL_APP_SERVICE)).stop();
+        Intent intent = new Intent();
+        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
+        activity.startActivity(intent);
+    }
+
+    @Override
+    public Status getStatus() {
+        return lastStatus;
+    }
+
+    public void setStatus(Status status) {
+        lastStatus = status;
+    }
+
+    @Override
+    public void reset() {
+
+    }
+
+    public ClearDataManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, dataKitAPI, operation);
+        lastStatus = new Status(Status.SUCCESS);
     }
 }

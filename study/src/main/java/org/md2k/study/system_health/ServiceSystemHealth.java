@@ -51,16 +51,13 @@ import org.md2k.utilities.Report.Log;
 
 public class ServiceSystemHealth extends Service {
     public static final String INTENT_NAME = "MONITOR_HEALTH";
-    public static final String TYPE="TYPE";
-    public static final String VALUE="VALUE";
-    public static final String TIMESTAMP="TIMESTAMP";
-    public static final int CONNECTED=1;
-    public static final int NOT_CONNECTED=2;
-    public static final int SETTINGS=3;
-    public static final int INSTALL=4;
-    public static final int USERINFO_WAKEUP_SLEEP=5;
-    public static final int ADMIN=6;
-    public static final int DATA_QUALITY=7;
+    public static final String TYPE = "TYPE";
+    public static final String VALUE = "VALUE";
+    public static final int CONNECTED = 1;
+    public static final int NOT_CONNECTED = 2;
+    public static final int DAY_START_END = 3;
+    public static final int ADMIN = 6;
+    public static final int DATA_QUALITY = 7;
 
 
     private static final String TAG = ServiceSystemHealth.class.getSimpleName();
@@ -70,10 +67,11 @@ public class ServiceSystemHealth extends Service {
     AdminManager adminManager;
     UserManager userManager;
     AppServiceManager appServiceManager;
-    public Status[] dataQuality;
-    public long lastPrivacyTime=0;
-    public Status lastStatus=new Status(Status.SUCCESS);
-    public Status lastDayStatus=new Status(Status.SUCCESS);
+    boolean isDataQualityAvailable, isPrivacyAvailable, isDayStartEnd;
+    public long lastPrivacyTime = 0;
+    public Status lastAdminStatus = null;
+    public Status[] lastDataQualityStatus = null;
+    public Status lastDayStartEndStatus = null;
 
     public void onCreate() {
         super.onCreate();
@@ -83,33 +81,61 @@ public class ServiceSystemHealth extends Service {
         modelManager = ModelManager.getInstance(getApplicationContext());
         adminManager = AdminManager.getInstance(getApplicationContext());
         userManager = UserManager.getInstance(getApplicationContext());
-        appServiceManager= (AppServiceManager) modelManager.getModel(ModelManager.MODEL_APP_SERVICE);
-
+        appServiceManager = (AppServiceManager) modelManager.getModel(ModelManager.MODEL_APP_SERVICE);
+        isPrivacyAvailable = userManager.getModels(ModelManager.MODEL_PRIVACY) != null;
+        isDataQualityAvailable = userManager.getModels(ModelManager.MODEL_DATA_QUALITY) != null;
+        isDayStartEnd = userManager.getModels(ModelManager.MODEL_DAY_START_END) != null;
         handler = new Handler();
         handler.post(system_health);
-        Log.d(TAG, "onCreate()");
     }
-    Status checkAdminHealth(){
+
+    Status getAdminStatus() {
         Status status = modelManager.getStatus();
         if (status.getStatusCode() == Status.SUCCESS)
             status = adminManager.getStatus();
-        Log.d(TAG,"status="+status.getStatusMessage());
-        if(status.getStatusCode()!=Status.SUCCESS)
-            if(status.getStatusCode()==Status.APP_NOT_RUNNING)
-                ((AppServiceManager)modelManager.getModel(ModelManager.MODEL_APP_SERVICE)).start();
+        Log.d(TAG, "admin status=" + status.getStatusMessage());
+        if (status.getStatusCode() == Status.SUCCESS) {
+            appServiceManager.start();
+        }
         return status;
     }
-    void checkDataQuality(){
-        if(dataQuality==null) return;
-        Intent intent=new Intent(ActivityMain.INTENT_NAME);
+
+    void prepareBandOff() {
+        for (int i = 0; i < lastDataQualityStatus.length; i++) {
+            lastDataQualityStatus[i] = new Status(Status.DATAQUALITY_OFF);
+        }
+
+    }
+
+    void sendMessageDataQuality() {
+        if (lastDataQualityStatus == null) return;
+        if (lastAdminStatus.getStatusCode() != Status.SUCCESS)
+            prepareBandOff();
+        else {
+            long timestamp = DateTime.getDateTime();
+            for (int i = 0; i < lastDataQualityStatus.length; i++) {
+                if (timestamp - lastDataQualityStatus[i].getTimestamp() > 30000)
+                    lastDataQualityStatus[i] = new Status(Status.DATAQUALITY_OFF);
+            }
+        }
+        Intent intent = new Intent(ActivityMain.INTENT_NAME);
         intent.putExtra(ActivityMain.TYPE, ActivityMain.DATA_QUALITY);
-        intent.putExtra(ActivityMain.VALUE, dataQuality);
+        intent.putExtra(ActivityMain.VALUE, lastDataQualityStatus);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
-    void checkPrivacy(){
+
+    void sendMessageDayStartEnd() {
+        Intent intent = new Intent(ActivityMain.INTENT_NAME);
+        intent.putExtra(ActivityMain.TYPE, ActivityMain.DAY_START_END);
+        intent.putExtra(ActivityMain.VALUE, lastDayStartEndStatus);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+    }
+
+    void sendMessagePrivacy() {
         long curPrivacyTime;
-        PrivacyControlManager privacyControlManager= (PrivacyControlManager) userManager.getModels(ModelManager.MODEL_PRIVACY);
-        if(privacyControlManager!=null) {
+        PrivacyControlManager privacyControlManager = (PrivacyControlManager) userManager.getModels(ModelManager.MODEL_PRIVACY);
+        if (privacyControlManager != null) {
             if (privacyControlManager.getStatus().getStatusCode() == Status.PRIVACY_ACTIVE) {
                 long remainingTime = privacyControlManager.getPrivacyData().getStartTimeStamp() + privacyControlManager.getPrivacyData().getDuration().getValue() - DateTime.getDateTime();
                 if (remainingTime > 0) {
@@ -128,59 +154,57 @@ public class ServiceSystemHealth extends Service {
             }
         }
     }
-    Status checkDayStartEnd(){
-        Status curDayStatus=null;
-        DayStartEndInfoManager dayStartEndInfoManager= (DayStartEndInfoManager) userManager.getModels(ModelManager.MODEL_DAY_START_END);
-        if(dayStartEndInfoManager!=null) {
+
+    Status getDayStartEndStatus(Status adminStatus) {
+        Status curDayStatus = null;
+        if (adminStatus.getStatusCode() != Status.SUCCESS) return new Status(Status.DAY_ERROR);
+        DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) userManager.getModels(ModelManager.MODEL_DAY_START_END);
+        if (dayStartEndInfoManager != null) {
             curDayStatus = dayStartEndInfoManager.getStatus();
         }
         return curDayStatus;
     }
-    public void sendMessage(Status curStatus, Status curDayStatus){
- /*       if(curStatus.getStatusCode()==lastStatus.getStatusCode() && curStatus.getStatusMessage().equals(lastStatus.getStatusMessage())
-                && curDayStatus.getStatusCode()==lastDayStatus.getStatusCode() && curDayStatus.getStatusMessage().equals(lastDayStatus.getStatusMessage()))
-            return;
-*/
-        if(curStatus.getStatusCode()==Status.SUCCESS){
-            lastStatus=curDayStatus;
-            Intent intent=new Intent(ActivityMain.INTENT_NAME);
-            intent.putExtra(ActivityMain.TYPE, ActivityMain.STATUS);
-            intent.putExtra(ActivityMain.VALUE, lastStatus);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        }else{
-            lastStatus=curStatus;
-            Intent intent=new Intent(ActivityMain.INTENT_NAME);
-            intent.putExtra(ActivityMain.TYPE, ActivityMain.STATUS);
-            intent.putExtra(ActivityMain.VALUE, lastStatus);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
-        }
-        if(lastDayStatus.getStatusCode()!=curDayStatus.getStatusCode()) {
-            lastDayStatus=curDayStatus;
-            Intent intent = new Intent(ActivityMain.INTENT_NAME);
-            intent.putExtra(ActivityMain.TYPE, ActivityMain.DAY_START_END);
-            intent.putExtra(ActivityMain.VALUE, lastDayStatus);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        }
+    public void sendMessageStatus() {
+        Intent intent = new Intent(ActivityMain.INTENT_NAME);
+        intent.putExtra(ActivityMain.TYPE, ActivityMain.STATUS);
+        if (lastAdminStatus.getStatusCode() != Status.SUCCESS)
+            intent.putExtra(ActivityMain.VALUE, lastAdminStatus);
+        else if (lastDayStartEndStatus != null)
+            intent.putExtra(ActivityMain.VALUE, lastDayStartEndStatus);
+        else
+            intent.putExtra(ActivityMain.VALUE, lastAdminStatus);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
+
     Runnable system_health = new Runnable() {
         @Override
         public void run() {
-            checkDataQuality();
-            checkPrivacy();
-            Status curStatus=checkAdminHealth();
-            Status curDayStatus=checkDayStartEnd();
-            sendMessage(curStatus, curDayStatus);
+            if (modelManager.isInstalled() && !modelManager.isConnected())
+                modelManager.connect();
+            Status curAdminStatus, curDayStartEndStatus = null;
+            if (isPrivacyAvailable) sendMessagePrivacy();
+            curAdminStatus = getAdminStatus();
+            if (isDayStartEnd)
+                curDayStartEndStatus = getDayStartEndStatus(curAdminStatus);
+
+            if (curDayStartEndStatus == null) {
+                if (lastAdminStatus == null || curAdminStatus.getStatusCode() != lastAdminStatus.getStatusCode()) {
+                    lastAdminStatus = curAdminStatus;
+                    sendMessageStatus();
+                }
+            } else if (lastAdminStatus == null || lastDayStartEndStatus == null || curAdminStatus.getStatusCode() != lastAdminStatus.getStatusCode() || curDayStartEndStatus.getStatusCode() != lastDayStartEndStatus.getStatusCode()) {
+                lastAdminStatus = curAdminStatus;
+                lastDayStartEndStatus = curDayStartEndStatus;
+                sendMessageStatus();
+                sendMessageDayStartEnd();
+            }
+            sendMessageDataQuality();
             handler.postDelayed(system_health, Constants.HEALTH_CHECK_REPEAT);
         }
     };
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId)
-    {
-        handler.removeCallbacks(system_health);
-        handler.post(system_health);
-        return START_STICKY; // or whatever your flag
-    }
+
+
     @Override
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiverStatus);
@@ -199,32 +223,25 @@ public class ServiceSystemHealth extends Service {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getIntExtra(TYPE, -1)) {
                 case CONNECTED:
+                    Log.d(TAG, "Service...DataKit Connected");
                     adminManager.reset();
                     userManager.reset();
-                    break;
-                case INSTALL:
-                    adminManager.reset();
-                    userManager.reset();
-                    break;
-                case SETTINGS:
-                    adminManager.reset();
-                    userManager.reset();
-                    appServiceManager.stop();
-                    break;
-                case USERINFO_WAKEUP_SLEEP:
-                    adminManager.reset();
-                    userManager.reset();
-                    break;
-                case ADMIN:
-                    adminManager.reset();
-                    userManager.reset();
+                    handler.removeCallbacks(system_health);
+                    handler.post(system_health);
                     break;
                 case DATA_QUALITY:
-                    dataQuality= (Status[]) intent.getParcelableArrayExtra(VALUE);
+                    lastDataQualityStatus = (Status[]) intent.getParcelableArrayExtra(VALUE);
+                    if (isDataQualityAvailable) sendMessageDataQuality();
+                    break;
+                case DAY_START_END:
+                    handler.removeCallbacks(system_health);
+                    handler.post(system_health);
+                    break;
+                case NOT_CONNECTED:
+                    if (modelManager.isInstalled())
+                        modelManager.connect();
                     break;
             }
-            handler.removeCallbacks(system_health);
-            handler.post(system_health);
         }
     };
 }

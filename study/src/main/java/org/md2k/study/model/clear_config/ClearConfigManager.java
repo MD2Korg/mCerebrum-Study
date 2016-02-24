@@ -7,7 +7,9 @@ import org.md2k.study.Status;
 import org.md2k.study.config.Application;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
+import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.Model;
+import org.md2k.study.model.app_service.AppServiceManager;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -40,18 +42,18 @@ import java.util.ArrayList;
  */
 public class ClearConfigManager extends Model {
     ArrayList<ClearConfig> clearConfigList;
-    int statusCode;
 
     public void delete(){
-        statusCode=Status.CONFIG_FILE_NOT_EXIST;
+        lastStatus=new Status(Status.CONFIG_FILE_NOT_EXIST);
+        ((AppServiceManager) ModelManager.getInstance(context).getModel(ModelManager.MODEL_APP_SERVICE)).stop();
         for(int i=0;i< clearConfigList.size();i++)
             clearConfigList.get(i).delete();
-        statusCode=Status.SUCCESS;
+        lastStatus=new Status(Status.SUCCESS);
     }
 
     @Override
     public Status getStatus() {
-        return new Status(statusCode);
+        return lastStatus;
     }
 
     @Override
@@ -69,5 +71,6 @@ public class ClearConfigManager extends Model {
                 clearConfigList.add(clearConfig);
             }
         }
+        lastStatus=new Status(Status.SUCCESS);
     }
 }
