@@ -7,6 +7,8 @@ import org.md2k.study.Status;
 import org.md2k.study.config.Application;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
+import org.md2k.study.controller.ModelManager;
+import org.md2k.study.controller.UserManager;
 import org.md2k.study.model.Model;
 import org.md2k.utilities.Report.Log;
 
@@ -39,37 +41,69 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AppServiceManager extends Model {
-    private static final String TAG = AppServiceManager.class.getSimpleName();
     public ArrayList<AppService> appServiceList;
 
-    public AppServiceManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context, dataKitAPI, operation);
-        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfig().getApplication();
-        appServiceList=new ArrayList<>();
-        for(int i=0;i<applications.size();i++){
-            if(applications.get(i).getService()!=null) {
-                AppService appService = new AppService(applications.get(i).getName(), applications.get(i).getPackage_name(), applications.get(i).getService());
+    public AppServiceManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
+        appServiceList = new ArrayList<>();
+    }
+
+    public void set() {
+        ArrayList<Application> applications = configManager.getConfig().getApplication();
+        for (int i = 0; i < applications.size(); i++) {
+            if (applications.get(i).getService() != null) {
+                AppService appService = new AppService(context, applications.get(i).getName(), applications.get(i).getPackage_name(), applications.get(i).getService());
                 appServiceList.add(appService);
             }
         }
-        lastStatus=new Status(Status.SUCCESS);
-    }
-    public int size(){
-        return appServiceList.size();
-    }
-    public void start(){
-        for(int i=0;i< appServiceList.size();i++)
-            appServiceList.get(i).start(context);
-    }
-    public void stop(){
-        for(int i=0;i< appServiceList.size();i++)
-            appServiceList.get(i).stop(context);
-    }
-    public Status getStatus(){
-        return lastStatus;
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
     }
 
-    @Override
-    public void reset() {
+    public void clear() {
+        appServiceList.clear();
+    }
+
+    public void start() {
+        update();
+    }
+
+    public void stop() {
+        for (int i = 0; i < appServiceList.size(); i++)
+            appServiceList.get(i).stop();
+    }
+
+    public Status getStatus() {
+        lastStatus = new Status(Status.SUCCESS);
+/*        for (int i = 0; i < appServiceList.size(); i++) {
+            Status status = appServiceList.get(i).getStatus();
+            if (status.getStatusCode() != Status.SUCCESS)
+                lastStatus = status;
+        }
+*/
+        return lastStatus;
+    }
+    public Status isActive(){
+        for(int i=0;i<appServiceList.size();i++){
+            if(!appServiceList.get(i).isActive()) return new Status(Status.APP_NOT_RUNNING);
+            if(!appServiceList.get(i).isRunning()) return new Status(Status.APP_NOT_RUNNING);
+        }
+        return new Status(Status.SUCCESS);
+    }
+    public boolean isValid(){
+        UserManager userManager=ModelManager.getInstance(context).getAdminManager();
+        for(int i=0;i<userManager.getModel().size();i++){
+            if(userManager.getModel().get(i).getOperation()==null) return false;
+            if(userManager.getModel().get(i).getOperation().getId()==null) return false;
+            if(!userManager.getModel().get(i).getOperation().getId().equals(ModelManager.MODEL_APP_SERVICE))
+                if(userManager.getModel().get(i).getStatus().getStatusCode()!=Status.SUCCESS) return false;
+        }
+        return true;
+    }
+
+    public void update() {
+        if(!isValid()) return;
+        for (int i = 0; i < appServiceList.size(); i++)
+            appServiceList.get(i).start();
+        lastStatus = new Status(Status.SUCCESS);
     }
 }

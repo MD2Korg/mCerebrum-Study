@@ -15,6 +15,7 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
+import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
 import org.md2k.study.model.Model;
 
@@ -53,20 +54,35 @@ public class SleepInfoManager extends Model {
     long sleepTimeDB;
     long sleepTimeNew;
 
-    public SleepInfoManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context, dataKitAPI, operation);
-        dataSourceBuilder = createDataSourceBuilder();
-        reset();
-    }
-
-    public void reset() {
+    public SleepInfoManager(Context context, ConfigManager configManager,DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
         sleepTimeNew = -1;
         sleepTimeDB = -1;
+    }
+
+    @Override
+    public void start() {
+        update();
+    }
+
+    public void clear(){
+        sleepTimeNew = -1;
+        sleepTimeDB = -1;
+    }
+    public void set(){
+        sleepTimeNew = -1;
+        sleepTimeDB = -1;
+        dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+    }
+    public void stop(){
+    }
+    public void update(){
         if (!dataKitAPI.isConnected()) lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
-        if (sleepTimeDB == -1)
+        else if (sleepTimeDB == -1)
             lastStatus= new Status(Status.SLEEP_NOT_DEFINED);
-        lastStatus= new Status(Status.SUCCESS);
+        else lastStatus= new Status(Status.SUCCESS);
     }
 
     public Status getStatus() {
@@ -128,7 +144,8 @@ public class SleepInfoManager extends Model {
         return dataDescriptor;
     }
     public void save(){
-        writeToDataKit();reset();
+        writeToDataKit();
+        set();
     }
 
     public long getSleepTimeDB() {

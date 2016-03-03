@@ -32,15 +32,11 @@ import android.os.Environment;
 public class Constants{
     public static final String CONFIG_FILENAME = "config.json";
 
-    public static final String PASSWORD="1234";
     public static final String CONFIG_DIRECTORY_BASE= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/";
+    public static final String CONFIG_DIRECTORY_ROOT= Environment.getExternalStorageDirectory().getAbsolutePath() + "/";
     public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/org.md2k.study/";
+    public static final String TEMP_DIRECTORY=Environment.getExternalStorageDirectory().getAbsolutePath()+"/mCerebrum/temp/";
 
-    public static String getInstallPath(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/temp.apk";
-    }
-    public static String getInstallDir(Context context) {
-        return Environment.getExternalStorageDirectory() + "/Android/data/" +context.getPackageName()+"/";
-    }
     public static final long HEALTH_CHECK_REPEAT=5000;
+    public static final String CONFIG_DOWNLOAD_LINK="https://github.com/MD2Korg/mCerebrum-Configuration/releases/download/config/";
 }

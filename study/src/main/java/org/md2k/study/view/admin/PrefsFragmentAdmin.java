@@ -4,14 +4,12 @@ import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +21,6 @@ import android.widget.Toast;
 import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.config.Operation;
-import org.md2k.study.controller.AdminManager;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.controller.UserManager;
 import org.md2k.study.model.Model;
@@ -31,15 +28,14 @@ import org.md2k.study.model.app_service.AppServiceManager;
 import org.md2k.study.model.clear_config.ClearConfigManager;
 import org.md2k.study.model.clear_data.ClearDataManager;
 import org.md2k.study.model.config_info.ConfigInfoManager;
-import org.md2k.study.model.data_quality.DataQualityManager;
 import org.md2k.study.model.sleep_info.SleepInfoManager;
 import org.md2k.study.model.study_info.StudyInfoManager;
 import org.md2k.study.model.user_info.UserInfoManager;
 import org.md2k.study.model.wakeup_info.WakeupInfoManager;
-import org.md2k.study.system_health.ServiceSystemHealth;
 import org.md2k.study.view.app_install.ActivityInstallApp;
 import org.md2k.study.view.app_service.ActivityService;
 import org.md2k.study.view.app_settings.ActivityAppSettings;
+import org.md2k.study.view.config_download.ActivityConfigDownload;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.UI.AlertDialogs;
 
@@ -72,26 +68,24 @@ import org.md2k.utilities.UI.AlertDialogs;
 public class PrefsFragmentAdmin extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentAdmin.class.getSimpleName();
-    AdminManager adminManager;
-    UserManager userManager;
+    ModelManager modelManager;
+    UserManager adminManager;
     boolean isRefresh = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adminManager = AdminManager.getInstance(getActivity());
-        userManager=UserManager.getInstance(getActivity());
+        modelManager=ModelManager.getInstance(getActivity());
+        adminManager=modelManager.getAdminManager();
         addPreferencesFromResource(R.xml.pref_settings);
-        createPreference();
     }
-
     void createPreference(){
         ((PreferenceCategory) findPreference("info")).removeAll();
         ((PreferenceCategory) findPreference("setup")).removeAll();
         ((PreferenceCategory) findPreference("status")).removeAll();
         ((PreferenceCategory) findPreference("reset")).removeAll();
-        for(int i=0;i<adminManager.getModels().size();i++){
-            Operation operation=adminManager.getModels().get(i).getOperation();
+        for(int i=0;i<adminManager.getModel().size();i++){
+            Operation operation=adminManager.getModel().get(i).getOperation();
             if(operation.getId().equals(ModelManager.MODEL_USER_INFO)){
                 EditTextPreference preference = new EditTextPreference(getActivity());
                 preference.setTitle(operation.getName());
@@ -120,54 +114,56 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     @Override
     public void onResume() {
+        createPreference();
         Model model=adminManager.getModel(ModelManager.MODEL_CLEAR_DATABASE);
         if(model!=null) {
             ((ClearDataManager)model).setStatus(new Status(Status.SUCCESS));
         }
         if (isRefresh) {
-            adminManager.reset();
-            userManager.reset();
-
+            modelManager.stop();
+            modelManager.clear();
+            modelManager.set();
+            modelManager.start();
             isRefresh = false;
         }
         updatePreference();
         super.onResume();
     }
     public void updatePreference(){
-        for(int i=0;i<adminManager.getModels().size();i++){
-            switch(adminManager.getModels().get(i).getOperation().getId()){
+        for(int i=0;i<adminManager.getModel().size();i++){
+            switch(adminManager.getModel().get(i).getOperation().getId()){
                 case ModelManager.MODEL_APP_INSTALL:
-                    setupAppInstall(adminManager.getModels().get(i));
+                    setupAppInstall(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_APP_SETTINGS:
-                    setupAppSettings(adminManager.getModels().get(i));
+                    setupAppSettings(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_CONFIG_INFO:
-                    setupConfigInfo(adminManager.getModels().get(i));
+                    setupConfigInfo(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_STUDY_INFO:
-                    setupStudyInfo(adminManager.getModels().get(i));
+                    setupStudyInfo(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_USER_INFO:
-                    setupUserInfo(adminManager.getModels().get(i));
+                    setupUserInfo(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_SLEEP_INFO:
-                    setupSleepInfo(adminManager.getModels().get(i));
+                    setupSleepInfo(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_WAKEUP_INFO:
-                    setupWakeupInfo(adminManager.getModels().get(i));
+                    setupWakeupInfo(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_CLEAR_CONFIG:
-                    setupClearConfig(adminManager.getModels().get(i));
+                    setupClearConfig(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_CLEAR_DATABASE:
-                    setupClearData(adminManager.getModels().get(i));
+                    setupClearData(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_APP_SERVICE:
-                    setupAppService(adminManager.getModels().get(i));
+                    setupAppService(adminManager.getModel().get(i));
                     break;
                 case ModelManager.MODEL_NOTIFICATION_TEST:
-                    setupNotificationTest(adminManager.getModels().get(i));
+                    setupNotificationTest(adminManager.getModel().get(i));
 
             }
         }
@@ -180,6 +176,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         setupIcon(preference, status);
         preference.setTitle(((StudyInfoManager) model).getStudy_name());
         setupIcon(preference, status);
+        preference.setEnabled(false);
     }
 
     void setupConfigInfo(Model model) {
@@ -187,6 +184,14 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         Status status = model.getStatus();
         setupIcon(preference, status);
         preference.setSummary("" + ((ConfigInfoManager) model).getVersion() + "  (" + status.getStatusMessage() + ")");
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(getActivity(), ActivityConfigDownload.class);
+                startActivity(intent);
+                return false;
+            }
+        });
     }
 
     void setupIcon(Preference preference, Status status) {
@@ -245,7 +250,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == AlertDialog.BUTTON_POSITIVE) {
-                            ((AppServiceManager)ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE)).stop();
+                            ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE).stop();
                             clearConfigManager.delete();
                             isRefresh = true;
                             Toast.makeText(getActivity(), "File Deleted", Toast.LENGTH_SHORT).show();
@@ -311,8 +316,8 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         button.setText("Save");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                for (int i = 0; i < adminManager.getModels().size(); i++) {
-                    adminManager.getModels().get(i).save();
+                for (int i = 0; i < adminManager.getModel().size(); i++) {
+                    adminManager.getModel().get(i).save();
                 }
                 Toast.makeText(getActivity(), "Saved...", Toast.LENGTH_LONG).show();
                 isRefresh = true;
@@ -359,17 +364,18 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
             preference.setSummary(status.getStatusMessage());
             preference.setEnabled(false);
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-        } else
-            preference.setEnabled(true);
-        if (sleepInfoManager.getSleepTimeDB() == -1 && sleepInfoManager.getSleepTimeNew() == -1) {
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-            preference.setSummary("");
-        } else if (sleepInfoManager.getSleepTimeNew() != -1) {
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-            preference.setSummary(formatTime(sleepInfoManager.getSleepTimeNew()));
         } else {
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-            preference.setSummary(formatTime(sleepInfoManager.getSleepTimeDB()));
+            preference.setEnabled(true);
+            if (sleepInfoManager.getSleepTimeDB() == -1 && sleepInfoManager.getSleepTimeNew() == -1) {
+                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+                preference.setSummary("");
+            } else if (sleepInfoManager.getSleepTimeNew() != -1) {
+                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+                preference.setSummary(formatTime(sleepInfoManager.getSleepTimeNew()));
+            } else {
+                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+                preference.setSummary(formatTime(sleepInfoManager.getSleepTimeDB()));
+            }
         }
 
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -424,11 +430,13 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     }
     void setupAppService(Model model) {
         Preference preference = findPreference(model.getOperation().getId());
-        Status status = model.getStatus();
-        preference.setSummary(status.getStatusMessage());
-        if (status.getStatusCode() == Status.SUCCESS) {
+        AppServiceManager appServiceManager=(AppServiceManager)model;
+        Status status=appServiceManager.isActive();
+        if(status.getStatusCode()==Status.SUCCESS){
+            preference.setSummary(status.getStatusMessage());
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-        } else if (status.getStatusCode() == Status.APP_NOT_RUNNING) {
+        } else {
+            preference.setSummary(status.getStatusMessage());
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
         }
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

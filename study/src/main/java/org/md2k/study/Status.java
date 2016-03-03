@@ -43,22 +43,27 @@ public class Status implements Parcelable {
     public static final int USERID_NOT_DEFINED = 3;
     public static final int WAKEUP_NOT_DEFINED = 4;
     public static final int SLEEP_NOT_DEFINED = 5;
-    public static final int APP_NOT_RUNNING=6;
-    public static final int APP_CONFIG_ERROR=7;
-    public static final int CONFIG_FILE_NOT_EXIST=8;
-    public static final int CLEAR_OLD_DATA=9;
-    public static final int DATAKIT_NOT_AVAILABLE =10;
-    public static final int PRIVACY_ACTIVE=11;
-    public static final int DATAQUALITY_GOOD=12;
-    public static final int DATAQUALITY_OFF=13;
-    public static final int DATAQUALITY_LOOSE=14;
-    public static final int DATAQUALITY_NOISY=15;
-    public static final int DATAQUALITY_NOT_WORN=16;
-    public static final int DATAQUALITY_BAD=17;
-    public static final int DAY_START_NOT_AVAILABLE=18;
-    public static final int DAY_COMPLETED=19;
-    public static final int DAY_ERROR=20;
-    public static final int DATABASE_NOT_AVAILABLE=21;
+    public static final int APP_NOT_RUNNING = 6;
+    public static final int APP_CONFIG_ERROR = 7;
+    public static final int CONFIG_FILE_NOT_EXIST = 8;
+    public static final int CLEAR_OLD_DATA = 9;
+    public static final int DATAKIT_NOT_AVAILABLE = 10;
+    public static final int PRIVACY_ACTIVE = 11;
+    public static final int DATAQUALITY_GOOD = 12;
+    public static final int DATAQUALITY_OFF = 13;
+    public static final int DATAQUALITY_LOOSE = 14;
+    public static final int DATAQUALITY_NOISY = 15;
+    public static final int DATAQUALITY_NOT_WORN = 16;
+    public static final int DATAQUALITY_BAD = 17;
+    public static final int DAY_START_NOT_AVAILABLE = 18;
+    public static final int DAY_COMPLETED = 19;
+    public static final int DAY_ERROR = 20;
+    public static final int DATABASE_NOT_AVAILABLE = 21;
+    public static final int CONNECTION_ERROR = 22;
+    public static final int DOWNLOAD_ERROR = 23;
+    public static final int STUDY_START_NOT_AVAILABLE = 24;
+    public static final int STUDY_RUNNING = 25;
+    public static final int STUDY_COMPLETED=26;
     public static final String[] message = new String[]{
             "Status: OK",
             "Error: Application not installed properly",
@@ -79,26 +84,32 @@ public class Status implements Parcelable {
             "Not Worn",
             "Bad Quality",
             "Warning: Day is not started",
-            "Ok: Day is completed",
+            "Status Ok: Day is completed",
             "ERROR: System Error",
-            "ERROR: Database not available"
+            "ERROR: Database not available",
+            "ERROR: Internet Connection Error.",
+            "ERROR: File can't be downloaded properly",
+            "ERROR: Study not started",
+            "Study is running",
+            "Study is completed",
     };
 
     public Status(int statusCode) {
         this.statusCode = statusCode;
         this.statusMessage = message[statusCode];
-        this.timestamp= DateTime.getDateTime();
+        this.timestamp = DateTime.getDateTime();
     }
+
     public Status(int statusCode, String message) {
         this.statusCode = statusCode;
         this.statusMessage = message;
-        this.timestamp=DateTime.getDateTime();
+        this.timestamp = DateTime.getDateTime();
     }
 
     protected Status(Parcel in) {
         statusCode = in.readInt();
         statusMessage = in.readString();
-        timestamp=in.readLong();
+        timestamp = in.readLong();
     }
 
     public static final Creator<Status> CREATOR = new Creator<Status>() {

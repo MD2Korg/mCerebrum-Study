@@ -6,6 +6,7 @@ import org.md2k.study.Status;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.User;
 import org.md2k.study.model.Model;
+
 import java.util.ArrayList;
 
 /**
@@ -34,36 +35,59 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class UserManager{
+public class UserManager {
     private static final String TAG = UserManager.class.getSimpleName();
-    private static UserManager instance = null;
     User user;
     ArrayList<Model> models;
+    Context context;
+    boolean admin;
 
-    public static UserManager getInstance(Context context){
-        if (instance == null)
-            instance = new UserManager(context);
-        return instance;
+    public UserManager(Context context, boolean admin) {
+        this.context = context;
+        models = new ArrayList<>();
+        user = null;
+        this.admin = admin;
+
     }
 
-    private UserManager(Context context){
-        user = ConfigManager.getInstance(context).getConfig().getUser();
-        ModelManager modelManager=ModelManager.getInstance(context);
-        models=new ArrayList<>();
-        for(int i=0;i<user.getPanel().size();i++){
+    public void set(ConfigManager configManager) {
+        if (admin)
+            user = configManager.getConfig().getAdmin();
+        else
+            user = configManager.getConfig().getUser();
+        ModelManager modelManager = ModelManager.getInstance(context);
+        for (int i = 0; i < user.getPanel().size(); i++) {
             models.add(modelManager.getModel(user.getPanel().get(i)));
         }
+        for(int i=0;i<models.size();i++)
+            models.get(i).set();
     }
 
-    public void reset(){
-        for(int i=0;i< models.size();i++)
-            models.get(i).reset();
+    public void clear() {
+        user = null;
+        models.clear();
     }
+
+    public void start() {
+        for (int i = 0; i < models.size(); i++)
+            models.get(i).start();
+    }
+
+    public void stop() {
+        for (int i = 0; i < models.size(); i++)
+            models.get(i).stop();
+    }
+
+    public void update() {
+        for (int i = 0; i < models.size(); i++)
+            models.get(i).update();
+    }
+
     public Status getStatus() {
         Status status;
-        for(int i=0;i< models.size();i++){
-            status= models.get(i).getStatus();
-            if(status.getStatusCode()!=Status.SUCCESS)
+        for (int i = 0; i < models.size(); i++) {
+            status = models.get(i).getStatus();
+            if (status.getStatusCode() != Status.SUCCESS)
                 return status;
         }
         return new Status(Status.SUCCESS);
@@ -73,13 +97,14 @@ public class UserManager{
         return user;
     }
 
-    public ArrayList<Model> getModels() {
+    public ArrayList<Model> getModel() {
         return models;
     }
-    public Model getModels(String modelId){
-        if(models==null) return null;
-        for(int i=0;i<models.size();i++)
-            if(models.get(i).getOperation().getId().equals(modelId))
+
+    public Model getModel(String modelId) {
+        if (models == null) return null;
+        for (int i = 0; i < models.size(); i++)
+            if (models.get(i).getOperation().getId().equals(modelId))
                 return models.get(i);
         return null;
     }

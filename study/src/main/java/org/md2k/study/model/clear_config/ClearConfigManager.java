@@ -45,32 +45,48 @@ public class ClearConfigManager extends Model {
 
     public void delete(){
         lastStatus=new Status(Status.CONFIG_FILE_NOT_EXIST);
-        ((AppServiceManager) ModelManager.getInstance(context).getModel(ModelManager.MODEL_APP_SERVICE)).stop();
+        ModelManager.getInstance(context).getModel(ModelManager.MODEL_APP_SERVICE).stop();
         for(int i=0;i< clearConfigList.size();i++)
             clearConfigList.get(i).delete();
         lastStatus=new Status(Status.SUCCESS);
+    }
+    public void start(){
+        lastStatus=new Status(Status.SUCCESS);
+        update();
+
     }
 
     @Override
     public Status getStatus() {
         return lastStatus;
     }
+    public void stop(){
 
-    @Override
-    public void reset() {
+    }
+    public void update(){
 
     }
 
-    public ClearConfigManager(Context context, DataKitAPI dataKitAPI, Operation operation){
-        super(context,dataKitAPI,operation);
-        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfig().getApplication();
-        clearConfigList =new ArrayList<>();
+    @Override
+    public void clear() {
+        clearConfigList.clear();
+    }
+
+    @Override
+    public void set() {
+        ArrayList<Application> applications= configManager.getConfig().getApplication();
         for(int i=0;i<applications.size();i++){
             if(applications.get(i).getConfig()!=null){
                 ClearConfig clearConfig =new ClearConfig(applications.get(i));
                 clearConfigList.add(clearConfig);
             }
         }
-        lastStatus=new Status(Status.SUCCESS);
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+    }
+
+
+    public ClearConfigManager(Context context, ConfigManager configManager,DataKitAPI dataKitAPI, Operation operation){
+        super(context, configManager, dataKitAPI, operation);
+        clearConfigList =new ArrayList<>();
     }
 }

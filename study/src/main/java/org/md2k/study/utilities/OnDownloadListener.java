@@ -1,8 +1,4 @@
-package org.md2k.study.config;
-
-import org.md2k.datakitapi.source.datasource.DataSource;
-
-import java.util.ArrayList;
+package org.md2k.study.utilities;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -30,45 +26,6 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Config {
-    ConfigInfo config_info;
-    StudyInfo study_info;
-    ArrayList<Application> application;
-    ArrayList<Operation> operation;
-    User admin;
-    User user;
-    ArrayList<DataSource> data_quality;
-
-    public ConfigInfo getConfig_info() {
-        return config_info;
-    }
-
-    public ArrayList<Application> getApplication() {
-        return application;
-    }
-
-    public StudyInfo getStudy_info() {
-        return study_info;
-    }
-
-    public User getAdmin() {
-        return admin;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public ArrayList<DataSource> getData_quality() {
-        return data_quality;
-    }
-
-    public ArrayList<Operation> getOperation() {
-        return operation;
-    }
-    public Operation getOperation(String id){
-        for(int i=0;i<operation.size();i++)
-            if(operation.get(i).getId().equals(id)) return operation.get(i);
-        return null;
-    }
+public interface OnDownloadListener {
+    void onDownloadCompleted(boolean status, String message);
 }

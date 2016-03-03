@@ -46,10 +46,32 @@ public class ClearDataManager extends Model {
 
     public void delete(Activity activity) {
         lastStatus = new Status(Status.DATABASE_NOT_AVAILABLE);
-        ((AppServiceManager) ModelManager.getInstance(activity).getModel(ModelManager.MODEL_APP_SERVICE)).stop();
+        ModelManager.getInstance(activity).getModel(ModelManager.MODEL_APP_SERVICE).stop();
         Intent intent = new Intent();
+        intent.putExtra("delete",true);
         intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
-        activity.startActivity(intent);
+
+        activity.startActivityForResult(intent,1);
+    }
+
+    public void start(){
+        lastStatus = new Status(Status.SUCCESS);
+        update();
+    }
+    public void stop(){
+    }
+    public void update(){
+
+    }
+
+    @Override
+    public void clear() {
+
+    }
+
+    @Override
+    public void set() {
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
     }
 
     @Override
@@ -60,14 +82,8 @@ public class ClearDataManager extends Model {
     public void setStatus(Status status) {
         lastStatus = status;
     }
-
-    @Override
-    public void reset() {
-
-    }
-
-    public ClearDataManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context, dataKitAPI, operation);
+    public ClearDataManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
         lastStatus = new Status(Status.SUCCESS);
     }
 }

@@ -175,14 +175,9 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
     }
     @Override
     public void onResume() {
-        appInstallManager.reset();
+        appInstallManager.update();
         setupAppInstall();
         ModelManager.getInstance(context).connect();
         super.onResume();
-    }
-    @Override
-    public void onStop(){
-        appInstallManager.reset();
-        super.onStop();
     }
 }

@@ -1,4 +1,4 @@
-package org.md2k.study.model.day_start_end;
+package org.md2k.study.model.study_start_end;
 
 import android.content.Context;
 
@@ -48,18 +48,18 @@ import java.util.HashMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DayStartEndInfoManager extends Model {
-    DataSourceBuilder dataSourceBuilderDayStart;
-    DataSourceClient dataSourceClientDayStart;
-    DataSourceBuilder dataSourceBuilderDayEnd;
-    DataSourceClient dataSourceClientDayEnd;
-    long dayStartTime;
-    long dayEndTime;
+public class StudyStartEndInfoManager extends Model {
+    DataSourceBuilder dataSourceBuilderStudyStart;
+    DataSourceClient dataSourceClientStudyStart;
+    DataSourceBuilder dataSourceBuilderStudyEnd;
+    DataSourceClient dataSourceClientStudyEnd;
+    long studyStartTime;
+    long studyEndTime;
 
-    public DayStartEndInfoManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+    public StudyStartEndInfoManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
         super(context, configManager, dataKitAPI, operation);
-        dataSourceBuilderDayStart = createDataSourceBuilderDayStart();
-        dataSourceBuilderDayEnd = createDataSourceBuilderDayEnd();
+        dataSourceBuilderStudyStart = createDataSourceBuilderStudyStart();
+        dataSourceBuilderStudyEnd = createDataSourceBuilderStudyEnd();
     }
 
     public void start() {
@@ -71,31 +71,23 @@ public class DayStartEndInfoManager extends Model {
     }
 
     public void set() {
-        readDayStartFromDataKit();
-        readDayEndFromDataKit();
+        readStudyStartFromDataKit();
+        readStudyEndFromDataKit();
         lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
     }
     public void clear(){
-        dayStartTime = -1;
-        dayEndTime = -1;
+        studyStartTime = -1;
+        studyEndTime = -1;
     }
 
-    boolean isToday(long timestamp) {
-        Calendar calendar = Calendar.getInstance();
-        Calendar calendarNow = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-        if (calendar.get(Calendar.YEAR) != calendarNow.get(Calendar.YEAR)) return false;
-        if (calendar.get(Calendar.MONTH) != calendarNow.get(Calendar.MONTH)) return false;
-        if (calendar.get(Calendar.DAY_OF_MONTH) != calendarNow.get(Calendar.DAY_OF_MONTH))
-            return false;
-        return true;
-    }
     public void update(){
         if (!dataKitAPI.isConnected()) lastStatus=new Status(Status.DATAKIT_NOT_AVAILABLE);
-        else if (dayStartTime == -1 || !isToday(dayStartTime))
-            lastStatus= new Status(Status.DAY_START_NOT_AVAILABLE);
-        else if (dayStartTime < dayEndTime) lastStatus= new Status(Status.DAY_COMPLETED);
-        else lastStatus=new Status(Status.SUCCESS);
+        else if (studyStartTime == -1)
+            lastStatus= new Status(Status.STUDY_START_NOT_AVAILABLE);
+        else if (studyStartTime < studyEndTime) {
+            lastStatus= new Status(Status.SUCCESS,"Study is completed");
+        }
+        else lastStatus=new Status(Status.SUCCESS, "Study is running");
     }
 
     public Status getStatus() {
@@ -103,105 +95,105 @@ public class DayStartEndInfoManager extends Model {
         return lastStatus;
     }
 
-    private void readDayStartFromDataKit() {
-        dayStartTime=-1;
+    private void readStudyStartFromDataKit() {
+        studyStartTime=-1;
         if (dataKitAPI.isConnected()) {
-            dataSourceClientDayStart = dataKitAPI.register(dataSourceBuilderDayStart);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
+            dataSourceClientStudyStart = dataKitAPI.register(dataSourceBuilderStudyStart);
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyStart, 1);
             if (dataTypes.size() != 0) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                dayStartTime = dataTypeLong.getSample();
+                studyStartTime = dataTypeLong.getSample();
             }
         }
     }
 
-    private void readDayEndFromDataKit() {
-        dayEndTime=-1;
+    private void readStudyEndFromDataKit() {
+        studyEndTime=-1;
         if (dataKitAPI.isConnected()) {
-            dataSourceClientDayEnd = dataKitAPI.register(dataSourceBuilderDayEnd);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);
+            dataSourceClientStudyEnd = dataKitAPI.register(dataSourceBuilderStudyEnd);
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyEnd, 1);
             if (dataTypes.size() != 0) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                dayEndTime = dataTypeLong.getSample();
+                studyEndTime = dataTypeLong.getSample();
             }
         }
     }
 
-    private boolean writeDayStartToDataKit() {
+    private boolean writeStudyStartToDataKit() {
         if (!dataKitAPI.isConnected()) return false;
-        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), dayStartTime);
-        dataSourceClientDayStart = dataKitAPI.register(dataSourceBuilderDayStart);
-        dataKitAPI.insert(dataSourceClientDayStart, dataTypeLong);
+        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyStartTime);
+        dataSourceClientStudyStart = dataKitAPI.register(dataSourceBuilderStudyStart);
+        dataKitAPI.insert(dataSourceClientStudyStart, dataTypeLong);
         return true;
     }
 
-    private boolean writeDayEndToDataKit() {
+    private boolean writeStudyEndToDataKit() {
         if (!dataKitAPI.isConnected()) return false;
-        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), dayEndTime);
-        dataSourceClientDayEnd = dataKitAPI.register(dataSourceBuilderDayEnd);
-        dataKitAPI.insert(dataSourceClientDayEnd, dataTypeLong);
+        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyEndTime);
+        dataSourceClientStudyEnd = dataKitAPI.register(dataSourceBuilderStudyEnd);
+        dataKitAPI.insert(dataSourceClientStudyEnd, dataTypeLong);
         return true;
     }
 
-    DataSourceBuilder createDataSourceBuilderDayStart() {
+    DataSourceBuilder createDataSourceBuilderStudyStart() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.DAY_START).setPlatform(platform);
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Day Start");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Represents when day started");
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.STUDY_START).setPlatform(platform);
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Study Start");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Represents when study started");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeLong.class.getName());
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         HashMap<String, String> dataDescriptor = new HashMap<>();
-        dataDescriptor.put(METADATA.NAME, "Day Start");
+        dataDescriptor.put(METADATA.NAME, "Study Start");
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
         dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(Long.MAX_VALUE));
         dataDescriptor.put(METADATA.UNIT, "millisecond");
-        dataDescriptor.put(METADATA.DESCRIPTION, "Contains day start time in millisecond");
+        dataDescriptor.put(METADATA.DESCRIPTION, "Contains study start time in millisecond");
         dataDescriptor.put(METADATA.DATA_TYPE, long.class.getName());
         dataDescriptors.add(dataDescriptor);
         dataSourceBuilder = dataSourceBuilder.setDataDescriptors(dataDescriptors);
         return dataSourceBuilder;
     }
 
-    DataSourceBuilder createDataSourceBuilderDayEnd() {
+    DataSourceBuilder createDataSourceBuilderStudyEnd() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.DAY_END).setPlatform(platform);
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Day End");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Represents when day ended");
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.STUDY_END).setPlatform(platform);
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Study End");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Represents when study ended");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeLong.class.getName());
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         HashMap<String, String> dataDescriptor = new HashMap<>();
-        dataDescriptor.put(METADATA.NAME, "Day End");
+        dataDescriptor.put(METADATA.NAME, "Study End");
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
         dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(Long.MAX_VALUE));
         dataDescriptor.put(METADATA.UNIT, "millisecond");
-        dataDescriptor.put(METADATA.DESCRIPTION, "Contains day end time in millisecond");
+        dataDescriptor.put(METADATA.DESCRIPTION, "Contains study end time in millisecond");
         dataDescriptor.put(METADATA.DATA_TYPE, long.class.getName());
         dataDescriptors.add(dataDescriptor);
         dataSourceBuilder = dataSourceBuilder.setDataDescriptors(dataDescriptors);
         return dataSourceBuilder;
     }
 
-    public void saveDayStart() {
-        writeDayStartToDataKit();
+    public void saveStudyStart() {
+        writeStudyStartToDataKit();
     }
 
-    public void saveDayEnd() {
-        writeDayEndToDataKit();
+    public void saveStudyEnd() {
+        writeStudyEndToDataKit();
     }
 
-    public void setDayStartTime(long dayStartTime) {
-        this.dayStartTime = dayStartTime;
+    public void setStudyStartTime(long studyStartTime) {
+        this.studyStartTime = studyStartTime;
     }
 
-    public void setDayEndTime(long dayEndTime) {
-        this.dayEndTime = dayEndTime;
+    public void setStudyEndTime(long studyEndTime) {
+        this.studyEndTime = studyEndTime;
     }
 
-    public long getDayStartTime() {
-        return dayStartTime;
+    public long getStudyStartTime() {
+        return studyStartTime;
     }
 
-    public long getDayEndTime() {
-        return dayEndTime;
+    public long getStudyEndTime() {
+        return studyEndTime;
     }
 }

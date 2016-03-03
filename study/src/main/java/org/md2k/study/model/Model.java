@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.study.Status;
+import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
 
 /**
@@ -33,22 +34,27 @@ import org.md2k.study.config.Operation;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public abstract class Model {
-    protected Operation operation;
+    protected ConfigManager configManager;
     protected DataKitAPI dataKitAPI;
     protected Context context;
     protected Status lastStatus;
+    protected Operation operation;
 
     public abstract Status getStatus();
 
-    public abstract void reset();
-
-    public Model(Context context, DataKitAPI dataKitAPI, Operation operation) {
+    public Model(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
         this.context = context;
         this.dataKitAPI = dataKitAPI;
+        this.configManager=configManager;
         this.operation = operation;
     }
+    abstract public void start();
+    abstract public void stop();
+    abstract public void update();
+    abstract public void clear();
+    abstract public void set();
 
-    public void save() {
+    public void save(){
 
     }
 

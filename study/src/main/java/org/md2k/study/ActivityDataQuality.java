@@ -11,21 +11,25 @@ import android.widget.TextView;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.PlatformId;
+import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.data_quality.DataQualityManager;
 
 import java.util.ArrayList;
 
-public class ActivityDataQuality extends ActivityBase {
-    public static final String TAG = ActivityDataQuality.class.getSimpleName();
+public class ActivityDataQuality extends ActivityPrivacy {
     ImageView[] imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (isError) return;
-        DataQualityManager dataQualityManager = (DataQualityManager) userManager.getModels(ModelManager.MODEL_DATA_QUALITY);
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+        if(!modelManager.isValid()) return;
+        DataQualityManager dataQualityManager = (DataQualityManager) ModelManager.getInstance(this).getUserManager().getModel(ModelManager.MODEL_DATA_QUALITY);
         if (dataQualityManager != null) {
             findViewById(R.id.linear_layout_header_dataquality).setVisibility(View.VISIBLE);
             findViewById(R.id.linear_layout_content_dataquality).setVisibility(View.VISIBLE);
@@ -39,7 +43,7 @@ public class ActivityDataQuality extends ActivityBase {
     void addImageView() {
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linear_layout_dataquality_all);
         linearLayout.removeAllViews();
-        ArrayList<DataSource> dataSources = ConfigManager.getInstance(this).getConfig().getData_quality();
+        ArrayList<DataSource> dataSources = ModelManager.getInstance(this).getConfigManager().getConfig().getData_quality();
         imageView = new ImageView[dataSources.size()];
         for (int i = 0; i < dataSources.size(); i++) {
             LinearLayout linearLayoutOne = new LinearLayout(this);
@@ -73,13 +77,24 @@ public class ActivityDataQuality extends ActivityBase {
                     default:
                         textViewOne.setText("-");
                 }
-            } else {
+            } else if(dataSources.get(i).getPlatform().getId()!=null){
                 switch (dataSources.get(i).getPlatform().getId()) {
                     case PlatformId.LEFT_WRIST:
-                        textViewOne.setText("Wrist(L)");
+                        textViewOne.setText("Wrist (L)");
                         break;
                     case PlatformId.RIGHT_WRIST:
-                        textViewOne.setText("Wrist(R)");
+                        textViewOne.setText("Wrist (R)");
+                        break;
+                    default:
+                        textViewOne.setText("-");
+                }
+            }else if(dataSources.get(i).getPlatform().getType()!=null){
+                switch (dataSources.get(i).getPlatform().getType()) {
+                    case PlatformType.MICROSOFT_BAND:
+                        textViewOne.setText("Microsoft Band");
+                        break;
+                    case PlatformType.AUTOSENSE_WRIST:
+                        textViewOne.setText("AutoSense Wrist");
                         break;
                     default:
                         textViewOne.setText("-");

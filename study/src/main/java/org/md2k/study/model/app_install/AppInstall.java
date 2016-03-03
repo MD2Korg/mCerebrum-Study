@@ -3,12 +3,26 @@ package org.md2k.study.model.app_install;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.widget.Toast;
 
+import org.md2k.study.Constants;
 import org.md2k.study.OnDataChangeListener;
+import org.md2k.study.Status;
 import org.md2k.study.config.Application;
+import org.md2k.study.utilities.Download;
+import org.md2k.study.utilities.OnCompletionListenter;
 import org.md2k.utilities.Apps;
+import org.md2k.utilities.Files;
 import org.md2k.utilities.Report.Log;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.UUID;
 
 
 /**
@@ -40,23 +54,31 @@ import org.md2k.utilities.Report.Log;
 public class AppInstall {
     private static final String TAG = AppInstall.class.getSimpleName();
     Application application;
-    private String curVersion = null;
-    private String latestVersion = null;
+    private String curVersion;
+    private String latestVersion;
     private boolean installed;
     Context context;
 
     AppInstall(Context context, Application application) {
-        this.context=context;
-        this.application=application;
-        reset();
+        this.context = context;
+        this.application = application;
+        curVersion=null;
+        latestVersion=null;
+        installed=false;
     }
-    public void reset(){
-        installed=Apps.isPackageInstalled(context, application.getPackage_name());
+    public void set(){
+        installed = Apps.isPackageInstalled(context, application.getPackage_name());
         setVersionName();
-        Log.d(TAG, "reset()...packageName=" + application.getPackage_name() + " installed=" + installed + " version=" + curVersion);
+    }
+    public void clear(){
+    }
+    public void update(){
+        installed = Apps.isPackageInstalled(context, application.getPackage_name());
+        setVersionName();
     }
 
     public void downloadAndInstallApp(final Context context) {
+        final String filename = "file_" + application.getId()+latestVersion + ".apk";
         if (application.getDownload_link().startsWith("market")) {
             Intent goToMarket = new Intent(Intent.ACTION_VIEW)
                     .setData(Uri.parse(application.getDownload_link()));
@@ -66,23 +88,49 @@ public class AppInstall {
                 setLatestVersionName(context, new OnDataChangeListener() {
                     @Override
                     public void onDataChange(String str) {
-                        download(context);
+                        String link = application.getDownload_link() +
+                                "/download/" + latestVersion +
+                                "/" + application.getId() +
+                                latestVersion + ".apk";
+                        download(context, filename, link, new OnCompletionListenter() {
+                            @Override
+                            public void OnCompleted(Status status) {
+                                if(status.getStatusCode()==Status.SUCCESS){
+                                    Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY+filename)), "application/vnd.android.package-archive");
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    context.startActivity(intent);
+                                }
+                            }
+                        });
+
                     }
                 });
-            } else
-                download(context);
+            } else {
+                String link = application.getDownload_link() +
+                        "/download/" + latestVersion +
+                        "/" + application.getId() +
+                        latestVersion + ".apk";
+                download(context, filename, link, new OnCompletionListenter() {
+                    @Override
+                    public void OnCompleted(Status status) {
+                        if(status.getStatusCode()==Status.SUCCESS){
+                            Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY+filename)), "application/vnd.android.package-archive");
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(intent);
+                        }
+                    }
+                });
+            }
         }
     }
 
-    private void download(Context context) {
-        String downloadLinkName = application.getDownload_link() +
-                "/download/" + latestVersion +
-                "/" + application.getId() +
-                latestVersion + ".apk";
-        DownloadTask downloadTask = new DownloadTask(context);
-        String[] s = new String[]{downloadLinkName};
-        downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, s);
-
+    private void download(Context context, String filename, String link, OnCompletionListenter onCompletionListenter) {
+        Download download = new Download(context, onCompletionListenter);
+        download.execute(link, filename);
     }
 
     public void run(Context context) {
@@ -94,20 +142,53 @@ public class AppInstall {
         return installed;
     }
 
-    public void setLatestVersionName(Context context, final OnDataChangeListener onDataChangeListener) {
-//        if (latestVersion != null) onDataChangeListener.onDataChange(latestVersion);
-        if (!application.getPackage_name().startsWith("market")) {
-            DownloadVersion downloadVersion = new DownloadVersion(context, new OnTaskCompleted() {
-                @Override
-                public void onTaskCompleted(String versionName) {
-                    latestVersion = versionName;
-                    onDataChangeListener.onDataChange(versionName);
-                }
-            });
-            downloadVersion.execute(application.getDownload_link() + "/latest");
-        } else {
+    public void setLatestVersionName(final Context context, final OnDataChangeListener onDataChangeListener) {
+        String link = application.getDownload_link() + "/latest";
+        final String filename = "version_" + UUID.randomUUID().toString() + ".txt";
+        if (application.getPackage_name().startsWith("market")) {
             onDataChangeListener.onDataChange(latestVersion);
+            return;
         }
+        download(context, filename, link, new OnCompletionListenter() {
+            @Override
+            public void OnCompleted(Status status) {
+                if (status.getStatusCode() == Status.SUCCESS) {
+                    latestVersion = retrieveLatestVersion(Constants.TEMP_DIRECTORY+filename);
+                    onDataChangeListener.onDataChange(latestVersion);
+                } else
+                    Toast.makeText(context, status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                Files.delete(Constants.TEMP_DIRECTORY+filename);
+            }
+        });
+    }
+
+    String retrieveLatestVersion(String filename) {
+        BufferedReader in;
+        String versionName=null;
+        try {
+            in = new BufferedReader(new FileReader(filename));
+            String str, str1 = "";
+            while ((str = in.readLine()) != null) {
+                str1 += str;
+                if (str1.contains("<title>") && str1.contains("</title>")) {
+                    int start_id = str1.indexOf("<title>") + 7;
+                    int end_id = str1.indexOf("</title>");
+
+                    str = str1.substring(start_id, end_id);
+                    String[] s = str.split(" ");
+                    if (s.length >= 2) {
+                        versionName = s[1];
+                    }
+                }
+            }
+            in.close();
+        } catch (FileNotFoundException e1) {
+            return null;
+
+        } catch (IOException e1) {
+            return null;
+        }
+        return versionName;
     }
 
     public boolean isUpdateAvailable() {
@@ -119,7 +200,7 @@ public class AppInstall {
     public void setVersionName() {
         if (installed)
             curVersion = Apps.getVersionName(context, application.getPackage_name());
-        else curVersion=null;
+        else curVersion = null;
     }
 
     public String getName() {

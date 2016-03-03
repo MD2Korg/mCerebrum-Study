@@ -16,6 +16,7 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
+import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
 import org.md2k.study.model.Model;
 import org.md2k.study.controller.ModelManager;
@@ -57,20 +58,35 @@ public class UserInfoManager extends Model {
     UserInfo userInfo;
     boolean isInDatabase;
 
-    public UserInfoManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context,dataKitAPI, operation);
-        reset();
+    public UserInfoManager(Context context, ConfigManager configManager,DataKitAPI dataKitAPI, Operation operation) {
+        super(context,configManager,dataKitAPI, operation);
     }
+    public void start(){
+        update();
 
-    public void reset() {
-        isInDatabase = false;
-        userInfo = new UserInfo();
+    }
+    public void stop(){
+
+    }
+    public void update(){
         if (!dataKitAPI.isConnected()) lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
         else {
-            readFromDataKit();
             if (isInDatabase) lastStatus = new Status(Status.SUCCESS);
             else lastStatus = new Status(Status.USERID_NOT_DEFINED);
         }
+    }
+
+    @Override
+    public void clear() {
+        isInDatabase=false;
+    }
+
+    @Override
+    public void set() {
+        isInDatabase=false;
+        userInfo = new UserInfo();
+        readFromDataKit();
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
     }
 
     public void setUserId(String userId) {
@@ -78,7 +94,6 @@ public class UserInfoManager extends Model {
 
         String study_id= ((StudyInfoManager)ModelManager.getInstance(context).getModel(ModelManager.MODEL_STUDY_INFO)).getStudy_id();
         UUID userUUID=UUID.nameUUIDFromBytes((study_id+userId).getBytes());
-
         userInfo.setUuid(userUUID.toString());
     }
 
@@ -103,7 +118,7 @@ public class UserInfoManager extends Model {
     }
     public void save(){
         writeToDataKit();
-        reset();
+        update();
     }
 
     private boolean writeToDataKit() {

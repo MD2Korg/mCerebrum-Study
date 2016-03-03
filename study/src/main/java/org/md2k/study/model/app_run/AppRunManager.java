@@ -37,16 +37,31 @@ import java.io.FileNotFoundException;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AppRunManager extends Model {
-    public AppRunManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context,dataKitAPI, operation);
-        lastStatus=new Status(Status.SUCCESS);
+    public AppRunManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context,configManager, dataKitAPI, operation);
     }
-    public Status getStatus(){
-        return lastStatus;
+    public void start(){
+        lastStatus=new Status(Status.SUCCESS);
+        update();
+    }
+    public void stop(){
+
+    }
+    public void update(){
+
     }
 
     @Override
-    public void reset() {
+    public void clear() {
 
+    }
+
+    @Override
+    public void set() {
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+    }
+
+    public Status getStatus(){
+        return lastStatus;
     }
 }

@@ -74,7 +74,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     void updatePreference(AppSettings settingsApp) {
         Preference preference = findPreference(settingsApp.getName());
         Status status = settingsApp.getStatus();
-        if (status.getStatusCode() == Status.APP_CONFIG_ERROR) {
+        if (status.getStatusCode() != Status.SUCCESS) {
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
             preference.setSummary(status.getStatusMessage());
         } else {
@@ -85,7 +85,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
 
     @Override
     public void onResume() {
-        appSettingsManager.reset();
+        appSettingsManager.update();
         setupAppSettings();
         super.onResume();
     }
@@ -129,7 +129,6 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     }
     @Override
     public void onStop(){
-        appSettingsManager.reset();
         super.onStop();
     }
 

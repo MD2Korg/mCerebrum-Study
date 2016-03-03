@@ -14,6 +14,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.PlatformId;
+import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -69,6 +70,10 @@ public class DataQuality {
             name = "Wrist(L)";
         if (dataSource.getPlatform().getId() != null && dataSource.getPlatform().getId().equals(PlatformId.RIGHT_WRIST))
             name = "Wrist(R)";
+        if(dataSource.getPlatform().getType()!=null && dataSource.getPlatform().getType().equals(PlatformType.MICROSOFT_BAND))
+            name="MicrosoftBand";
+        if(dataSource.getPlatform().getType()!=null && dataSource.getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST))
+            name="AutoSenseWrist";
     }
 
     public DataSource createDataSource(DataSource dataSource) {
@@ -84,16 +89,17 @@ public class DataQuality {
     Runnable runnableStart=new Runnable() {
         @Override
         public void run() {
+            if(!dataKitAPI.isConnected()) return;
             ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
-            Log.d(TAG, "start: platformType=" + dataSource.getPlatform().getType() + " dataSource=" + dataSource.getType() + " size=" + dataSourceClientArrayList.size());
+//            Log.d(TAG, "start: platformType=" + dataSource.getPlatform().getType() + " dataSource=" + dataSource.getType() + " size=" + dataSourceClientArrayList.size());
 
             if (dataSourceClientArrayList.size() !=0) {
                 dataSourceClient = dataSourceClientArrayList.get(0);
-                Log.d(TAG, "id=" + dataSourceClient.getDs_id() + " platformType=" + dataSourceClient.getDataSource().getPlatform().getType());
+  //              Log.d(TAG, "id=" + dataSourceClient.getDs_id() + " platformType=" + dataSourceClient.getDataSource().getPlatform().getType());
                 dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
                     @Override
                     public void onReceived(DataType dataType) {
-                        Log.d(TAG, "onReceive .. id=" + dataSourceClient.getDs_id() + " platformType=" + dataSource.getPlatform().getType()+" dataSource="+dataSource.getType());
+ //                       Log.d(TAG, "onReceive .. id=" + dataSourceClient.getDs_id() + " platformType=" + dataSource.getPlatform().getType()+" dataSource="+dataSource.getType());
                         //lastSample = getLastSample(((DataTypeIntArray) dataType).getSample());
 //                    receiveCallBack.onReceive(dataSource, lastSample);
                         receiveCallBack.onReceive(dataSource,((DataTypeIntArray) dataType).getSample());

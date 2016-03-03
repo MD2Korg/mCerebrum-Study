@@ -42,18 +42,19 @@ import java.util.ArrayList;
 public class ConfigInfoManager extends Model {
     ConfigInfo configInfo;
 
-    public ConfigInfoManager(Context context,DataKitAPI dataKitAPI, Operation operation) {
-        super(context, dataKitAPI, operation);
-        this.configInfo = ConfigManager.getInstance(context).getConfig().getConfig_info();
-        reset();
+    public ConfigInfoManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
+        configInfo=null;
     }
+    public void set(){
+        this.configInfo = configManager.getConfig().getConfig_info();
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
 
-    public Status getStatus() {
-        return lastStatus;
     }
-
-    @Override
-    public void reset() {
+    public void clear(){
+        this.configInfo=null;
+    }
+    public void start(){
         if (configInfo.getRequired_files() == null || configInfo.getRequired_files().size() == 0)
             lastStatus= new Status(Status.SUCCESS);
         for (int i = 0; i < configInfo.getRequired_files().size(); i++) {
@@ -61,7 +62,16 @@ public class ConfigInfoManager extends Model {
                 lastStatus=new Status(Status.CONFIG_FILE_NOT_EXIST);
         }
         lastStatus= new Status(Status.SUCCESS);
+        update();
+    }
+    public void update(){
+    }
+    public void stop(){
 
+    }
+
+    public Status getStatus() {
+        return lastStatus;
     }
 
     public String getId() {

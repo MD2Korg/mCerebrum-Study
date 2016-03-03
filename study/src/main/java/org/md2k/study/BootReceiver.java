@@ -1,4 +1,8 @@
-package org.md2k.study.model.app_install;
+package org.md2k.study;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -26,6 +30,12 @@ package org.md2k.study.model.app_install;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public interface OnTaskCompleted {
-    void onTaskCompleted(String versionName);
+public class BootReceiver extends BroadcastReceiver
+{
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Intent myIntent = new Intent(context, ActivityMain.class);
+        myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(myIntent);
+    }
 }

@@ -14,12 +14,10 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.ActivityMain;
 import org.md2k.study.Constants;
 import org.md2k.study.Status;
-import org.md2k.study.controller.AdminManager;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.controller.UserManager;
 import org.md2k.study.model.app_service.AppServiceManager;
 import org.md2k.study.model.day_start_end.DayStartEndInfoManager;
-import org.md2k.study.model.privacy_control.PrivacyControlManager;
 import org.md2k.utilities.Report.Log;
 
 /**
@@ -60,15 +58,13 @@ public class ServiceSystemHealth extends Service {
     public static final int DATA_QUALITY = 7;
 
 
-    private static final String TAG = ServiceSystemHealth.class.getSimpleName();
     Context context;
     Handler handler;
     ModelManager modelManager;
-    AdminManager adminManager;
+    UserManager adminManager;
     UserManager userManager;
-    AppServiceManager appServiceManager;
-    boolean isDataQualityAvailable, isPrivacyAvailable, isDayStartEnd;
-    public long lastPrivacyTime = 0;
+    boolean isDataQualityAvailable;
+    boolean isDayStartEnd;
     public Status lastAdminStatus = null;
     public Status[] lastDataQualityStatus = null;
     public Status lastDayStartEndStatus = null;
@@ -79,12 +75,10 @@ public class ServiceSystemHealth extends Service {
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiverStatus,
                 new IntentFilter(INTENT_NAME));
         modelManager = ModelManager.getInstance(getApplicationContext());
-        adminManager = AdminManager.getInstance(getApplicationContext());
-        userManager = UserManager.getInstance(getApplicationContext());
-        appServiceManager = (AppServiceManager) modelManager.getModel(ModelManager.MODEL_APP_SERVICE);
-        isPrivacyAvailable = userManager.getModels(ModelManager.MODEL_PRIVACY) != null;
-        isDataQualityAvailable = userManager.getModels(ModelManager.MODEL_DATA_QUALITY) != null;
-        isDayStartEnd = userManager.getModels(ModelManager.MODEL_DAY_START_END) != null;
+        adminManager = modelManager.getAdminManager();
+        userManager = modelManager.getUserManager();
+        isDataQualityAvailable = userManager.getModel(ModelManager.MODEL_DATA_QUALITY) != null;
+        isDayStartEnd = userManager.getModel(ModelManager.MODEL_DAY_START_END) != null;
         handler = new Handler();
         handler.post(system_health);
     }
@@ -93,9 +87,8 @@ public class ServiceSystemHealth extends Service {
         Status status = modelManager.getStatus();
         if (status.getStatusCode() == Status.SUCCESS)
             status = adminManager.getStatus();
-        Log.d(TAG, "admin status=" + status.getStatusMessage());
         if (status.getStatusCode() == Status.SUCCESS) {
-            appServiceManager.start();
+            modelManager.getModel(ModelManager.MODEL_APP_SERVICE).start();
         }
         return status;
     }
@@ -129,36 +122,12 @@ public class ServiceSystemHealth extends Service {
         intent.putExtra(ActivityMain.TYPE, ActivityMain.DAY_START_END);
         intent.putExtra(ActivityMain.VALUE, lastDayStartEndStatus);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-
-    }
-
-    void sendMessagePrivacy() {
-        long curPrivacyTime;
-        PrivacyControlManager privacyControlManager = (PrivacyControlManager) userManager.getModels(ModelManager.MODEL_PRIVACY);
-        if (privacyControlManager != null) {
-            if (privacyControlManager.getStatus().getStatusCode() == Status.PRIVACY_ACTIVE) {
-                long remainingTime = privacyControlManager.getPrivacyData().getStartTimeStamp() + privacyControlManager.getPrivacyData().getDuration().getValue() - DateTime.getDateTime();
-                if (remainingTime > 0) {
-                    curPrivacyTime = remainingTime;
-                } else
-                    curPrivacyTime = -1;
-            } else
-                curPrivacyTime = -1;
-            if (curPrivacyTime != lastPrivacyTime) {
-                lastPrivacyTime = curPrivacyTime;
-                Intent intent = new Intent(ActivityMain.INTENT_NAME);
-                intent.putExtra(ActivityMain.TYPE, ActivityMain.PRIVACY);
-                intent.putExtra(ActivityMain.VALUE, lastPrivacyTime);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-
-            }
-        }
     }
 
     Status getDayStartEndStatus(Status adminStatus) {
         Status curDayStatus = null;
         if (adminStatus.getStatusCode() != Status.SUCCESS) return new Status(Status.DAY_ERROR);
-        DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) userManager.getModels(ModelManager.MODEL_DAY_START_END);
+        DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) userManager.getModel(ModelManager.MODEL_DAY_START_END);
         if (dayStartEndInfoManager != null) {
             curDayStatus = dayStartEndInfoManager.getStatus();
         }
@@ -183,11 +152,9 @@ public class ServiceSystemHealth extends Service {
             if (modelManager.isInstalled() && !modelManager.isConnected())
                 modelManager.connect();
             Status curAdminStatus, curDayStartEndStatus = null;
-            if (isPrivacyAvailable) sendMessagePrivacy();
             curAdminStatus = getAdminStatus();
             if (isDayStartEnd)
                 curDayStartEndStatus = getDayStartEndStatus(curAdminStatus);
-
             if (curDayStartEndStatus == null) {
                 if (lastAdminStatus == null || curAdminStatus.getStatusCode() != lastAdminStatus.getStatusCode()) {
                     lastAdminStatus = curAdminStatus;
@@ -223,9 +190,10 @@ public class ServiceSystemHealth extends Service {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getIntExtra(TYPE, -1)) {
                 case CONNECTED:
-                    Log.d(TAG, "Service...DataKit Connected");
-                    adminManager.reset();
-                    userManager.reset();
+                    modelManager.stop();
+                    modelManager.clear();
+                    modelManager.set();
+                    modelManager.start();
                     handler.removeCallbacks(system_health);
                     handler.post(system_health);
                     break;

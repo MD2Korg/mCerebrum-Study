@@ -15,6 +15,7 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
+import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
 import org.md2k.study.model.Model;
 
@@ -53,19 +54,37 @@ public class WakeupInfoManager extends Model {
     long wakeupTimeDB;
     long wakeupTimeNew;
 
-    public WakeupInfoManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context, dataKitAPI, operation);
-        dataSourceBuilder = createDataSourceBuilder();
-        reset();
-    }
-    public void reset() {
+    public WakeupInfoManager(Context context,ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
         wakeupTimeNew = -1;
         wakeupTimeDB = -1;
-        readStudyInfoFromDataKit();
-        if (!dataKitAPI.isConnected()) lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
-        if (wakeupTimeDB == -1)
-            lastStatus= new Status(Status.WAKEUP_NOT_DEFINED);
-        lastStatus= new Status(Status.SUCCESS);
+    }
+
+    public void start() {
+        update();
+    }
+
+    public void stop() {
+    }
+
+    public void update() {
+        if (!dataKitAPI.isConnected()) lastStatus = new Status(Status.DATAKIT_NOT_AVAILABLE);
+        else if (wakeupTimeDB == -1)
+            lastStatus = new Status(Status.WAKEUP_NOT_DEFINED);
+        else lastStatus = new Status(Status.SUCCESS);
+    }
+
+    @Override
+    public void clear() {
+        wakeupTimeNew = -1;
+        wakeupTimeDB = -1;
+    }
+
+    @Override
+    public void set() {
+        dataSourceBuilder = createDataSourceBuilder();
+        wakeupTimeDB=readStudyInfoFromDataKit();
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
     }
 
     public Status getStatus() {
@@ -79,28 +98,28 @@ public class WakeupInfoManager extends Model {
         return true;
     }
 
-    private void readStudyInfoFromDataKit() {
-        wakeupTimeDB = -1;
+    private long readStudyInfoFromDataKit() {
+        long wakeup=-1;
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
             if (dataTypes.size() != 0) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                wakeupTimeDB = dataTypeLong.getSample();
+                wakeup = dataTypeLong.getSample();
             }
         }
+        return wakeup;
     }
 
 
-        private boolean writeToDataKit(){
-            if(!dataKitAPI.isConnected()) return false;
-            if(!isValid()) return false;
-            DataTypeLong dataTypeLong=new DataTypeLong(DateTime.getDateTime(),wakeupTimeNew);
-            dataSourceClient = dataKitAPI.register(dataSourceBuilder);
-            dataKitAPI.insert(dataSourceClient,dataTypeLong);
-            wakeupTimeDB=wakeupTimeNew;
-            return true;
-        }
+    private boolean writeToDataKit() {
+        if (!dataKitAPI.isConnected()) return false;
+        if (!isValid()) return false;
+        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), wakeupTimeNew);
+        dataSourceClient = dataKitAPI.register(dataSourceBuilder);
+        dataKitAPI.insert(dataSourceClient, dataTypeLong);
+        return true;
+    }
 
     DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
@@ -128,9 +147,11 @@ public class WakeupInfoManager extends Model {
         dataDescriptor.put(METADATA.DATA_TYPE, long.class.getName());
         return dataDescriptor;
     }
-    public void save(){
-        writeToDataKit();
-        reset();
+
+    public void save() {
+        if(writeToDataKit())
+            wakeupTimeDB = wakeupTimeNew;
+        update();
     }
 
     public long getWakeupTimeDB() {

@@ -50,19 +50,22 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentServiceApp.class.getSimpleName();
     Context context;
-    AppServiceManager appServiceManager;
     Handler handler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context=getActivity().getApplicationContext();
-        appServiceManager = (AppServiceManager)ModelManager.getInstance(context).getModel(ModelManager.MODEL_APP_SERVICE);
         addPreferencesFromResource(R.xml.pref_app_service);
-        setupServiceApp();
-        setupButtons();
         handler=new Handler();
     }
+    @Override
+    public void onStart(){
+        setupServiceApp();
+        setupButtons();
+        super.onStart();
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,6 +89,9 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
         button1.setText("Start All");
         button1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE);
+                for(int i=0;i<appServiceManager.appServiceList.size();i++)
+                    appServiceManager.appServiceList.get(i).setActive(true);
                 appServiceManager.start();
             }
         });
@@ -93,14 +99,18 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
         button2.setText("Stop All");
         button2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE);
+                for(int i=0;i<appServiceManager.appServiceList.size();i++)
+                    appServiceManager.appServiceList.get(i).setActive(false);
                 appServiceManager.stop();
             }
         });
     }
 
     void updatePreference(int i) {
+        AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE);
         SwitchPreference switchPreference = (SwitchPreference) findPreference(String.valueOf(i));
-        Status status = appServiceManager.appServiceList.get(i).getStatus(context);
+        Status status = appServiceManager.appServiceList.get(i).getStatus();
         if(status.getStatusCode()==Status.APP_NOT_INSTALLED) {
             switchPreference.setEnabled(false);
             switchPreference.setChecked(false);
@@ -119,12 +129,11 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
         }
     }
     void setupServiceApp() {
+        AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE);
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_app");
         preferenceCategory.removeAll();
-        Log.d(TAG, "size=" + appServiceManager.appServiceList.size());
 
         for (int i = 0; i < appServiceManager.appServiceList.size(); i++) {
-            Log.d(TAG,"name="+ appServiceManager.appServiceList.get(i).getName());
             SwitchPreference switchPreference = new SwitchPreference(getActivity());
             switchPreference.setKey(String.valueOf(i));
             switchPreference.setTitle(appServiceManager.appServiceList.get(i).getName());
@@ -132,13 +141,16 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
             switchPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE);
                     int i=Integer.parseInt(preference.getKey());
-                    Status status = appServiceManager.appServiceList.get(i).getStatus(context);
+                    Status status = appServiceManager.appServiceList.get(i).getStatus();
                     if (status.getStatusCode() == Status.SUCCESS) {
-                        appServiceManager.appServiceList.get(i).stop(context);
+                        appServiceManager.appServiceList.get(i).stop();
+                        appServiceManager.appServiceList.get(i).setActive(false);
                         updatePreference(i);
                     } else if (status.getStatusCode() == Status.APP_NOT_RUNNING) {
-                        appServiceManager.appServiceList.get(i).start(context);
+                        appServiceManager.appServiceList.get(i).setActive(true);
+                        appServiceManager.appServiceList.get(i).start();
                         updatePreference(i);
                     }
                     return false;
@@ -151,6 +163,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
     Runnable serviceRunning=new Runnable() {
         @Override
         public void run() {
+            AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelManager.MODEL_APP_SERVICE);
             for(int i=0;i< appServiceManager.appServiceList.size();i++)
                 updatePreference(i);
             handler.postDelayed(serviceRunning,1000);

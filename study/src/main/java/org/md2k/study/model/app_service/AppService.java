@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import org.md2k.study.Status;
 import org.md2k.utilities.Apps;
+import org.md2k.utilities.Report.Log;
 
 
 /**
@@ -34,43 +35,58 @@ import org.md2k.utilities.Apps;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AppService {
-    private static final String TAG = AppService.class.getSimpleName();
     private String name;
     private String package_name;
     private String service;
+    private boolean active;
+    Context context;
 
-    public AppService(String name, String package_name, String service) {
+    public AppService(Context context, String name, String package_name, String service) {
+        this.context = context;
         this.name = name;
         this.package_name = package_name;
         this.service = service;
+        active = true;
     }
 
-    public void start(Context context) {
-        if(!isInstalled(context)) return;
-        if(isRunning(context)) return;
+    public void start() {
+        if (!isInstalled()) return;
+        if (isRunning()) return;
+        if (!active) return;
         Intent intent = new Intent();
         intent.setClassName(package_name, service);
-            context.startService(intent);
+        context.startService(intent);
     }
-    public void stop(Context context){
-        if(!isInstalled(context)) return;
-        if(!isRunning(context)) return;
+
+    public void stop() {
+        if (!isInstalled()) return;
+        if (!isRunning()) return;
         Intent intent = new Intent();
         intent.setClassName(package_name, service);
         context.stopService(intent);
     }
-    public Status getStatus(Context context){
-        if(!isInstalled(context)) return new Status(Status.APP_NOT_INSTALLED);
-        if(!isRunning(context)) return new Status(Status.APP_NOT_RUNNING);
+
+    public Status getStatus() {
+        if (!isInstalled()) return new Status(Status.APP_NOT_INSTALLED);
+        if (!isRunning()) return new Status(Status.APP_NOT_RUNNING);
         return new Status(Status.SUCCESS);
     }
 
-    public boolean isInstalled(Context context) {
+    public boolean isInstalled() {
         return Apps.isPackageInstalled(context, package_name);
     }
-    public boolean isRunning(Context context){
+
+    public boolean isRunning() {
         return Apps.isServiceRunning(context, service);
 
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public String getName() {

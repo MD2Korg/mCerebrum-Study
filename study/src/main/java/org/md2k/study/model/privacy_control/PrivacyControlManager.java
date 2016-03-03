@@ -12,6 +12,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
+import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
 import org.md2k.study.model.Model;
 import org.md2k.utilities.Report.Log;
@@ -50,18 +51,33 @@ public class PrivacyControlManager extends Model {
     ArrayList<DataSourceClient> dataSourceClient;
     PrivacyData privacyData;
 
-    public PrivacyControlManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context, dataKitAPI, operation);
+    public PrivacyControlManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
         dataSourceBuilder = createDataSourceBuilder();
-        reset();
     }
 
-    public void reset() {
+    @Override
+    public void start() {
+        update();
+    }
+
+    public void set(){
+        privacyData = readFromDataKit();        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+
+    }
+    public void stop(){
+
+    }
+    public void update(){
         privacyData = readFromDataKit();
     }
 
+    @Override
+    public void clear() {
+
+    }
+
     public Status getStatus() {
-        reset();
         if (privacyData == null) return new Status(Status.SUCCESS);
         if (privacyData.isStatus() == false) return new Status(Status.SUCCESS);
         if (privacyData.getStartTimeStamp() + privacyData.getDuration().getValue() < DateTime.getDateTime())

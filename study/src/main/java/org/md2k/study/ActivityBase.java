@@ -16,42 +16,48 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.md2k.study.config.ConfigManager;
-import org.md2k.study.controller.AdminManager;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.controller.UserManager;
+import org.md2k.study.model.study_info.StudyInfoManager;
 import org.md2k.study.view.admin.ActivityAdmin;
+import org.md2k.study.view.config_download.ActivityConfigDownload;
+import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
 
-import org.md2k.study.system_health.ServiceSystemHealth;
-
 public class ActivityBase extends AppCompatActivity {
-    public static final String TAG = ActivityBase.class.getSimpleName();
-    boolean isError=false;
-    ConfigManager configManager;
     ModelManager modelManager;
-    AdminManager adminManager;
     UserManager userManager;
-    Intent intentServiceSystemHealth;
+    UserManager adminManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        configManager = ConfigManager.getInstance(getApplicationContext());
-        if(configManager.read()) {
-            modelManager = ModelManager.getInstance(getApplicationContext());
-            adminManager = AdminManager.getInstance(getApplicationContext());
-            userManager = UserManager.getInstance(getApplicationContext());
-            setContentView(R.layout.activity_main);
-        }else{
-            Toast.makeText(this,"ERROR: Incorrect configuration file...", Toast.LENGTH_LONG).show();;
-            isError=true;
+        setContentView(R.layout.activity_main);
+        modelManager = ModelManager.getInstance(getApplicationContext());
+        userManager=modelManager.getUserManager();
+        adminManager=modelManager.getAdminManager();
+        if (modelManager.isValid()) {
+            modelManager.set();
+            modelManager.start();
         }
+    }
+    @Override
+    public void onStart() {
+        if (modelManager.isValid()) {
+            modelManager.update();
+            setTitle(((StudyInfoManager) ModelManager.getInstance(this).getModel(ModelManager.MODEL_STUDY_INFO)).getStudy_name());
+        }
+        else {
+            Toast.makeText(this, "ERROR: Incorrect configuration file...", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(this, ActivityConfigDownload.class);
+            startActivity(intent);
+        }
+        super.onStart();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
     }
@@ -84,47 +90,54 @@ public class ActivityBase extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     public void showPasswordDialog() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(ActivityBase.this);
-        alertDialog.setTitle("PASSWORD (Admin Access)");
-        alertDialog.setMessage("Enter Password");
-        final EditText input = new EditText(ActivityBase.this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT |
-                InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        input.setLayoutParams(lp);
-        alertDialog.setView(input);
-        alertDialog.setIcon(R.drawable.ic_id_teal_48dp);
+        if(adminManager.getUser().getPassword()!=null && adminManager.getUser().getPassword().length()>0) {
 
-        alertDialog.setPositiveButton("Go",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        String password = input.getText().toString();
-                        if (Constants.PASSWORD.equals(password)) {
-                            Toast.makeText(getApplicationContext(),
-                                    "Password Matched", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(ActivityBase.this, ActivityAdmin.class);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(getApplicationContext(),
-                                    "Wrong Password!", Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(ActivityBase.this);
+            alertDialog.setTitle("PASSWORD (Admin Access)");
+            alertDialog.setMessage("Enter Password");
+            final EditText input = new EditText(ActivityBase.this);
+            input.setInputType(InputType.TYPE_CLASS_TEXT |
+                    InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            input.setLayoutParams(lp);
+            alertDialog.setView(input);
+            alertDialog.setIcon(R.drawable.ic_id_teal_48dp);
+
+            alertDialog.setPositiveButton("Go",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            String password = input.getText().toString();
+                            if (adminManager.getUser().getPassword().equals(password)) {
+                                Toast.makeText(getApplicationContext(),
+                                        "Password Matched", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(ActivityBase.this, ActivityAdmin.class);
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(getApplicationContext(),
+                                        "Wrong Password!", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
 
-        alertDialog.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+            alertDialog.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
 //        alertDialog.show();
-        AlertDialog dialog = alertDialog.show();
-        TextView messageText = (TextView) dialog.findViewById(android.R.id.message);
-        messageText.setGravity(Gravity.CENTER);
-        dialog.show();
+            AlertDialog dialog = alertDialog.show();
+            TextView messageText = (TextView) dialog.findViewById(android.R.id.message);
+            messageText.setGravity(Gravity.CENTER);
+            dialog.show();
+        }else{
+            Intent intent = new Intent(ActivityBase.this, ActivityAdmin.class);
+            startActivity(intent);
+        }
     }
 
     @Override

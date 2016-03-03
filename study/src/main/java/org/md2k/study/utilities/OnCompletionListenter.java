@@ -1,6 +1,6 @@
-package org.md2k.study.config;
+package org.md2k.study.utilities;
 
-import java.util.ArrayList;
+import org.md2k.study.Status;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,15 +28,6 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Admin {
-    String password;
-    ArrayList<String> panel;
-
-    public String getPassword() {
-        return password;
-    }
-
-    public ArrayList<String> getPanel() {
-        return panel;
-    }
+public interface OnCompletionListenter {
+    public void OnCompleted(Status status);
 }

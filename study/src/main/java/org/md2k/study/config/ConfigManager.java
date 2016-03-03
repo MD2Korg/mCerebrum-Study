@@ -6,11 +6,11 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
+import org.md2k.utilities.Files;
+
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 
@@ -41,24 +41,17 @@ import java.lang.reflect.Type;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConfigManager {
-    private static ConfigManager instance;
     Context context;
     Config config;
 
-    public static ConfigManager getInstance(Context context) {
-        if (instance == null)
-            instance = new ConfigManager(context);
-        return instance;
-    }
-
-    private ConfigManager(Context context) {
+    public ConfigManager(Context context) {
         this.context = context;
     }
 
     public boolean read() {
         BufferedReader br;
         try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(Constants.CONFIG_DIRECTORY+Constants.CONFIG_FILENAME)));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(Constants.CONFIG_DIRECTORY + Constants.CONFIG_FILENAME)));
             Gson gson = new Gson();
             Type collectionType = new TypeToken<Config>() {
             }.getType();

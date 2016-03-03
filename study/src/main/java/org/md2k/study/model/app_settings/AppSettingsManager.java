@@ -40,37 +40,50 @@ import java.util.ArrayList;
  */
 public class AppSettingsManager extends Model {
     ArrayList<AppSettings> appSettingsList;
-    Status status;
 
-    public AppSettingsManager(Context context, DataKitAPI dataKitAPI, Operation operation){
-        super(context,dataKitAPI, operation);
-        status=null;
-        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfig().getApplication();
-        appSettingsList=new ArrayList<>();
-        for(int i=0;i<applications.size();i++){
-            if(applications.get(i).getSettings()!=null && applications.get(i).getSettings().trim().length()!=0){
-                Application application=applications.get(i);
-                AppSettings appSettings=new AppSettings(application);
+    public AppSettingsManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
+        appSettingsList = new ArrayList<>();
+    }
+
+    @Override
+    public void start() {
+        update();
+    }
+
+    public void set() {
+        ArrayList<Application> applications = configManager.getConfig().getApplication();
+        for (int i = 0; i < applications.size(); i++) {
+            if (applications.get(i).getSettings() != null && applications.get(i).getSettings().trim().length() != 0) {
+                Application application = applications.get(i);
+                AppSettings appSettings = new AppSettings(application);
                 appSettingsList.add(appSettings);
             }
         }
-        reset();
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
     }
+
+    public void clear() {
+        appSettingsList.clear();
+    }
+
+    public void stop() {
+    }
+
 
     public ArrayList<AppSettings> getAppSettingsList() {
         return appSettingsList;
     }
-    @Override
-    public void reset(){
+
+    public void update() {
+        lastStatus = new Status(Status.SUCCESS);
         for (int i = 0; i < appSettingsList.size(); i++)
             if (!appSettingsList.get(i).isEqual()) {
-                lastStatus= new Status(Status.APP_CONFIG_ERROR);
+                lastStatus = new Status(Status.APP_CONFIG_ERROR);
             }
-
-        lastStatus=new Status(Status.SUCCESS);
     }
+
     public Status getStatus() {
         return lastStatus;
     }
-
 }

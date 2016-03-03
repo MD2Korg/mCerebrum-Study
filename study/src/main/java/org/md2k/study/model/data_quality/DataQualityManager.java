@@ -54,23 +54,11 @@ public class DataQualityManager extends Model {
     ArrayList<DataQuality> dataQualities;
     Status[] dataQuality;
     ArrayList<DataSource> dataSources;
-    public DataQualityManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context, dataKitAPI, operation);
+    public DataQualityManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
         dataQualities = new ArrayList<>();
-        dataSources = ConfigManager.getInstance(context).getConfig().getData_quality();
-        dataQuality=new Status[dataSources.size()];
-        for (int i = 0; i < dataSources.size(); i++)
-            dataQualities.add(new DataQuality(context, dataKitAPI, dataSources.get(i)));
-        for(int i=0;i<dataSources.size();i++)
-            dataQuality[i]=new Status(Status.DATAQUALITY_OFF);
-    }
-
-    public void reset() {
-        stop();
-        start();
     }
     public void start() {
-        Log.d(TAG, "dataquality=start");
         for (int i = 0; i < dataQualities.size(); i++) {
             final int finalI = i;
             dataQualities.get(i).start(new ReceiveCallBack() {
@@ -102,7 +90,31 @@ public class DataQualityManager extends Model {
                 }
             });
         }
+        update();
     }
+    public void update(){
+
+    }
+
+    @Override
+    public void clear() {
+        dataQuality=null;
+        dataSources=null;
+
+    }
+
+    @Override
+    public void set() {
+        dataSources = configManager.getConfig().getData_quality();
+        dataQuality=new Status[dataSources.size()];
+        for (int i = 0; i < dataSources.size(); i++)
+            dataQualities.add(new DataQuality(context, dataKitAPI, dataSources.get(i)));
+        for(int i=0;i<dataSources.size();i++)
+            dataQuality[i]=new Status(Status.DATAQUALITY_OFF);
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+
+    }
+
     Status translate(int value){
         switch(value){
             case DATA_QUALITY.GOOD:
@@ -124,13 +136,13 @@ public class DataQualityManager extends Model {
         Log.d(TAG,"dataquality=stop");
         for (int i = 0; i < dataQualities.size(); i++)
             dataQualities.get(i).stop();
-        ArrayList<DataSource> dataSources = ConfigManager.getInstance(context).getConfig().getData_quality();
+        ArrayList<DataSource> dataSources = configManager.getConfig().getData_quality();
         for(int i=0;i<dataSources.size();i++)
             dataQuality[i]=new Status(DATA_QUALITY.BAND_OFF,"Band Off");
     }
 
     @Override
     public Status getStatus() {
-        return null;
+        return new Status(Status.SUCCESS);
     }
 }

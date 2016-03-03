@@ -45,15 +45,38 @@ public class AppInstallManager extends Model {
         return appInstallList;
     }
 
-    public AppInstallManager(Context context, DataKitAPI dataKitAPI, Operation operation) {
-        super(context,dataKitAPI, operation);
-        ArrayList<Application> applications= ConfigManager.getInstance(context).getConfig().getApplication();
-        appInstallList=new ArrayList<>();
-        for(int i=0;i<applications.size();i++){
-            AppInstall appInstall =new AppInstall(context,applications.get(i));
+    public AppInstallManager(Context context, ConfigManager configManager,DataKitAPI dataKitAPI, Operation operation) {
+        super(context,configManager, dataKitAPI, operation);
+        appInstallList = new ArrayList<>();
+    }
+    public void stop() {
+    }
+    public void start(){
+        update();
+    }
+
+    public void set() {
+        ArrayList<Application> applications = configManager.getConfig().getApplication();
+        for (int i = 0; i < applications.size(); i++) {
+            AppInstall appInstall = new AppInstall(context, applications.get(i));
             appInstallList.add(appInstall);
         }
-        reset();
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+    }
+    public void clear(){
+        appInstallList.clear();
+    }
+    public void update(){
+        for(int i=0;i<appInstallList.size();i++)
+            appInstallList.get(i).update();
+        int total = size();
+        int install = sizeInstalled();
+        int update = sizeUpdate();
+        if (update == 0 && total == install)
+            lastStatus= new Status(Status.SUCCESS);
+        else if (total != install)
+            lastStatus= new Status(Status.APP_NOT_INSTALLED);
+        else lastStatus= new Status(Status.APP_UPDATE_AVAILABLE);
     }
     public int size(){
         return appInstallList.size();
@@ -76,17 +99,5 @@ public class AppInstallManager extends Model {
                 count++;
         }
         return count;
-    }
-    public void reset(){
-        for(int i=0;i<appInstallList.size();i++)
-            appInstallList.get(i).reset();
-        int total = size();
-        int install = sizeInstalled();
-        int update = sizeUpdate();
-        if (update == 0 && total == install)
-            lastStatus= new Status(Status.SUCCESS);
-        else if (total != install)
-            lastStatus= new Status(Status.APP_NOT_INSTALLED);
-        else lastStatus= new Status(Status.APP_UPDATE_AVAILABLE);
     }
 }

@@ -18,12 +18,15 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+
+import io.fabric.sdk.android.Fabric;
+
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.Model;
 import org.md2k.study.model.day_start_end.DayStartEndInfoManager;
-import org.md2k.study.model.privacy_control.PrivacyControlManager;
-import org.md2k.study.model.study_info.StudyInfoManager;
+import org.md2k.study.model.study_start_end.StudyStartEndInfoManager;
 import org.md2k.study.system_health.ServiceSystemHealth;
 import org.md2k.study.view.user.AppAdapter;
 import org.md2k.utilities.Report.Log;
@@ -36,70 +39,47 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class ActivityMain extends ActivityDataQuality {
-    public static final String TAG = ActivityMain.class.getSimpleName();
     public static final String INTENT_NAME = "UPDATE_VIEW";
     public static final String TYPE = "TYPE";
     public static final String VALUE = "VALUE";
     public static final int STATUS = 0;
     public static final int DATA_QUALITY = 1;
-    public static final int PRIVACY = 2;
-    public static final int DAY_START_END=3;
+    public static final int PRIVACY=2;
+    public static final int DAY_START_END = 3;
     public GridView gridViewApplication;
     public AppAdapter appAdapter;
-    Status lastStatus=new Status(Status.SUCCESS);
+    Status lastStatus = new Status(Status.SUCCESS);
     ArrayList<Model> userApps;
-    Handler handler;
-    PrivacyControlManager privacyControlManager;
-
+    Intent intentServiceSystemHealth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(isError) finish();
-        else {
-            handler=new Handler();
-            setTitle(((StudyInfoManager) ModelManager.getInstance(this).getModel(ModelManager.MODEL_STUDY_INFO)).getStudy_name());
-            LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-                    new IntentFilter(INTENT_NAME));
+        intentServiceSystemHealth = new Intent(getApplicationContext(), ServiceSystemHealth.class);
+        Fabric.with(this, new Crashlytics());
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter(INTENT_NAME));
+        startService(intentServiceSystemHealth);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (modelManager.isValid()) {
             initializeDayStartEnd();
+            initializeStudyStartEnd();
             updateUserApp();
-            if(userManager.getModels(ModelManager.MODEL_PRIVACY)!=null)
-                privacyControlManager=(PrivacyControlManager)userManager.getModels(ModelManager.MODEL_PRIVACY);
-
-            else privacyControlManager=null;
-
-            intentServiceSystemHealth = new Intent(this, ServiceSystemHealth.class);
-            startService(intentServiceSystemHealth);
         }
     }
-/*
-    Runnable runnablePrivacy=new Runnable() {
 
-        @Override
-        public void run() {
-            initializeUserApp();
-            if(privacyControlManager!=null){
-                if(privacyControlManager.getStatus().getStatusCode()==Status.PRIVACY_ACTIVE)
-                    handler.postDelayed(runnablePrivacy, 1000);
-            }
-        }
-    };
-    void updateUserApp(){
-        handler.post(runnablePrivacy);
-    }
-
-*/
-void  updateUserApp(){
-    initializeUserApp();
-}
-    void initializeUserApp(){
-        userApps=getModels(userManager.getModels());
+    void updateUserApp() {
+        userApps = getModels(userManager.getModel());
         gridViewApplication = (GridView) findViewById(R.id.gridview);
         appAdapter = new AppAdapter(ActivityMain.this, getModels(userApps));
         gridViewApplication.setAdapter(appAdapter);
         gridViewApplication.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (lastStatus.getStatusCode() != Status.SUCCESS && lastStatus.getStatusCode()!=Status.DAY_START_NOT_AVAILABLE && lastStatus.getStatusCode()!=Status.DAY_COMPLETED)
+                if (lastStatus.getStatusCode() != Status.SUCCESS && lastStatus.getStatusCode() != Status.DAY_START_NOT_AVAILABLE && lastStatus.getStatusCode() != Status.DAY_COMPLETED)
                     Toast.makeText(ActivityMain.this, "Please configure the study first...", Toast.LENGTH_SHORT).show();
                 else {
                     String packageName = userApps.get(position).getOperation().getPackage_name();
@@ -125,8 +105,9 @@ void  updateUserApp(){
             }
         });
     }
-    public void initializeDayStartEnd(){
-        DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) userManager.getModels(ModelManager.MODEL_DAY_START_END);
+
+    public void initializeDayStartEnd() {
+        DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) userManager.getModel(ModelManager.MODEL_DAY_START_END);
         if (dayStartEndInfoManager == null) {
             findViewById(R.id.linear_layout_header_day).setVisibility(View.GONE);
             findViewById(R.id.linear_layout_content_day).setVisibility(View.GONE);
@@ -135,22 +116,33 @@ void  updateUserApp(){
             findViewById(R.id.linear_layout_content_day).setVisibility(View.VISIBLE);
         }
     }
-    public String getDateTime(long timestamp){
-        Date date = new Date (timestamp);
+    public void initializeStudyStartEnd() {
+        StudyStartEndInfoManager studyStartEndInfoManager = (StudyStartEndInfoManager) userManager.getModel(ModelManager.MODEL_STUDY_START_END);
+        if (studyStartEndInfoManager == null) {
+            findViewById(R.id.linear_layout_header_study).setVisibility(View.GONE);
+            findViewById(R.id.linear_layout_content_study).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.linear_layout_header_study).setVisibility(View.VISIBLE);
+            findViewById(R.id.linear_layout_content_study).setVisibility(View.VISIBLE);
+        }
+    }
+
+    public String getDateTime(long timestamp) {
+        Date date = new Date(timestamp);
         return new SimpleDateFormat("hh:mm:ss a").format(date);
     }
-    public void updateDayStartEnd(Status status){
-        final DayStartEndInfoManager dayStartEndInfoManager= (DayStartEndInfoManager) userManager.getModels(ModelManager.MODEL_DAY_START_END);
-        Button button= (Button) findViewById(R.id.button_day_start_end);
-        if(status.getStatusCode()==Status.DAY_ERROR){
+
+    public void updateDayStartEnd(Status status) {
+        final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) userManager.getModel(ModelManager.MODEL_DAY_START_END);
+        Button button = (Button) findViewById(R.id.button_day_start_end);
+        if (status.getStatusCode() == Status.DAY_ERROR) {
             button.setEnabled(false);
-            button.setText("System Error");
-        }
-        else if(status.getStatusCode()==Status.DAY_START_NOT_AVAILABLE){
+            button.setText("Error");
+        } else if (status.getStatusCode() == Status.DAY_START_NOT_AVAILABLE) {
             button.setText("Start Day");
             button.setEnabled(true);
-            ((TextView)findViewById(R.id.text_view_day_start)).setText("N/A");
-            ((TextView)findViewById(R.id.text_view_day_end)).setText("N/A");
+            ((TextView) findViewById(R.id.text_view_day_start)).setText("N/A");
+            ((TextView) findViewById(R.id.text_view_day_end)).setText("N/A");
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -168,16 +160,16 @@ void  updateUserApp(){
 
                 }
             });
-        }else if(status.getStatusCode()==Status.DAY_COMPLETED){
-            ((TextView)findViewById(R.id.text_view_day_start)).setText(getDateTime(dayStartEndInfoManager.getDayStartTime()));
-            ((TextView)findViewById(R.id.text_view_day_end)).setText(getDateTime(dayStartEndInfoManager.getDayEndTime()));
+        } else if (status.getStatusCode() == Status.DAY_COMPLETED) {
+            ((TextView) findViewById(R.id.text_view_day_start)).setText(getDateTime(dayStartEndInfoManager.getDayStartTime()));
+            ((TextView) findViewById(R.id.text_view_day_end)).setText(getDateTime(dayStartEndInfoManager.getDayEndTime()));
             button.setText("Day Ended");
             button.setEnabled(false);
-        }else {
+        } else {
             button.setText("End Day");
             button.setEnabled(true);
-            ((TextView)findViewById(R.id.text_view_day_start)).setText(getDateTime(dayStartEndInfoManager.getDayStartTime()));
-            ((TextView)findViewById(R.id.text_view_day_end)).setText("-");
+            ((TextView) findViewById(R.id.text_view_day_start)).setText(getDateTime(dayStartEndInfoManager.getDayStartTime()));
+            ((TextView) findViewById(R.id.text_view_day_end)).setText("-");
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -197,8 +189,83 @@ void  updateUserApp(){
             });
         }
     }
-    void sendMessage(){
-        Intent intent=new Intent(ServiceSystemHealth.INTENT_NAME);
+    public void updateStudyStartEnd() {
+        final StudyStartEndInfoManager studyStartEndInfoManager = (StudyStartEndInfoManager) userManager.getModel(ModelManager.MODEL_STUDY_START_END);
+        if(studyStartEndInfoManager==null) return;
+        Button button = (Button) findViewById(R.id.button_study_start_end);
+
+        if (adminManager.getStatus().getStatusCode() != Status.SUCCESS) {
+            button.setEnabled(false);
+            button.setText("Error");
+        } else{
+            Status status=studyStartEndInfoManager.getStatus();
+            if (status.getStatusCode() == Status.STUDY_START_NOT_AVAILABLE) {
+                button.setText("Start");
+                button.setEnabled(true);
+                ((TextView) findViewById(R.id.text_view_study_start)).setText("N/A");
+                ((TextView) findViewById(R.id.text_view_study_end)).setText("N/A");
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialogs.showAlertDialogConfirm(ActivityMain.this, "Start the study?", "Start the Study?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == AlertDialog.BUTTON_POSITIVE) {
+                                    studyStartEndInfoManager.setStudyStartTime(DateTime.getDateTime());
+                                    studyStartEndInfoManager.saveStudyStart();
+                                    updateStudyStartEnd();
+                                }
+                            }
+                        });
+                    }
+                });
+            } else if (status.getStatusMessage().equals("Study is completed")) {
+                ((TextView) findViewById(R.id.text_view_study_start)).setText(getDateTime(studyStartEndInfoManager.getStudyStartTime()));
+                ((TextView) findViewById(R.id.text_view_study_end)).setText(getDateTime(studyStartEndInfoManager.getStudyEndTime()));
+                button.setText("Study Ended");
+                button.setEnabled(true);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialogs.showAlertDialogConfirm(ActivityMain.this, "Start the study?", "Start the Study?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == AlertDialog.BUTTON_POSITIVE) {
+                                    studyStartEndInfoManager.setStudyStartTime(DateTime.getDateTime());
+                                    studyStartEndInfoManager.saveStudyStart();
+                                    updateStudyStartEnd();
+                                }
+                            }
+                        });
+                    }
+                });
+
+            } else {
+                button.setText("End Study");
+                button.setEnabled(true);
+                ((TextView) findViewById(R.id.text_view_study_start)).setText(getDateTime(studyStartEndInfoManager.getStudyStartTime()));
+                ((TextView) findViewById(R.id.text_view_study_end)).setText("-");
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialogs.showAlertDialogConfirm(ActivityMain.this, "End of Study?", "Is this the end of the study?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == AlertDialog.BUTTON_POSITIVE) {
+                                    studyStartEndInfoManager.setStudyEndTime(DateTime.getDateTime());
+                                    studyStartEndInfoManager.saveStudyEnd();
+                                    updateStudyStartEnd();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    void sendMessage() {
+        Intent intent = new Intent(ServiceSystemHealth.INTENT_NAME);
         intent.putExtra(ServiceSystemHealth.TYPE, ServiceSystemHealth.DAY_START_END);
         LocalBroadcastManager.getInstance(ActivityMain.this).sendBroadcast(intent);
 
@@ -207,7 +274,7 @@ void  updateUserApp(){
     private ArrayList<Model> getModels(ArrayList<Model> all) {
         ArrayList<Model> selected = new ArrayList<>();
         for (int i = 0; i < all.size(); i++) {
-            if (all.get(i).getOperation().getId().equals(ModelManager.MODEL_DATA_QUALITY) || all.get(i).getOperation().getId().equals(ModelManager.MODEL_DAY_START_END))
+            if (all.get(i).getOperation().getId().equals(ModelManager.MODEL_DATA_QUALITY) || all.get(i).getOperation().getId().equals(ModelManager.MODEL_DAY_START_END) || all.get(i).getOperation().getId().equals(ModelManager.MODEL_PRIVACY) || all.get(i).getOperation().getId().equals(ModelManager.MODEL_STUDY_START_END))
                 continue;
             selected.add(all.get(i));
         }
@@ -217,14 +284,15 @@ void  updateUserApp(){
     public void updateStatus(Status status) {
         ((TextView) findViewById(R.id.textView_status)).setText(status.getStatusMessage());
         Button button = (Button) findViewById(R.id.button_status);
-        if (status.getStatusCode() == Status.SUCCESS || status.getStatusCode()==Status.DAY_COMPLETED) {
+        if (status.getStatusCode() == Status.SUCCESS || status.getStatusCode() == Status.DAY_COMPLETED) {
             findViewById(R.id.layout_health).setBackground(ContextCompat.getDrawable(this, R.color.teal_50));
             ((TextView) findViewById(R.id.textView_status)).setTextColor(ContextCompat.getColor(this, R.color.teal_700));
             button.setBackground(ContextCompat.getDrawable(this, R.drawable.button_teal));
             button.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_ok_teal_50dp, 0);
-            button.setText("");
+            button.setText("OK");
             button.setEnabled(false);
             button.setOnClickListener(null);
+//            button.setVisibility(View.INVISIBLE);
 
         } else {
             findViewById(R.id.layout_health).setBackground(ContextCompat.getDrawable(this, R.color.red_200));
@@ -250,17 +318,15 @@ void  updateUserApp(){
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            updateStudyStartEnd();
             switch (intent.getIntExtra(TYPE, -1)) {
                 case DATA_QUALITY:
                     updateDataQuality((Status[]) intent.getParcelableArrayExtra(VALUE));
                     break;
-                case PRIVACY:
-                    updateUserApp();
-                    break;
                 case STATUS:
-                    Status curStatus=intent.getParcelableExtra(VALUE);
-                    if(lastStatus==null || curStatus.getStatusCode()!=lastStatus.getStatusCode() || !curStatus.getStatusMessage().equals(lastStatus.getStatusMessage())) {
-                        lastStatus=curStatus;
+                    Status curStatus = intent.getParcelableExtra(VALUE);
+                    if (lastStatus == null || curStatus.getStatusCode() != lastStatus.getStatusCode() || !curStatus.getStatusMessage().equals(lastStatus.getStatusMessage())) {
+                        lastStatus = curStatus;
                         updateStatus(lastStatus);
                         updateUserApp();
                     }
@@ -268,17 +334,25 @@ void  updateUserApp(){
                 case DAY_START_END:
                     updateDayStartEnd(intent.<Status>getParcelableExtra(VALUE));
                     break;
+                case PRIVACY:
+                    updatePrivacyUI();
             }
         }
     };
+    @Override
+    public void onResume(){
+        updateStudyStartEnd();
+        super.onResume();
+    }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy()...");
-        if (!isError) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
-            stopService(intentServiceSystemHealth);
-        }
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        stopService(intentServiceSystemHealth);
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 }

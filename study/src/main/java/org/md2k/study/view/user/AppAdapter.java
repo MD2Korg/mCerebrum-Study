@@ -68,26 +68,13 @@ public class AppAdapter extends BaseAdapter {
         }
         listViewHolder.textInListView.setText(models.get(position).getOperation().getName());
         listViewHolder.imageInListView.setImageDrawable(getIconFromApplication(models.get(position).getOperation().getIcon()));
-        if(models.get(position).getOperation().getId().equals(ModelManager.MODEL_PRIVACY)){
-            PrivacyControlManager privacyControlManager=(PrivacyControlManager)models.get(position);
-            if(privacyControlManager.getStatus().getStatusCode()== Status.PRIVACY_ACTIVE){
-                long remainingTime=privacyControlManager.getPrivacyData().getStartTimeStamp()+privacyControlManager.getPrivacyData().getDuration().getValue()- DateTime.getDateTime();
-                if(remainingTime>0) {
-                    remainingTime/=1000;
-                    int sec= (int) (remainingTime%60);
-                    int min= (int) (remainingTime/60);
-                    listViewHolder.imageInListView.setImageDrawable(getIconFromApplication("ic_lock_red_48dp"));
-                    listViewHolder.textInListView.setText("Privacy\n" + String.format("%02d:%02d", min, sec));
-                }
-            }
-        }
         return convertView;
     }
 
     private Drawable getIconFromApplication(String icon) {
         Resources resources=context.getResources();
-        int resourceId=resources.getIdentifier(icon,"drawable",context.getPackageName());
         Log.d(TAG, "icon=" + icon);
+        int resourceId=resources.getIdentifier(icon,"drawable",context.getPackageName());
         return resources.getDrawable(resourceId);
     }
 

@@ -58,31 +58,49 @@ public class StudyInfoManager extends Model {
     StudyInfo studyInfoDB;
     StudyInfo studyInfoFile;
 
-    public StudyInfoManager(Context context, DataKitAPI dataKitAPI, Operation operation){
-        super(context, dataKitAPI, operation);
-        studyInfoFile=ConfigManager.getInstance(context).getConfig().getStudy_info();
+    public StudyInfoManager(Context context, ConfigManager configManager, DataKitAPI dataKitAPI, Operation operation) {
+        super(context, configManager, dataKitAPI, operation);
+    }
+
+    public void set() {
+        studyInfoFile = configManager.getConfig().getStudy_info();
         dataSourceBuilder = createDataSourceBuilder();
-        reset();
-    }
-    public void reset(){
-        studyInfoDB=readFromDataKit();
-        if(studyInfoDB==null && studyInfoFile!=null) {
+        studyInfoDB = readFromDataKit();
+        if (studyInfoDB == null && studyInfoFile != null) {
             writeToDataKit();
-            studyInfoDB=readFromDataKit();
+            studyInfoDB = readFromDataKit();
         }
-        if(studyInfoDB==null) lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
-        else if(!studyInfoDB.getId().equals(studyInfoFile.getId()) || !studyInfoDB.getName().equals(studyInfoFile.getName()))
-            lastStatus= new Status(Status.CLEAR_OLD_DATA);
-        else lastStatus= new Status(Status.SUCCESS);
+        lastStatus= new Status(Status.DATAKIT_NOT_AVAILABLE);
+    }
+
+    public void clear() {
+        studyInfoDB = null;
+        studyInfoFile = null;
+    }
+
+    public void start() {
+        if (studyInfoDB == null) lastStatus = new Status(Status.DATAKIT_NOT_AVAILABLE);
+        else if (!studyInfoDB.getId().equals(studyInfoFile.getId()) || !studyInfoDB.getName().equals(studyInfoFile.getName()))
+            lastStatus = new Status(Status.CLEAR_OLD_DATA);
+        else lastStatus = new Status(Status.SUCCESS);
+        update();
+    }
+
+    @Override
+    public void stop() {
 
     }
 
-     public Status getStatus() {
-         return lastStatus;
+    public void update() {
+
+    }
+
+    public Status getStatus() {
+        return lastStatus;
     }
 
     private StudyInfo readFromDataKit() {
-        StudyInfo studyInfo=null;
+        StudyInfo studyInfo = null;
 
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
@@ -97,16 +115,17 @@ public class StudyInfoManager extends Model {
     }
 
     public boolean writeToDataKit() {
-        Log.d(TAG,"StudyInfoManager...writeToDataKit()");
+        Log.d(TAG, "StudyInfoManager...writeToDataKit()");
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
         String sample = gson.toJson(studyInfoFile);
         dataSourceClient = dataKitAPI.register(dataSourceBuilder);
         DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClient, dataTypeString);
-        studyInfoDB=studyInfoFile;
+        studyInfoDB = studyInfoFile;
         return true;
     }
+
     DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.STUDY_INFO).setPlatform(platform);
@@ -115,6 +134,7 @@ public class StudyInfoManager extends Model {
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
         return dataSourceBuilder;
     }
+
     public String getStudy_id() {
         return studyInfoFile.getId();
     }
