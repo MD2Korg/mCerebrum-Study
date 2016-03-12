@@ -1,0 +1,17 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="delete"
+        android:title="Delete"/>
+    <Preference
+        android:key="delete_data"
+        android:title="Delete Data"/>
+    <Preference
+        android:key="delete_config"
+        android:title="Delete Configuration"/>
+    <PreferenceCategory
+        android:key="configuration"
+        android:title="Configuration"/>
+    <Preference
+        android:key="download_config"
+        android:title="Download Configuration"/>
+</PreferenceScreen>

@@ -8,9 +8,8 @@ import org.md2k.study.config.Application;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.config.Operation;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.controller.UserManager;
+import org.md2k.study.controller.AUManager;
 import org.md2k.study.model.Model;
-import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 
@@ -90,12 +89,12 @@ public class AppServiceManager extends Model {
         return new Status(Status.SUCCESS);
     }
     public boolean isValid(){
-        UserManager userManager=ModelManager.getInstance(context).getAdminManager();
-        for(int i=0;i<userManager.getModel().size();i++){
-            if(userManager.getModel().get(i).getOperation()==null) return false;
-            if(userManager.getModel().get(i).getOperation().getId()==null) return false;
-            if(!userManager.getModel().get(i).getOperation().getId().equals(ModelManager.MODEL_APP_SERVICE))
-                if(userManager.getModel().get(i).getStatus().getStatusCode()!=Status.SUCCESS) return false;
+        AUManager AUManager =ModelManager.getInstance(context).getAdminManager();
+        for(int i=0;i< AUManager.getModel().size();i++){
+            if(AUManager.getModel().get(i).getOperation()==null) return false;
+            if(AUManager.getModel().get(i).getOperation().getId()==null) return false;
+            if(!AUManager.getModel().get(i).getOperation().getId().equals(ModelManager.MODEL_APP_SERVICE))
+                if(AUManager.getModel().get(i).getStatus().getStatusCode()!=Status.SUCCESS) return false;
         }
         return true;
     }

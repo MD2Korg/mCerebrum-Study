@@ -1,6 +1,5 @@
 package org.md2k.study;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,23 +8,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.datakitapi.source.platform.PlatformId;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.model.data_quality.DataQualityManager;
 import org.md2k.study.model.privacy_control.PrivacyControlManager;
 import org.md2k.study.system_health.ServiceSystemHealth;
-
-import java.util.ArrayList;
 
 public class ActivityPrivacy extends ActivityBase {
     Handler handlerPrivacy;

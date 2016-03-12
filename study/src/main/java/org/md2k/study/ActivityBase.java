@@ -15,27 +15,25 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.md2k.study.config.ConfigManager;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.controller.UserManager;
+import org.md2k.study.controller.AUManager;
 import org.md2k.study.model.study_info.StudyInfoManager;
 import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.study.view.config_download.ActivityConfigDownload;
-import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
 
 public class ActivityBase extends AppCompatActivity {
     ModelManager modelManager;
-    UserManager userManager;
-    UserManager adminManager;
+    AUManager AUManager;
+    AUManager adminManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         modelManager = ModelManager.getInstance(getApplicationContext());
-        userManager=modelManager.getUserManager();
+        AUManager =modelManager.getUserManager();
         adminManager=modelManager.getAdminManager();
         if (modelManager.isValid()) {
             modelManager.set();

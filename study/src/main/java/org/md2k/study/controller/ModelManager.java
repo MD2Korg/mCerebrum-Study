@@ -30,10 +30,8 @@ import org.md2k.study.model.user_info.UserInfoManager;
 import org.md2k.study.model.wakeup_info.WakeupInfoManager;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.Files;
-import org.md2k.utilities.Report.Log;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 import org.md2k.study.system_health.ServiceSystemHealth;
 
@@ -89,8 +87,8 @@ public class ModelManager {
     Context context;
     HashMap<String, Model> modelHashMap;
     DataKitAPI dataKitAPI;
-    UserManager adminManager;
-    UserManager userManager;
+    AUManager adminManager;
+    AUManager userManager;
     ConfigManager configManager;
     boolean valid;
 
@@ -105,8 +103,8 @@ public class ModelManager {
         modelHashMap = new HashMap<>();
         dataKitAPI = DataKitAPI.getInstance(context);
         configManager = new ConfigManager(context);
-        adminManager = new UserManager(context, true);
-        userManager = new UserManager(context, false);
+        adminManager = new AUManager(context, true);
+        userManager = new AUManager(context, false);
         valid = true;
     }
 
@@ -149,11 +147,11 @@ public class ModelManager {
     }
 
 
-    public UserManager getAdminManager() {
+    public AUManager getAdminManager() {
         return adminManager;
     }
 
-    public UserManager getUserManager() {
+    public AUManager getUserManager() {
         return userManager;
     }
 

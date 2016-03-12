@@ -1,44 +1,24 @@
 package org.md2k.study;
 
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.AvoidXfermode;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.GridView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
-import com.crashlytics.android.Crashlytics;
 
-import io.fabric.sdk.android.Fabric;
-
-import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.Model;
-import org.md2k.study.model.day_start_end.DayStartEndInfoManager;
-import org.md2k.study.model.study_start_end.StudyStartEndInfoManager;
-import org.md2k.study.system_health.ServiceSystemHealth;
+import org.md2k.study.view.data_quality.UserViewDataQuality;
+import org.md2k.study.view.day_start_end.UserViewDayStartEnd;
+import org.md2k.study.view.privacy_control.UserViewPrivacyControl;
+import org.md2k.study.view.status.UserViewStatus;
+import org.md2k.study.view.study_start_end.UserViewStudyStartEnd;
 import org.md2k.study.view.user.AppAdapter;
-import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.UI.AlertDialogs;
+import org.md2k.study.view.user.UserView;
+import org.md2k.study.view.user_app.UserViewUserApp;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
-public class ActivityMain extends ActivityDataQuality {
+public class ActivityMain extends ActivityBase {
     public static final String INTENT_NAME = "UPDATE_VIEW";
     public static final String TYPE = "TYPE";
     public static final String VALUE = "VALUE";
@@ -51,26 +31,39 @@ public class ActivityMain extends ActivityDataQuality {
     Status lastStatus = new Status(Status.SUCCESS);
     ArrayList<Model> userApps;
     Intent intentServiceSystemHealth;
+    ArrayList<UserView> userViews;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        intentServiceSystemHealth = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-        Fabric.with(this, new Crashlytics());
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-                new IntentFilter(INTENT_NAME));
-        startService(intentServiceSystemHealth);
+//        intentServiceSystemHealth = new Intent(getApplicationContext(), ServiceSystemHealth.class);
+//        Fabric.with(this, new Crashlytics());
+//        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+//                new IntentFilter(INTENT_NAME));
+        userViews=new ArrayList<>();
+        userViews.add(new UserViewStatus(this));
+        userViews.add(new UserViewDataQuality(this));
+        userViews.add(new UserViewPrivacyControl(this));
+        userViews.add(new UserViewStudyStartEnd(this));
+        userViews.add(new UserViewDayStartEnd(this));
+        userViews.add(new UserViewUserApp(this));
+//        startService(intentServiceSystemHealth);
+        LinearLayout linearLayoutMain= (LinearLayout) findViewById(R.id.linear_layout_main);
+        linearLayoutMain.removeAllViews();
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        for(int i=0;i<userViews.size();i++)
+            userViews.get(i).addView();
         if (modelManager.isValid()) {
-            initializeDayStartEnd();
-            initializeStudyStartEnd();
-            updateUserApp();
+
+//            initializeDayStartEnd();
+//            initializeStudyStartEnd();
+//            updateUserApp();
         }
     }
-
+/*
     void updateUserApp() {
         userApps = getModels(userManager.getModel());
         gridViewApplication = (GridView) findViewById(R.id.gridview);
@@ -321,7 +314,7 @@ public class ActivityMain extends ActivityDataQuality {
             updateStudyStartEnd();
             switch (intent.getIntExtra(TYPE, -1)) {
                 case DATA_QUALITY:
-                    updateDataQuality((Status[]) intent.getParcelableArrayExtra(VALUE));
+                    //updateDataQuality((Status[]) intent.getParcelableArrayExtra(VALUE));
                     break;
                 case STATUS:
                     Status curStatus = intent.getParcelableExtra(VALUE);
@@ -355,4 +348,5 @@ public class ActivityMain extends ActivityDataQuality {
     @Override
     public void onBackPressed() {
     }
+*/
 }

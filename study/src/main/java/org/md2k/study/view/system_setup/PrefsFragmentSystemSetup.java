@@ -1,4 +1,4 @@
-package org.md2k.study.view.admin;
+package org.md2k.study.view.system_setup;
 
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
@@ -21,8 +21,8 @@ import android.widget.Toast;
 import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.config.Operation;
-import org.md2k.study.controller.ModelManager;
 import org.md2k.study.controller.AUManager;
+import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model.Model;
 import org.md2k.study.model.app_service.AppServiceManager;
 import org.md2k.study.model.clear_config.ClearConfigManager;
@@ -65,9 +65,9 @@ import org.md2k.utilities.UI.AlertDialogs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class PrefsFragmentAdmin extends PreferenceFragment {
+public class PrefsFragmentSystemSetup extends PreferenceFragment {
 
-    private static final String TAG = PrefsFragmentAdmin.class.getSimpleName();
+    private static final String TAG = PrefsFragmentSystemSetup.class.getSimpleName();
     ModelManager modelManager;
     AUManager adminManager;
     boolean isRefresh = false;

@@ -35,14 +35,14 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class UserManager {
-    private static final String TAG = UserManager.class.getSimpleName();
+public class AUManager {
+    private static final String TAG = AUManager.class.getSimpleName();
     User user;
     ArrayList<Model> models;
     Context context;
     boolean admin;
 
-    public UserManager(Context context, boolean admin) {
+    public AUManager(Context context, boolean admin) {
         this.context = context;
         models = new ArrayList<>();
         user = null;

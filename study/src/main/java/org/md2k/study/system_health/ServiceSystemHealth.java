@@ -15,10 +15,8 @@ import org.md2k.study.ActivityMain;
 import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.controller.UserManager;
-import org.md2k.study.model.app_service.AppServiceManager;
+import org.md2k.study.controller.AUManager;
 import org.md2k.study.model.day_start_end.DayStartEndInfoManager;
-import org.md2k.utilities.Report.Log;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -61,8 +59,8 @@ public class ServiceSystemHealth extends Service {
     Context context;
     Handler handler;
     ModelManager modelManager;
-    UserManager adminManager;
-    UserManager userManager;
+    AUManager adminManager;
+    AUManager AUManager;
     boolean isDataQualityAvailable;
     boolean isDayStartEnd;
     public Status lastAdminStatus = null;
@@ -74,15 +72,19 @@ public class ServiceSystemHealth extends Service {
         context = getApplicationContext();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiverStatus,
                 new IntentFilter(INTENT_NAME));
+        ModelManager.getInstance(getApplicationContext()).clear();
         modelManager = ModelManager.getInstance(getApplicationContext());
         adminManager = modelManager.getAdminManager();
-        userManager = modelManager.getUserManager();
-        isDataQualityAvailable = userManager.getModel(ModelManager.MODEL_DATA_QUALITY) != null;
-        isDayStartEnd = userManager.getModel(ModelManager.MODEL_DAY_START_END) != null;
+        AUManager = modelManager.getUserManager();
+        isDataQualityAvailable = AUManager.getModel(ModelManager.MODEL_DATA_QUALITY) != null;
+        isDayStartEnd = AUManager.getModel(ModelManager.MODEL_DAY_START_END) != null;
         handler = new Handler();
         handler.post(system_health);
     }
-
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
     Status getAdminStatus() {
         Status status = modelManager.getStatus();
         if (status.getStatusCode() == Status.SUCCESS)
@@ -127,7 +129,7 @@ public class ServiceSystemHealth extends Service {
     Status getDayStartEndStatus(Status adminStatus) {
         Status curDayStatus = null;
         if (adminStatus.getStatusCode() != Status.SUCCESS) return new Status(Status.DAY_ERROR);
-        DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) userManager.getModel(ModelManager.MODEL_DAY_START_END);
+        DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) AUManager.getModel(ModelManager.MODEL_DAY_START_END);
         if (dayStartEndInfoManager != null) {
             curDayStatus = dayStartEndInfoManager.getStatus();
         }
