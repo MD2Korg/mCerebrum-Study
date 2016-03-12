@@ -24,8 +24,6 @@ android {
         targetSdkVersion 21
         versionCode 9
         versionName '0.3.3'
-        // Enabling multidex support.
-        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -48,6 +46,4 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':datakitapi')
     compile project(':utilities')
-    compile 'com.android.support:multidex:1.0.0'
-
 }
