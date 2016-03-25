@@ -1,12 +1,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:serviceApp="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".AutoSenseActivity">
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_48dp"
-        serviceApp:showAsAction="ifRoom"
-        android:title="Settings" />
+        android:title="Admin Settings" />
+    <item
+        android:id="@+id/action_reset_app"
+        android:icon="@drawable/ic_settings_white_48dp"
+        android:title="Reset Application" />
+
+    <item
+        android:id="@+id/action_tutorial"
+        android:icon="@drawable/ic_settings_white_48dp"
+        android:title="Tutorial" />
     <item
         android:id="@+id/action_about"
         android:icon="@drawable/ic_info_teal_48dp"

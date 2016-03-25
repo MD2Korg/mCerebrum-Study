@@ -33,42 +33,62 @@ import java.util.ArrayList;
 public class Config {
     ConfigInfo config_info;
     StudyInfo study_info;
-    ArrayList<Application> application;
-    ArrayList<Operation> operation;
-    User admin;
-    User user;
+    ArrayList<App> apps;
+    ArrayList<Action> actions;
+    CView admin_view;
+    CView user_view;
     ArrayList<DataSource> data_quality;
 
     public ConfigInfo getConfig_info() {
         return config_info;
     }
 
-    public ArrayList<Application> getApplication() {
-        return application;
+    public ArrayList<App> getApps() {
+        ArrayList<App> appList=new ArrayList<>();
+        if(apps==null || apps.size()==0)
+            return appList;
+        else {
+            for(int i=0;i<apps.size();i++){
+                if(apps.get(i).enable)
+                    appList.add(apps.get(i));
+            }
+        }
+        return appList;
+    }
+    public App getApps(String id){
+        if(apps==null || apps.size()==0)
+            return null;
+        else {
+            for(int i=0;i<apps.size();i++){
+                if(apps.get(i).enable && apps.get(i).id.equals(id))
+                    return apps.get(i);
+            }
+        }
+        return null;
     }
 
     public StudyInfo getStudy_info() {
         return study_info;
     }
 
-    public User getAdmin() {
-        return admin;
+    public CView getAdmin_view() {
+        return admin_view;
     }
 
-    public User getUser() {
-        return user;
+    public CView getUser_view() {
+        return user_view;
+    }
+
+    public ArrayList<Action> getActions() {
+        return actions;
+    }
+    public Action getAction(String id){
+        for(int i=0;i< actions.size();i++)
+            if(actions.get(i).getId().equals(id)) return actions.get(i);
+        return null;
     }
 
     public ArrayList<DataSource> getData_quality() {
         return data_quality;
-    }
-
-    public ArrayList<Operation> getOperation() {
-        return operation;
-    }
-    public Operation getOperation(String id){
-        for(int i=0;i<operation.size();i++)
-            if(operation.get(i).getId().equals(id)) return operation.get(i);
-        return null;
     }
 }

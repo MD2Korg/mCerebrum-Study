@@ -1,0 +1,240 @@
+package org.md2k.study.model_view.app_install;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.widget.Toast;
+
+import org.md2k.study.Constants;
+import org.md2k.study.OnDataChangeListener;
+import org.md2k.study.Status;
+import org.md2k.study.config.App;
+import org.md2k.study.utilities.Download;
+import org.md2k.study.utilities.OnCompletionListener;
+import org.md2k.utilities.Apps;
+import org.md2k.utilities.Files;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.UUID;
+
+
+/**
+ * Copyright (c) 2015, The University of Memphis, MD2K Center
+ * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * All rights reserved.
+ * <p/>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * <p/>
+ * * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ * <p/>
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p/>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+public class AppInstall {
+    private static final String TAG = AppInstall.class.getSimpleName();
+    App app;
+    private String curVersion;
+    private String latestVersion;
+    private boolean installed;
+    Context context;
+
+    AppInstall(Context context, App app) {
+        this.context = context;
+        this.app = app;
+        curVersion = null;
+        latestVersion = null;
+        installed = false;
+    }
+
+    public void set() {
+        installed = Apps.isPackageInstalled(context, app.getPackage_name());
+        setVersionName();
+    }
+
+    public void clear() {
+    }
+
+    public void update() {
+        installed = Apps.isPackageInstalled(context, app.getPackage_name());
+        setVersionName();
+    }
+
+    public void downloadAndInstallApp(final Context context) {
+        final String filename = "file_" + app.getId() + latestVersion + ".apk";
+        if (app.getDownload_link().startsWith("market")) {
+            Intent goToMarket = new Intent(Intent.ACTION_VIEW)
+                    .setData(Uri.parse(app.getDownload_link()));
+            context.startActivity(goToMarket);
+        } else if (app.getDownload_link().endsWith(".apk")) {
+            String link = app.getDownload_link();
+            download(context, filename, link, true, new OnCompletionListener() {
+                @Override
+                public void OnCompleted(int curStatus) {
+                    if (curStatus == Status.SUCCESS) {
+                        Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY + filename)), "application/vnd.android.package-archive");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    }
+                }
+            });
+        } else {
+            if (latestVersion == null) {
+                setLatestVersionName(context, new OnDataChangeListener() {
+                    @Override
+                    public void onDataChange(String str) {
+                        String link = app.getDownload_link() +
+                                "/download/" + latestVersion +
+                                "/" + app.getId() +
+                                latestVersion + ".apk";
+                        download(context, filename, link,false, new OnCompletionListener() {
+                            @Override
+                            public void OnCompleted(int curStatus) {
+                                if (curStatus == Status.SUCCESS) {
+                                    Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY + filename)), "application/vnd.android.package-archive");
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    context.startActivity(intent);
+                                }
+                            }
+                        });
+
+                    }
+                });
+            } else {
+                String link = app.getDownload_link() +
+                        "/download/" + latestVersion +
+                        "/" + app.getId() +
+                        latestVersion + ".apk";
+                download(context, filename, link, true,new OnCompletionListener() {
+                    @Override
+                    public void OnCompleted(int curStatus) {
+                        if (curStatus == Status.SUCCESS) {
+                            Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY + filename)), "application/vnd.android.package-archive");
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(intent);
+                        }
+                    }
+                });
+            }
+        }
+
+    }
+
+    private void download(Context context, String filename, String link, boolean isProgressShow, OnCompletionListener onCompletionListenter) {
+        Download download = new Download(context, isProgressShow, onCompletionListenter);
+        download.execute(link, filename);
+    }
+
+    public void run(Context context) {
+        Intent LaunchIntent = context.getPackageManager().getLaunchIntentForPackage(app.getPackage_name());
+        context.startActivity(LaunchIntent);
+    }
+
+    public boolean isInstalled() {
+        return installed;
+    }
+
+    public void setLatestVersionName(final Context context, final OnDataChangeListener onDataChangeListener) {
+        String link = app.getDownload_link() + "/latest";
+        final String filename = "version_" + UUID.randomUUID().toString() + ".txt";
+        if (app.getPackage_name().startsWith("market")) {
+            onDataChangeListener.onDataChange(latestVersion);
+            return;
+        }
+        download(context, filename, link,false, new OnCompletionListener() {
+            @Override
+            public void OnCompleted(int curStatus) {
+                if (curStatus == Status.SUCCESS) {
+                    latestVersion = retrieveLatestVersion(Constants.TEMP_DIRECTORY + filename);
+                    onDataChangeListener.onDataChange(latestVersion);
+                } else
+                    Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
+                Files.delete(Constants.TEMP_DIRECTORY + filename);
+            }
+        });
+    }
+
+    String retrieveLatestVersion(String filename) {
+        BufferedReader in;
+        String versionName = null;
+        try {
+            in = new BufferedReader(new FileReader(filename));
+            String str, str1 = "";
+            while ((str = in.readLine()) != null) {
+                str1 += str;
+                if (str1.contains("<title>") && str1.contains("</title>")) {
+                    int start_id = str1.indexOf("<title>") + 7;
+                    int end_id = str1.indexOf("</title>");
+
+                    str = str1.substring(start_id, end_id);
+                    String[] s = str.split(" ");
+                    if (s.length >= 2) {
+                        versionName = s[1];
+                    }
+                }
+            }
+            in.close();
+        } catch (FileNotFoundException e1) {
+            return null;
+
+        } catch (IOException e1) {
+            return null;
+        }
+        return versionName;
+    }
+
+    public boolean isUpdateAvailable() {
+        if (curVersion == null) return false;
+        if (latestVersion == null) return false;
+        return !curVersion.equals(latestVersion);
+    }
+
+    public void setVersionName() {
+        if (installed)
+            curVersion = Apps.getVersionName(context, app.getPackage_name());
+        else curVersion = null;
+    }
+
+    public String getName() {
+        return app.getName();
+    }
+
+    public String getPackage_name() {
+        return app.getPackage_name();
+    }
+
+    public String getDownload_link() {
+        return app.getDownload_link();
+    }
+
+    public String getCurVersion() {
+        return curVersion;
+    }
+
+    public String getLatestVersion() {
+        return latestVersion;
+    }
+}

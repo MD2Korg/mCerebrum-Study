@@ -1,0 +1,8 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="setup"
+        android:title="Setup"/>
+    <PreferenceCategory
+        android:key="reset"
+        android:title="Reset"/>
+</PreferenceScreen>

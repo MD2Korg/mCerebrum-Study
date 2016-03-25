@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MD2k Study</string>
+    <string name="app_name">mCerebrum</string>
     <string name="app_description">Monitor status of the study</string>
     <string name="url_release">https://github.com/MD2Korg/mCerebrum-Study/releases</string>
     <string name="url_sourcecode">https://github.com/MD2Korg/mCerebrum-Study</string>

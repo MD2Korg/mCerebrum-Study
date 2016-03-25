@@ -1,5 +1,12 @@
 package org.md2k.study.config;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+
+import org.md2k.study.Constants;
+import org.md2k.utilities.Files;
+import org.md2k.utilities.Report.Log;
+
 import java.util.ArrayList;
 
 /**
@@ -29,21 +36,57 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConfigInfo {
+    private static final String TAG = ConfigInfo.class.getSimpleName();
     String id;
     String name;
-    String version;
+    int version_code;
     ArrayList<String> required_files;
     public String getId() {
         return id;
     }
-    public String getVersion() {
-        return version;
-    }
-    public ArrayList<String> getRequired_files() {
-        return required_files;
-    }
 
     public String getName() {
         return name;
+    }
+
+    public int getVersion_code() {
+        return version_code;
+    }
+
+    public boolean isValid(Context context){
+        Log.d(TAG,"isValid()...");
+        if(!isValidVersion(context)) return false;
+        Log.d(TAG,"isValid()...isValidVersion()=true");
+        if(!isValidRequiredFiles()) return false;
+        Log.d(TAG,"isValid()...isValidRequiredFiles()=true");
+        Log.d(TAG,"isvalid()...true");
+        return true;
+    }
+    private boolean isValidVersion(Context context){
+        Log.d(TAG, "isValidVersion()...");
+        try {
+            int appVersion = (context.getPackageManager().getPackageInfo(context.getPackageName(), 0)).versionCode;
+            Log.d(TAG,"isValidVersion()...appversion="+appVersion+" version_code="+version_code);
+            if(version_code>appVersion) return false;
+            if(version_code< Constants.CONFIG_MIN_VERSION) return false;
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+    private boolean isValidRequiredFiles(){
+        Log.d(TAG, "isValidRequiredFiles()...");
+        if(required_files==null) return true;
+        for(int i=0;i<required_files.size();i++){
+            if(!Files.isExist(Constants.CONFIG_DIRECTORY_BASE+required_files.get(i))) {
+                Log.d(TAG,Constants.CONFIG_DIRECTORY_BASE+required_files.get(i));
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public ArrayList<String> getRequired_files() {
+        return required_files;
     }
 }

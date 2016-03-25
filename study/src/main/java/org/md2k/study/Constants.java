@@ -1,6 +1,5 @@
 package org.md2k.study;
 
-import android.content.Context;
 import android.os.Environment;
 
 /**
@@ -11,7 +10,7 @@ import android.os.Environment;
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * <p/>
- * * Redistributions of source code must retain the above copyright notice, this
+ * * Redistributions of source status must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
  * <p/>
  * * Redistributions in binary form must reproduce the above copyright notice,
@@ -39,4 +38,5 @@ public class Constants{
 
     public static final long HEALTH_CHECK_REPEAT=5000;
     public static final String CONFIG_DOWNLOAD_LINK="https://github.com/MD2Korg/mCerebrum-Configuration/releases/download/config/";
+    public static final int CONFIG_MIN_VERSION=10;
 }

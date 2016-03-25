@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.PowerManager;
-import android.widget.Toast;
 
 import org.md2k.study.Constants;
-import org.md2k.study.Status;
 import org.md2k.utilities.Report.Log;
 
 import java.io.File;
@@ -45,83 +43,89 @@ import java.net.URL;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Download extends AsyncTask<String, Integer,Status> {
+public class Download extends AsyncTask<String, Integer, Integer> {
     private static final String TAG = Download.class.getSimpleName();
+    public static final int SUCCESS = 0;
+    public static final int ERROR_CONNECTION = 1;
+    public static final int ERROR_DOWNLOAD = 2;
     ProgressDialog mProgressDialog;
     private Context context;
     private PowerManager.WakeLock mWakeLock;
-    OnCompletionListenter onCompletionListenter;
+    OnCompletionListener onCompletionListener;
+    boolean isProgressShow;
 
-    public Download(Context context, OnCompletionListenter onCompletionListenter) {
+    public Download(Context context, boolean isProgressShow, OnCompletionListener onCompletionListener) {
         this.context = context;
-        this.onCompletionListenter=onCompletionListenter;
-        mProgressDialog = new ProgressDialog(context);
-        mProgressDialog.setTitle("Download");
-        mProgressDialog.setMessage("Download in progress...");
-//        mProgressDialog.setIndeterminate(true);
-       mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgressDialog.setProgress(0);
-        mProgressDialog.setMax(100);
-//        mProgressDialog.setCancelable(true);
-        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                cancel(true);
-            }
-        });
-        mProgressDialog.show();
+        this.isProgressShow = isProgressShow;
+
+        this.onCompletionListener = onCompletionListener;
+        if (isProgressShow) {
+            mProgressDialog = new ProgressDialog(context);
+            mProgressDialog.setTitle("Download");
+            mProgressDialog.setMessage("Download in progress...");
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            mProgressDialog.setProgress(0);
+            mProgressDialog.setMax(100);
+            mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    cancel(true);
+                }
+            });
+            mProgressDialog.show();
+        }
     }
+
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        Log.d(TAG,"onCanceled");
+        Log.d(TAG, "onCanceled");
     }
+
     @Override
-    protected org.md2k.study.Status doInBackground(String... str) {
+    protected Integer doInBackground(String... str) {
         InputStream input = null;
         OutputStream output = null;
         HttpURLConnection connection = null;
         try {
             URL url = new URL(str[0]);
-            Log.d(TAG,"URL="+str[0]);
+            Log.d(TAG, "URL=" + str[0]);
             connection = (HttpURLConnection) url.openConnection();
             connection.connect();
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                return new org.md2k.study.Status(org.md2k.study.Status.CONNECTION_ERROR);
+                return ERROR_CONNECTION;
             }
 
             int fileLength = connection.getContentLength();
 //            if(fileLength!=0) mProgressDialog.setIndeterminate(false);
-            Log.d(TAG,"filelength="+fileLength);
-            Log.d(TAG,"filename="+str[1]);
+            Log.d(TAG, "filelength=" + fileLength);
+            Log.d(TAG, "filename=" + str[1]);
             input = connection.getInputStream();
             Log.d(TAG, "Directory=" + Constants.TEMP_DIRECTORY);
-            File dir=new File(Constants.TEMP_DIRECTORY);
-            if(!dir.exists()) dir.mkdirs();
-            output = new FileOutputStream(Constants.TEMP_DIRECTORY+str[1]);
+            File dir = new File(Constants.TEMP_DIRECTORY);
+            if (!dir.exists()) dir.mkdirs();
+            output = new FileOutputStream(Constants.TEMP_DIRECTORY + str[1]);
 
             byte data[] = new byte[4096];
             long total = 0;
             int count;
             while ((count = input.read(data)) != -1) {
                 if (isCancelled()) {
-                    Log.d(TAG,"isCanceled...");
+                    Log.d(TAG, "isCanceled...");
                     input.close();
                     output.close();
                     connection.disconnect();
-
-//                    publishProgress(-1);
-                    return new org.md2k.study.Status(org.md2k.study.Status.DOWNLOAD_ERROR);
+                    return ERROR_DOWNLOAD;
                 }
                 total += count;
-                if (fileLength > 0) // only if total length is known
+                if (isProgressShow) {
+                    if (fileLength > 0)
                         mProgressDialog.setProgress((int) (total * 100.0 / fileLength));
-//                    publishProgress((int) (total * 100.0 / fileLength));
-                Log.d(TAG,"Total="+total+" progress="+(int) (total * 100.0 / fileLength));
+                }
                 output.write(data, 0, count);
             }
         } catch (Exception e) {
-            return new org.md2k.study.Status(org.md2k.study.Status.SUCCESS);
+            return ERROR_DOWNLOAD;
         } finally {
             try {
                 if (output != null)
@@ -129,45 +133,30 @@ public class Download extends AsyncTask<String, Integer,Status> {
                 if (input != null)
                     input.close();
             } catch (IOException ignored) {
-                return new org.md2k.study.Status(org.md2k.study.Status.DOWNLOAD_ERROR);
+                return ERROR_DOWNLOAD;
 
             }
 
             if (connection != null)
                 connection.disconnect();
         }
-        return new org.md2k.study.Status(org.md2k.study.Status.SUCCESS);
+        return SUCCESS;
     }
+
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        // take CPU lock to prevent CPU from going off if the user
-        // presses the power button during download
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 getClass().getName());
         mWakeLock.acquire();
-//        mProgressDialog = ProgressDialog.show(context,
-//                "Download", " Downloading in progress..");
     }
 
     @Override
-    protected void onProgressUpdate(Integer... progress) {
-/*        if(progress[0]==-1){
-            mProgressDialog.cancel();
-            super.onProgressUpdate(progress);
-        }else {
-            super.onProgressUpdate(progress);
-            mProgressDialog.setIndeterminate(false);
-            mProgressDialog.setMax(100);
-            mProgressDialog.setProgress(progress[0]);
-        }
-*/    }
-
-    @Override
-    protected void onPostExecute(org.md2k.study.Status status) {
+    protected void onPostExecute(Integer status) {
         mWakeLock.release();
-        mProgressDialog.dismiss();
-        onCompletionListenter.OnCompleted(status);
+        if(isProgressShow)
+            mProgressDialog.dismiss();
+        onCompletionListener.OnCompleted(status);
     }
 }

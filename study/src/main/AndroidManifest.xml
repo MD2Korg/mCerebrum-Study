@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.md2k.study">
+
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -26,45 +27,104 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.app_install.ActivityInstallApp"
+            android:name=".model_view.app_install.ActivityInstallApp"
             android:label="Install Application"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view.app_service.ActivityService"
+            android:name=".model_view.app_service.ActivityService"
             android:label="Run Application"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view.app_settings.ActivityAppSettings"
+            android:name=".model_view.app_settings.ActivityAppSettings"
             android:label="Application Settings"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view.intervention.ActivityInterventionApp"
+            android:name=".model_view.intervention.ActivityInterventionApp"
             android:label="@string/title_intervention_apps"
             android:screenOrientation="portrait" />
         <activity
             android:name=".view.admin.ActivityAdmin"
-            android:label="@string/settings"
+            android:label="Settings"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view.selfreport.ActivitySelfReport"
+            android:name=".view.study_setup.ActivityStudySetup"
+            android:label="Study Settings"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".view.report.ActivityReport"
+            android:label="Status"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".view.system.ActivitySystem"
+            android:label="System Settings"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".view.test.ActivityTest"
+            android:label="Test"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model_view.EMA_test.ActivityEMA_test"
+            android:label="EMA Test"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model_view.selfreport.ActivitySelfReport"
             android:label="Self Report"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
-            android:name=".view.config_download.ActivityConfigDownload"
+            android:name=".model_view.config_info.ActivityConfigDownload"
             android:label="Download Configuration File"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view.sleep.ActivitySleep"
-            android:label="Going to bed"
+            android:name=".model_view.clear_data.ActivityClearData"
+            android:label="Clear Data"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".model_view.config_download.ActivityConfigDownload"
+            android:label="Download Configuration File"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model_view.user_info.ActivityUserInfo"
+            android:label="Set User ID"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
+        <activity
+            android:name=".model_view.day_type.ActivityDayType"
+            android:label="Type of Day"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
+        <activity
+            android:name=".model_view.sleep_info.ActivitySleep"
+            android:label="Set Sleep Time"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model_view.clear_config.ActivityClearConfig"
+            android:label="Clear Configuration"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
+
+        <activity
+            android:name=".model_view.wakeup_info.ActivityWakeUp"
+            android:label="Set WakeUp Time"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model_view.app_start.ActivityAppStart"
+            android:label="Set User ID"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
+        <activity
+            android:name=".model_view.app_stop.ActivityAppStop"
+            android:label="Set User ID"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
 
         <service
-            android:name=".system_health.ServiceSystemHealth"
+            android:name=".ServiceSystemHealth"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
         <receiver android:name=".BootReceiver">
-            <intent-filter >
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
         <meta-data
