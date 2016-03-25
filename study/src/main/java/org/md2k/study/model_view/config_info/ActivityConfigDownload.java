@@ -46,16 +46,18 @@ import org.md2k.utilities.Report.Log;
 public class ActivityConfigDownload extends Activity {
     private static final String TAG = ActivityConfigDownload.class.getSimpleName();
     String m_Text = "";
+    public static boolean isShown=false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Status status = getIntent().getParcelableExtra(Status.class.getSimpleName());
+        if(isShown==true) finish();
         if(status==null){
             showDeleteDirectory();
         }else {
-            Log.d(TAG, "onCreate()...status=" + status.getRank());
-            if (status.getRank() == Status.RANK_CONFIG) {
+            Log.d(TAG, "onCreate()...rank=" + status.getRank() + " status=" + status.getStatus());
+            if (status.getRank() == Status.RANK_CONFIG && status.getStatus()!=Status.SUCCESS) {
                 if (Files.isExist(Constants.CONFIG_DIRECTORY_BASE)) {
                     Log.d(TAG, "directory exists...deleting...");
                     Files.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
@@ -64,6 +66,7 @@ public class ActivityConfigDownload extends Activity {
             } else
                 showDeleteDirectory();
         }
+        isShown=true;
     }
 
     public void showDownloadConfig() {
@@ -127,5 +130,10 @@ public class ActivityConfigDownload extends Activity {
         });
         builder.show();
 
+    }
+    @Override
+    public void onDestroy(){
+        isShown=false;
+        super.onDestroy();
     }
 }

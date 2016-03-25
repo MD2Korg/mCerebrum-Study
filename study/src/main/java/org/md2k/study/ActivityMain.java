@@ -13,8 +13,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 
 import org.md2k.study.config.ViewContent;
 import org.md2k.study.controller.ModelFactory;
@@ -45,7 +47,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
+        Fabric.with(this, new Crashlytics.Builder().core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
         setContentView(R.layout.activity_main);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
         Log.d(TAG, "broadcast...set...");
@@ -71,7 +73,7 @@ public class ActivityMain extends AppCompatActivity {
         Log.d(TAG, "createUI()...");
         modelManager = ModelManager.getInstance(ActivityMain.this);
         Status status = modelManager.getStatus();
-        Log.d(TAG, "createUI()...status=" + status.getRank());
+        Log.d(TAG, "createUI()...status=" + status.log());
         if (status.getRank() == Status.RANK_CONFIG && status.getStatus() != Status.SUCCESS)
             showDownloadConfigWindow();
         else {
@@ -106,6 +108,7 @@ public class ActivityMain extends AppCompatActivity {
 
 
     void showDownloadConfigWindow() {
+        Log.d(TAG,"showDownloadConfigWindow()..");
         userViews.clear();
         Intent intentDownload = new Intent(ActivityMain.this, ActivityConfigDownload.class);
         intentDownload.putExtra(Status.class.getSimpleName(), new Status(Status.RANK_CONFIG, Status.CONFIG_FILE_NOT_EXIST));
@@ -114,6 +117,9 @@ public class ActivityMain extends AppCompatActivity {
 
     public void addUserView() {
         ArrayList<ViewContent> viewContents = modelManager.getConfigManager().getConfig().getUser_view().getView_contents();
+        LinearLayout linearLayoutMain = (LinearLayout) findViewById(R.id.linear_layout_main);
+        linearLayoutMain.removeAllViews();
+
         for (int i = 0; i < viewContents.size(); i++) {
             if (!viewContents.get(i).isEnable()) continue;
             UserView userView = UserView.getUserView(this, viewContents.get(i).getId());
@@ -136,6 +142,7 @@ public class ActivityMain extends AppCompatActivity {
             switch (status.getRank()) {
                 case Status.RANK_CONFIG:
                     if (status.getStatus() != Status.SUCCESS) {
+                        Log.d(TAG,"broadcast...showDownloadConfig()..."+status.log());
                         showDownloadConfigWindow();
                     }
                     else updateUI();
