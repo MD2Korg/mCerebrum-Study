@@ -1,10 +1,9 @@
-package org.md2k.study.model_view.wakeup_info;
+package org.md2k.study.model_view.day_type;
 
-import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TimePicker;
 
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -36,40 +35,38 @@ import org.md2k.study.controller.ModelManager;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ActivityWakeUp extends AppCompatActivity {
+public class ActivityDayType extends AppCompatActivity {
+    AlertDialog levelDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        showTimePicker();
+        showAlertDialog();
 
     }
 
-    void showTimePicker() {
-        int hour, minute;
-        hour = 8;
-        minute = 0;
-        TimePickerDialog mTimePicker;
-        mTimePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                WakeupInfoManager wakeupInfoManager = (WakeupInfoManager) ModelManager.getInstance(ActivityWakeUp.this).getModel(ModelFactory.MODEL_WAKEUP_INFO);
-                wakeupInfoManager.setWakeupTimeNew(selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000);
-                finish();
+    int selected;
+    void showAlertDialog() {
+        final CharSequence[] items = {"Pre Quit Day", "Post Quit Day"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Pre/Post Quit Day");
+        builder.setCancelable(false);
+        builder.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                selected=item;
             }
-        }, hour, minute, false);
-        mTimePicker.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        });
+        builder.setPositiveButton("Select", new DialogInterface.OnClickListener() {
             @Override
-            public void onCancel(DialogInterface dialog) {
+            public void onClick(DialogInterface dialog, int which) {
+                DayTypeManager dayTypeManager = (DayTypeManager) ModelManager.getInstance(ActivityDayType.this).getModel(ModelFactory.MODEL_DAY_TYPE);
+                dayTypeManager.setDayType(selected);
+                levelDialog.dismiss();
                 finish();
             }
         });
-        mTimePicker.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                finish();
-            }
-        });
-        mTimePicker.setTitle("Select Time");
-        mTimePicker.show();
+        levelDialog = builder.create();
+
+        levelDialog.show();
     }
 }

@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.Report.Log;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -41,15 +41,40 @@ import java.lang.reflect.Type;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConfigManager {
-    Context context;
+    private static final String TAG = ConfigManager.class.getSimpleName();
     Config config;
+    boolean valid;
 
-    public ConfigManager(Context context) {
-        this.context = context;
+    private static ConfigManager instance=null;
+    public static ConfigManager getInstance(Context context){
+        if(instance==null)
+            instance=new ConfigManager(context);
+        return instance;
     }
 
-    public boolean read() {
+    private ConfigManager(Context context) {
+        Log.d(TAG, "ConfigManager()...");
+        valid=read();
+        Log.d(TAG,"read()...valid="+valid);
+        if(valid) {
+            if(config.getConfig_info()==null) {
+                valid = false;
+                Log.d(TAG,"read()...getConfig_info()=null");
+            }
+            else {
+                valid = config.getConfig_info().isValid(context);
+                Log.d(TAG,"read()...getConfig_info().isValid()="+valid);
+            }
+        }
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    private boolean read() {
         BufferedReader br;
+        config=null;
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(Constants.CONFIG_DIRECTORY + Constants.CONFIG_FILENAME)));
             Gson gson = new Gson();
@@ -64,5 +89,8 @@ public class ConfigManager {
 
     public Config getConfig() {
         return config;
+    }
+    public static void clear(){
+        instance=null;
     }
 }

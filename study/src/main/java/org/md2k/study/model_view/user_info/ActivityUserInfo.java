@@ -1,10 +1,11 @@
-package org.md2k.study.model_view.wakeup_info;
+package org.md2k.study.model_view.user_info;
 
-import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TimePicker;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -36,40 +37,45 @@ import org.md2k.study.controller.ModelManager;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ActivityWakeUp extends AppCompatActivity {
+public class ActivityUserInfo extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        showTimePicker();
-
+        UserInfoManager userInfoManager= (UserInfoManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_USER_INFO);
+        if(userInfoManager.isInDatabase){
+            Toast.makeText(this,"UserID exists. To change it, clear all data...",Toast.LENGTH_LONG).show();
+            finish();
+        }else
+            showAlertDialog();
     }
 
-    void showTimePicker() {
-        int hour, minute;
-        hour = 8;
-        minute = 0;
-        TimePickerDialog mTimePicker;
-        mTimePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+    void showAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("User ID");
+        builder.setMessage("Enter User ID");
+
+        final EditText input = new EditText(this);
+//        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
-            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                WakeupInfoManager wakeupInfoManager = (WakeupInfoManager) ModelManager.getInstance(ActivityWakeUp.this).getModel(ModelFactory.MODEL_WAKEUP_INFO);
-                wakeupInfoManager.setWakeupTimeNew(selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000);
-                finish();
+            public void onClick(DialogInterface dialog, int which) {
+                String m_Text = input.getText().toString().trim();
+                if (m_Text != null && m_Text.length() != 0) {
+                    UserInfoManager userInfoManager = (UserInfoManager) ModelManager.getInstance(ActivityUserInfo.this).getModel(ModelFactory.MODEL_USER_INFO);
+                    userInfoManager.setUserId(m_Text);
+                    finish();
+                }
             }
-        }, hour, minute, false);
-        mTimePicker.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
-            public void onCancel(DialogInterface dialog) {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
                 finish();
             }
         });
-        mTimePicker.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                finish();
-            }
-        });
-        mTimePicker.setTitle("Select Time");
-        mTimePicker.show();
+
+        builder.show();
     }
 }

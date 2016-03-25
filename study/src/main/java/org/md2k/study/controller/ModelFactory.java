@@ -26,7 +26,7 @@ import org.md2k.study.model_view.study_start_end.StudyStartEndInfoManager;
 import org.md2k.study.model_view.user_app.UserAppManager;
 import org.md2k.study.model_view.user_info.UserInfoManager;
 import org.md2k.study.model_view.user_status.UserStatusManager;
-import org.md2k.study.model_view.wakeup_info.WakeUpInfoManager;
+import org.md2k.study.model_view.wakeup_info.WakeupInfoManager;
 
 /**
  * Created by monowar on 3/16/16.
@@ -74,7 +74,7 @@ public class ModelFactory {
             case MODEL_USER_INFO:
                 return new UserInfoManager(modelManager, id, rank);
             case MODEL_WAKEUP_INFO:
-                return new WakeUpInfoManager(modelManager, id,rank);
+                return new WakeupInfoManager(modelManager, id,rank);
             case MODEL_SLEEP_INFO:
                 return new SleepInfoManager(modelManager, id,rank);
             case MODEL_CLEAR_DATABASE:

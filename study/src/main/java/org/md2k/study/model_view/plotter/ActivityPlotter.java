@@ -1,11 +1,10 @@
-package org.md2k.study.model_view.wakeup_info;
+package org.md2k.study.model_view.plotter;
 
-import android.app.TimePickerDialog;
-import android.content.DialogInterface;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.widget.TimePicker;
 
+import org.md2k.study.config.App;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 
@@ -36,40 +35,13 @@ import org.md2k.study.controller.ModelManager;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ActivityWakeUp extends AppCompatActivity {
+public class ActivityPlotter extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        showTimePicker();
-
-    }
-
-    void showTimePicker() {
-        int hour, minute;
-        hour = 8;
-        minute = 0;
-        TimePickerDialog mTimePicker;
-        mTimePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                WakeupInfoManager wakeupInfoManager = (WakeupInfoManager) ModelManager.getInstance(ActivityWakeUp.this).getModel(ModelFactory.MODEL_WAKEUP_INFO);
-                wakeupInfoManager.setWakeupTimeNew(selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000);
-                finish();
-            }
-        }, hour, minute, false);
-        mTimePicker.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                finish();
-            }
-        });
-        mTimePicker.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                finish();
-            }
-        });
-        mTimePicker.setTitle("Select Time");
-        mTimePicker.show();
+        App app = ModelManager.getInstance(this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(app.getPackage_name());
+        startActivity(launchIntent);
+        finish();
     }
 }

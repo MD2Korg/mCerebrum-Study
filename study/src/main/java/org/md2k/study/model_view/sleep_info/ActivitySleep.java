@@ -1,4 +1,4 @@
-package org.md2k.study.model_view.wakeup_info;
+package org.md2k.study.model_view.sleep_info;
 
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
@@ -36,7 +36,7 @@ import org.md2k.study.controller.ModelManager;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ActivityWakeUp extends AppCompatActivity {
+public class ActivitySleep extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,14 +46,14 @@ public class ActivityWakeUp extends AppCompatActivity {
 
     void showTimePicker() {
         int hour, minute;
-        hour = 8;
+        hour = 22;
         minute = 0;
         TimePickerDialog mTimePicker;
         mTimePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                WakeupInfoManager wakeupInfoManager = (WakeupInfoManager) ModelManager.getInstance(ActivityWakeUp.this).getModel(ModelFactory.MODEL_WAKEUP_INFO);
-                wakeupInfoManager.setWakeupTimeNew(selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000);
+                SleepInfoManager sleepInfoManager = (SleepInfoManager) ModelManager.getInstance(ActivitySleep.this).getModel(ModelFactory.MODEL_SLEEP_INFO);
+                sleepInfoManager.setSleepTimeNew(selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000);
                 finish();
             }
         }, hour, minute, false);

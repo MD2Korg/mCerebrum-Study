@@ -1,5 +1,5 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:key="key_settings"
-        android:title="Settings" />z
+        android:key="test"
+        android:title="Test"/>
 </PreferenceScreen>
