@@ -65,6 +65,9 @@ public class UserViewPrivacyControl extends UserView {
         activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
         ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn On");
     }
+    public void stop(){
+        handler.removeCallbacks(runnablePrivacy);
+    }
 
     @Override
     public void enableView() {

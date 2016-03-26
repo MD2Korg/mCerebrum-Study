@@ -47,19 +47,29 @@ public class AppServiceManager extends Model {
         appServiceList = new ArrayList<>();
         status=new Status(rank,Status.NOT_DEFINED);
         handler=new Handler();
+        ArrayList<App> apps = modelManager.getConfigManager().getConfig().getApps();
+        for (int i = 0; i < apps.size(); i++) {
+            if (apps.get(i).getService() != null) {
+                AppService appService = new AppService(modelManager.getContext(), apps.get(i).getName(), apps.get(i).getPackage_name(), apps.get(i).getService(), rank);
+                appServiceList.add(appService);
+                appService.stop();
+
+            }
+        }
+
     }
 
     public void set() {
         Log.d(TAG,"set()...");
         handler.removeCallbacks(runnableServiceRun);
-        ArrayList<App> apps = modelManager.getConfigManager().getConfig().getApps();
-        appServiceList.clear();
-        for (int i = 0; i < apps.size(); i++) {
-            if (apps.get(i).getService() != null) {
-                AppService appService = new AppService(modelManager.getContext(), apps.get(i).getName(), apps.get(i).getPackage_name(), apps.get(i).getService(), rank);
-                appServiceList.add(appService);
-            }
-        }
+//        ArrayList<App> apps = modelManager.getConfigManager().getConfig().getApps();
+ //       appServiceList.clear();
+ //       for (int i = 0; i < apps.size(); i++) {
+ //           if (apps.get(i).getService() != null) {
+ //               AppService appService = new AppService(modelManager.getContext(), apps.get(i).getName(), apps.get(i).getPackage_name(), apps.get(i).getService(), rank);
+ //               appServiceList.add(appService);
+ //           }
+ //       }
         handler.post(runnableServiceRun);
     }
 
@@ -67,7 +77,7 @@ public class AppServiceManager extends Model {
         Log.d(TAG,"clear()...");
         for (int i = 0; i < appServiceList.size(); i++)
             appServiceList.get(i).stop();
-        appServiceList.clear();
+//        appServiceList.clear();
         status=new Status(rank,Status.NOT_DEFINED);
         handler.removeCallbacks(runnableServiceRun);
     }

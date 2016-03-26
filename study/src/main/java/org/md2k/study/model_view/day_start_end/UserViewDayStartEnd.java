@@ -68,6 +68,7 @@ public class UserViewDayStartEnd extends UserView {
         linearLayoutMain.addView(view);
         prepareButton();
     }
+    public void stop(){}
 
     void prepareButton() {
         Button button = (Button) activity.findViewById(R.id.button_day_start_end);

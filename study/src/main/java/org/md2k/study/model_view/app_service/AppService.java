@@ -63,6 +63,7 @@ public class AppService {
     }
 
     public void stop() {
+        Log.d(TAG,"app_service...package_name="+package_name+" stop()");
         if (!isInstalled()) return;
         if (!isRunning()) return;
         Intent intent = new Intent();

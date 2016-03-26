@@ -60,15 +60,16 @@ public class UserViewUserApp extends UserView {
     }
 
     private void addView() {
-        Log.d(TAG,"addView()...");
+        Log.d(TAG, "addView()...");
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
         if(view==null) {
             view = activity.getLayoutInflater().inflate(R.layout.layout_user_app, null);
             linearLayoutMain.addView(view);
-            addUserApp();
         }
+        addUserApp();
         disable = false;
     }
+    public void stop(){}
 
     void addUserApp() {
         Log.d(TAG, "addUserApp()...");

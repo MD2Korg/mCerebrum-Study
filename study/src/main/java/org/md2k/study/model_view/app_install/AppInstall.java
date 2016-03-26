@@ -168,13 +168,20 @@ public class AppInstall {
             @Override
             public void OnCompleted(int curStatus) {
                 if (curStatus == Status.SUCCESS) {
-                    latestVersion = retrieveLatestVersion(Constants.TEMP_DIRECTORY + filename);
+                    latestVersion = retrieveAndVerifyLatestVersion(Constants.TEMP_DIRECTORY + filename);
                     onDataChangeListener.onDataChange(latestVersion);
                 } else
                     Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
                 Files.delete(Constants.TEMP_DIRECTORY + filename);
             }
         });
+    }
+    String retrieveAndVerifyLatestVersion(String filename){
+        String curLatestVersion=retrieveLatestVersion(filename);
+        if(curLatestVersion==null)  return curLatestVersion;
+        String[] vals1 = curLatestVersion.split("\\.");
+        if(vals1.length!=3) return null;
+        return curLatestVersion;
     }
 
     String retrieveLatestVersion(String filename) {
@@ -209,7 +216,26 @@ public class AppInstall {
     public boolean isUpdateAvailable() {
         if (curVersion == null) return false;
         if (latestVersion == null) return false;
-        return !curVersion.equals(latestVersion);
+        String[] vals1 = curVersion.split("\\.");
+        String[] vals2 = latestVersion.split("\\.");
+        int i = 0;
+        // set index to first non-equal ordinal or length of shortest version string
+        while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i]))
+        {
+            i++;
+        }
+        // compare first non-equal ordinal number
+        if (i < vals1.length && i < vals2.length)
+        {
+            return Integer.parseInt(vals1[i]) <= Integer.parseInt(vals2[i]);
+        }
+        // the strings are equal or one string is a substring of the other
+        // e.g. "1.2.3" = "1.2.3" or "1.2.3" < "1.2.3.4"
+        else
+        {
+            if(vals1.length<=vals1.length) return false;
+            else return true;
+        }
     }
 
     public void setVersionName() {

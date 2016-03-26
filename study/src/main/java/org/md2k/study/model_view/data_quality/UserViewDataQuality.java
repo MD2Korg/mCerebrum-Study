@@ -68,6 +68,9 @@ public class UserViewDataQuality extends UserView {
         addLayout();
         addImageView();
     }
+    public void stop(){
+        handler.removeCallbacks(runnableUpdateView);
+    }
 
     private void addLayout() {
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
@@ -158,5 +161,4 @@ public class UserViewDataQuality extends UserView {
         Log.d(TAG, "updateView()...");
         handler.post(runnableUpdateView);
     }
-
 }

@@ -52,7 +52,6 @@ public class ActivityConfigDownload extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Status status = getIntent().getParcelableExtra(Status.class.getSimpleName());
-        if(isShown==true) finish();
         if(status==null){
             showDeleteDirectory();
         }else {
@@ -66,7 +65,6 @@ public class ActivityConfigDownload extends Activity {
             } else
                 showDeleteDirectory();
         }
-        isShown=true;
     }
 
     public void showDownloadConfig() {

@@ -78,6 +78,7 @@ public class UserViewStudyStartEnd extends UserView {
             ((TextView) activity.findViewById(R.id.text_view_study_end)).setText(formatTime(studyStartEndInfoManager.getStudyEndTime()));
         }
     }
+    public void stop(){}
 
     private void addView() {
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);

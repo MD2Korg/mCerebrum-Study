@@ -75,8 +75,6 @@ public class ServiceSystemHealth extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiverStatus);
-//        handler.removeCallbacks(system_health);
         modelManager.stop();
         isRunning=false;
 

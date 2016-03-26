@@ -16,7 +16,6 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 
 import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.CrashlyticsCore;
 
 import org.md2k.study.config.ViewContent;
 import org.md2k.study.controller.ModelFactory;
@@ -47,7 +46,9 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics.Builder().core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
+        Fabric.with(this, new Crashlytics());
+
+//        Fabric.with(this, new Crashlytics.Builder().core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
         setContentView(R.layout.activity_main);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
         Log.d(TAG, "broadcast...set...");
@@ -108,11 +109,16 @@ public class ActivityMain extends AppCompatActivity {
 
 
     void showDownloadConfigWindow() {
-        Log.d(TAG,"showDownloadConfigWindow()..");
-        userViews.clear();
-        Intent intentDownload = new Intent(ActivityMain.this, ActivityConfigDownload.class);
-        intentDownload.putExtra(Status.class.getSimpleName(), new Status(Status.RANK_CONFIG, Status.CONFIG_FILE_NOT_EXIST));
-        startActivity(intentDownload);
+        Log.d(TAG, "showDownloadConfigWindow()..");
+        if(!ActivityConfigDownload.isShown) {
+            ActivityConfigDownload.isShown=true;
+            for(int i=0;i<userViews.size();i++)
+                userViews.get(i).stop();
+            userViews.clear();
+            Intent intentDownload = new Intent(ActivityMain.this, ActivityConfigDownload.class);
+            intentDownload.putExtra(Status.class.getSimpleName(), new Status(Status.RANK_CONFIG, Status.CONFIG_FILE_NOT_EXIST));
+            startActivity(intentDownload);
+        }
     }
 
     public void addUserView() {

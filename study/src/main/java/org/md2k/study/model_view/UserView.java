@@ -49,6 +49,7 @@ public abstract class UserView {
         this.activity=activity;
         this.model=model;
     }
+    public abstract void stop();
     public abstract void disableView();
     public static UserView getUserView(Activity activity, String id){
         switch(id){

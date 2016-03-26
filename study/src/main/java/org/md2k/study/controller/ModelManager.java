@@ -56,6 +56,7 @@ public class ModelManager {
         this.context = context;
         modelHashMap = new HashMap<>();
         isUpdating = false;
+
     }
 
     public void stop() {

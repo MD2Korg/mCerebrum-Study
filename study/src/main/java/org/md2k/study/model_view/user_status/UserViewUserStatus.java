@@ -112,6 +112,7 @@ public class UserViewUserStatus extends UserView {
             });
         }
     }
+    public void stop(){}
 
     void showAlertDialog(int type) {
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(activity);
