@@ -74,7 +74,7 @@ public class SelfReportManager extends Model {
     private boolean writeToDataKit() {
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
-        String sample = gson.toJson(new Event(Event.SMOKING, Event.TYPE_SYSTEM));
+        String sample = gson.toJson(new Event(Event.SMOKING, Event.TYPE_SELF_REPORT));
         DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClient, dataTypeString);
         return true;

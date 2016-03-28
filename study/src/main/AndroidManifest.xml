@@ -18,6 +18,7 @@
         android:theme="@style/app_theme_teal_light">
         <activity
             android:name=".ActivityMain"
+            android:noHistory="false"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -115,7 +116,7 @@
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
             android:name=".model_view.app_stop.ActivityAppStop"
-            android:label="Set User ID"
+            android:label="App Stop"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
 

@@ -83,7 +83,6 @@ public class UserViewDayStartEnd extends UserView {
                 } else if (status.getStatus() == Status.SUCCESS) {
                     showAlertDialog(Status.SUCCESS);
                 }
-                enableView();
             }
         });
     }
@@ -105,7 +104,7 @@ public class UserViewDayStartEnd extends UserView {
                     dayStartEndInfoManager.setDayStartTime(DateTime.getDateTime());
                 else if (status == Status.SUCCESS)
                     dayStartEndInfoManager.setDayEndTime(DateTime.getDateTime());
-
+                enableView();
                 dialog.dismiss();
             }
         });
@@ -121,6 +120,7 @@ public class UserViewDayStartEnd extends UserView {
 
     @Override
     public void enableView() {
+        Log.d(TAG,"enableView () .. UserViewDayStartEnd");
         if (view == null) return;
         activity.findViewById(R.id.button_day_start_end).setEnabled(true);
         DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) model;

@@ -49,6 +49,11 @@ public class ActivityMain extends AppCompatActivity {
         Fabric.with(this, new Crashlytics());
 
 //        Fabric.with(this, new Crashlytics.Builder().core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
+        if (getIntent().getExtras() != null && getIntent().getExtras().getBoolean("EXIT", false)) {
+            Intent intent = new Intent(this, ServiceSystemHealth.class);
+            stopService(intent);
+            finish();
+        }
         setContentView(R.layout.activity_main);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
         Log.d(TAG, "broadcast...set...");
@@ -89,15 +94,14 @@ public class ActivityMain extends AppCompatActivity {
             addUserView();
         Status status = modelManager.getStatus();
         for (int i = 0; i < userViews.size(); i++) {
-            Log.d(TAG,"modelmanager Status="+status.log()+" view status="+userViews.get(i).getModel().getRank());
+            Log.d(TAG, "modelmanager Status=" + status.log() + " view status=" + userViews.get(i).getModel().getRank());
             if (status.getRank() > Status.RANK_USER_REQUIRED) {
                 userViews.get(i).disableView();
-                Log.d(TAG,"userView disabled");
-            }
-            else {
-                if(userViews.get(i).getModel() instanceof PrivacyControlManager){
+                Log.d(TAG, "userView disabled");
+            } else {
+                if (userViews.get(i).getModel() instanceof PrivacyControlManager) {
                     Log.d(TAG, "privacyManager..view.." + i);
-                    PrivacyControlManager privacyControlManager= ((PrivacyControlManager)userViews.get(i).getModel());
+                    PrivacyControlManager privacyControlManager = ((PrivacyControlManager) userViews.get(i).getModel());
                     privacyControlManager.set();
                 }
                 userViews.get(i).enableView();
@@ -110,9 +114,9 @@ public class ActivityMain extends AppCompatActivity {
 
     void showDownloadConfigWindow() {
         Log.d(TAG, "showDownloadConfigWindow()..");
-        if(!ActivityConfigDownload.isShown) {
-            ActivityConfigDownload.isShown=true;
-            for(int i=0;i<userViews.size();i++)
+        if (!ActivityConfigDownload.isShown) {
+            ActivityConfigDownload.isShown = true;
+            for (int i = 0; i < userViews.size(); i++)
                 userViews.get(i).stop();
             userViews.clear();
             Intent intentDownload = new Intent(ActivityMain.this, ActivityConfigDownload.class);
@@ -134,8 +138,10 @@ public class ActivityMain extends AppCompatActivity {
             }
         }
     }
+
     @Override
     public void onResume() {
+        Log.d(TAG,"onResume()...");
         updateUI();
         super.onResume();
     }
@@ -148,10 +154,9 @@ public class ActivityMain extends AppCompatActivity {
             switch (status.getRank()) {
                 case Status.RANK_CONFIG:
                     if (status.getStatus() != Status.SUCCESS) {
-                        Log.d(TAG,"broadcast...showDownloadConfig()..."+status.log());
+                        Log.d(TAG, "broadcast...showDownloadConfig()..." + status.log());
                         showDownloadConfigWindow();
-                    }
-                    else updateUI();
+                    } else updateUI();
                     break;
                 default:
                     updateUI();
@@ -209,8 +214,8 @@ public class ActivityMain extends AppCompatActivity {
                 break;
             case R.id.action_reset_app:
                 Model model = modelManager.getModel(ModelFactory.MODEL_APP_RESET);
-                if(model != null){
-                    ((AppResetManager)model).resetApp();
+                if (model != null) {
+                    ((AppResetManager) model).resetApp();
                 }
                 break;
 

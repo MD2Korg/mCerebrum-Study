@@ -62,6 +62,7 @@ public class DataQualityManager extends Model {
                 @Override
                 public void onReceive(DataSource dataSource, DataSourceClient dataSourceClient, int sample[]) {
                     if (sample.length == 1) {
+                        if(dataQualityInfos==null || dataQualityInfos.size()<=finalI) return;
                         dataQualityInfos.get(finalI).setQualities(dataSourceClient.getDataSource(),translate(sample[0]));
                     } else {
                         updateAutoSenseChest(dataSourceClient.getDataSource(), DataSourceType.RESPIRATION, translate(sample[0]));
