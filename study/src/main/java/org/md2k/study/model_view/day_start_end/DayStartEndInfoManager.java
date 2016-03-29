@@ -90,14 +90,6 @@ public class DayStartEndInfoManager extends Model {
             return false;
         }
     }
-    Runnable runnable=new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG,"runnable...set() start....");
-            set();
-            Log.d(TAG, "runnable...set() end....");
-        }
-    };
 
     public void clear() {
         Log.d(TAG, "clear()...");
@@ -129,6 +121,7 @@ public class DayStartEndInfoManager extends Model {
     }
 
     public Status getCurrentStatusDetails() {
+        set();
         if (isNewDay()) {
             Log.d(TAG,"rank="+rank);
             set();

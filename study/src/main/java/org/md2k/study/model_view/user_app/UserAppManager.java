@@ -64,6 +64,7 @@ public class UserAppManager extends Model {
     }
 
     public ArrayList<Model> getUserApps() {
+        set();
         return userApps;
     }
 }
