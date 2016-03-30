@@ -9,6 +9,8 @@ import android.widget.TextView;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.R;
 import org.md2k.study.Status;
+import org.md2k.study.controller.ModelFactory;
+import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
 
@@ -44,8 +46,6 @@ import java.util.Date;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class UserViewStudyStartEnd extends UserView {
-    Activity activity;
-
     public UserViewStudyStartEnd(Activity activity, Model model) {
         super(activity, model);
         addView();
@@ -59,10 +59,19 @@ public class UserViewStudyStartEnd extends UserView {
         ((TextView) activity.findViewById(R.id.text_view_study_end)).setText("-");
     }
 
+    private void addView() {
+        LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
+        view = activity.getLayoutInflater().inflate(R.layout.layout_study_start_end, null);
+        linearLayoutMain.addView(view);
+        prepareButton();
+    }
+
     @Override
     public void enableView() {
+        if (view == null) return;
+
         activity.findViewById(R.id.button_study_start_end).setEnabled(true);
-        StudyStartEndInfoManager studyStartEndInfoManager = (StudyStartEndInfoManager) model;
+        StudyStartEndInfoManager studyStartEndInfoManager = (StudyStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_STUDY_START_END);
         Status status = studyStartEndInfoManager.getCurrentStatusDetails();
         if (status.getStatus() == Status.STUDY_START_NOT_AVAILABLE) {
             ((Button) activity.findViewById(R.id.button_study_start_end)).setText("Start Study");
@@ -80,12 +89,6 @@ public class UserViewStudyStartEnd extends UserView {
     }
     public void stop(){}
 
-    private void addView() {
-        LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
-        view = activity.getLayoutInflater().inflate(R.layout.layout_study_start_end, null);
-        linearLayoutMain.addView(view);
-        prepareButton();
-    }
 
 
     void prepareButton() {
@@ -93,7 +96,7 @@ public class UserViewStudyStartEnd extends UserView {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StudyStartEndInfoManager studyStartEndInfoManager = (StudyStartEndInfoManager) model;
+                StudyStartEndInfoManager studyStartEndInfoManager = (StudyStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_STUDY_START_END);
                 Status status = studyStartEndInfoManager.getCurrentStatusDetails();
                 if (status.getStatus() == Status.STUDY_START_NOT_AVAILABLE || status.getStatus() == Status.STUDY_COMPLETED)
                     studyStartEndInfoManager.setStudyStartTime(DateTime.getDateTime());

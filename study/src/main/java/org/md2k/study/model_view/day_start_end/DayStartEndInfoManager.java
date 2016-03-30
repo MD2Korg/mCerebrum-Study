@@ -1,7 +1,5 @@
 package org.md2k.study.model_view.day_start_end;
 
-import android.os.Handler;
-
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
@@ -56,7 +54,6 @@ public class DayStartEndInfoManager extends Model {
     DataSourceClient dataSourceClientDayEnd;
     long dayStartTime;
     long dayEndTime;
-    Handler handler;
 
     public DayStartEndInfoManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -65,7 +62,6 @@ public class DayStartEndInfoManager extends Model {
         dataSourceBuilderDayEnd = createDataSourceBuilderDayEnd();
         dayStartTime = -1;
         dayEndTime = -1;
-        handler=new Handler();
     }
 
     public void set() {
@@ -112,6 +108,7 @@ public class DayStartEndInfoManager extends Model {
     private void readDayStartFromDataKit() {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayStartTime = -1;
+        if(!dataKitAPI.isConnected()) return;
         dataSourceClientDayStart = dataKitAPI.register(dataSourceBuilderDayStart);
         ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
         if (dataTypes.size() != 0) {
@@ -121,7 +118,7 @@ public class DayStartEndInfoManager extends Model {
     }
 
     public Status getCurrentStatusDetails() {
-        set();
+        if(status.getStatus()!=Status.SUCCESS) return status;
         if (isNewDay()) {
             Log.d(TAG,"rank="+rank);
             set();
@@ -136,6 +133,7 @@ public class DayStartEndInfoManager extends Model {
     private void readDayEndFromDataKit() {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayEndTime = -1;
+        if(!dataKitAPI.isConnected()) return;
         dataSourceClientDayEnd = dataKitAPI.register(dataSourceBuilderDayEnd);
         ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);
         if (dataTypes.size() != 0) {

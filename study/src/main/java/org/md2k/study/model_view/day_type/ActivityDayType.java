@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
+import org.md2k.utilities.data_format.DayTypeInfo;
 
 
 /**
@@ -47,7 +48,7 @@ public class ActivityDayType extends AppCompatActivity {
 
     int selected;
     void showAlertDialog() {
-        final CharSequence[] items = {"Pre Quit Day", "Post Quit Day"};
+        final CharSequence[] items = {DayTypeInfo.PRE_QUIT_NAME, DayTypeInfo.POST_QUIT_NAME};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Pre/Post Quit Day");
         builder.setCancelable(false);

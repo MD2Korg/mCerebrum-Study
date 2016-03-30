@@ -60,10 +60,10 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentAdmin.class.getSimpleName();
     ModelManager modelManager;
-    boolean isSystem=false;
-    boolean isStudySetup=false;
-    boolean isReport=false;
-    boolean isTest=false;
+    boolean isSystem = false;
+    boolean isStudySetup = false;
+    boolean isReport = false;
+    boolean isTest = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,34 +71,33 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
         modelManager = ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_admin);
-        ((PreferenceCategory)findPreference("key_category")).removeAll();
-        ArrayList<ViewContent> viewContents=modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents();
-        for(int i=0;i<viewContents.size();i++){
-            if(!viewContents.get(i).isEnable()) continue;
-            switch(viewContents.get(i).getId()){
+        ((PreferenceCategory) findPreference("key_category")).removeAll();
+        ArrayList<ViewContent> viewContents = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents();
+        for (int i = 0; i < viewContents.size(); i++) {
+            if (!viewContents.get(i).isEnable()) continue;
+            switch (viewContents.get(i).getId()) {
                 case CView.SYSTEM:
-
-                    prepareSystem();
+                    prepareSystem(viewContents.get(i));
                     break;
                 case CView.STUDY_SETUP:
-                    prepareStudySetup();
+                    prepareStudySetup(viewContents.get(i));
                     break;
                 case CView.REPORT:
-                    prepareReport();
+                    prepareReport(viewContents.get(i));
                     break;
                 case CView.TEST:
-                    prepareTest();
+                    prepareTest(viewContents.get(i));
                     break;
             }
         }
         setupCloseButton();
     }
 
-    void prepareSystem() {
-        isSystem=true;
+    void prepareSystem(ViewContent viewContent) {
+        isSystem = true;
         Preference preference = new Preference(getActivity());
         preference.setKey(CView.SYSTEM);
-        preference.setTitle("System Settings");
+        preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -107,14 +106,14 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                 return false;
             }
         });
-        ((PreferenceCategory)findPreference("key_category")).addPreference(preference);
+        ((PreferenceCategory) findPreference("key_category")).addPreference(preference);
     }
 
-    void prepareStudySetup() {
-        isStudySetup=true;
+    void prepareStudySetup(ViewContent viewContent) {
+        isStudySetup = true;
         Preference preference = new Preference(getActivity());
         preference.setKey(CView.STUDY_SETUP);
-        preference.setTitle("Study Settings");
+        preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -123,14 +122,14 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                 return false;
             }
         });
-        ((PreferenceCategory)findPreference("key_category")).addPreference(preference);
+        ((PreferenceCategory) findPreference("key_category")).addPreference(preference);
     }
 
-    void prepareTest() {
-        isTest=true;
+    void prepareTest(ViewContent viewContent) {
+        isTest = true;
         Preference preference = new Preference(getActivity());
         preference.setKey(CView.TEST);
-        preference.setTitle("Test");
+        preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -139,13 +138,14 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                 return false;
             }
         });
-        ((PreferenceCategory)findPreference("key_category")).addPreference(preference);
+        ((PreferenceCategory) findPreference("key_category")).addPreference(preference);
     }
-    void prepareReport() {
-        isReport=true;
+
+    void prepareReport(ViewContent viewContent) {
+        isReport = true;
         Preference preference = new Preference(getActivity());
         preference.setKey(CView.REPORT);
-        preference.setTitle("Status");
+        preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -154,7 +154,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                 return false;
             }
         });
-        ((PreferenceCategory)findPreference("key_category")).addPreference(preference);
+        ((PreferenceCategory) findPreference("key_category")).addPreference(preference);
     }
 
 
@@ -190,8 +190,8 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
             updatePreference(CView.REPORT, false, false, "");
         } else if (status.getRank() >= Status.RANK_ADMIN_OPTIONAL) {
             updatePreference(CView.SYSTEM, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.STUDY_SETUP, true, true, new Status(0,Status.SUCCESS).getMessage());
-            updatePreference(CView.TEST, true, true, new Status(0,Status.SUCCESS).getMessage());
+            updatePreference(CView.STUDY_SETUP, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(CView.TEST, true, true, new Status(0, Status.SUCCESS).getMessage());
             updatePreference(CView.REPORT, false, false, "");
         } else {
             updatePreference(CView.SYSTEM, true, true, new Status(0, Status.SUCCESS).getMessage());
@@ -203,7 +203,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     void updatePreference(String key, boolean enable, boolean status, String message) {
         Preference preference = findPreference(key);
-        if(preference==null) return;
+        if (preference == null) return;
         preference.setEnabled(enable);
         if (status)
             preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
@@ -215,6 +215,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         }
         preference.setSummary(message);
     }
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -223,7 +224,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     };
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
         super.onDestroy();
     }

@@ -11,6 +11,8 @@ import android.widget.TextView;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.R;
 import org.md2k.study.Status;
+import org.md2k.study.controller.ModelFactory;
+import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
 import org.md2k.utilities.Report.Log;
@@ -76,20 +78,21 @@ public class UserViewDayStartEnd extends UserView {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) model;
+                DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
                 Status status = dayStartEndInfoManager.getCurrentStatusDetails();
                 if (status.getStatus() == Status.DAY_START_NOT_AVAILABLE) {
                     showAlertDialog(Status.DAY_START_NOT_AVAILABLE);
                 } else if (status.getStatus() == Status.SUCCESS) {
                     showAlertDialog(Status.SUCCESS);
                 }
+                enableView();
             }
         });
     }
 
     public void showAlertDialog(final int status) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) model;
+        final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
         if (status == Status.DAY_START_NOT_AVAILABLE) {
             builder.setTitle("Start Day");
             builder.setMessage("Do you want to start the day?");
@@ -123,7 +126,7 @@ public class UserViewDayStartEnd extends UserView {
         Log.d(TAG,"enableView () .. UserViewDayStartEnd");
         if (view == null) return;
         activity.findViewById(R.id.button_day_start_end).setEnabled(true);
-        DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) model;
+        final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
         Status status = dayStartEndInfoManager.getCurrentStatusDetails();
         if (status.getStatus() == Status.DAY_START_NOT_AVAILABLE) {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Start Day");
@@ -142,7 +145,6 @@ public class UserViewDayStartEnd extends UserView {
                 activity.findViewById(R.id.button_day_start_end).setEnabled(true);
                 activity.findViewById(R.id.button_day_start_end).setVisibility(View.VISIBLE);
             }
-
         } else {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Day Ended");
             activity.findViewById(R.id.button_day_start_end).setEnabled(false);
@@ -155,7 +157,8 @@ public class UserViewDayStartEnd extends UserView {
     }
 
     long getRequiredTime() {
-        String[] parameters = model.getAction().getParameters();
+        final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
+        String[] parameters = dayStartEndInfoManager.getAction().getParameters();
         if (parameters == null || parameters.length == 0) return 0;
         Log.d(TAG, "parameter=" + parameters[0]);
         return Long.parseLong(parameters[0]);

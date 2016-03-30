@@ -52,9 +52,12 @@ public class DataKitConnectManager extends Model {
 
     @Override
     public void set() {
+        dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
             notifyIfRequired(new Status(rank, Status.SUCCESS));
         }else{
+            dataKitAPI.close();
+            dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
             dataKitAPI.connect(new OnConnectionListener() {
                 @Override
                 public void onConnected() {
@@ -71,8 +74,10 @@ public class DataKitConnectManager extends Model {
 
     @Override
     public void clear() {
+        Log.d(TAG,"clear()...");
         if(dataKitAPI.isConnected()){
             dataKitAPI.disconnect();
+            dataKitAPI.close();
             notifyIfRequired(new Status(rank,Status.DATAKIT_NOT_AVAILABLE));
         }
     }

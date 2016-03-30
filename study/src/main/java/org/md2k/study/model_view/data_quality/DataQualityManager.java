@@ -50,7 +50,7 @@ public class DataQualityManager extends Model {
     @Override
     public void set() {
         status=new Status(rank, Status.SUCCESS);
-        Log.d(TAG,"set()...");
+        Log.d(TAG, "set()...");
         dataQualities.clear();
         dataQualityInfos.clear();
         ArrayList<DataSource> dataSources=modelManager.getConfigManager().getConfig().getData_quality();
@@ -91,6 +91,7 @@ public class DataQualityManager extends Model {
     }
     @Override
     public void clear() {
+        Log.d(TAG,"clear()...");
         status=new Status(rank,Status.NOT_DEFINED);
         if(dataQualities!=null) {
             for (int i = 0; i < dataQualities.size(); i++)

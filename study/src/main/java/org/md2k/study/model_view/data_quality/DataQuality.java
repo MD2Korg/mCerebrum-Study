@@ -1,6 +1,7 @@
 package org.md2k.study.model_view.data_quality;
 
 import android.content.Context;
+import android.os.Handler;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
@@ -48,11 +49,13 @@ public class DataQuality {
     ArrayList<DataSourceClient> dataSourceClientArrayList;
     Context context;
     DataSourceClient dataSourceClient;
+    Handler handler;
 
     public DataQuality(Context context, DataSource dataSource, ReceiveCallBack receiveCallBack) {
         this.dataSource = dataSource;
         this.receiveCallBack=receiveCallBack;
         this.context=context;
+        handler=new Handler();
     }
 
     public DataSource createDataSource(DataSource dataSource) {
@@ -62,19 +65,29 @@ public class DataQuality {
     }
     public void start(){
         dataKitAPI = DataKitAPI.getInstance(context);
-        dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
-        for(int i=0;i<dataSourceClientArrayList.size();i++){
-            dataSourceClient = dataSourceClientArrayList.get(i);
-            dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
-                @Override
-                public void onReceived(DataType dataType) {
-                    receiveCallBack.onReceive(dataSource, dataSourceClient, ((DataTypeIntArray) dataType).getSample());
-                }
-            });
-        }
-
+        handler.post(runnableSubscribe);
     }
+    Runnable runnableSubscribe=new Runnable() {
+        @Override
+        public void run() {
+            dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
+            if(dataSourceClientArrayList.size()==0)
+                handler.postDelayed(this, 1000);
+            else {
+                for (int i = 0; i < dataSourceClientArrayList.size(); i++) {
+                    dataSourceClient = dataSourceClientArrayList.get(i);
+                    dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
+                        @Override
+                        public void onReceived(DataType dataType) {
+                            receiveCallBack.onReceive(dataSource, dataSourceClient, ((DataTypeIntArray) dataType).getSample());
+                        }
+                    });
+                }
+            }
+        }
+    };
     public void stop() {
+        handler.removeCallbacks(runnableSubscribe);
         for(int i=0;i<dataSourceClientArrayList.size();i++)
         if (dataSourceClientArrayList.get(i) != null && dataKitAPI!=null && dataKitAPI.isConnected())
             dataKitAPI.unsubscribe(dataSourceClientArrayList.get(i));

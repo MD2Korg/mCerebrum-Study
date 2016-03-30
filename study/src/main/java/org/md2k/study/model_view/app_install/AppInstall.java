@@ -106,7 +106,7 @@ public class AppInstall {
                                 "/download/" + latestVersion +
                                 "/" + app.getId() +
                                 latestVersion + ".apk";
-                        download(context, filename, link,false, new OnCompletionListener() {
+                        download(context, filename, link,true, new OnCompletionListener() {
                             @Override
                             public void OnCompleted(int curStatus) {
                                 if (curStatus == Status.SUCCESS) {

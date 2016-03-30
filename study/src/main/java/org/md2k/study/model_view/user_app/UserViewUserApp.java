@@ -9,6 +9,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.md2k.study.R;
+import org.md2k.study.controller.ModelFactory;
+import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
 import org.md2k.utilities.Report.Log;
@@ -73,7 +75,7 @@ public class UserViewUserApp extends UserView {
 
     void addUserApp() {
         Log.d(TAG, "addUserApp()...");
-        final UserAppManager userAppManager = (UserAppManager) model;
+        final UserAppManager userAppManager = (UserAppManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_USER_APP);
         gridViewApplication = (GridView) activity.findViewById(R.id.gridview);
         Log.d(TAG,"addUserApp()...size="+userAppManager.getUserApps().size());
         AppAdapter appAdapter = new AppAdapter(activity, userAppManager.getUserApps());

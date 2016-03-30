@@ -61,9 +61,12 @@ public class ModelManager {
 
     public void stop() {
         isUpdating = true;
-        for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
-            if (entry.getValue() == null) continue;
-            entry.getValue().clear();
+        for(int i=Status.RANK_SUCCESS;i<=Status.RANK_BEGIN;i++) {
+            for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
+                if (entry.getValue() == null) continue;
+                if(entry.getValue().getRank()==i)
+                    entry.getValue().clear();
+            }
         }
     }
 

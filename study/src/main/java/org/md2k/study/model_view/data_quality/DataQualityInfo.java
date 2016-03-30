@@ -68,10 +68,6 @@ public class DataQualityInfo {
             title="-";
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
     public String getTitle() {
         return title;
     }

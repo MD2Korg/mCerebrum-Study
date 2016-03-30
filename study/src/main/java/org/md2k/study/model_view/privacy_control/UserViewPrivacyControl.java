@@ -13,6 +13,8 @@ import android.widget.TextView;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.R;
 import org.md2k.study.Status;
+import org.md2k.study.controller.ModelFactory;
+import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
 import org.md2k.utilities.Report.Log;
@@ -80,7 +82,8 @@ public class UserViewPrivacyControl extends UserView {
         public void run() {
             activity.findViewById(R.id.button_privacy).setEnabled(true);
             Log.d(TAG, "updateView()...");
-            PrivacyControlManager privacyControlManager = (PrivacyControlManager) model;
+            PrivacyControlManager privacyControlManager = (PrivacyControlManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_PRIVACY);
+
             Status status = privacyControlManager.getCurrentStatusDetails();
 
             if (status.getStatus() == Status.PRIVACY_ACTIVE) {
@@ -119,7 +122,8 @@ public class UserViewPrivacyControl extends UserView {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                intent.setClassName(model.getAction().getPackage_name(), model.getAction().getClass_name());
+                PrivacyControlManager privacyControlManager = (PrivacyControlManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_PRIVACY);
+                intent.setClassName(privacyControlManager.getAction().getPackage_name(), privacyControlManager.getAction().getClass_name());
                 activity.startActivity(intent);
             }
         });
