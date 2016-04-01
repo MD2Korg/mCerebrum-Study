@@ -128,7 +128,6 @@ public class UserViewDataQuality extends UserView {
     Runnable runnableUpdateView = new Runnable() {
         @Override
         public void run() {
-            Log.d(TAG, "runnableUpdateView()...");
             String message = null;
             boolean isAllGood = true;
             boolean isStatusSuccess;
@@ -140,10 +139,8 @@ public class UserViewDataQuality extends UserView {
             if (dataQualityManager.getStatus().getStatus() == Status.SUCCESS)
                 isStatusSuccess = true;
             else isStatusSuccess = false;
-            Log.d(TAG,"runnableUpdateView()...isStatusSuccess="+isStatusSuccess);
 
             ArrayList<DataQualityInfo> dataQualityInfos = dataQualityManager.dataQualityInfos;
-            Log.d(TAG,"runnableUpdateView..DataQualityInfos size="+dataQualityInfos.size());
             for (int i = 0; i < dataQualityInfos.size(); i++) {
                 textViews[i].setText(dataQualityInfos.get(i).getTitle());
                 if (isStatusSuccess == false) {
