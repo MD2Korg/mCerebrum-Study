@@ -128,16 +128,21 @@ public class UserViewDataQuality extends UserView {
     Runnable runnableUpdateView = new Runnable() {
         @Override
         public void run() {
-            Log.d(TAG,"runnableUpdateView()...");
+            Log.d(TAG, "runnableUpdateView()...");
             String message = null;
             boolean isAllGood = true;
             boolean isStatusSuccess;
-            if (ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DATA_QUALITY).getStatus().getStatus() == Status.SUCCESS)
+            DataQualityManager dataQualityManager= (DataQualityManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DATA_QUALITY);
+            if(dataQualityManager==null){
+                handler.postDelayed(this, 5000);
+                return;
+            }
+            if (dataQualityManager.getStatus().getStatus() == Status.SUCCESS)
                 isStatusSuccess = true;
             else isStatusSuccess = false;
             Log.d(TAG,"runnableUpdateView()...isStatusSuccess="+isStatusSuccess);
 
-            ArrayList<DataQualityInfo> dataQualityInfos = ((DataQualityManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DATA_QUALITY)).dataQualityInfos;
+            ArrayList<DataQualityInfo> dataQualityInfos = dataQualityManager.dataQualityInfos;
             Log.d(TAG,"runnableUpdateView..DataQualityInfos size="+dataQualityInfos.size());
             for (int i = 0; i < dataQualityInfos.size(); i++) {
                 textViews[i].setText(dataQualityInfos.get(i).getTitle());

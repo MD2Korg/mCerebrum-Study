@@ -5,12 +5,11 @@ import android.os.Handler;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeIntArray;
+import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.source.datasource.DataSourceType;
 
 import java.util.ArrayList;
 
@@ -60,7 +59,6 @@ public class DataQuality {
 
     public DataSource createDataSource(DataSource dataSource) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
-        dataSourceBuilder.setType(DataSourceType.STATUS);
         return dataSourceBuilder.build();
     }
     public void start(){
@@ -79,7 +77,7 @@ public class DataQuality {
                     dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
                         @Override
                         public void onReceived(DataType dataType) {
-                            receiveCallBack.onReceive(dataSource, dataSourceClient, ((DataTypeIntArray) dataType).getSample());
+                            receiveCallBack.onReceive(dataSource, dataSourceClient, ((DataTypeInt) dataType).getSample());
                         }
                     });
                 }

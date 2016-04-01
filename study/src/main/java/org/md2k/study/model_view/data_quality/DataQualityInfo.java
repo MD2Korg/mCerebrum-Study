@@ -19,8 +19,7 @@ public class DataQualityInfo {
     int qualities[];
     int quality;
     int now;
-    String dataSourceType;
-    long lastRecivedTime;
+    long lastReceivedTime;
 
     DataQualityInfo(DataSource dataSource) {
         quality = Status.DATAQUALITY_OFF;
@@ -28,15 +27,14 @@ public class DataQualityInfo {
         now = 0;
         qualities = new int[QSIZE];
         message = "";
-        dataSourceType=dataSource.getType();
-        lastRecivedTime=0;
+        lastReceivedTime =0;
         setTitle();
     }
 
     void setTitle(){
-        if (dataSourceType != null && dataSourceType.equals(DataSourceType.RESPIRATION))
+        if (dataSource.getId() != null && dataSource.getId().equals(DataSourceType.RESPIRATION))
             title="Respiration";
-        else if(dataSourceType != null && dataSourceType.equals(DataSourceType.ECG))
+        else if(dataSource.getId() != null && dataSource.getId().equals(DataSourceType.ECG))
             title="ECG";
         else if(dataSource.getPlatform()!=null && dataSource.getPlatform().getType()!=null && dataSource.getPlatform().getId()!=null){
             if(dataSource.getPlatform().getId().equals(PlatformId.LEFT_WRIST) && dataSource.getPlatform().getType().equals(PlatformType.MICROSOFT_BAND))
@@ -73,7 +71,7 @@ public class DataQualityInfo {
     }
 
     public int getQuality() {
-        if(DateTime.getDateTime()-lastRecivedTime>10000) {
+        if(DateTime.getDateTime()- lastReceivedTime >10000) {
             quality=Status.DATAQUALITY_OFF;
             Status curStatus = new Status(0, this.quality);
             message = title + " - " + curStatus.getMessage();
@@ -88,9 +86,9 @@ public class DataQualityInfo {
 
     public void setQualities(DataSource dataSource, int value) {
         this.dataSource=dataSource;
-        lastRecivedTime= DateTime.getDateTime();
+        lastReceivedTime = DateTime.getDateTime();
         setTitle();
-        if (dataSourceType!=null && (dataSourceType.equals(DataSourceType.RESPIRATION) || dataSourceType.equals(DataSourceType.ECG))) {
+        if (dataSource.getId()!=null && (dataSource.getId().equals(DataSourceType.RESPIRATION) || dataSource.getId().equals(DataSourceType.ECG))) {
             now = now % QSIZE;
             this.qualities[now++] = value;
             this.quality = findMaximumOccurrence();

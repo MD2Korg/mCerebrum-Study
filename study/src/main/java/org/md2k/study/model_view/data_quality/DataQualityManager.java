@@ -2,7 +2,6 @@ package org.md2k.study.model_view.data_quality;
 
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -41,69 +40,60 @@ public class DataQualityManager extends Model {
     private static final String TAG = DataQualityManager.class.getSimpleName();
     ArrayList<DataQuality> dataQualities;
     ArrayList<DataQualityInfo> dataQualityInfos;
+
     public DataQualityManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-        dataQualityInfos=new ArrayList<>();
-        dataQualities=new ArrayList<>();
+        dataQualityInfos = new ArrayList<>();
+        dataQualities = new ArrayList<>();
     }
+
     @Override
     public void set() {
-        status=new Status(rank, Status.SUCCESS);
+        status = new Status(rank, Status.SUCCESS);
         Log.d(TAG, "set()...");
         dataQualities.clear();
         dataQualityInfos.clear();
-        ArrayList<DataSource> dataSources=modelManager.getConfigManager().getConfig().getData_quality();
-        if(dataSources==null || dataSources.size()==0) return;
-        for(int i=0;i<dataSources.size();i++){
+        ArrayList<DataSource> dataSources = modelManager.getConfigManager().getConfig().getData_quality();
+        if (dataSources == null || dataSources.size() == 0) return;
+        for (int i = 0; i < dataSources.size(); i++) {
             dataQualityInfos.add(new DataQualityInfo(dataSources.get(i)));
             final int finalI = i;
             dataQualities.add(new DataQuality(modelManager.getContext(), dataSources.get(i), new ReceiveCallBack() {
                 @Override
-                public void onReceive(DataSource dataSource, DataSourceClient dataSourceClient, int sample[]) {
-                    if (sample.length == 1) {
-                        if(dataQualityInfos==null || dataQualityInfos.size()<=finalI) return;
-                        dataQualityInfos.get(finalI).setQualities(dataSourceClient.getDataSource(),translate(sample[0]));
-                    } else {
-                        updateAutoSenseChest(dataSourceClient.getDataSource(), DataSourceType.RESPIRATION, translate(sample[0]));
-                        updateAutoSenseChest(dataSourceClient.getDataSource(), DataSourceType.ECG, translate(sample[1]));
-                    }
+                public void onReceive(DataSource dataSource, DataSourceClient dataSourceClient, int sample) {
+                    if (dataQualityInfos == null || dataQualityInfos.size() <= finalI) return;
+                    dataQualityInfos.get(finalI).setQualities(dataSourceClient.getDataSource(), translate(sample));
                 }
             }));
         }
-        for(int i=0;i<dataSources.size();i++)
+        for (int i = 0; i < dataSources.size(); i++)
             dataQualities.get(i).start();
     }
-    Status getCurrentStatus(){
-        for(int i=0;i<dataQualityInfos.size();i++){
-            if(dataQualityInfos.get(i).getQuality()!=Status.DATAQUALITY_GOOD)
-                return new Status(rank,dataQualityInfos.get(i).getQuality());
+
+    Status getCurrentStatus() {
+        for (int i = 0; i < dataQualityInfos.size(); i++) {
+            if (dataQualityInfos.get(i).getQuality() != Status.DATAQUALITY_GOOD)
+                return new Status(rank, dataQualityInfos.get(i).getQuality());
         }
         return new Status(rank, Status.DATAQUALITY_GOOD);
     }
-    void updateAutoSenseChest(DataSource dataSource, String dataSourceType, int sample){
-        for(int i=0;i<dataQualityInfos.size();i++){
-            if(dataQualityInfos.get(i).dataSourceType==null) continue;
-            if(!dataQualityInfos.get(i).dataSourceType.equals(dataSourceType)) continue;
-            dataQualityInfos.get(i).setQualities(dataSource, sample);
-            break;
-        }
-    }
+
     @Override
     public void clear() {
-        Log.d(TAG,"clear()...");
-        status=new Status(rank,Status.NOT_DEFINED);
-        if(dataQualities!=null) {
+        Log.d(TAG, "clear()...");
+        status = new Status(rank, Status.NOT_DEFINED);
+        if (dataQualities != null) {
             for (int i = 0; i < dataQualities.size(); i++)
                 dataQualities.get(i).stop();
             dataQualities.clear();
         }
-        if(dataQualityInfos!=null)
+        if (dataQualityInfos != null)
             dataQualityInfos.clear();
     }
 
-    int translate(int value){
-        switch(value){
+    int translate(int value) {
+        switch (value) {
             case DATA_QUALITY.GOOD:
                 return Status.DATAQUALITY_GOOD;
             case DATA_QUALITY.BAND_OFF:

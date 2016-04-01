@@ -30,5 +30,5 @@ import org.md2k.datakitapi.source.datasource.DataSourceClient;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public interface ReceiveCallBack {
-    void onReceive(DataSource dataSource, DataSourceClient dataSourceClient, int[] sample);
+    void onReceive(DataSource dataSource, DataSourceClient dataSourceClient, int sample);
 }
