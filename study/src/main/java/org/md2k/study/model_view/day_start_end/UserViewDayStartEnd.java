@@ -152,8 +152,6 @@ public class UserViewDayStartEnd extends UserView {
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(formatTime(dayStartEndInfoManager.getDayStartTime()));
             ((TextView) activity.findViewById(R.id.text_view_day_end)).setText(formatTime(dayStartEndInfoManager.getDayEndTime()));
         }
-//        if(status.getStatus()!=Status.SUCCESS)
-//            dayStartEndInfoManager.set();
     }
 
     long getRequiredTime() {

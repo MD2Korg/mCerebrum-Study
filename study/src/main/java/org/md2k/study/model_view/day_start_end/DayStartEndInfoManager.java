@@ -118,15 +118,10 @@ public class DayStartEndInfoManager extends Model {
     }
 
     public Status getCurrentStatusDetails() {
-        if(status.getStatus()!=Status.SUCCESS) return status;
-        if (isNewDay()) {
-            Log.d(TAG,"rank="+rank);
-            set();
-//            if(status.getStatus()!=Status.DAY_START_NOT_AVAILABLE) handler.post(runnable);
-            return new Status(rank, Status.DAY_START_NOT_AVAILABLE);
-        }
+        if(status.getStatus()==Status.NOT_DEFINED) return status;
+        set();
+        if(status.getStatus()==Status.DAY_START_NOT_AVAILABLE) return status;
         if (dayEndTime > dayStartTime) return new Status(rank, Status.DAY_COMPLETED);
-
         return new Status(rank, Status.SUCCESS);
     }
 
