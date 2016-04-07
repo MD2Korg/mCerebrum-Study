@@ -1,9 +1,11 @@
 package org.md2k.study.model_view.selfreport;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -16,7 +18,6 @@ import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.DayTypeInfo;
 import org.md2k.utilities.data_format.Event;
 
 import java.util.ArrayList;
@@ -74,17 +75,17 @@ public class SelfReportManager extends Model {
     private boolean writeToDataKit() {
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
-        String sample = gson.toJson(new Event(Event.SMOKING, Event.TYPE_SELF_REPORT));
-        DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClient, dataTypeString);
+        JsonObject sample = new JsonParser().parse(gson.toJson(new Event(Event.SMOKING, Event.TYPE_SELF_REPORT))).getAsJsonObject();
+        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
         return true;
     }
     DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EVENT).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Event");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Event with type (ex: smoking, selfreport)");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Event with type (ex: smoking, selfreport) as a json object");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
         return dataSourceBuilder;
     }
@@ -99,8 +100,8 @@ public class SelfReportManager extends Model {
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, name);
         dataDescriptor.put(METADATA.UNIT, "String");
-        dataDescriptor.put(METADATA.DESCRIPTION, name);
-        dataDescriptor.put(METADATA.DATA_TYPE, DayTypeInfo.class.getName());
+        dataDescriptor.put(METADATA.DESCRIPTION, "contains event as a json object");
+        dataDescriptor.put(METADATA.DATA_TYPE, Event.class.getName());
         return dataDescriptor;
     }
     public void save(){
