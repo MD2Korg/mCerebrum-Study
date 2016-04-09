@@ -1,10 +1,12 @@
 package org.md2k.study.model_view.day_type;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -100,9 +102,9 @@ public class DayTypeManager extends Model {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
             if (dataTypes.size() != 0) {
-                DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
+                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
                 Gson gson = new Gson();
-                dayTypeDB = gson.fromJson(dataTypeString.getSample(), DayTypeInfo.class);
+                dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
             }
         }
     }
@@ -111,10 +113,10 @@ public class DayTypeManager extends Model {
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         Gson gson = new Gson();
-        String sample = gson.toJson(dayTypeNew);
+        JsonObject sample = new JsonParser().parse(gson.toJson(dayTypeNew)).getAsJsonObject();
         dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClient, dataTypeString);
+        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
         dayTypeDB = dayTypeNew;
         return true;
     }
@@ -123,7 +125,7 @@ public class DayTypeManager extends Model {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.TYPE_OF_DAY).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Pre/Post Quit Day");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Defines type of Day");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
         return dataSourceBuilder;
     }

@@ -1,10 +1,12 @@
 package org.md2k.study.model_view.user_info;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -107,9 +109,9 @@ public class UserInfoManager extends Model {
         DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
         if (dataTypes.size() != 0) {
-            DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
+            DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
             Gson gson = new Gson();
-            userInfo = gson.fromJson(dataTypeString.getSample(), UserInfo.class);
+            userInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), UserInfo.class);
             isInDatabase = true;
         }
     }
@@ -126,10 +128,11 @@ public class UserInfoManager extends Model {
         if (userInfo.getUser_id() == null) return false;
         if (userInfo.getUser_id().length() == 0) return false;
         Gson gson = new Gson();
-        String sample = gson.toJson(userInfo);
+        JsonObject sample = new JsonParser().parse(gson.toJson(userInfo)).getAsJsonObject();
+
         dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClient, dataTypeString);
+        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
         isInDatabase = true;
         return true;
     }
@@ -139,7 +142,7 @@ public class UserInfoManager extends Model {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.USER_INFO).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "User Info");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Contains user_id as a json object");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         return dataSourceBuilder;
     }
 }

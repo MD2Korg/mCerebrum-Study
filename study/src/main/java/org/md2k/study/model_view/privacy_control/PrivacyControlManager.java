@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
@@ -13,6 +13,7 @@ import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.privacy.PrivacyData;
 
 import java.util.ArrayList;
 
@@ -73,9 +74,9 @@ public class PrivacyControlManager extends Model {
         if(dataSourceClients.size()>0) {
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
             if (dataTypes.size() != 0) {
-                DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
+                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
                 Gson gson = new Gson();
-                privacyData = gson.fromJson(dataTypeString.getSample(), PrivacyData.class);
+                privacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
             }
         }
         return privacyData;
