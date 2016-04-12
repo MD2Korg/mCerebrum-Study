@@ -20,6 +20,8 @@ public class DataQualityInfo {
     int quality;
     int now;
     long lastReceivedTime;
+    public static final long RESTART_TIME=300000;
+    long lastTimeStampNoData;
 
     DataQualityInfo(DataSource dataSource) {
         quality = Status.DATAQUALITY_OFF;

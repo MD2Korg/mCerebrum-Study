@@ -71,14 +71,6 @@ public class DataQualityManager extends Model {
             dataQualities.get(i).start();
     }
 
-    Status getCurrentStatus() {
-        for (int i = 0; i < dataQualityInfos.size(); i++) {
-            if (dataQualityInfos.get(i).getQuality() != Status.DATAQUALITY_GOOD)
-                return new Status(rank, dataQualityInfos.get(i).getQuality());
-        }
-        return new Status(rank, Status.DATAQUALITY_GOOD);
-    }
-
     @Override
     public void clear() {
         Log.d(TAG, "clear()...");

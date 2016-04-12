@@ -2,11 +2,13 @@ package org.md2k.study.model_view.config_info;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.md2k.study.ActivityMain;
 import org.md2k.study.Constants;
 import org.md2k.study.R;
 import org.md2k.study.Status;
@@ -82,7 +84,7 @@ public class ActivityConfigDownload extends Activity {
                 m_Text = input.getText().toString().trim();
                 final String filename = m_Text + ".zip";
                 if (m_Text.length() > 0) {
-                    Download download = new Download(ActivityConfigDownload.this,true, new OnCompletionListener() {
+                    Download download = new Download(ActivityConfigDownload.this, true, new OnCompletionListener() {
                         @Override
                         public void OnCompleted(int status) {
                             if (status == Download.SUCCESS) {
@@ -99,6 +101,16 @@ public class ActivityConfigDownload extends Activity {
                     download.execute(Constants.CONFIG_DOWNLOAD_LINK + m_Text + ".zip", filename);
                 } else
                     showDownloadConfig();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(getApplicationContext(), ActivityMain.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("EXIT", true);
+                startActivity(intent);
+                finish();
             }
         });
         builder.show();

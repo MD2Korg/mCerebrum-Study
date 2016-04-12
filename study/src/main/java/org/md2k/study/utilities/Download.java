@@ -46,8 +46,8 @@ import java.net.URL;
 public class Download extends AsyncTask<String, Integer, Integer> {
     private static final String TAG = Download.class.getSimpleName();
     public static final int SUCCESS = 0;
-    public static final int ERROR_CONNECTION = 1;
-    public static final int ERROR_DOWNLOAD = 2;
+    public static final int CONNECTION_ERROR = 22;
+    public static final int DOWNLOAD_ERROR = 23;
     ProgressDialog mProgressDialog;
     private Context context;
     private PowerManager.WakeLock mWakeLock;
@@ -93,7 +93,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
             connection = (HttpURLConnection) url.openConnection();
             connection.connect();
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                return ERROR_CONNECTION;
+                return CONNECTION_ERROR;
             }
 
             int fileLength = connection.getContentLength();
@@ -115,7 +115,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
                     input.close();
                     output.close();
                     connection.disconnect();
-                    return ERROR_DOWNLOAD;
+                    return DOWNLOAD_ERROR;
                 }
                 total += count;
                 if (isProgressShow) {
@@ -125,7 +125,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
                 output.write(data, 0, count);
             }
         } catch (Exception e) {
-            return ERROR_DOWNLOAD;
+            return DOWNLOAD_ERROR;
         } finally {
             try {
                 if (output != null)
@@ -133,7 +133,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
                 if (input != null)
                     input.close();
             } catch (IOException ignored) {
-                return ERROR_DOWNLOAD;
+                return DOWNLOAD_ERROR;
 
             }
 

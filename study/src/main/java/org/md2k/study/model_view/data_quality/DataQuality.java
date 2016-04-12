@@ -1,6 +1,7 @@
 package org.md2k.study.model_view.data_quality;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 
 import org.md2k.datakitapi.DataKitAPI;
@@ -10,6 +11,12 @@ import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.datakitapi.source.platform.PlatformType;
+import org.md2k.datakitapi.time.DateTime;
+import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigManager;
+import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
 
@@ -42,6 +49,7 @@ import java.util.ArrayList;
  */
 public class DataQuality {
     private static final String TAG = DataQuality.class.getSimpleName();
+    public static final long RESTART_TIME=120000;
     DataSource dataSource;
     DataKitAPI dataKitAPI;
     ReceiveCallBack receiveCallBack;
@@ -49,6 +57,7 @@ public class DataQuality {
     Context context;
     DataSourceClient dataSourceClient;
     Handler handler;
+    long lastReceivedTimeStamp;
 
     public DataQuality(Context context, DataSource dataSource, ReceiveCallBack receiveCallBack) {
         this.dataSource = dataSource;
@@ -72,20 +81,51 @@ public class DataQuality {
             if(dataSourceClientArrayList.size()==0)
                 handler.postDelayed(this, 1000);
             else {
+                lastReceivedTimeStamp=DateTime.getDateTime();
+                handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
                 for (int i = 0; i < dataSourceClientArrayList.size(); i++) {
+
                     dataSourceClient = dataSourceClientArrayList.get(i);
                     dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
                         @Override
                         public void onReceived(DataType dataType) {
-                            receiveCallBack.onReceive(dataSource, dataSourceClient, ((DataTypeInt) dataType).getSample());
+                            int sample=((DataTypeInt) dataType).getSample();
+                            if(sample!= DATA_QUALITY.BAND_OFF)
+                                lastReceivedTimeStamp=DateTime.getDateTime();
+                            receiveCallBack.onReceive(dataSource, dataSourceClient, sample);
                         }
                     });
                 }
             }
         }
     };
+    Runnable runnableCheckAvailability=new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "runnableCheckAvailability()...");
+            if(DateTime.getDateTime()-lastReceivedTimeStamp>RESTART_TIME){
+                if(dataSourceClientArrayList.get(0).getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_CHEST) || dataSourceClientArrayList.get(0).getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST)){
+                    Log.d(TAG, "runnableCheckAvailability()...autosense");
+                    Intent intent = new Intent();
+                    App app=ConfigManager.getInstance(context).getConfig().getApps("autosense");
+                    intent.setClassName(app.getPackage_name(), app.getService());
+                    context.stopService(intent);
+                    context.startService(intent);
+                }else if(dataSourceClientArrayList.get(0).getDataSource().getPlatform().getType().equals(PlatformType.MICROSOFT_BAND)){
+                    Log.d(TAG, "runnableCheckAvailability()...microsoftband");
+                    Intent intent = new Intent();
+                    App app=ConfigManager.getInstance(context).getConfig().getApps("microsoftband");
+                    intent.setClassName(app.getPackage_name(), app.getService());
+                    context.stopService(intent);
+                    context.startService(intent);
+                }
+            }
+            handler.postDelayed(this, RESTART_TIME);
+        }
+    };
     public void stop() {
         handler.removeCallbacks(runnableSubscribe);
+        handler.removeCallbacks(runnableCheckAvailability);
         for(int i=0;i<dataSourceClientArrayList.size();i++)
         if (dataSourceClientArrayList.get(i) != null && dataKitAPI!=null && dataKitAPI.isConnected())
             dataKitAPI.unsubscribe(dataSourceClientArrayList.get(i));
