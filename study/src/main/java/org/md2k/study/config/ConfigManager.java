@@ -81,7 +81,9 @@ public class ConfigManager {
             Type collectionType = new TypeToken<Config>() {
             }.getType();
             config = gson.fromJson(br, collectionType);
-            return true;
+            if(config.getUser_view()==null || config.getUser_view().getView_contents()==null)
+                return false;
+            else return true;
         } catch (FileNotFoundException e) {
             return false;
         }

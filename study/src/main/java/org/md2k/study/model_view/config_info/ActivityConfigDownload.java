@@ -48,7 +48,6 @@ import org.md2k.utilities.Report.Log;
 public class ActivityConfigDownload extends Activity {
     private static final String TAG = ActivityConfigDownload.class.getSimpleName();
     String m_Text = "";
-    public static boolean isShown=false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -143,7 +142,6 @@ public class ActivityConfigDownload extends Activity {
     }
     @Override
     public void onDestroy(){
-        isShown=false;
         super.onDestroy();
     }
 }

@@ -50,9 +50,11 @@ public class ActivityMain extends AppCompatActivity {
 
 //        Fabric.with(this, new Crashlytics.Builder().core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
         if (getIntent().getExtras() != null && getIntent().getExtras().getBoolean("EXIT", false)) {
+            Log.d(TAG, "closing...");
             Intent intent = new Intent(this, ServiceSystemHealth.class);
             stopService(intent);
             finish();
+            return;
         }
         setContentView(R.layout.activity_main);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
@@ -80,8 +82,10 @@ public class ActivityMain extends AppCompatActivity {
         modelManager = ModelManager.getInstance(ActivityMain.this);
         Status status = modelManager.getStatus();
         Log.d(TAG, "createUI()...status=" + status.log());
-        if (status.getRank() == Status.RANK_CONFIG && status.getStatus() != Status.SUCCESS)
-            showDownloadConfigWindow();
+        if (status.getRank() == Status.RANK_CONFIG && status.getStatus() != Status.SUCCESS){
+
+        }
+//            showDownloadConfigWindow();
         else {
             Log.d(TAG, "here");
             updateUI();
@@ -114,15 +118,12 @@ public class ActivityMain extends AppCompatActivity {
 
     void showDownloadConfigWindow() {
         Log.d(TAG, "showDownloadConfigWindow()..");
-        if (!ActivityConfigDownload.isShown) {
-            ActivityConfigDownload.isShown = true;
-            for (int i = 0; i < userViews.size(); i++)
-                userViews.get(i).stop();
-            userViews.clear();
-            Intent intentDownload = new Intent(ActivityMain.this, ActivityConfigDownload.class);
-            intentDownload.putExtra(Status.class.getSimpleName(), new Status(Status.RANK_CONFIG, Status.CONFIG_FILE_NOT_EXIST));
-            startActivity(intentDownload);
-        }
+        for (int i = 0; i < userViews.size(); i++)
+            userViews.get(i).stop();
+        userViews.clear();
+        Intent intentDownload = new Intent(ActivityMain.this, ActivityConfigDownload.class);
+        intentDownload.putExtra(Status.class.getSimpleName(), new Status(Status.RANK_CONFIG, Status.CONFIG_FILE_NOT_EXIST));
+        startActivity(intentDownload);
     }
 
     public void addUserView() {
@@ -141,7 +142,7 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        Log.d(TAG,"onResume()...");
+        Log.d(TAG, "onResume()...");
         updateUI();
         super.onResume();
     }
