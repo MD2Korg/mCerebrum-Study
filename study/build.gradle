@@ -22,8 +22,8 @@ android {
         applicationId 'org.md2k.study'
         minSdkVersion 19
         targetSdkVersion 21
-        versionCode 17
-        versionName '0.4.6'
+        versionCode 18
+        versionName '0.4.8'
         // Enabling multidex support.
         multiDexEnabled true
     }
