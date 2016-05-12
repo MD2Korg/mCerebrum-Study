@@ -8,14 +8,13 @@ import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.md2k.study.ActivityMain;
 import org.md2k.study.Constants;
 import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 
 
@@ -53,18 +52,15 @@ public class ActivityConfigDownload extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Status status = getIntent().getParcelableExtra(Status.class.getSimpleName());
-        if(status==null){
+        if (status == null) {
             showDeleteDirectory();
-        }else {
+        } else {
             Log.d(TAG, "onCreate()...rank=" + status.getRank() + " status=" + status.getStatus());
-            if (status.getRank() == Status.RANK_CONFIG && status.getStatus()!=Status.SUCCESS) {
-                if (Files.isExist(Constants.CONFIG_DIRECTORY_BASE)) {
-                    Log.d(TAG, "directory exists...deleting...");
-                    Files.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
-                }
-                showDownloadConfig();
-            } else
-                showDeleteDirectory();
+            if (FileManager.isExist(Constants.CONFIG_DIRECTORY_BASE)) {
+                Log.d(TAG, "directory exists...deleting...");
+                FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+            }
+            showDownloadConfig();
         }
     }
 
@@ -87,9 +83,12 @@ public class ActivityConfigDownload extends Activity {
                         @Override
                         public void OnCompleted(int status) {
                             if (status == Download.SUCCESS) {
-                                ModelManager.getInstance(ActivityConfigDownload.this).stop();
-                                Files.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
-                                ModelManager.getInstance(ActivityConfigDownload.this).start(true);
+                                ModelManager.getInstance(ActivityConfigDownload.this).clear();
+                                FileManager.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
+                                ModelManager.getInstance(ActivityConfigDownload.this).remove();
+                                ModelManager.getInstance(ActivityConfigDownload.this).set();
+                                Intent returnIntent = new Intent();
+                                setResult(Activity.RESULT_OK, returnIntent);
                                 finish();
                             } else {
                                 Toast.makeText(ActivityConfigDownload.this, "Error!!! File not found...", Toast.LENGTH_LONG).show();
@@ -105,10 +104,9 @@ public class ActivityConfigDownload extends Activity {
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(getApplicationContext(), ActivityMain.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("EXIT", true);
-                startActivity(intent);
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_CANCELED, returnIntent);
+                dialog.cancel();
                 finish();
             }
         });
@@ -119,29 +117,30 @@ public class ActivityConfigDownload extends Activity {
     public void showDeleteDirectory() {
         Log.d(TAG, "showDeleteDirectory()...");
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete configuration directory?");
-        builder.setMessage("Do you want to delete configuration directory?");
+        builder.setTitle("Delete configuration files?");
+        builder.setMessage("Do you want to delete configuration files?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ModelManager.getInstance(ActivityConfigDownload.this).stop();
-                Files.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
-                ModelManager.getInstance(ActivityConfigDownload.this).start(true);
+                ModelManager.getInstance(ActivityConfigDownload.this).clear();
+                ModelManager.getInstance(ActivityConfigDownload.this).remove();
+                FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+                ModelManager.getInstance(ActivityConfigDownload.this).set();
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_OK, returnIntent);
+                dialog.cancel();
                 finish();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_OK, returnIntent);
                 dialog.cancel();
                 finish();
             }
         });
         builder.show();
-
-    }
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
     }
 }

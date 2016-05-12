@@ -60,7 +60,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         context = getActivity();
         addPreferencesFromResource(R.xml.pref_app_install);
         appInstallManager = (AppInstallManager) ModelManager.getInstance(getActivity()).getModel(ModelFactory.MODEL_APP_INSTALL);
-        isRefreshRequired=false;
+        isRefreshRequired = false;
         setupButtons();
     }
 
@@ -163,14 +163,14 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
                     AppInstall appInstall = appInstallManager.getAppInstallList().get(finalI);
                     if (newValue.equals("Install") || newValue.equals("Update")) {
                         appInstall.downloadAndInstallApp(getActivity());
-                        isRefreshRequired=true;
+                        isRefreshRequired = true;
                     } else if (newValue.equals("Run")) {
                         appInstall.run(context);
                     } else if (newValue.equals("Uninstall")) {
                         Intent uninstallIntent = new Intent(Intent.ACTION_DELETE,
                                 Uri.parse("package:" + appInstall.getPackage_name()));
                         startActivity(uninstallIntent);
-                        isRefreshRequired=true;
+                        isRefreshRequired = true;
                     }
                     return false;
                 }
@@ -182,9 +182,9 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     @Override
     public void onResume() {
-        if(isRefreshRequired) {
-            ModelManager.getInstance(getActivity()).stop();
-            ModelManager.getInstance(getActivity()).start(false);
+        if (isRefreshRequired) {
+            ModelManager.getInstance(getActivity()).clear();
+            ModelManager.getInstance(getActivity()).set();
         }
         setupAppInstall();
         super.onResume();

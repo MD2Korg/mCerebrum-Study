@@ -1,15 +1,15 @@
 package org.md2k.study;
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,10 +23,9 @@ import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
 import org.md2k.study.model_view.app_reset.AppResetManager;
-import org.md2k.study.model_view.config_info.ActivityConfigDownload;
 import org.md2k.study.model_view.privacy_control.PrivacyControlManager;
 import org.md2k.study.view.admin.ActivityAdmin;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
@@ -38,17 +37,15 @@ import io.fabric.sdk.android.Fabric;
 
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
-    private ProgressDialog progressDialog = null;
     ModelManager modelManager;
-    Handler handler;
     ArrayList<UserView> userViews;
+    MenuItem menuItemStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate()...");
         Fabric.with(this, new Crashlytics());
-
-//        Fabric.with(this, new Crashlytics.Builder().core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
         if (getIntent().getExtras() != null && getIntent().getExtras().getBoolean("EXIT", false)) {
             Log.d(TAG, "closing...");
             Intent intent = new Intent(this, ServiceSystemHealth.class);
@@ -59,16 +56,8 @@ public class ActivityMain extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
         Log.d(TAG, "broadcast...set...");
-        handler = new Handler();
         userViews = new ArrayList<>();
         Log.d(TAG, "onCreate()..isServiceRunning=" + ServiceSystemHealth.isRunning);
-        if (!ServiceSystemHealth.isRunning) {
-            this.progressDialog = ProgressDialog.show(this, "Please wait..", "Loading...", true, false);
-            Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-            startService(intent);
-            handler.post(runnableServiceIsRunning);
-        } else
-            createUI();
     }
 
     @Override
@@ -82,21 +71,27 @@ public class ActivityMain extends AppCompatActivity {
         modelManager = ModelManager.getInstance(ActivityMain.this);
         Status status = modelManager.getStatus();
         Log.d(TAG, "createUI()...status=" + status.log());
-        if (status.getRank() == Status.RANK_CONFIG && status.getStatus() != Status.SUCCESS){
+        Log.d(TAG, "here");
+        updateUI();
+    }
 
-        }
-//            showDownloadConfigWindow();
-        else {
-            Log.d(TAG, "here");
-            updateUI();
-        }
+
+    void updateMenu() {
+        if (menuItemStatus == null) return;
+        if (modelManager == null) return;
+        Status status = modelManager.getStatus();
+        if (status.getRank() >= Status.RANK_ADMIN_REQUIRED)
+            menuItemStatus.setIcon(R.drawable.ic_error_red_48dp);
+        else menuItemStatus.setIcon(R.drawable.ic_ok_green_48dp);
     }
 
     void updateUI() {
         if (modelManager == null) return;
+        Status status = modelManager.getStatus();
         if (userViews.size() == 0)
             addUserView();
-        Status status = modelManager.getStatus();
+        updateMenu();
+
         for (int i = 0; i < userViews.size(); i++) {
             Log.d(TAG, "modelmanager Status=" + status.log() + " view status=" + userViews.get(i).getModel().getRank());
             if (status.getRank() > Status.RANK_USER_REQUIRED) {
@@ -116,16 +111,6 @@ public class ActivityMain extends AppCompatActivity {
     }
 
 
-    void showDownloadConfigWindow() {
-        Log.d(TAG, "showDownloadConfigWindow()..");
-        for (int i = 0; i < userViews.size(); i++)
-            userViews.get(i).stop();
-        userViews.clear();
-        Intent intentDownload = new Intent(ActivityMain.this, ActivityConfigDownload.class);
-        intentDownload.putExtra(Status.class.getSimpleName(), new Status(Status.RANK_CONFIG, Status.CONFIG_FILE_NOT_EXIST));
-        startActivity(intentDownload);
-    }
-
     public void addUserView() {
         ArrayList<ViewContent> viewContents = modelManager.getConfigManager().getConfig().getUser_view().getView_contents();
         LinearLayout linearLayoutMain = (LinearLayout) findViewById(R.id.linear_layout_main);
@@ -143,7 +128,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onResume() {
         Log.d(TAG, "onResume()...");
-        updateUI();
+        createUI();
         super.onResume();
     }
 
@@ -152,37 +137,48 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Status status = intent.getParcelableExtra(Status.class.getSimpleName());
             Log.d(TAG, "received broadcast...rank =" + status.getRank());
-            switch (status.getRank()) {
-                case Status.RANK_CONFIG:
-                    if (status.getStatus() != Status.SUCCESS) {
-                        Log.d(TAG, "broadcast...showDownloadConfig()..." + status.log());
-                        showDownloadConfigWindow();
-                    } else updateUI();
-                    break;
-                default:
-                    updateUI();
-            }
-        }
-    };
-
-    Runnable runnableServiceIsRunning = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "runnableServiceIsRunning...isServiceRunning=" + ServiceSystemHealth.isRunning);
-            if (!ServiceSystemHealth.isRunning)
-                handler.postDelayed(this, 500);
-            else {
-                if (progressDialog.isShowing())
-                    progressDialog.dismiss();
+            if(status.getStatus()==Status.CONFIG_FILE_NOT_EXIST)
+                finish();
+            else
                 createUI();
-            }
         }
     };
 
     @Override
+    public void onStart() {
+        super.onStart();
+        if (ServiceSystemHealth.RANK_LIMIT == Status.RANK_ADMIN_OPTIONAL)
+            finish();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_settings, menu);
+        menuItemStatus = menu.findItem(R.id.action_status);
+        updateMenu();
         return true;
+    }
+
+    void showStatus() {
+        Status status = modelManager.getStatus();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("System Status");
+        if (status.getRank() >= Status.RANK_ADMIN_REQUIRED) {
+            builder.setIcon(R.drawable.ic_error_red_48dp);
+            builder.setMessage(status.getMessage());
+        } else {
+            builder.setIcon(R.drawable.ic_ok_green_48dp);
+            builder.setMessage("System is Okay.");
+
+        }
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+
     }
 
     @Override
@@ -192,6 +188,7 @@ public class ActivityMain extends AppCompatActivity {
             case android.R.id.home:
                 finish();
                 break;
+
             case R.id.action_about:
                 intent = new Intent(this, ActivityAbout.class);
                 try {
@@ -205,6 +202,9 @@ public class ActivityMain extends AppCompatActivity {
             case R.id.action_copyright:
                 intent = new Intent(this, ActivityCopyright.class);
                 startActivity(intent);
+                break;
+            case R.id.action_status:
+                showStatus();
                 break;
             case R.id.action_settings:
                 intent = new Intent(this, ActivityAdmin.class);
@@ -226,7 +226,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     void openPDF() {
-        if (!Files.isExist(Constants.CONFIG_DIRECTORY + "tutorial.pdf"))
+        if (!FileManager.isExist(Constants.CONFIG_DIRECTORY + "tutorial.pdf"))
             return;
         Intent intent = new Intent();
         intent.setPackage("com.adobe.reader");
@@ -234,4 +234,5 @@ public class ActivityMain extends AppCompatActivity {
         intent.setDataAndType(Uri.fromFile(file), "application/pdf");
         startActivity(intent);
     }
+
 }

@@ -1,9 +1,7 @@
 package org.md2k.study.view.test;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,10 +10,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import org.md2k.study.R;
-import org.md2k.study.config.CView;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.model_view.Model;
-import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 
@@ -53,7 +48,7 @@ public class PrefsFragmentTest extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+/*
         modelManager= ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_test);
         ArrayList<String> views= modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(CView.TEST).getValues();
@@ -80,6 +75,7 @@ public class PrefsFragmentTest extends PreferenceFragment {
             preferences.add(preference);
         }
         setupCloseButton();
+        */
     }
 
     @Override

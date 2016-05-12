@@ -6,7 +6,7 @@ import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.study.config.App;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.FileManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -103,8 +103,8 @@ public class AppSettings {
         }
         String outDir= Constants.CONFIG_DIRECTORY_BASE+ app.getPackage_name()+ File.separator;
         try {
-            ArrayList<DataSource> dataSourcesDefault = Files.readJSONArray(outDir, app.getDefault_config(),DataSource.class);
-            ArrayList<DataSource> dataSources = Files.readJSONArray(outDir, app.getConfig(),DataSource.class);
+            ArrayList<DataSource> dataSourcesDefault = FileManager.readJSONArray(outDir, app.getDefault_config(),DataSource.class);
+            ArrayList<DataSource> dataSources = FileManager.readJSONArray(outDir, app.getConfig(),DataSource.class);
             if(dataSources.size()!=dataSourcesDefault.size()) return false;
             for(int i=0;i<dataSources.size();i++){
                 if(!isDataSourceMatch(dataSources.get(i), dataSourcesDefault))

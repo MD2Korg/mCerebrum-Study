@@ -4,7 +4,7 @@ import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.FileManager;
 
 import java.util.ArrayList;
 
@@ -44,7 +44,7 @@ public class ConfigDownloadManager extends Model {
 
     public void delete(){
         ArrayList<String> requiredFiles=modelManager.getConfigManager().getConfig().getConfig_info().getRequired_files();
-        Files.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+        FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.md2k.study.controller;
 
 import android.content.Context;
 
+import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.model_view.Model;
@@ -48,7 +49,7 @@ public class ModelManager {
 
     public static ModelManager getInstance(Context context) {
         if (instance == null)
-            instance = new ModelManager(context);
+            instance = new ModelManager(context.getApplicationContext());
         return instance;
     }
 
@@ -56,27 +57,28 @@ public class ModelManager {
         this.context = context;
         modelHashMap = new HashMap<>();
         isUpdating = false;
-
     }
 
-    public void stop() {
+    public void clear() {
         isUpdating = true;
-        for(int i=Status.RANK_SUCCESS;i<=Status.RANK_BEGIN;i++) {
+        for (int i = Status.RANK_SUCCESS; i <= Status.RANK_BEGIN; i++) {
             for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
                 if (entry.getValue() == null) continue;
-                if(entry.getValue().getRank()==i)
+                if (entry.getValue().getRank() == i)
                     entry.getValue().clear();
             }
         }
     }
 
-    public void start(boolean isDeleteRequired) {
-        if (isDeleteRequired) {
-            modelHashMap.clear();
-            ConfigManager.clear();
-            configManager = ConfigManager.getInstance(context);
+    public void remove() {
+        modelHashMap.clear();
+        ConfigManager.clear();
+    }
+
+    public void set() {
+        configManager = ConfigManager.getInstance(context);
+        if (!modelHashMap.containsKey(ModelFactory.MODEL_CONFIG_INFO))
             modelHashMap.put(ModelFactory.MODEL_CONFIG_INFO, ModelFactory.getModel(this, ModelFactory.MODEL_CONFIG_INFO, Status.RANK_CONFIG));
-        }
         if (configManager.isValid()) {
             for (int i = 0; i < configManager.getConfig().getActions().size(); i++) {
                 if (!configManager.getConfig().getActions().get(i).isEnable()) continue;
@@ -99,22 +101,23 @@ public class ModelManager {
         Status lastStatus = status;
         while (true) {
             Status curStatus = findLatestStatus();
-            Log.d(TAG,"update()...lastStatus="+lastStatus.log()+" curStatus="+curStatus.log());
-            if (curStatus.getRank() == lastStatus.getRank() || curStatus.getStatus() == Status.SUCCESS) {
+            Log.d(TAG, "update()...lastStatus=" + lastStatus.log() + " curStatus=" + curStatus.log()+" rankLimit="+ServiceSystemHealth.RANK_LIMIT);
+            if (curStatus.getRank() == lastStatus.getRank() || curStatus.getStatus() == Status.SUCCESS || curStatus.getRank()==ServiceSystemHealth.RANK_LIMIT){
                 lastStatus = curStatus;
                 break;
             } else {
                 if (curStatus.getRank() < lastStatus.getRank())
-                    set(curStatus.getRank(), curStatus.getRank());
+                    setNow(curStatus.getRank());
                 else if (curStatus.getRank() > lastStatus.getRank())
-                    clear(curStatus.getRank()-1);
+                    clear(curStatus.getRank() - 1);
 
             }
             lastStatus = curStatus;
         }
         if (!status.equals(lastStatus)) {
             status = lastStatus;
-            callback.onStatusChange(status);
+            if (callback != null)
+                callback.onStatusChange(status);
         }
         isUpdating = false;
     }
@@ -134,15 +137,13 @@ public class ModelManager {
         return curStatus;
     }
 
-    private void set(int state1, int state2) {
-        Log.d(TAG, "set(" + state1 + "," + state2 + ")...");
-        for (int state = state1; state >= state2; state--) {
-            if (state < Status.RANK_SUCCESS || state > Status.RANK_BEGIN) continue;
-            for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
-                if (entry.getValue() == null) continue;
-                if (entry.getValue().getRank() == state) {
-                    entry.getValue().set();
-                }
+    private void setNow(int state) {
+        Log.d(TAG, "set(" + state + ")...");
+        if (state < Status.RANK_SUCCESS || state > Status.RANK_BEGIN) return;
+        for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
+            if (entry.getValue() == null) continue;
+            if (entry.getValue().getRank() == state) {
+                entry.getValue().set();
             }
         }
     }

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 
 import org.md2k.study.Constants;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public class ConfigInfo {
         Log.d(TAG, "isValidRequiredFiles()...");
         if(required_files==null) return true;
         for(int i=0;i<required_files.size();i++){
-            if(!Files.isExist(Constants.CONFIG_DIRECTORY_BASE+required_files.get(i))) {
+            if(!FileManager.isExist(Constants.CONFIG_DIRECTORY_BASE+required_files.get(i))) {
                 Log.d(TAG,Constants.CONFIG_DIRECTORY_BASE+required_files.get(i));
                 return false;
             }

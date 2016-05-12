@@ -12,7 +12,7 @@ import org.md2k.study.config.App;
 import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
 import org.md2k.utilities.Apps;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.FileManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -54,6 +54,7 @@ public class AppInstall {
     private String curVersion;
     private String latestVersion;
     private boolean installed;
+    private boolean isDownloadOnGoing;
     Context context;
 
     AppInstall(Context context, App app) {
@@ -118,7 +119,6 @@ public class AppInstall {
                                 }
                             }
                         });
-
                     }
                 });
             } else {
@@ -140,7 +140,6 @@ public class AppInstall {
                 });
             }
         }
-
     }
 
     private void download(Context context, String filename, String link, boolean isProgressShow, OnCompletionListener onCompletionListenter) {
@@ -172,7 +171,7 @@ public class AppInstall {
                     onDataChangeListener.onDataChange(latestVersion);
                 } else
                     Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
-                Files.delete(Constants.TEMP_DIRECTORY + filename);
+                FileManager.deleteFile(Constants.TEMP_DIRECTORY + filename);
             }
         });
     }

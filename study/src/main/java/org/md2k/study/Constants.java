@@ -36,5 +36,5 @@ public class Constants{
     public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/org.md2k.study/";
     public static final String TEMP_DIRECTORY=Environment.getExternalStorageDirectory().getAbsolutePath()+"/mCerebrum/temp/";
     public static final String CONFIG_DOWNLOAD_LINK="https://github.com/MD2Korg/mCerebrum-Configuration/releases/download/config/";
-    public static final int CONFIG_MIN_VERSION=17;
+    public static final int CONFIG_MIN_VERSION=19;
 }

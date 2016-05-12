@@ -41,6 +41,7 @@ public class ServiceSystemHealth extends Service {
     public static final String INTENT_NAME="INTENT_SERVICE";
     ModelManager modelManager;
     public static boolean isRunning=false;
+    public static int RANK_LIMIT;
 
     public void onCreate() {
         Log.d(TAG, "onCreate...");
@@ -57,7 +58,8 @@ public class ServiceSystemHealth extends Service {
 
             }
         });
-        modelManager.start(true);
+        modelManager.remove();
+        modelManager.set();
         isRunning=true;
         Log.d(TAG,"...onCreate");
     }
@@ -65,6 +67,9 @@ public class ServiceSystemHealth extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        modelManager.clear();
+        modelManager.remove();
+        modelManager.set();
         return START_STICKY;
     }
 
@@ -75,7 +80,7 @@ public class ServiceSystemHealth extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
-        modelManager.stop();
+        modelManager.clear();
         isRunning=false;
 
         super.onDestroy();

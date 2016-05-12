@@ -3,7 +3,6 @@ package org.md2k.study.model_view.selfreport;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -46,7 +45,6 @@ public class ActivitySelfReport extends AppCompatActivity {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
                     SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
                     selfReportManager.save();
-                    Toast.makeText(ActivitySelfReport.this, "event saved...", Toast.LENGTH_LONG).show();
                 }
                 finish();
             }

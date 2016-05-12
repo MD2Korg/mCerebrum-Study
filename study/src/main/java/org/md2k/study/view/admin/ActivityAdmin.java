@@ -2,6 +2,7 @@ package org.md2k.study.view.admin;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -15,27 +16,49 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.md2k.study.R;
+import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
+import org.md2k.study.model_view.config_info.ActivityConfigDownload;
 
 public class ActivityAdmin extends AppCompatActivity {
     AlertDialog alertDialog;
+    boolean passwordFirst=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (isPasswordRequired()) {
-            showPasswordWindow();
-        }else{
-            setContentView(R.layout.activity_admin);
-            getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
-                    new PrefsFragmentAdmin()).commit();
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setDisplayShowTitleEnabled(true);
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+        Status status=ModelManager.getInstance(this).getStatus();
+        if(status.getStatus()== Status.CONFIG_FILE_NOT_EXIST) {
+            passwordFirst=false;
+            Intent intent = new Intent(this, ActivityConfigDownload.class);
+            intent.putExtra(Status.class.getSimpleName(), status);
+            startActivityForResult(intent,1);
+        }
+        else {
+            if (passwordFirst==false && isPasswordRequired()) {
+                showPasswordWindow();
+            } else {
+                setContentView(R.layout.activity_admin);
+                getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
+                        new PrefsFragmentAdmin()).commit();
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setDisplayShowTitleEnabled(true);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                }
             }
-
         }
     }
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_CANCELED) {
+                finish();
+            }
+        }
+    }
 
     boolean isPasswordRequired() {
         String password = getPassword();
@@ -84,6 +107,7 @@ public class ActivityAdmin extends AppCompatActivity {
                         String password = input.getText().toString();
                         if (getPassword().equals(password)) {
                             setContentView(R.layout.activity_admin);
+                            passwordFirst=true;
                             getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
                                     new PrefsFragmentAdmin()).commit();
                             if (getSupportActionBar() != null) {

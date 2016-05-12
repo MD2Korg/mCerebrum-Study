@@ -126,8 +126,8 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     @Override
     public void onResume(){
         if(isRefreshRequired) {
-            ModelManager.getInstance(getActivity()).stop();
-            ModelManager.getInstance(getActivity()).start(false);
+            ModelManager.getInstance(getActivity()).clear();
+            ModelManager.getInstance(getActivity()).set();
         }
         appSettingsManager.update();
         setupAppSettings();

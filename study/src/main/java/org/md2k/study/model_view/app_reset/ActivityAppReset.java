@@ -1,15 +1,13 @@
-package org.md2k.study.model_view.config_download;
+package org.md2k.study.model_view.app_reset;
 
-import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
-import org.md2k.study.ActivityMain;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.UI.AlertDialogs;
 
 
 /**
@@ -38,43 +36,19 @@ import org.md2k.utilities.Report.Log;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ActivityConfigDownload extends Activity {
-    private static final String TAG = ActivityConfigDownload.class.getSimpleName();
-    int resume=0;
-
+public class ActivityAppReset extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        showDeleteDirectory();
-    }
-    public void showDeleteDirectory() {
-        Log.d(TAG, "showDeleteDirectory()...");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete Current Configuration");
-        builder.setMessage("Do you want to delete current configuration files?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        AlertDialogs.showAlertDialogConfirm(ActivityAppReset.this, "Reset App", "Do you want to reset application?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ModelManager modelManager=ModelManager.getInstance(ActivityConfigDownload.this);
-                ConfigDownloadManager configDownloadManager= (ConfigDownloadManager) modelManager.getModel(ModelFactory.MODEL_CONFIG_DOWNLOAD);
-                Log.d(TAG,"ConfigDownloadManager...="+configDownloadManager);
-                configDownloadManager.delete();
-                modelManager.stop();
-                modelManager.start(true);
-                Intent intent = new Intent(getApplicationContext(), ActivityMain.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    AppResetManager appResetManager = ((AppResetManager) ModelManager.getInstance(ActivityAppReset.this).getModel(ModelFactory.MODEL_APP_RESET));
+                    appResetManager.resetApp();
+                    Toast.makeText(ActivityAppReset.this, "app resetting...", Toast.LENGTH_LONG).show();
+                }
                 finish();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                finish();
-            }
-        });
-        builder.show();
-
-    }
-}
+    }}

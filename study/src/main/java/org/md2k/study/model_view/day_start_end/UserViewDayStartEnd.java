@@ -2,6 +2,8 @@ package org.md2k.study.model_view.day_start_end;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
@@ -60,6 +62,8 @@ public class UserViewDayStartEnd extends UserView {
     public void disableView() {
         activity.findViewById(R.id.button_day_start_end).setEnabled(false);
         ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Start Day");
+        activity.findViewById(R.id.button_day_start_end).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_red));
+        ((Button)activity.findViewById(R.id.button_day_start_end)).setTextColor(Color.WHITE);
         ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(" - ");
         ((TextView) activity.findViewById(R.id.text_view_day_end)).setText(" - ");
     }

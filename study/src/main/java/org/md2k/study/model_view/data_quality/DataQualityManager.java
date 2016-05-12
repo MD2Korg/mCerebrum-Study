@@ -54,20 +54,22 @@ public class DataQualityManager extends Model {
         Log.d(TAG, "set()...");
         dataQualities.clear();
         dataQualityInfos.clear();
-        ArrayList<DataSource> dataSources = modelManager.getConfigManager().getConfig().getData_quality();
-        if (dataSources == null || dataSources.size() == 0) return;
-        for (int i = 0; i < dataSources.size(); i++) {
-            dataQualityInfos.add(new DataQualityInfo(dataSources.get(i)));
+        final ArrayList<org.md2k.study.config.DataQuality> dataQuality = modelManager.getConfigManager().getConfig().getData_quality();
+        if (dataQuality == null || dataQuality.size() == 0) return;
+        for (int i = 0; i < dataQuality.size(); i++) {
+            dataQualityInfos.add(new DataQualityInfo(dataQuality.get(i)));
             final int finalI = i;
-            dataQualities.add(new DataQuality(modelManager.getContext(), dataSources.get(i), new ReceiveCallBack() {
+            final int finalI1 = i;
+            dataQualities.add(new DataQuality(modelManager.getContext(), dataQuality.get(i).datasource_quality, new ReceiveCallBack() {
                 @Override
                 public void onReceive(DataSource dataSource, DataSourceClient dataSourceClient, int sample) {
                     if (dataQualityInfos == null || dataQualityInfos.size() <= finalI) return;
-                    dataQualityInfos.get(finalI).setQualities(dataSourceClient.getDataSource(), translate(sample));
+                    dataQuality.get(finalI1).datasource_quality=dataSourceClient.getDataSource();
+                    dataQualityInfos.get(finalI).setQualities(dataQuality.get(finalI1), translate(sample));
                 }
             }));
         }
-        for (int i = 0; i < dataSources.size(); i++)
+        for (int i = 0; i < dataQuality.size(); i++)
             dataQualities.get(i).start();
     }
 

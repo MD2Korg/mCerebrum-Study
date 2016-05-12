@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -22,10 +23,9 @@ import org.md2k.study.Status;
 import org.md2k.study.config.CView;
 import org.md2k.study.config.ViewContent;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.view.report.ActivityReport;
-import org.md2k.study.view.study_setup.ActivityStudySetup;
-import org.md2k.study.view.system.ActivitySystem;
-import org.md2k.study.view.test.ActivityTest;
+import org.md2k.study.model_view.Model;
+import org.md2k.study.view.configure_app.ActivityConfigureApp;
+import org.md2k.study.view.configure_study.ActivityConfigureStudy;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -60,10 +60,6 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentAdmin.class.getSimpleName();
     ModelManager modelManager;
-    boolean isSystem = false;
-    boolean isStudySetup = false;
-    boolean isReport = false;
-    boolean isTest = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,92 +67,115 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
         modelManager = ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_admin);
-        ((PreferenceCategory) findPreference("key_category")).removeAll();
+
         ArrayList<ViewContent> viewContents = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents();
         for (int i = 0; i < viewContents.size(); i++) {
             if (!viewContents.get(i).isEnable()) continue;
             switch (viewContents.get(i).getId()) {
-                case CView.SYSTEM:
-                    prepareSystem(viewContents.get(i));
+                case CView.CONFIGURE_APP:
+                    prepareConfigureApp(viewContents.get(i));
                     break;
-                case CView.STUDY_SETUP:
-                    prepareStudySetup(viewContents.get(i));
+                case CView.CONFIGURE_STUDY:
+                    prepareConfigureStudy(viewContents.get(i));
                     break;
-                case CView.REPORT:
-                    prepareReport(viewContents.get(i));
+                case CView.START_STUDY:
+                    prepareStartStudy(viewContents.get(i));
                     break;
-                case CView.TEST:
-                    prepareTest(viewContents.get(i));
+                case CView.STOP_STUDY:
+                    prepareStopStudy(viewContents.get(i));
+                    break;
+                case CView.OTHER:
+                    prepareOther(viewContents.get(i));
                     break;
             }
         }
         setupCloseButton();
     }
 
-    void prepareSystem(ViewContent viewContent) {
-        isSystem = true;
-        Preference preference = new Preference(getActivity());
-        preference.setKey(CView.SYSTEM);
+    void prepareStartStudy(ViewContent viewContent) {
+        Preference preference = findPreference(CView.START_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getActivity(), ActivitySystem.class);
-                getActivity().startActivity(intent);
+                ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
+                modelManager.clear();
+                modelManager.remove();
+                modelManager.set();
                 return false;
             }
         });
-        ((PreferenceCategory) findPreference("key_category")).addPreference(preference);
     }
 
-    void prepareStudySetup(ViewContent viewContent) {
-        isStudySetup = true;
-        Preference preference = new Preference(getActivity());
-        preference.setKey(CView.STUDY_SETUP);
+    void prepareStopStudy(ViewContent viewContent) {
+        Preference preference = findPreference(CView.STOP_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getActivity(), ActivityStudySetup.class);
-                getActivity().startActivity(intent);
+                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                modelManager.clear();
+                modelManager.remove();
+                modelManager.set();
                 return false;
             }
         });
-        ((PreferenceCategory) findPreference("key_category")).addPreference(preference);
     }
 
-    void prepareTest(ViewContent viewContent) {
-        isTest = true;
-        Preference preference = new Preference(getActivity());
-        preference.setKey(CView.TEST);
+    void prepareConfigureApp(ViewContent viewContent) {
+        Preference preference = findPreference(CView.CONFIGURE_APP);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getActivity(), ActivityTest.class);
+                Intent intent = new Intent(getActivity(), ActivityConfigureApp.class);
                 getActivity().startActivity(intent);
                 return false;
             }
         });
-        ((PreferenceCategory) findPreference("key_category")).addPreference(preference);
     }
 
-    void prepareReport(ViewContent viewContent) {
-        isReport = true;
-        Preference preference = new Preference(getActivity());
-        preference.setKey(CView.REPORT);
+    void prepareConfigureStudy(ViewContent viewContent) {
+        Preference preference = findPreference(CView.CONFIGURE_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getActivity(), ActivityReport.class);
+                Intent intent = new Intent(getActivity(), ActivityConfigureStudy.class);
                 getActivity().startActivity(intent);
                 return false;
             }
         });
-        ((PreferenceCategory) findPreference("key_category")).addPreference(preference);
     }
-
+    void prepareOther(ViewContent viewContent){
+        PreferenceCategory preferenceCategory= (PreferenceCategory) findPreference(viewContent.getId());
+        preferenceCategory.removeAll();
+        ArrayList<String> views= viewContent.getValues();
+        for(int i=0;i<views.size();i++){
+            Log.d(TAG, "onCreate()...id=" + views.get(i));
+            final Model model = modelManager.getModel(views.get(i));
+            if(model==null) continue;
+            Preference preference=new Preference(getActivity());
+            preference.setKey(model.getAction().getId());
+            preference.setTitle(model.getAction().getName());
+            Resources resources=getActivity().getResources();
+            Log.d(TAG, "id=" + model.getAction().getId() + " " + model.getAction().getIcon());
+            int resourceId=resources.getIdentifier(model.getAction().getIcon(),"drawable",getActivity().getPackageName());
+            preference.setIcon(ContextCompat.getDrawable(getActivity(), resourceId));
+            preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    if (model.getAction().getPackage_name() != null && model.getAction().getClass_name() != null) {
+                        Intent intent = new Intent();
+                        intent.setClassName(model.getAction().getPackage_name(), model.getAction().getClass_name());
+                        startActivity(intent);
+                    }
+                    return false;
+                }
+            });
+            preferenceCategory.addPreference(preference);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -178,26 +197,30 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         Status status = modelManager.getStatus();
         Log.d(TAG, "updatePreference()...status=" + status.log());
         if (status.getRank() >= Status.RANK_SYSTEM) {
-            updatePreference(CView.SYSTEM, true, false, status.getMessage());
-            updatePreference(CView.STUDY_SETUP, false, false, "");
-            updatePreference(CView.TEST, false, false, "");
-            updatePreference(CView.REPORT, false, false, "");
+            updatePreference(CView.CONFIGURE_APP, true, false, status.getMessage());
+            updatePreference(CView.CONFIGURE_STUDY, false, false, "");
+            updatePreference(CView.START_STUDY, false, false, "");
+            updatePreference(CView.STOP_STUDY, false, false, "");
+            updatePreference(CView.OTHER, false, false, "");
 
         } else if (status.getRank() >= Status.RANK_ADMIN_REQUIRED) {
-            updatePreference(CView.SYSTEM, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.STUDY_SETUP, true, false, status.getMessage());
-            updatePreference(CView.TEST, false, false, "");
-            updatePreference(CView.REPORT, false, false, "");
+            updatePreference(CView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(CView.CONFIGURE_STUDY, true, false, status.getMessage());
+            updatePreference(CView.START_STUDY, false, false, "");
+            updatePreference(CView.STOP_STUDY, false, false, "");
+            updatePreference(CView.OTHER, false, false, "");
         } else if (status.getRank() >= Status.RANK_ADMIN_OPTIONAL) {
-            updatePreference(CView.SYSTEM, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.STUDY_SETUP, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.TEST, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.REPORT, false, false, "");
+            updatePreference(CView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(CView.CONFIGURE_STUDY, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(CView.START_STUDY, true, false, "");
+            updatePreference(CView.STOP_STUDY, false, false, "");
+            updatePreference(CView.OTHER, false, false, "");
         } else {
-            updatePreference(CView.SYSTEM, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.STUDY_SETUP, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.TEST, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.REPORT, true, true, "");
+            updatePreference(CView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(CView.CONFIGURE_STUDY, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(CView.START_STUDY, false, false, "");
+            updatePreference(CView.STOP_STUDY, true, true, "");
+            updatePreference(CView.OTHER, true, true, "");
         }
     }
 

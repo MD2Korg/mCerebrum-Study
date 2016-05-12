@@ -17,16 +17,21 @@
         android:label="@string/app_name"
         android:theme="@style/app_theme_teal_light">
         <activity
-            android:name=".ActivityMain"
-            android:noHistory="false"
+            android:name=".ActivityStartScreen"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ActivityMain"
+            android:label="@string/app_name"
+            android:noHistory="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".model_view.app_install.ActivityInstallApp"
             android:label="Install Application"
@@ -48,15 +53,11 @@
             android:label="Settings"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view.study_setup.ActivityStudySetup"
+            android:name=".view.configure_study.ActivityConfigureStudy"
             android:label="Study Settings"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view.report.ActivityReport"
-            android:label="Status"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".view.system.ActivitySystem"
+            android:name=".view.configure_app.ActivityConfigureApp"
             android:label="System Settings"
             android:screenOrientation="portrait" />
         <activity
@@ -73,6 +74,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
+            android:name=".model_view.app_reset.ActivityAppReset"
+            android:label="Reset App"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
+        <activity
             android:name=".model_view.config_info.ActivityConfigDownload"
             android:label="Download Configuration File"
             android:launchMode="singleTop"
@@ -80,11 +86,6 @@
         <activity
             android:name=".model_view.clear_data.ActivityClearData"
             android:label="Clear Data"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".model_view.config_download.ActivityConfigDownload"
-            android:label="Download Configuration File"
-            android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.user_info.ActivityUserInfo"
@@ -120,6 +121,10 @@
             android:label="App Stop"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
+        <activity
+            android:name=".model_view.data_quality.ActivityDataQuality"
+            android:label="Data Quality"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".ServiceSystemHealth"

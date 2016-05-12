@@ -38,7 +38,6 @@ import org.md2k.utilities.Report.Log;
  */
 public class ActivityClearConfig extends Activity {
     private static final String TAG = ActivityClearConfig.class.getSimpleName();
-    int resume=0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,8 +56,9 @@ public class ActivityClearConfig extends Activity {
                 ClearConfigManager clearConfigManager= (ClearConfigManager) modelManager.getModel(ModelFactory.MODEL_CLEAR_CONFIG);
                 Log.d(TAG,"clearConfigManager...="+clearConfigManager);
                 clearConfigManager.delete();
-                modelManager.stop();
-                modelManager.start(true);
+                modelManager.clear();
+                modelManager.remove();
+                modelManager.set();
                 finish();
             }
         });

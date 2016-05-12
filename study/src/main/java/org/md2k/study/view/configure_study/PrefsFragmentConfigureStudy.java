@@ -1,10 +1,9 @@
-package org.md2k.study.view.system;
+package org.md2k.study.view.configure_study;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -16,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.md2k.study.R;
 import org.md2k.study.ServiceSystemHealth;
@@ -53,9 +53,8 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class PrefsFragmentSystem extends PreferenceFragment {
-
-    private static final String TAG = PrefsFragmentSystem.class.getSimpleName();
+public class PrefsFragmentConfigureStudy extends PreferenceFragment {
+    private static final String TAG = PrefsFragmentConfigureStudy.class.getSimpleName();
     ModelManager modelManager;
     ArrayList<Preference> preferences;
 
@@ -63,21 +62,21 @@ public class PrefsFragmentSystem extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
-        modelManager= ModelManager.getInstance(getActivity());
-        addPreferencesFromResource(R.xml.pref_system);
-        ArrayList<String> views= modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(CView.SYSTEM).getValues();
-        preferences=new ArrayList<>();
-        for(int i=0;i<views.size();i++){
+
+        modelManager = ModelManager.getInstance(getActivity());
+        addPreferencesFromResource(R.xml.pref_study_setup);
+        ArrayList<String> views = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(CView.CONFIGURE_STUDY).getValues();
+        preferences = new ArrayList<>();
+        for (int i = 0; i < views.size(); i++) {
             Log.d(TAG, "onCreate()...id=" + views.get(i));
             final Model model = modelManager.getModel(views.get(i));
-            if(model==null) continue;
-            Preference preference=new Preference(getActivity());
+            if (model == null) continue;
+            Preference preference = new Preference(getActivity());
             preference.setKey(model.getAction().getId());
             preference.setTitle(model.getAction().getName());
-            if(model.getAction().getPackage_name()==null || model.getAction().getClass_name()==null)
+            if (model.getAction().getPackage_name() == null || model.getAction().getClass_name() == null)
                 preference.setEnabled(false);
             else {
-
                 preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
@@ -90,11 +89,13 @@ public class PrefsFragmentSystem extends PreferenceFragment {
                     }
                 });
             }
-            ((PreferenceCategory)findPreference(model.getAction().getType())).addPreference(preference);
+            ((PreferenceCategory) findPreference(model.getAction().getType())).addPreference(preference);
             preferences.add(preference);
         }
         setupCloseButton();
+        setSaveButton();
     }
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -103,8 +104,10 @@ public class PrefsFragmentSystem extends PreferenceFragment {
     };
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
+        for (int i = 0; i < preferences.size(); i++)
+            modelManager.getModel(preferences.get(i).getKey()).reset();
         super.onDestroy();
     }
 
@@ -117,6 +120,19 @@ public class PrefsFragmentSystem extends PreferenceFragment {
             }
         });
     }
+
+    private void setSaveButton() {
+        final Button button = (Button) getActivity().findViewById(R.id.button_2);
+        button.setText("Save");
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                for (int i = 0; i < preferences.size(); i++)
+                    modelManager.getModel(preferences.get(i).getKey()).save();
+                Toast.makeText(getActivity(), "Saved...", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -126,38 +142,34 @@ public class PrefsFragmentSystem extends PreferenceFragment {
         lv.setPadding(0, 0, 0, 0);
         return v;
     }
+
     @Override
     public void onResume() {
-        Log.d(TAG, "onResume()...");
         updatePreference();
         super.onResume();
     }
-    void updatePreference(){
-        try {
-            for (int i = 0; i < preferences.size(); i++) {
-                Model model=modelManager.getModel(preferences.get(i).getKey());
-                Status status = model.getStatus();
-                Log.d(TAG, "id=" + preferences.get(i).getKey() + " status=" + status.log());
-                if(model.getAction()!=null && model.getAction().getType()!=null && model.getAction().getType().equals("reset")){
-                    Resources resources=getActivity().getResources();
-                    int resourceId=resources.getIdentifier(model.getAction().getIcon(),"drawable",getActivity().getPackageName());
-                    preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), resourceId));
-//                    preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_delete_blue_48dp));
-                    preferences.get(i).setSummary("");
-                }
-                else if (status.getStatus() == Status.SUCCESS) {
-                    preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-                    preferences.get(i).setSummary(status.getMessage());
-                } else if (status.getStatus() == Status.APP_UPDATE_AVAILABLE) {
-                    preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_warning_amber_50dp));
-                    preferences.get(i).setSummary(status.getMessage());
-                } else {
-                    preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-                    preferences.get(i).setSummary(status.getMessage());
-                }
+
+    void updatePreference() {
+        for (int i = 0; i < preferences.size(); i++) {
+            Model model = modelManager.getModel(preferences.get(i).getKey());
+            Status status = model.getStatus();
+            Log.d(TAG, "id=" + preferences.get(i).getKey() + " status=" + status.log());
+            if(model.getAction()!=null && model.getAction().getType()!=null && model.getAction().getType().equals("reset")){
+                preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_delete_blue_48dp));
+                preferences.get(i).setSummary("");
             }
-        }catch(Exception e){
-            getActivity().finish();
+
+            else if (status.getStatus() == Status.SUCCESS) {
+                preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+                preferences.get(i).setSummary(status.getMessage());
+            } else if (status.getStatus() == Status.APP_UPDATE_AVAILABLE) {
+                preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_warning_amber_50dp));
+                preferences.get(i).setSummary(status.getMessage());
+            } else {
+                preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+                preferences.get(i).setSummary(status.getMessage());
+            }
         }
     }
+
 }

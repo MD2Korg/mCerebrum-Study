@@ -29,10 +29,11 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class CView {
-    public static final String SYSTEM="system";
-    public static final String STUDY_SETUP="study_setup";
-    public static final String REPORT="report";
-    public static final String TEST="test";
+    public static final String CONFIGURE_APP ="key_configure_app";
+    public static final String CONFIGURE_STUDY ="key_configure_study";
+    public static final String START_STUDY ="key_start_study";
+    public static final String STOP_STUDY ="key_stop_study";
+    public static final String OTHER="key_other";
 
     String password;
     ArrayList<ViewContent> view_contents;

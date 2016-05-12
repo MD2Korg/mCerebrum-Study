@@ -41,10 +41,13 @@ public class ActivityClearData extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ModelManager.getInstance(this).stop();
-
+        ModelManager.getInstance(this).clear();
         Intent intent = new Intent();
-        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
+        intent.putExtra("delete",true);
+        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsArchive");
+        startActivity(intent);
+        intent.putExtra("delete",true);
+        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsDatabase");
         startActivity(intent);
     }
     @Override
@@ -52,7 +55,7 @@ public class ActivityClearData extends Activity {
         Log.d(TAG, "onResume...");
         resume++;
         if(resume==2) {
-            ModelManager.getInstance(this).start(false);
+            ModelManager.getInstance(this).set();
             finish();
         }
         super.onResume();

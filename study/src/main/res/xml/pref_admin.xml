@@ -1,5 +1,25 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:key="key_category"
-        android:title="Admin Settings"/>
+        android:title="Study Settings"/>
+    <Preference
+        android:key="key_configure_app"
+        android:title="Configure Apps"
+        />
+    <Preference
+        android:key="key_configure_study"
+        android:title="Configure Study"
+        />
+    <Preference
+        android:key="key_start_study"
+        android:title="Start Study"
+        />
+    <Preference
+        android:key="key_stop_study"
+        android:title="Stop Study"
+        />
+    <PreferenceCategory
+        android:key="key_other"
+        android:title="Others"/>
+
 </PreferenceScreen>

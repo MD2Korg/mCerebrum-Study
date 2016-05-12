@@ -41,8 +41,9 @@ public class AppResetManager extends Model {
 
     public void resetApp() {
         Toast.makeText(modelManager.getContext(),"Resetting...",Toast.LENGTH_LONG).show();
-        modelManager.stop();
-        modelManager.start(true);
+        modelManager.clear();
+        modelManager.remove();
+        modelManager.set();
         Toast.makeText(modelManager.getContext(),"Resetting...DONE",Toast.LENGTH_LONG).show();
     }
     public void clear(){

@@ -1,14 +1,15 @@
 package org.md2k.study.model_view.data_quality;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelFactory;
@@ -82,6 +83,7 @@ public class UserViewDataQuality extends UserView {
 
     private void addLayout() {
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
+//        linearLayoutMain.setBackground(R.style.app_theme_teal_light_button);
         view = activity.getLayoutInflater().inflate(R.layout.layout_data_quality, null);
         linearLayoutMain.addView(view);
     }
@@ -89,14 +91,25 @@ public class UserViewDataQuality extends UserView {
     private void addImageView() {
         LinearLayout linearLayout = (LinearLayout) activity.findViewById(R.id.linear_layout_dataquality_all);
         Log.d(TAG, "linearLayout=" + linearLayout.toString());
-        ArrayList<DataSource> dataSources = ModelManager.getInstance(activity).getConfigManager().getConfig().getData_quality();
-        Log.d(TAG, "datasource size=" + dataSources.size());
-        imageView = new ImageView[dataSources.size()];
-        textViews = new TextView[dataSources.size()];
-        for (int i = 0; i < dataSources.size(); i++) {
+        ArrayList<org.md2k.study.config.DataQuality> dataQualities = ModelManager.getInstance(activity).getConfigManager().getConfig().getData_quality();
+        Log.d(TAG, "datasource size=" + dataQualities.size());
+        imageView = new ImageView[dataQualities.size()];
+        textViews = new TextView[dataQualities.size()];
+        for (int i = 0; i < dataQualities.size(); i++) {
             LinearLayout linearLayoutOne = new LinearLayout(activity);
+            linearLayoutOne.setClickable(true);
+            linearLayoutOne.setBackground(ContextCompat.getDrawable(activity, android.R.drawable.btn_default_small));
+            final int finalI = i;
+            linearLayoutOne.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent=new Intent(activity, ActivityDataQuality.class);
+                    intent.putExtra("id", finalI);
+                    activity.startActivity(intent);
+                }
+            });
             linearLayoutOne.setOrientation(LinearLayout.VERTICAL);
-            LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataSources.size()));
+            LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataQualities.size()));
             linearLayoutOne.setLayoutParams(LLParams);
             TextView textViewOne = new TextView(activity);
             textViewOne.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -107,19 +120,22 @@ public class UserViewDataQuality extends UserView {
             textViews[i] = textViewOne;
             linearLayout.addView(linearLayoutOne);
             imageViewOne.setImageResource(R.drawable.ic_error_red_50dp);
-            LinearLayout.LayoutParams ll_params_imageView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataSources.size()));
+            LinearLayout.LayoutParams ll_params_imageView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataQualities.size()));
             ll_params_imageView.gravity = Gravity.CENTER_HORIZONTAL;
 
             imageViewOne.setLayoutParams(ll_params_imageView);
             imageViewOne.requestLayout();
             imageViewOne.getLayoutParams().height = 60;
             imageViewOne.getLayoutParams().width = 60;
-            if (dataSources.get(i).getType() != null)
-                textViewOne.setText(dataSources.get(i).getType());
-            else if (dataSources.get(i).getPlatform().getId() != null) {
-                textViewOne.setText(dataSources.get(i).getPlatform().getId());
-            } else if (dataSources.get(i).getPlatform().getType() != null) {
-                textViewOne.setText(dataSources.get(i).getPlatform().getId());
+            if(dataQualities.get(i).name!=null) textViewOne.setText(dataQualities.get(i).name);
+            else {
+                if (dataQualities.get(i).datasource_quality.getType() != null)
+                    textViewOne.setText(dataQualities.get(i).datasource_quality.getType());
+                else if (dataQualities.get(i).datasource_quality.getPlatform().getId() != null) {
+                    textViewOne.setText(dataQualities.get(i).datasource_quality.getPlatform().getId());
+                } else if (dataQualities.get(i).datasource_quality.getPlatform().getType() != null) {
+                    textViewOne.setText(dataQualities.get(i).datasource_quality.getPlatform().getId());
+                }
             }
         }
 
@@ -160,7 +176,7 @@ public class UserViewDataQuality extends UserView {
                         case Status.DATAQUALITY_LOOSE:
                         case Status.DATAQUALITY_NOISY:
                             if (message == null) message = dataQualityInfos.get(i).getMessage();
-                            imageView[i].setImageResource(R.drawable.ic_warning_amber_50dp);
+                            imageView[i].setImageResource(R.drawable.ic_warning_red_48dp);
                             isAllGood = false;
                             break;
                     }
