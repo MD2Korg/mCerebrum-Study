@@ -125,6 +125,9 @@
             android:name=".model_view.data_quality.ActivityDataQuality"
             android:label="Data Quality"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".model_view.data_quality.ActivityYouTube"
+            android:label="Video" />
 
         <service
             android:name=".ServiceSystemHealth"

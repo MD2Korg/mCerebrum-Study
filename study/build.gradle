@@ -55,4 +55,5 @@ dependencies {
         transitive = true;
     }
     compile 'com.google.apis:google-api-services-youtube:v3-rev171-1.22.0'
+    compile files('libs/YouTubeAndroidPlayerApi.jar')
 }

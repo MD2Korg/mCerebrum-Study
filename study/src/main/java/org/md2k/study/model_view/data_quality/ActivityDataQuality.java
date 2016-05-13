@@ -1,7 +1,6 @@
 package org.md2k.study.model_view.data_quality;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 public class ActivityDataQuality extends AppCompatActivity {
     private static final String TAG = ActivityDataQuality.class.getSimpleName();
     org.md2k.study.config.DataQuality dataQuality;
+    public static final String VIDEO_LINK="VIDEO_LINK";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +65,9 @@ public class ActivityDataQuality extends AppCompatActivity {
         button.setText(dataQuality.name+" help video");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(dataQuality.video_link)));
+                Intent intent=new Intent(ActivityDataQuality.this, ActivityYouTube.class);
+                intent.putExtra(VIDEO_LINK, dataQuality.video_link);
+                startActivity(intent);
             }
         });
     }
