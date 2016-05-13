@@ -138,7 +138,6 @@ public class UserViewDataQuality extends UserView {
                 }
             }
         }
-
     }
 
     Runnable runnableUpdateView = new Runnable() {

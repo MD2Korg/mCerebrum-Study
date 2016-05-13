@@ -81,6 +81,7 @@ public class ServiceSystemHealth extends Service {
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
         modelManager.clear();
+        modelManager.remove();
         isRunning=false;
 
         super.onDestroy();

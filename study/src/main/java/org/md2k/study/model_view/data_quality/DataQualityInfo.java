@@ -42,26 +42,26 @@ public class DataQualityInfo {
                 title = "ECG";
             else if (dataQuality.datasource_quality.getPlatform() != null && dataQuality.datasource_quality.getPlatform().getType() != null && dataQuality.datasource_quality.getPlatform().getId() != null) {
                 if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.LEFT_WRIST) && dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.MICROSOFT_BAND))
-                    title = "MSBand (L)";
+                    title = "Left Wrist(M)";
                 else if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.RIGHT_WRIST) && dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.MICROSOFT_BAND))
-                    title = "MSBand (R)";
+                    title = "Right Wrist(M)";
                 else if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.LEFT_WRIST) && dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST))
-                    title = "WristA (L)";
+                    title = "Left Wrist(A)";
                 else if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.RIGHT_WRIST) && dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST))
-                    title = "WristA (R)";
+                    title = "Right Wrist(A)";
                 else title = "-";
 
             } else if (dataQuality.datasource_quality.getPlatform() != null && dataQuality.datasource_quality.getPlatform().getId() != null) {
                 if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.LEFT_WRIST))
-                    title = "Wrist (L)";
+                    title = "Left Wrist";
                 else if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.RIGHT_WRIST))
-                    title = "Wrist (R)";
+                    title = "Right Wrist";
                 else title = "-";
             } else if (dataQuality.datasource_quality.getPlatform() != null && dataQuality.datasource_quality.getPlatform().getType() != null) {
                 if (dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.MICROSOFT_BAND))
-                    title = "MSBand";
+                    title = "Wrist(M)";
                 else if (dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST))
-                    title = "WristA";
+                    title = "Wrist(A)";
                 else title = "-";
             } else
                 title = "-";

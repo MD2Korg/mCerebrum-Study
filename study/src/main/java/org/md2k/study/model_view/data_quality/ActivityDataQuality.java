@@ -8,8 +8,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.datakitapi.source.platform.PlatformBuilder;
+import org.md2k.datakitapi.source.platform.PlatformId;
+import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.study.R;
 import org.md2k.study.config.App;
 import org.md2k.study.controller.ModelFactory;
@@ -19,15 +23,18 @@ import java.util.ArrayList;
 
 public class ActivityDataQuality extends AppCompatActivity {
     private static final String TAG = ActivityDataQuality.class.getSimpleName();
-    org.md2k.study.config.DataQuality dataQuality;
-    public static final String VIDEO_LINK="VIDEO_LINK";
+    org.md2k.study.config.DataQuality dataQualityConfig;
+    DataQualityInfo dataQualityInfo;
+    public static final String VIDEO_LINK = "VIDEO_LINK";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_quality);
         int id = getIntent().getIntExtra("id", 0);
-        dataQuality = ModelManager.getInstance(ActivityDataQuality.this).getConfigManager().getConfig().getData_quality().get(id);
+        dataQualityConfig = ModelManager.getInstance(ActivityDataQuality.this).getConfigManager().getConfig().getData_quality().get(id);
+        DataQualityManager dataQualityManager = (DataQualityManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_DATA_QUALITY);
+        dataQualityInfo = dataQualityManager.dataQualityInfos.get(id);
         setupButtonPlotter();
         setupButtonVideo();
         setupButtonClose();
@@ -36,45 +43,80 @@ public class ActivityDataQuality extends AppCompatActivity {
 
     void setupButtonPlotter() {
         final Button button = (Button) findViewById(R.id.button_plotter);
-        if (!dataQuality.plotter) {
+        if (!dataQualityConfig.plotter) {
             button.setVisibility(View.INVISIBLE);
             return;
         }
-        this.setTitle(dataQuality.name);
-        button.setText("Graph of " + dataQuality.name);
+        this.setTitle(dataQualityInfo.title);
+        button.setText("Graph of " + dataQualityInfo.title);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 App app = ModelManager.getInstance(ActivityDataQuality.this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
-                Intent intent=new Intent();
+                Intent intent = new Intent();
                 intent.setClassName(app.getPackage_name(), "org.md2k.plotter.ActivityPlot");
-                ArrayList<DataSourceClient> dataSourceClientArrayList=DataKitAPI.getInstance(ActivityDataQuality.this).find(new DataSourceBuilder(dataQuality.datasource_plot));
-                if(dataSourceClientArrayList.size()>0) {
-                    intent.putExtra(DataSourceClient.class.getSimpleName(), dataSourceClientArrayList.get(0));
+                DataSourceClient dataSourceClient = getDataSourceClient();
+                if (dataSourceClient != null) {
+                    intent.putExtra(DataSourceClient.class.getSimpleName(), dataSourceClient);
                     startActivity(intent);
+                }
+
+                ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(ActivityDataQuality.this).find(new DataSourceBuilder(dataQualityConfig.datasource_plot));
+                if (dataSourceClientArrayList.size() > 0) {
                 }
             }
         });
     }
 
+    DataSourceClient getDataSourceClient() {
+        DataSource curDataSource;
+        if (isWristType()) {
+            PlatformBuilder platformBuilder = new PlatformBuilder(dataQualityConfig.datasource_plot.getPlatform());
+            DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setPlatform(platformBuilder.build());
+            ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(ActivityDataQuality.this).find(dataSourceBuilder);
+            if (dataSourceClientArrayList.size() == 0) return null;
+            DataSource dataSource = dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1).getDataSource();
+            if (dataSource.getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST)) {
+                curDataSource = dataSourceBuilder.setType(dataQualityConfig.datasource_plot.getType()+"_X").build();
+            } else curDataSource = dataQualityConfig.datasource_plot;
+        } else {
+            curDataSource = dataQualityConfig.datasource_plot;
+        }
+        ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(ActivityDataQuality.this).find(new DataSourceBuilder(curDataSource));
+        if (dataSourceClientArrayList.size() > 0)
+            return dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
+        else return null;
+    }
+
+    boolean isWristType() {
+        if (dataQualityConfig.datasource_plot.getPlatform() == null) return false;
+        if (dataQualityConfig.datasource_plot.getPlatform().getId() == null) return false;
+        if (dataQualityConfig.datasource_plot.getPlatform().getId().equals(PlatformId.LEFT_WRIST))
+            return true;
+        if (dataQualityConfig.datasource_plot.getPlatform().getId().equals(PlatformId.RIGHT_WRIST))
+            return true;
+        return false;
+    }
+
     void setupButtonVideo() {
         final Button button = (Button) findViewById(R.id.button_video);
-        if (!dataQuality.video) {
+        if (!dataQualityConfig.video) {
             button.setVisibility(View.INVISIBLE);
             return;
         }
-        button.setText(dataQuality.name+" help video");
+        button.setText(dataQualityInfo.title + " help video");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent=new Intent(ActivityDataQuality.this, ActivityYouTube.class);
-                intent.putExtra(VIDEO_LINK, dataQuality.video_link);
+                Intent intent = new Intent(ActivityDataQuality.this, ActivityYouTube.class);
+                intent.putExtra(VIDEO_LINK, dataQualityConfig.video_link);
                 startActivity(intent);
             }
         });
     }
-    void setupMessage(){
-        TextView textView= (TextView) findViewById(R.id.textView_message);
-        textView.setText(dataQuality.message_link);
-        TextView textView1= (TextView) findViewById(R.id.textView_message_header);
+
+    void setupMessage() {
+        TextView textView = (TextView) findViewById(R.id.textView_message);
+        textView.setText(dataQualityConfig.message_link);
+        TextView textView1 = (TextView) findViewById(R.id.textView_message_header);
         textView1.setText("Tips to get good signal");
 
     }
