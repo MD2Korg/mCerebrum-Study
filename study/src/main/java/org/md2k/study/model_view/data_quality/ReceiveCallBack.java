@@ -1,6 +1,5 @@
 package org.md2k.study.model_view.data_quality;
 
-import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 
 /**
@@ -30,5 +29,5 @@ import org.md2k.datakitapi.source.datasource.DataSourceClient;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public interface ReceiveCallBack {
-    void onReceive(DataSource dataSource, DataSourceClient dataSourceClient, int sample);
+    void onReceive(DataSourceClient dataSourceClient, int sample);
 }

@@ -1,5 +1,7 @@
 package org.md2k.study.config;
 
+import java.util.ArrayList;
+
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -26,51 +28,30 @@ package org.md2k.study.config;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Action {
-    String id;
-    String type;
-    String name;
-    String icon;
-    int rank;
-    String package_name;
-    String class_name;
-    boolean enable;
-    String [] parameters;
-    public Action(){}
+public class ConfigView {
+    public static final String CONFIGURE_APP ="key_configure_app";
+    public static final String CONFIGURE_STUDY ="key_configure_study";
+    public static final String START_STUDY ="key_start_study";
+    public static final String STOP_STUDY ="key_stop_study";
+    public static final String OTHER="key_other";
 
-    public String getId() {
-        return id;
+    String password;
+    ArrayList<ConfigViewContent> view_contents;
+
+    public String getPassword() {
+        return password;
     }
 
-    public int getRank() {
-        return rank;
+    public ArrayList<ConfigViewContent> getView_contents() {
+        return view_contents;
     }
-
-    public String getName() {
-        return name;
+    public ConfigViewContent getView_contents(String id){
+        for(int i=0;i<view_contents.size();i++)
+            if(view_contents.get(i).getId().equals(id))
+                return view_contents.get(i);
+        return null;
     }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public String getPackage_name() {
-        return package_name;
-    }
-
-    public String getClass_name() {
-        return class_name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public boolean isEnable() {
-        return enable;
-    }
-
-    public String[] getParameters() {
-        return parameters;
+    public boolean hasPassword(){
+        return !(password == null || password.length() == 0);
     }
 }

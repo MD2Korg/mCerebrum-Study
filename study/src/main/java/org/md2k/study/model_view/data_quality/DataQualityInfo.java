@@ -1,11 +1,13 @@
 package org.md2k.study.model_view.data_quality;
 
+import org.md2k.datakitapi.source.datasource.DataSource;
+import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.datakitapi.source.platform.PlatformId;
-import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
-import org.md2k.study.config.DataQuality;
+import org.md2k.study.config.ConfigDataQualityView;
+
+import java.util.ArrayList;
 
 /**
  * Created by monowar on 3/17/16.
@@ -13,70 +15,32 @@ import org.md2k.study.config.DataQuality;
 public class DataQualityInfo {
     public static final int QSIZE = 3;
     private static final String TAG = DataQualityInfo.class.getSimpleName();
-    org.md2k.study.config.DataQuality dataQuality;
-    String title;
+    DataSourceClient dataSourceClient;
+    ConfigDataQualityView configDataQualityView;
     String message;
     int qualities[];
     int quality;
     int now;
     long lastReceivedTime;
-    public static final long RESTART_TIME=300000;
-    long lastTimeStampNoData;
 
-    DataQualityInfo(org.md2k.study.config.DataQuality dataQuality) {
+    DataQualityInfo() {
         quality = Status.DATAQUALITY_OFF;
-        this.dataQuality = dataQuality;
         now = 0;
         qualities = new int[QSIZE];
         message = "";
         lastReceivedTime =0;
-        setTitle();
-    }
-
-    void setTitle(){
-        if(dataQuality.name!=null) title=dataQuality.name;
-        else {
-            if (dataQuality.datasource_quality.getId() != null && dataQuality.datasource_quality.getId().equals(DataSourceType.RESPIRATION))
-                title = "Respiration";
-            else if (dataQuality.datasource_quality.getId() != null && dataQuality.datasource_quality.getId().equals(DataSourceType.ECG))
-                title = "ECG";
-            else if (dataQuality.datasource_quality.getPlatform() != null && dataQuality.datasource_quality.getPlatform().getType() != null && dataQuality.datasource_quality.getPlatform().getId() != null) {
-                if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.LEFT_WRIST) && dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.MICROSOFT_BAND))
-                    title = "Left Wrist(M)";
-                else if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.RIGHT_WRIST) && dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.MICROSOFT_BAND))
-                    title = "Right Wrist(M)";
-                else if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.LEFT_WRIST) && dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST))
-                    title = "Left Wrist(A)";
-                else if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.RIGHT_WRIST) && dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST))
-                    title = "Right Wrist(A)";
-                else title = "-";
-
-            } else if (dataQuality.datasource_quality.getPlatform() != null && dataQuality.datasource_quality.getPlatform().getId() != null) {
-                if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.LEFT_WRIST))
-                    title = "Left Wrist";
-                else if (dataQuality.datasource_quality.getPlatform().getId().equals(PlatformId.RIGHT_WRIST))
-                    title = "Right Wrist";
-                else title = "-";
-            } else if (dataQuality.datasource_quality.getPlatform() != null && dataQuality.datasource_quality.getPlatform().getType() != null) {
-                if (dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.MICROSOFT_BAND))
-                    title = "Wrist(M)";
-                else if (dataQuality.datasource_quality.getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST))
-                    title = "Wrist(A)";
-                else title = "-";
-            } else
-                title = "-";
-        }
     }
 
     public String getTitle() {
-        return title;
+        if(configDataQualityView==null) return "";
+        return configDataQualityView.name;
     }
 
     public int getQuality() {
         if(DateTime.getDateTime()- lastReceivedTime >10000) {
             quality=Status.DATAQUALITY_OFF;
             Status curStatus = new Status(0, this.quality);
-            message = title + " - " + curStatus.getMessage();
+            message = getTitle() + " - " + curStatus.getMessage();
         }
         return quality;
     }
@@ -86,18 +50,38 @@ public class DataQualityInfo {
         return message;
     }
 
-    public void setQualities(DataQuality dataQuality, int value) {
-        this.dataQuality=dataQuality;
+    public void setConfigDataQualityView(ArrayList<ConfigDataQualityView> configDataQualityViews, DataSource dataSource) {
+        for(int i=0;i<configDataQualityViews.size();i++){
+            DataSource confDataSource=configDataQualityViews.get(i).plotter.datasource;
+            if(confDataSource.getType().equals(DataSourceType.RESPIRATION) && confDataSource.getType().equals(dataSource.getId())) {
+                configDataQualityView = configDataQualityViews.get(i);
+                return;
+            }
+            if(confDataSource.getType().equals(DataSourceType.ECG) && confDataSource.getType().equals(dataSource.getId())) {
+                configDataQualityView = configDataQualityViews.get(i);
+                return;
+            }
+            if(confDataSource.getPlatform()==null || confDataSource.getPlatform().getId()==null || confDataSource.getPlatform().getType()==null)
+                continue;
+            else if(confDataSource.getPlatform().getType().equals(dataSource.getPlatform().getType()) && confDataSource.getPlatform().getId().equals(dataSource.getPlatform().getId())) {
+                configDataQualityView = configDataQualityViews.get(i);
+                return;
+            }
+        }
+    }
+
+    public void set(DataSourceClient dataSourceClient, ArrayList<ConfigDataQualityView> configDataQualityViewArrayList, int value) {
+        setConfigDataQualityView(configDataQualityViewArrayList, dataSourceClient.getDataSource());
+        this.dataSourceClient=dataSourceClient;
         lastReceivedTime = DateTime.getDateTime();
-        setTitle();
-        if (dataQuality.datasource_quality.getId()!=null && (dataQuality.datasource_quality.getId().equals(DataSourceType.RESPIRATION) || dataQuality.datasource_quality.getId().equals(DataSourceType.ECG))) {
+        if (dataSourceClient.getDataSource().getId()!=null && (dataSourceClient.getDataSource().getId().equals(DataSourceType.RESPIRATION) || dataSourceClient.getDataSource().getId().equals(DataSourceType.ECG))) {
             now = now % QSIZE;
             this.qualities[now++] = value;
             this.quality = findMaximumOccurrence();
         } else
             this.quality = value;
         Status curStatus = new Status(0, this.quality);
-        message = title + " - " + curStatus.getMessage();
+        message = getTitle() + " - " + curStatus.getMessage();
     }
 
     int findMaximumOccurrence() {

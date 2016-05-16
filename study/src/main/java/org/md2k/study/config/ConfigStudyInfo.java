@@ -1,7 +1,5 @@
 package org.md2k.study.config;
 
-import java.util.ArrayList;
-
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -28,30 +26,15 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CView {
-    public static final String CONFIGURE_APP ="key_configure_app";
-    public static final String CONFIGURE_STUDY ="key_configure_study";
-    public static final String START_STUDY ="key_start_study";
-    public static final String STOP_STUDY ="key_stop_study";
-    public static final String OTHER="key_other";
+public class ConfigStudyInfo {
+    String id;
+    String name;
 
-    String password;
-    ArrayList<ViewContent> view_contents;
-
-    public String getPassword() {
-        return password;
+    public String getId() {
+        return id;
     }
 
-    public ArrayList<ViewContent> getView_contents() {
-        return view_contents;
-    }
-    public ViewContent getView_contents(String id){
-        for(int i=0;i<view_contents.size();i++)
-            if(view_contents.get(i).getId().equals(id))
-                return view_contents.get(i);
-        return null;
-    }
-    public boolean hasPassword(){
-        return !(password == null || password.length() == 0);
+    public String getName() {
+        return name;
     }
 }

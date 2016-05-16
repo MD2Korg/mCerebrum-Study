@@ -17,7 +17,7 @@ import android.widget.LinearLayout;
 
 import com.crashlytics.android.Crashlytics;
 
-import org.md2k.study.config.ViewContent;
+import org.md2k.study.config.ConfigViewContent;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -80,7 +80,7 @@ public class ActivityMain extends AppCompatActivity {
         if (menuItemStatus == null) return;
         if (modelManager == null) return;
         Status status = modelManager.getStatus();
-        if (status.getRank() >= Status.RANK_ADMIN_REQUIRED)
+        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL)
             menuItemStatus.setIcon(R.drawable.ic_error_red_48dp);
         else menuItemStatus.setIcon(R.drawable.ic_ok_green_48dp);
     }
@@ -112,7 +112,7 @@ public class ActivityMain extends AppCompatActivity {
 
 
     public void addUserView() {
-        ArrayList<ViewContent> viewContents = modelManager.getConfigManager().getConfig().getUser_view().getView_contents();
+        ArrayList<ConfigViewContent> viewContents = modelManager.getConfigManager().getConfig().getUser_view().getView_contents();
         LinearLayout linearLayoutMain = (LinearLayout) findViewById(R.id.linear_layout_main);
         linearLayoutMain.removeAllViews();
 
@@ -163,7 +163,7 @@ public class ActivityMain extends AppCompatActivity {
         Status status = modelManager.getStatus();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("System Status");
-        if (status.getRank() >= Status.RANK_ADMIN_REQUIRED) {
+        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
             builder.setIcon(R.drawable.ic_error_red_48dp);
             builder.setMessage(status.getMessage());
         } else {

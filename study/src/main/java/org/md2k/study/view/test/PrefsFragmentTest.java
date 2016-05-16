@@ -51,7 +51,7 @@ public class PrefsFragmentTest extends PreferenceFragment {
 /*
         modelManager= ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_test);
-        ArrayList<String> views= modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(CView.TEST).getValues();
+        ArrayList<String> views= modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(ConfigView.TEST).getValues();
         preferences=new ArrayList<>();
         for(int i=0;i<views.size();i++){
             Log.d(TAG, "onCreate()...id=" + views.get(i));

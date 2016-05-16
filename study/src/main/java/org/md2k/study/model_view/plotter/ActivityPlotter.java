@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 
@@ -39,7 +39,7 @@ public class ActivityPlotter extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App app = ModelManager.getInstance(this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
+        ConfigApp app = ModelManager.getInstance(this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
         Intent launchIntent = getPackageManager().getLaunchIntentForPackage(app.getPackage_name());
         startActivity(launchIntent);
         finish();

@@ -26,9 +26,16 @@ package org.md2k.study.config;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class StudyInfo {
+public class ConfigApp {
     String id;
     String name;
+    boolean enable;
+    String package_name;
+    String service;
+    String settings;
+    String config;
+    String default_config;
+    String download_link;
 
     public String getId() {
         return id;
@@ -37,4 +44,32 @@ public class StudyInfo {
     public String getName() {
         return name;
     }
-}
+
+    public String getPackage_name() {
+        return package_name;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public String getSettings() {
+        return settings;
+    }
+
+    public String getConfig() {
+        return config;
+    }
+
+    public String getDefault_config() {
+        return default_config;
+    }
+
+    public String getDownload_link() {
+        return download_link;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+};

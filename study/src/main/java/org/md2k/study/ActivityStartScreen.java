@@ -50,7 +50,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         handler.removeCallbacks(runnableWaitStartCheck);
         if (progress != null)
             progress.dismiss();
-        if (ServiceSystemHealth.isRunning && ModelManager.getInstance(this).getStatus().getRank() <= Status.RANK_ADMIN_OPTIONAL) {
+        if (ServiceSystemHealth.isRunning && ModelManager.getInstance(this).getStatus().getRank() <= Status.RANK_ADMIN_OPTIONAL && ServiceSystemHealth.RANK_LIMIT==Status.RANK_SUCCESS) {
             Log.d(TAG, "service running..with rank=" + ServiceSystemHealth.RANK_LIMIT);
             Intent intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
             startActivity(intent);
@@ -139,6 +139,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             else {
                 if(firstTime) {firstTime=false;handler.postDelayed(runnableWaitStartCheck, 500);}
                 else {
+                    if(progress!=null)
                     progress.dismiss();
                     Status status = ModelManager.getInstance(ActivityStartScreen.this).getStatus();
                     Log.d(TAG, "status=" + status.log());

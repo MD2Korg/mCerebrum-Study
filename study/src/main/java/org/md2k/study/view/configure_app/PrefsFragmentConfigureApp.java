@@ -20,7 +20,7 @@ import android.widget.ListView;
 import org.md2k.study.R;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
-import org.md2k.study.config.CView;
+import org.md2k.study.config.ConfigView;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -65,7 +65,7 @@ public class PrefsFragmentConfigureApp extends PreferenceFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
         modelManager= ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_system);
-        ArrayList<String> views= modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(CView.CONFIGURE_APP).getValues();
+        ArrayList<String> views= modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(ConfigView.CONFIGURE_APP).getValues();
         preferences=new ArrayList<>();
         for(int i=0;i<views.size();i++){
             Log.d(TAG, "onCreate()...id=" + views.get(i));

@@ -16,7 +16,7 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
-import org.md2k.study.config.StudyInfo;
+import org.md2k.study.config.ConfigStudyInfo;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -54,8 +54,8 @@ public class StudyInfoManager extends Model {
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
     DataKitAPI dataKitAPI;
-    StudyInfo studyInfoDB;
-    StudyInfo studyInfoFile;
+    ConfigStudyInfo studyInfoDB;
+    ConfigStudyInfo studyInfoFile;
 
 
     public StudyInfoManager(ModelManager modelManager, String id, int rank) {
@@ -96,8 +96,8 @@ public class StudyInfoManager extends Model {
         notifyIfRequired(lastStatus);
     }
 
-    private StudyInfo readFromDataKit() {
-        StudyInfo studyInfo = null;
+    private ConfigStudyInfo readFromDataKit() {
+        ConfigStudyInfo studyInfo = null;
 
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
@@ -105,7 +105,7 @@ public class StudyInfoManager extends Model {
             if (dataTypes.size() != 0) {
                 DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
                 Gson gson = new Gson();
-                studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), StudyInfo.class);
+                studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), ConfigStudyInfo.class);
             }
         }
         return studyInfo;

@@ -1,5 +1,7 @@
 package org.md2k.study.config;
 
+import org.md2k.datakitapi.source.datasource.DataSource;
+
 import java.util.ArrayList;
 
 /**
@@ -30,19 +32,20 @@ import java.util.ArrayList;
  */
 public class Config {
     ConfigInfo config_info;
-    StudyInfo study_info;
-    ArrayList<App> apps;
-    ArrayList<Action> actions;
-    CView admin_view;
-    CView user_view;
-    ArrayList<DataQuality> data_quality;
+    ConfigStudyInfo study_info;
+    ArrayList<ConfigApp> apps;
+    ArrayList<ConfigAction> actions;
+    ConfigView admin_view;
+    ConfigView user_view;
+    ArrayList<DataSource> data_quality;
+    ArrayList<ConfigDataQualityView> data_quality_view;
 
     public ConfigInfo getConfig_info() {
         return config_info;
     }
 
-    public ArrayList<App> getApps() {
-        ArrayList<App> appList=new ArrayList<>();
+    public ArrayList<ConfigApp> getApps() {
+        ArrayList<ConfigApp> appList=new ArrayList<>();
         if(apps==null || apps.size()==0)
             return appList;
         else {
@@ -53,7 +56,7 @@ public class Config {
         }
         return appList;
     }
-    public App getApps(String id){
+    public ConfigApp getApps(String id){
         if(apps==null || apps.size()==0)
             return null;
         else {
@@ -65,28 +68,32 @@ public class Config {
         return null;
     }
 
-    public StudyInfo getStudy_info() {
+    public ConfigStudyInfo getStudy_info() {
         return study_info;
     }
 
-    public CView getAdmin_view() {
+    public ConfigView getAdmin_view() {
         return admin_view;
     }
 
-    public CView getUser_view() {
+    public ConfigView getUser_view() {
         return user_view;
     }
 
-    public ArrayList<Action> getActions() {
+    public ArrayList<ConfigAction> getActions() {
         return actions;
     }
-    public Action getAction(String id){
+    public ConfigAction getAction(String id){
         for(int i=0;i< actions.size();i++)
             if(actions.get(i).getId().equals(id)) return actions.get(i);
         return null;
     }
 
-    public ArrayList<DataQuality> getData_quality() {
+    public ArrayList<DataSource> getData_quality() {
         return data_quality;
+    }
+
+    public ArrayList<ConfigDataQualityView> getData_quality_view() {
+        return data_quality_view;
     }
 }

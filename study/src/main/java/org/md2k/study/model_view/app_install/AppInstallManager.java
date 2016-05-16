@@ -1,7 +1,7 @@
 package org.md2k.study.model_view.app_install;
 
 import org.md2k.study.Status;
-import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -45,7 +45,7 @@ public class AppInstallManager extends Model {
         super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
         appInstallList = new ArrayList<>();
-        ArrayList<App> apps = modelManager.getConfigManager().getConfig().getApps();
+        ArrayList<ConfigApp> apps = modelManager.getConfigManager().getConfig().getApps();
         for (int i = 0; i < apps.size(); i++) {
             AppInstall appInstall = new AppInstall(modelManager.getContext(), apps.get(i));
             appInstallList.add(appInstall);

@@ -20,7 +20,7 @@ import android.widget.Toast;
 import org.md2k.study.R;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
-import org.md2k.study.config.CView;
+import org.md2k.study.config.ConfigView;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -65,7 +65,7 @@ public class PrefsFragmentConfigureStudy extends PreferenceFragment {
 
         modelManager = ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_study_setup);
-        ArrayList<String> views = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(CView.CONFIGURE_STUDY).getValues();
+        ArrayList<String> views = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(ConfigView.CONFIGURE_STUDY).getValues();
         preferences = new ArrayList<>();
         for (int i = 0; i < views.size(); i++) {
             Log.d(TAG, "onCreate()...id=" + views.get(i));

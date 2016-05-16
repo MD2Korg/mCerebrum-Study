@@ -53,6 +53,7 @@ public class DataKitConnectManager extends Model {
     @Override
     public void set() {
         dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
+        Log.d(TAG,"DataKitConnectManager...set()..before...isConnected="+dataKitAPI.isConnected());
         if (dataKitAPI.isConnected()) {
             notifyIfRequired(new Status(rank, Status.SUCCESS));
         }else{
@@ -61,6 +62,7 @@ public class DataKitConnectManager extends Model {
             dataKitAPI.connect(new OnConnectionListener() {
                 @Override
                 public void onConnected() {
+                    Log.d(TAG,"connected...");
                     notifyIfRequired(new Status(rank, Status.SUCCESS));
                 }
             }, new OnExceptionListener() {
@@ -74,11 +76,16 @@ public class DataKitConnectManager extends Model {
 
     @Override
     public void clear() {
-        Log.d(TAG,"clear()...");
-        if(dataKitAPI.isConnected()){
+        Log.d(TAG, "clear(0)...dataKitAPI="+dataKitAPI);
+        if (dataKitAPI != null && dataKitAPI.isConnected()) {
+            Log.d(TAG,"DataKitConnectManager...clear(1)...datakitAPI="+dataKitAPI+"...isConnected="+dataKitAPI.isConnected());
             dataKitAPI.disconnect();
-            dataKitAPI.close();
-            notifyIfRequired(new Status(rank,Status.DATAKIT_NOT_AVAILABLE));
         }
+        if (dataKitAPI != null) {
+            Log.d(TAG,"DataKitConnectManager...clear(2)..datakitAPI="+dataKitAPI+"...isConnected="+dataKitAPI.isConnected());
+            dataKitAPI.close();
+        }
+        Log.d(TAG,"DataKitConnectManager...clear(3)..datakitAPI="+dataKitAPI);
+        notifyIfRequired(new Status(rank, Status.DATAKIT_NOT_AVAILABLE));
     }
 }

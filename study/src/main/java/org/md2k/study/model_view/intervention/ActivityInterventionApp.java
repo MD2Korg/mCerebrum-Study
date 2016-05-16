@@ -11,7 +11,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.md2k.study.R;
-import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
@@ -22,7 +22,7 @@ import java.util.List;
 
 public class ActivityInterventionApp extends AppCompatActivity {
     public static final String TAG = ActivityInterventionApp.class.getSimpleName();
-    List<App> items = new ArrayList<>();
+    List<ConfigApp> items = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +88,7 @@ public class ActivityInterventionApp extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     private void readItems() {
-        App app;
+        ConfigApp app;
         items=new ArrayList<>();
         app=ModelManager.getInstance(this).getConfigManager().getConfig().getApps("moodsurfing");
         if(app!=null)

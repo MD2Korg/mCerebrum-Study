@@ -8,7 +8,7 @@ import android.widget.Toast;
 import org.md2k.study.Constants;
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.Status;
-import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigApp;
 import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
 import org.md2k.utilities.Apps;
@@ -50,14 +50,14 @@ import java.util.UUID;
  */
 public class AppInstall {
     private static final String TAG = AppInstall.class.getSimpleName();
-    App app;
+    ConfigApp app;
     private String curVersion;
     private String latestVersion;
     private boolean installed;
     private boolean isDownloadOnGoing;
     Context context;
 
-    AppInstall(Context context, App app) {
+    AppInstall(Context context, ConfigApp app) {
         this.context = context;
         this.app = app;
         curVersion = null;

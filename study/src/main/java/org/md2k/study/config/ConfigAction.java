@@ -1,7 +1,5 @@
 package org.md2k.study.config;
 
-import java.util.ArrayList;
-
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -28,26 +26,51 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ViewContent {
+public class ConfigAction {
     String id;
+    String type;
     String name;
+    String icon;
+    int rank;
+    String package_name;
+    String class_name;
     boolean enable;
-    ArrayList<String> values;
+    String [] parameters;
+    public ConfigAction(){}
 
     public String getId() {
         return id;
+    }
+
+    public int getRank() {
+        return rank;
     }
 
     public String getName() {
         return name;
     }
 
+    public String getIcon() {
+        return icon;
+    }
+
+    public String getPackage_name() {
+        return package_name;
+    }
+
+    public String getClass_name() {
+        return class_name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
     public boolean isEnable() {
         return enable;
     }
 
-    public ArrayList<String> getValues() {
-        return values;
+    public String[] getParameters() {
+        return parameters;
     }
-
 }

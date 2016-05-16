@@ -3,7 +3,7 @@ package org.md2k.study.model_view.app_service;
 import android.os.Handler;
 
 import org.md2k.study.Status;
-import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -47,7 +47,7 @@ public class AppServiceManager extends Model {
         appServiceList = new ArrayList<>();
         status=new Status(rank,Status.NOT_DEFINED);
         handler=new Handler();
-        ArrayList<App> apps = modelManager.getConfigManager().getConfig().getApps();
+        ArrayList<ConfigApp> apps = modelManager.getConfigManager().getConfig().getApps();
         for (int i = 0; i < apps.size(); i++) {
             if (apps.get(i).getService() != null) {
                 AppService appService = new AppService(modelManager.getContext(), apps.get(i).getName(), apps.get(i).getPackage_name(), apps.get(i).getService(), rank);
@@ -62,7 +62,7 @@ public class AppServiceManager extends Model {
     public void set() {
         Log.d(TAG,"set()...");
         handler.removeCallbacks(runnableServiceRun);
-//        ArrayList<App> apps = modelManager.getConfigManager().getConfig().getApps();
+//        ArrayList<ConfigApp> apps = modelManager.getConfigManager().getConfig().getApps();
  //       appServiceList.clear();
  //       for (int i = 0; i < apps.size(); i++) {
  //           if (apps.get(i).getService() != null) {

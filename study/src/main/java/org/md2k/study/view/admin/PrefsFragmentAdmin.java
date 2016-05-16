@@ -20,8 +20,8 @@ import android.widget.ListView;
 import org.md2k.study.R;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
-import org.md2k.study.config.CView;
-import org.md2k.study.config.ViewContent;
+import org.md2k.study.config.ConfigView;
+import org.md2k.study.config.ConfigViewContent;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.study.view.configure_app.ActivityConfigureApp;
@@ -68,23 +68,23 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         modelManager = ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_admin);
 
-        ArrayList<ViewContent> viewContents = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents();
+        ArrayList<ConfigViewContent> viewContents = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents();
         for (int i = 0; i < viewContents.size(); i++) {
             if (!viewContents.get(i).isEnable()) continue;
             switch (viewContents.get(i).getId()) {
-                case CView.CONFIGURE_APP:
+                case ConfigView.CONFIGURE_APP:
                     prepareConfigureApp(viewContents.get(i));
                     break;
-                case CView.CONFIGURE_STUDY:
+                case ConfigView.CONFIGURE_STUDY:
                     prepareConfigureStudy(viewContents.get(i));
                     break;
-                case CView.START_STUDY:
+                case ConfigView.START_STUDY:
                     prepareStartStudy(viewContents.get(i));
                     break;
-                case CView.STOP_STUDY:
+                case ConfigView.STOP_STUDY:
                     prepareStopStudy(viewContents.get(i));
                     break;
-                case CView.OTHER:
+                case ConfigView.OTHER:
                     prepareOther(viewContents.get(i));
                     break;
             }
@@ -92,8 +92,8 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         setupCloseButton();
     }
 
-    void prepareStartStudy(ViewContent viewContent) {
-        Preference preference = findPreference(CView.START_STUDY);
+    void prepareStartStudy(ConfigViewContent viewContent) {
+        Preference preference = findPreference(ConfigView.START_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -107,8 +107,8 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         });
     }
 
-    void prepareStopStudy(ViewContent viewContent) {
-        Preference preference = findPreference(CView.STOP_STUDY);
+    void prepareStopStudy(ConfigViewContent viewContent) {
+        Preference preference = findPreference(ConfigView.STOP_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -122,8 +122,8 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         });
     }
 
-    void prepareConfigureApp(ViewContent viewContent) {
-        Preference preference = findPreference(CView.CONFIGURE_APP);
+    void prepareConfigureApp(ConfigViewContent viewContent) {
+        Preference preference = findPreference(ConfigView.CONFIGURE_APP);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -135,8 +135,8 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         });
     }
 
-    void prepareConfigureStudy(ViewContent viewContent) {
-        Preference preference = findPreference(CView.CONFIGURE_STUDY);
+    void prepareConfigureStudy(ConfigViewContent viewContent) {
+        Preference preference = findPreference(ConfigView.CONFIGURE_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -147,7 +147,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
             }
         });
     }
-    void prepareOther(ViewContent viewContent){
+    void prepareOther(ConfigViewContent viewContent){
         PreferenceCategory preferenceCategory= (PreferenceCategory) findPreference(viewContent.getId());
         preferenceCategory.removeAll();
         ArrayList<String> views= viewContent.getValues();
@@ -197,30 +197,30 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         Status status = modelManager.getStatus();
         Log.d(TAG, "updatePreference()...status=" + status.log());
         if (status.getRank() >= Status.RANK_SYSTEM) {
-            updatePreference(CView.CONFIGURE_APP, true, false, status.getMessage());
-            updatePreference(CView.CONFIGURE_STUDY, false, false, "");
-            updatePreference(CView.START_STUDY, false, false, "");
-            updatePreference(CView.STOP_STUDY, false, false, "");
-            updatePreference(CView.OTHER, false, false, "");
+            updatePreference(ConfigView.CONFIGURE_APP, true, false, status.getMessage());
+            updatePreference(ConfigView.CONFIGURE_STUDY, false, false, "");
+            updatePreference(ConfigView.START_STUDY, false, false, "");
+            updatePreference(ConfigView.STOP_STUDY, false, false, "");
+            updatePreference(ConfigView.OTHER, false, false, "");
 
         } else if (status.getRank() >= Status.RANK_ADMIN_REQUIRED) {
-            updatePreference(CView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.CONFIGURE_STUDY, true, false, status.getMessage());
-            updatePreference(CView.START_STUDY, false, false, "");
-            updatePreference(CView.STOP_STUDY, false, false, "");
-            updatePreference(CView.OTHER, false, false, "");
+            updatePreference(ConfigView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(ConfigView.CONFIGURE_STUDY, true, false, status.getMessage());
+            updatePreference(ConfigView.START_STUDY, false, false, "");
+            updatePreference(ConfigView.STOP_STUDY, false, false, "");
+            updatePreference(ConfigView.OTHER, false, false, "");
         } else if (status.getRank() >= Status.RANK_ADMIN_OPTIONAL) {
-            updatePreference(CView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.CONFIGURE_STUDY, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.START_STUDY, true, false, "");
-            updatePreference(CView.STOP_STUDY, false, false, "");
-            updatePreference(CView.OTHER, false, false, "");
+            updatePreference(ConfigView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(ConfigView.CONFIGURE_STUDY, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(ConfigView.START_STUDY, true, false, "");
+            updatePreference(ConfigView.STOP_STUDY, false, false, "");
+            updatePreference(ConfigView.OTHER, false, false, "");
         } else {
-            updatePreference(CView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.CONFIGURE_STUDY, true, true, new Status(0, Status.SUCCESS).getMessage());
-            updatePreference(CView.START_STUDY, false, false, "");
-            updatePreference(CView.STOP_STUDY, true, true, "");
-            updatePreference(CView.OTHER, true, true, "");
+            updatePreference(ConfigView.CONFIGURE_APP, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(ConfigView.CONFIGURE_STUDY, true, true, new Status(0, Status.SUCCESS).getMessage());
+            updatePreference(ConfigView.START_STUDY, false, false, "");
+            updatePreference(ConfigView.STOP_STUDY, true, true, "");
+            updatePreference(ConfigView.OTHER, true, true, "");
         }
     }
 

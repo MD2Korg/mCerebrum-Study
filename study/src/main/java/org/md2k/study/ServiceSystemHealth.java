@@ -58,18 +58,17 @@ public class ServiceSystemHealth extends Service {
 
             }
         });
-        modelManager.remove();
-        modelManager.set();
-        isRunning=true;
         Log.d(TAG,"...onCreate");
     }
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG,"onStartCommand()...");
         modelManager.clear();
         modelManager.remove();
         modelManager.set();
+        isRunning=true;
         return START_STICKY;
     }
 

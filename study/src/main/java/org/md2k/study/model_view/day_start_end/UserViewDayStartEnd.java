@@ -134,6 +134,8 @@ public class UserViewDayStartEnd extends UserView {
         Status status = dayStartEndInfoManager.getCurrentStatusDetails();
         if (status.getStatus() == Status.DAY_START_NOT_AVAILABLE) {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Start Day");
+            activity.findViewById(R.id.button_day_start_end).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_red));
+            ((Button)activity.findViewById(R.id.button_day_start_end)).setTextColor(Color.WHITE);
             activity.findViewById(R.id.button_day_start_end).setEnabled(true);
             activity.findViewById(R.id.button_day_start_end).setVisibility(View.VISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(" - ");

@@ -13,7 +13,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigApp;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DATA_QUALITY;
@@ -49,11 +49,10 @@ import java.util.ArrayList;
  */
 public class DataQuality {
     private static final String TAG = DataQuality.class.getSimpleName();
-    public static final long RESTART_TIME=120000;
+    public static final long RESTART_TIME = 120000;
     DataSource dataSource;
     DataKitAPI dataKitAPI;
     ReceiveCallBack receiveCallBack;
-    ArrayList<DataSourceClient> dataSourceClientArrayList;
     Context context;
     DataSourceClient dataSourceClient;
     Handler handler;
@@ -61,60 +60,59 @@ public class DataQuality {
 
     public DataQuality(Context context, DataSource dataSource, ReceiveCallBack receiveCallBack) {
         this.dataSource = dataSource;
-        this.receiveCallBack=receiveCallBack;
-        this.context=context;
-        handler=new Handler();
+        this.receiveCallBack = receiveCallBack;
+        this.context = context;
+        handler = new Handler();
     }
 
     public DataSource createDataSource(DataSource dataSource) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
         return dataSourceBuilder.build();
     }
-    public void start(){
+
+    public void start() {
         dataKitAPI = DataKitAPI.getInstance(context);
         handler.post(runnableSubscribe);
     }
-    Runnable runnableSubscribe=new Runnable() {
+
+    Runnable runnableSubscribe = new Runnable() {
         @Override
         public void run() {
-            dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
-            if(dataSourceClientArrayList.size()==0)
+            ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
+            if (dataSourceClientArrayList.size() == 0)
                 handler.postDelayed(this, 1000);
             else {
-                lastReceivedTimeStamp=DateTime.getDateTime();
+                lastReceivedTimeStamp = DateTime.getDateTime();
                 handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
-                for (int i = 0; i < dataSourceClientArrayList.size(); i++) {
-
-                    dataSourceClient = dataSourceClientArrayList.get(i);
-                    dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
-                        @Override
-                        public void onReceived(DataType dataType) {
-                            int sample=((DataTypeInt) dataType).getSample();
-                            if(sample!= DATA_QUALITY.BAND_OFF)
-                                lastReceivedTimeStamp=DateTime.getDateTime();
-                            receiveCallBack.onReceive(dataSource, dataSourceClient, sample);
-                        }
-                    });
-                }
+                dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size()-1);
+                dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
+                    @Override
+                    public void onReceived(DataType dataType) {
+                        int sample = ((DataTypeInt) dataType).getSample();
+                        if (sample != DATA_QUALITY.BAND_OFF)
+                            lastReceivedTimeStamp = DateTime.getDateTime();
+                        receiveCallBack.onReceive(dataSourceClient, sample);
+                    }
+                });
             }
         }
     };
-    Runnable runnableCheckAvailability=new Runnable() {
+    Runnable runnableCheckAvailability = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "runnableCheckAvailability()...");
-            if(DateTime.getDateTime()-lastReceivedTimeStamp>RESTART_TIME){
-                if(dataSourceClientArrayList.get(0).getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_CHEST) || dataSourceClientArrayList.get(0).getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST)){
+            if (DateTime.getDateTime() - lastReceivedTimeStamp > RESTART_TIME) {
+                if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_CHEST) || dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST)) {
                     Log.d(TAG, "runnableCheckAvailability()...autosense");
                     Intent intent = new Intent();
-                    App app=ConfigManager.getInstance(context).getConfig().getApps("autosense");
+                    ConfigApp app = ConfigManager.getInstance(context).getConfig().getApps("autosense");
                     intent.setClassName(app.getPackage_name(), app.getService());
                     context.stopService(intent);
                     context.startService(intent);
-                }else if(dataSourceClientArrayList.get(0).getDataSource().getPlatform().getType().equals(PlatformType.MICROSOFT_BAND)){
+                } else if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.MICROSOFT_BAND)) {
                     Log.d(TAG, "runnableCheckAvailability()...microsoftband");
                     Intent intent = new Intent();
-                    App app=ConfigManager.getInstance(context).getConfig().getApps("microsoftband");
+                    ConfigApp app = ConfigManager.getInstance(context).getConfig().getApps("microsoftband");
                     intent.setClassName(app.getPackage_name(), app.getService());
                     context.stopService(intent);
                     context.startService(intent);
@@ -123,11 +121,11 @@ public class DataQuality {
             handler.postDelayed(this, RESTART_TIME);
         }
     };
+
     public void stop() {
         handler.removeCallbacks(runnableSubscribe);
         handler.removeCallbacks(runnableCheckAvailability);
-        for(int i=0;i<dataSourceClientArrayList.size();i++)
-        if (dataSourceClientArrayList.get(i) != null && dataKitAPI!=null && dataKitAPI.isConnected())
-            dataKitAPI.unsubscribe(dataSourceClientArrayList.get(i));
+            if (dataSourceClient != null && dataKitAPI != null && dataKitAPI.isConnected())
+                dataKitAPI.unsubscribe(dataSourceClient);
     }
 }

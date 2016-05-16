@@ -5,7 +5,7 @@ import org.md2k.datakitapi.source.AbstractObject;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.study.Constants;
 import org.md2k.study.Status;
-import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigApp;
 import org.md2k.utilities.FileManager;
 
 import java.io.File;
@@ -41,10 +41,10 @@ import java.util.HashMap;
  */
 public class AppSettings {
     private static final String TAG = AppSettings.class.getSimpleName();
-    App app;
+    ConfigApp app;
     int rank;
 
-    public AppSettings(App app, int rank) {
+    public AppSettings(ConfigApp app, int rank) {
         this.app = app;
         this.rank=rank;
     }

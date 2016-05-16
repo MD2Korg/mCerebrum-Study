@@ -51,10 +51,12 @@ public class UserViewDataQuality extends UserView {
     private static final String TAG = UserViewDataQuality.class.getSimpleName();
     ImageView[] imageView;
     TextView[] textViews;
+    DataQualityManager dataQualityManager;
     Handler handler;
 
     public UserViewDataQuality(Activity activity, Model model) {
         super(activity, model);
+        dataQualityManager= (DataQualityManager) model;
         handler = new Handler();
         addView();
     }
@@ -83,19 +85,15 @@ public class UserViewDataQuality extends UserView {
 
     private void addLayout() {
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
-//        linearLayoutMain.setBackground(R.style.app_theme_teal_light_button);
         view = activity.getLayoutInflater().inflate(R.layout.layout_data_quality, null);
         linearLayoutMain.addView(view);
     }
 
     private void addImageView() {
         LinearLayout linearLayout = (LinearLayout) activity.findViewById(R.id.linear_layout_dataquality_all);
-        Log.d(TAG, "linearLayout=" + linearLayout.toString());
-        ArrayList<org.md2k.study.config.DataQuality> dataQualities = ModelManager.getInstance(activity).getConfigManager().getConfig().getData_quality();
-        Log.d(TAG, "datasource size=" + dataQualities.size());
-        imageView = new ImageView[dataQualities.size()];
-        textViews = new TextView[dataQualities.size()];
-        for (int i = 0; i < dataQualities.size(); i++) {
+        imageView = new ImageView[dataQualityManager.dataQualityInfos.size()];
+        textViews = new TextView[dataQualityManager.dataQualityInfos.size()];
+        for (int i = 0; i < dataQualityManager.dataQualityInfos.size(); i++) {
             LinearLayout linearLayoutOne = new LinearLayout(activity);
             linearLayoutOne.setClickable(true);
             linearLayoutOne.setBackground(ContextCompat.getDrawable(activity, android.R.drawable.btn_default_small));
@@ -109,7 +107,7 @@ public class UserViewDataQuality extends UserView {
                 }
             });
             linearLayoutOne.setOrientation(LinearLayout.VERTICAL);
-            LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataQualities.size()));
+            LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataQualityManager.dataQualityInfos.size()));
             linearLayoutOne.setLayoutParams(LLParams);
             TextView textViewOne = new TextView(activity);
             textViewOne.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -120,23 +118,14 @@ public class UserViewDataQuality extends UserView {
             textViews[i] = textViewOne;
             linearLayout.addView(linearLayoutOne);
             imageViewOne.setImageResource(R.drawable.ic_error_red_50dp);
-            LinearLayout.LayoutParams ll_params_imageView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataQualities.size()));
+            LinearLayout.LayoutParams ll_params_imageView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataQualityManager.dataQualityInfos.size()));
             ll_params_imageView.gravity = Gravity.CENTER_HORIZONTAL;
 
             imageViewOne.setLayoutParams(ll_params_imageView);
             imageViewOne.requestLayout();
             imageViewOne.getLayoutParams().height = 60;
             imageViewOne.getLayoutParams().width = 60;
-            if(dataQualities.get(i).name!=null) textViewOne.setText(dataQualities.get(i).name);
-            else {
-                if (dataQualities.get(i).datasource_quality.getType() != null)
-                    textViewOne.setText(dataQualities.get(i).datasource_quality.getType());
-                else if (dataQualities.get(i).datasource_quality.getPlatform().getId() != null) {
-                    textViewOne.setText(dataQualities.get(i).datasource_quality.getPlatform().getId());
-                } else if (dataQualities.get(i).datasource_quality.getPlatform().getType() != null) {
-                    textViewOne.setText(dataQualities.get(i).datasource_quality.getPlatform().getId());
-                }
-            }
+            textViewOne.setText(dataQualityManager.dataQualityInfos.get(i).getTitle());
         }
     }
 

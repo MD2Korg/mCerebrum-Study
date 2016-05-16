@@ -1,7 +1,7 @@
 package org.md2k.study.model_view;
 
 import org.md2k.study.Status;
-import org.md2k.study.config.Action;
+import org.md2k.study.config.ConfigAction;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 
@@ -37,7 +37,7 @@ public abstract class Model {
     protected ModelManager modelManager;
     protected int rank;
     protected Status status;
-    protected Action action;
+    protected ConfigAction action;
 
     public Model(ModelManager modelManager, String id, int rank) {
         this.id=id;
@@ -48,7 +48,7 @@ public abstract class Model {
         status=new Status(rank, Status.NOT_DEFINED);
     }
 
-    public Action getAction() {
+    public ConfigAction getAction() {
         return action;
     }
 

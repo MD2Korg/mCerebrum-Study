@@ -1,7 +1,7 @@
 package org.md2k.study.model_view.app_settings;
 
 import org.md2k.study.Status;
-import org.md2k.study.config.App;
+import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -47,10 +47,10 @@ public class AppSettingsManager extends Model {
     public void set(){
         Log.d(TAG, "set()...");
         appSettingsList.clear();
-        ArrayList<App> apps = modelManager.getConfigManager().getConfig().getApps();
+        ArrayList<ConfigApp> apps = modelManager.getConfigManager().getConfig().getApps();
         for (int i = 0; i < apps.size(); i++) {
             if (apps.get(i).getSettings() != null && apps.get(i).getSettings().trim().length() != 0) {
-                App app = apps.get(i);
+                ConfigApp app = apps.get(i);
                 AppSettings appSettings = new AppSettings(app, rank);
                 appSettingsList.add(appSettings);
             }

@@ -3,6 +3,7 @@ package org.md2k.study.model_view.data_quality;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.study.Status;
+import org.md2k.study.config.ConfigDataQualityView;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -41,6 +42,7 @@ public class DataQualityManager extends Model {
     ArrayList<DataQuality> dataQualities;
     ArrayList<DataQualityInfo> dataQualityInfos;
 
+
     public DataQualityManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
@@ -54,18 +56,17 @@ public class DataQualityManager extends Model {
         Log.d(TAG, "set()...");
         dataQualities.clear();
         dataQualityInfos.clear();
-        final ArrayList<org.md2k.study.config.DataQuality> dataQuality = modelManager.getConfigManager().getConfig().getData_quality();
+        final ArrayList<DataSource> dataQuality = modelManager.getConfigManager().getConfig().getData_quality();
+        final ArrayList<ConfigDataQualityView> configDataQualityViews=modelManager.getConfigManager().getConfig().getData_quality_view();
         if (dataQuality == null || dataQuality.size() == 0) return;
         for (int i = 0; i < dataQuality.size(); i++) {
-            dataQualityInfos.add(new DataQualityInfo(dataQuality.get(i)));
+            dataQualityInfos.add(new DataQualityInfo());
             final int finalI = i;
-            final int finalI1 = i;
-            dataQualities.add(new DataQuality(modelManager.getContext(), dataQuality.get(i).datasource_quality, new ReceiveCallBack() {
+            dataQualities.add(new DataQuality(modelManager.getContext(), dataQuality.get(i), new ReceiveCallBack() {
                 @Override
-                public void onReceive(DataSource dataSource, DataSourceClient dataSourceClient, int sample) {
+                public void onReceive( DataSourceClient dataSourceClient, int sample) {
                     if (dataQualityInfos == null || dataQualityInfos.size() <= finalI) return;
-                    dataQuality.get(finalI1).datasource_quality=dataSourceClient.getDataSource();
-                    dataQualityInfos.get(finalI).setQualities(dataQuality.get(finalI1), translate(sample));
+                    dataQualityInfos.get(finalI).set(dataSourceClient, configDataQualityViews, translate(sample));
                 }
             }));
         }
