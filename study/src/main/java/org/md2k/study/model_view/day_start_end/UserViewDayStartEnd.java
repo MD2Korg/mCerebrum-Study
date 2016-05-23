@@ -165,6 +165,7 @@ public class UserViewDayStartEnd extends UserView {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("End Day");
             ((Button) activity.findViewById(R.id.button_day_start_end)).setVisibility(View.VISIBLE);
             ((Button) activity.findViewById(R.id.button_day_start_end)).setEnabled(true);
+            ((Button) activity.findViewById(R.id.button_day_start_end)).setTextColor(Color.BLACK);
             ((Button) activity.findViewById(R.id.button_day_start_end)).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(formatTime(dayStartEndInfoManager.getDayStartTime()));
             ((TextView) activity.findViewById(R.id.text_view_day_end)).setText("-");
