@@ -27,15 +27,15 @@ package org.md2k.study.config;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConfigApp {
-    String id;
-    String name;
-    boolean enable;
-    String package_name;
-    String service;
-    String settings;
-    String config;
-    String default_config;
-    String download_link;
+    private String id;
+    private String name;
+    private boolean enable;
+    private String package_name;
+    private String service;
+    private String settings;
+    private String config;
+    private String default_config;
+    private String download_link;
 
     public String getId() {
         return id;

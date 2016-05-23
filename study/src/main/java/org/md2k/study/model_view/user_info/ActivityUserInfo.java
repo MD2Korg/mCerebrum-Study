@@ -75,7 +75,7 @@ public class ActivityUserInfo extends AppCompatActivity {
                 finish();
             }
         });
-
+        builder.setCancelable(false);
         builder.show();
     }
 }

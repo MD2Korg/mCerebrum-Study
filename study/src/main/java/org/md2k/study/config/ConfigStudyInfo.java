@@ -27,8 +27,10 @@ package org.md2k.study.config;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConfigStudyInfo {
-    String id;
-    String name;
+    private String id;
+    private String name;
+    private String logo;
+    private String title;
 
     public String getId() {
         return id;
@@ -36,5 +38,13 @@ public class ConfigStudyInfo {
 
     public String getName() {
         return name;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

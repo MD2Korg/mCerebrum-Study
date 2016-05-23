@@ -1,5 +1,10 @@
 package org.md2k.study.model_view.data_quality;
 
+import android.content.Intent;
+import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
+
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.study.Status;
@@ -41,6 +46,7 @@ public class DataQualityManager extends Model {
     private static final String TAG = DataQualityManager.class.getSimpleName();
     ArrayList<DataQuality> dataQualities;
     ArrayList<DataQualityInfo> dataQualityInfos;
+    Handler handler;
 
 
     public DataQualityManager(ModelManager modelManager, String id, int rank) {
@@ -48,6 +54,7 @@ public class DataQualityManager extends Model {
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
         dataQualityInfos = new ArrayList<>();
         dataQualities = new ArrayList<>();
+        handler=new Handler();
     }
 
     @Override
@@ -72,11 +79,13 @@ public class DataQualityManager extends Model {
         }
         for (int i = 0; i < dataQuality.size(); i++)
             dataQualities.get(i).start();
+        handler.post(runnableUpdateView);
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataKitException {
         Log.d(TAG, "clear()...");
+        handler.removeCallbacks(runnableUpdateView);
         status = new Status(rank, Status.NOT_DEFINED);
         if (dataQualities != null) {
             for (int i = 0; i < dataQualities.size(); i++)
@@ -103,4 +112,12 @@ public class DataQualityManager extends Model {
                 return Status.DATAQUALITY_OFF;
         }
     }
+    Runnable runnableUpdateView = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent=new Intent(DataQualityManager.class.getSimpleName());
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
+            handler.postDelayed(this, 5000);
+        }
+    };
 }

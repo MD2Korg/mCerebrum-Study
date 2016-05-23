@@ -1,23 +1,9 @@
 package org.md2k.study.model_view.user_status;
 
 import android.app.Activity;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.support.v4.content.ContextCompat;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import org.md2k.study.R;
-import org.md2k.study.Status;
-import org.md2k.study.controller.ModelFactory;
-import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
-import org.md2k.study.model_view.day_start_end.DayStartEndInfoManager;
-import org.md2k.study.view.admin.ActivityAdmin;
-import org.md2k.utilities.Report.Log;
 
 
 /**
@@ -51,85 +37,18 @@ public class UserViewUserStatus extends UserView {
 
     public UserViewUserStatus(Activity activity, Model model) {
         super(activity, model);
-        addView();
     }
 
     @Override
     public void disableView() {
-        enableView();
-    }
 
-    private void addView() {
-        LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
-        view = activity.getLayoutInflater().inflate(R.layout.layout_status, null);
-        linearLayoutMain.addView(view);
     }
 
 
     @Override
     public void enableView() {
-        ModelManager modelManager = ModelManager.getInstance(activity);
-        final Status status = modelManager.getStatus();
-        Log.d(TAG, "statusview...enableview...status=" + status.log());
-        String msg = status.getMessage();
-        if (status.getStatus() == Status.SUCCESS) {
-            if (modelManager.getModel(ModelFactory.MODEL_DAY_START_END) != null) {
-                msg = ((DayStartEndInfoManager) modelManager.getModel(ModelFactory.MODEL_DAY_START_END)).getCurrentStatusDetails().getMessage();
-            }
-        }
-        Button button = (Button) activity.findViewById(R.id.button_status);
-        ((TextView) activity.findViewById(R.id.textView_status)).setText(msg);
-        if (status.getStatus() == Status.SUCCESS) {
-            activity.findViewById(R.id.layout_health).setBackground(ContextCompat.getDrawable(activity, R.color.teal_50));
-            ((TextView) activity.findViewById(R.id.textView_status)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
-            button.setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
-            button.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_ok_teal_50dp, 0);
-            button.setText("OK");
-            button.setEnabled(false);
-            button.setOnClickListener(null);
-            //            button.setVisibility(View.INVISIBLE);
-
-        } else {
-            activity.findViewById(R.id.layout_health).setBackground(ContextCompat.getDrawable(activity, R.color.red_200));
-            ((TextView) activity.findViewById(R.id.textView_status)).setTextColor(ContextCompat.getColor(activity, R.color.red_900));
-            button.setBackground(ContextCompat.getDrawable(activity, R.drawable.button_red));
-            button.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_error_grey_50dp, 0);
-            button.setText("FIX");
-            button.setEnabled(true);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (status.getStatus() == Status.DAY_START_NOT_AVAILABLE) {
-                        showAlertDialog(Status.DAY_START_NOT_AVAILABLE);
-                    } else if (status.getStatus() == Status.STUDY_START_NOT_AVAILABLE)
-                        showAlertDialog(Status.STUDY_START_NOT_AVAILABLE);
-                    else {
-                        Intent intent = new Intent(activity, ActivityAdmin.class);
-                        activity.startActivity(intent);
-
-                    }
-                }
-            });
-        }
     }
     public void stop(){}
 
-    void showAlertDialog(int type) {
-        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(activity);
-        if (type == Status.DAY_START_NOT_AVAILABLE) {
-            builder.setTitle("Day is not started");
-            builder.setMessage("Please Click \"Day Start\" button");
-        } else if (type == Status.STUDY_START_NOT_AVAILABLE) {
-            builder.setTitle("Study is not started");
-            builder.setMessage("Please Click \"Study Start\" button");
-        }
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        builder.show();
-
-    }
 
 }

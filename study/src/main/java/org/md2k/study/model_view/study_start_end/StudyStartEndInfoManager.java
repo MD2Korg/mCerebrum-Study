@@ -3,6 +3,7 @@ package org.md2k.study.model_view.study_start_end;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -65,7 +66,7 @@ public class StudyStartEndInfoManager extends Model {
         status=new Status(rank, Status.NOT_DEFINED);
     }
 
-    public void set() {
+    public void set() throws DataKitException {
         Status lastStatus;
         readStudyStartFromDataKit();
         readStudyEndFromDataKit();
@@ -84,7 +85,7 @@ public class StudyStartEndInfoManager extends Model {
         status=new Status(rank, Status.NOT_DEFINED);
     }
 
-    private void readStudyStartFromDataKit() {
+    private void readStudyStartFromDataKit() throws DataKitException {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         studyStartTime=-1;
         if (dataKitAPI.isConnected()) {
@@ -98,7 +99,7 @@ public class StudyStartEndInfoManager extends Model {
         }
     }
 
-    private void readStudyEndFromDataKit() {
+    private void readStudyEndFromDataKit() throws DataKitException {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         studyEndTime=-1;
         if (dataKitAPI.isConnected()) {
@@ -121,7 +122,7 @@ public class StudyStartEndInfoManager extends Model {
         return true;
     }
 
-    private boolean writeStudyStartToDataKit() {
+    private boolean writeStudyStartToDataKit() throws DataKitException {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyStartTime);
@@ -130,7 +131,7 @@ public class StudyStartEndInfoManager extends Model {
         return true;
     }
 
-    private boolean writeStudyEndToDataKit() {
+    private boolean writeStudyEndToDataKit() throws DataKitException {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyEndTime);
@@ -177,14 +178,14 @@ public class StudyStartEndInfoManager extends Model {
         return dataSourceBuilder;
     }
 
-    public void setStudyStartTime(long studyStartTime) {
+    public void setStudyStartTime(long studyStartTime) throws DataKitException {
         this.studyStartTime = studyStartTime;
         writeStudyStartToDataKit();
         reset();
 
     }
 
-    public void setStudyEndTime(long studyEndTime) {
+    public void setStudyEndTime(long studyEndTime) throws DataKitException {
         this.studyEndTime = studyEndTime;
         writeStudyEndToDataKit();
         reset();

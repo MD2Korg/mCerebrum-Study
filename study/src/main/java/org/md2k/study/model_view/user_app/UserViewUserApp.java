@@ -8,6 +8,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.R;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -49,6 +50,7 @@ public class UserViewUserApp extends UserView {
 
     public UserViewUserApp(Activity activity, Model model) {
         super(activity, model);
+        addView();
     }
 
     @Override
@@ -56,8 +58,8 @@ public class UserViewUserApp extends UserView {
         disable = true;
     }
     @Override
-    public void enableView() {
-        addView();
+    public void enableView() throws DataKitException {
+        addUserApp();
         disable = false;
     }
 
@@ -68,12 +70,10 @@ public class UserViewUserApp extends UserView {
             view = activity.getLayoutInflater().inflate(R.layout.layout_user_app, null);
             linearLayoutMain.addView(view);
         }
-        addUserApp();
-        disable = false;
     }
     public void stop(){}
 
-    void addUserApp() {
+    void addUserApp() throws DataKitException {
         Log.d(TAG, "addUserApp()...");
         final UserAppManager userAppManager = (UserAppManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_USER_APP);
         gridViewApplication = (GridView) activity.findViewById(R.id.gridview);

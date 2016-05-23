@@ -6,20 +6,63 @@ import org.md2k.datakitapi.source.datasource.DataSource;
  * Created by monowar on 5/9/16.
  */
 public class ConfigDataQualityView {
-    public String name;
-    public Plotter plotter;
-    public Video video;
-    public Message message;
+    private String name;
+    private Plotter plotter;
+    private Video video;
+    private Message message;
+
     public class Plotter{
-        public boolean enable;
-        public DataSource datasource;
+        private boolean enable;
+        private DataSource datasource;
+
+        public boolean isEnable() {
+            return enable;
+        }
+
+        public DataSource getDatasource() {
+            return datasource;
+        }
     }
+
     public class Video{
-        public boolean enable;
-        public String link;
+        private boolean enable;
+        private String link;
+
+        public boolean isEnable() {
+            return enable;
+        }
+
+        public String getLink() {
+            return link;
+        }
     }
+
     public class Message{
-        public boolean enable;
-        public String text;
+        private boolean enable;
+        private String text;
+
+        public boolean isEnable() {
+            return enable;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Plotter getPlotter() {
+        return plotter;
+    }
+
+    public Video getVideo() {
+        return video;
+    }
+
+    public Message getMessage() {
+        return message;
     }
 }

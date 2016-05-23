@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
@@ -55,7 +56,7 @@ public class PrivacyControlManager extends Model {
         privacyData = null;
     }
 
-    public void set() {
+    public void set() throws DataKitException {
         privacyData = readFromDataKit();
         Status curStatus=new Status(rank, Status.SUCCESS);
         notifyIfRequired(curStatus);
@@ -67,7 +68,7 @@ public class PrivacyControlManager extends Model {
         status = new Status(rank, Status.NOT_DEFINED);
     }
 
-    private PrivacyData readFromDataKit() {
+    private PrivacyData readFromDataKit() throws DataKitException {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         PrivacyData privacyData = null;
         ArrayList<DataSourceClient> dataSourceClients= dataKitAPI.find(dataSourceBuilder);

@@ -20,6 +20,7 @@ import org.md2k.study.model_view.intervention.InterventionManager;
 import org.md2k.study.model_view.plotter.PlotterManager;
 import org.md2k.study.model_view.privacy_control.PrivacyControlManager;
 import org.md2k.study.model_view.selfreport.SelfReportManager;
+import org.md2k.study.model_view.selfreport_eating.SelfReportManagerEating;
 import org.md2k.study.model_view.sleep_info.SleepInfoManager;
 import org.md2k.study.model_view.study_info.StudyInfoManager;
 import org.md2k.study.model_view.study_start_end.StudyStartEndInfoManager;
@@ -46,6 +47,7 @@ public class ModelFactory {
     public static final String MODEL_PRIVACY = "privacy";
     public static final String MODEL_INTERVENTION = "intervention";
     public static final String MODEL_SMOKING_SELF_REPORT = "smoking_self_report";
+    public static final String MODEL_EATING_SELF_REPORT = "eating_self_report";
     public static final String MODEL_PLOTTER = "plotter";
     public static final String MODEL_EMA_TEST = "EMA_test";
     public static final String MODEL_DAY_START_END = "day_start_end";
@@ -93,6 +95,8 @@ public class ModelFactory {
                 return new InterventionManager(modelManager,id,rank);
             case MODEL_SMOKING_SELF_REPORT:
                 return new SelfReportManager(modelManager,id,rank);
+            case MODEL_EATING_SELF_REPORT:
+                return new SelfReportManagerEating(modelManager,id,rank);
             case MODEL_PLOTTER:
                 return new PlotterManager(modelManager,id,rank);
             case MODEL_PRIVACY:

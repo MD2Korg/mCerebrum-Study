@@ -7,6 +7,7 @@ import android.os.Handler;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeInt;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
@@ -78,22 +79,26 @@ public class DataQuality {
     Runnable runnableSubscribe = new Runnable() {
         @Override
         public void run() {
-            ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
-            if (dataSourceClientArrayList.size() == 0)
-                handler.postDelayed(this, 1000);
-            else {
-                lastReceivedTimeStamp = DateTime.getDateTime();
-                handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
-                dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size()-1);
-                dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
-                    @Override
-                    public void onReceived(DataType dataType) {
-                        int sample = ((DataTypeInt) dataType).getSample();
-                        if (sample != DATA_QUALITY.BAND_OFF)
-                            lastReceivedTimeStamp = DateTime.getDateTime();
-                        receiveCallBack.onReceive(dataSourceClient, sample);
-                    }
-                });
+            try {
+                ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
+                if (dataSourceClientArrayList.size() == 0)
+                    handler.postDelayed(this, 1000);
+                else {
+                    lastReceivedTimeStamp = DateTime.getDateTime();
+                    handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
+                    dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
+                    dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
+                        @Override
+                        public void onReceived(DataType dataType) {
+                            int sample = ((DataTypeInt) dataType).getSample();
+                            if (sample != DATA_QUALITY.BAND_OFF)
+                                lastReceivedTimeStamp = DateTime.getDateTime();
+                            receiveCallBack.onReceive(dataSourceClient, sample);
+                        }
+                    });
+                }
+            } catch (DataKitException e) {
+                e.printStackTrace();
             }
         }
     };
@@ -122,7 +127,7 @@ public class DataQuality {
         }
     };
 
-    public void stop() {
+    public void stop() throws DataKitException {
         handler.removeCallbacks(runnableSubscribe);
         handler.removeCallbacks(runnableCheckAvailability);
             if (dataSourceClient != null && dataKitAPI != null && dataKitAPI.isConnected())

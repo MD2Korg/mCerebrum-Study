@@ -3,9 +3,8 @@ package org.md2k.study;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.md2k.study.controller.Callback;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 
@@ -38,7 +37,6 @@ import org.md2k.utilities.Report.Log;
 
 public class ServiceSystemHealth extends Service {
     private static final String TAG = ServiceSystemHealth.class.getSimpleName();
-    public static final String INTENT_NAME="INTENT_SERVICE";
     ModelManager modelManager;
     public static boolean isRunning=false;
     public static int RANK_LIMIT;
@@ -47,17 +45,6 @@ public class ServiceSystemHealth extends Service {
         Log.d(TAG, "onCreate...");
         super.onCreate();
         modelManager=ModelManager.getInstance(getApplicationContext());
-        modelManager.setOnStatusChange(new Callback() {
-            @Override
-            public void onStatusChange(Status status) {
-                Log.d(TAG, "statusChange...status=" + status.getRank());
-                Intent intent = new Intent(INTENT_NAME);
-                intent.putExtra(Status.class.getSimpleName(), status);
-                LocalBroadcastManager.getInstance(ServiceSystemHealth.this).sendBroadcast(intent);
-                Log.d(TAG, "send status to activity...");
-
-            }
-        });
         Log.d(TAG,"...onCreate");
     }
 
@@ -65,9 +52,13 @@ public class ServiceSystemHealth extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG,"onStartCommand()...");
-        modelManager.clear();
-        modelManager.remove();
-        modelManager.set();
+        try {
+            modelManager.clear();
+            modelManager.remove();
+            modelManager.set();
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
         isRunning=true;
         return START_STICKY;
     }
@@ -79,8 +70,12 @@ public class ServiceSystemHealth extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
-        modelManager.clear();
-        modelManager.remove();
+        try {
+            modelManager.clear();
+            modelManager.remove();
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
         isRunning=false;
 
         super.onDestroy();

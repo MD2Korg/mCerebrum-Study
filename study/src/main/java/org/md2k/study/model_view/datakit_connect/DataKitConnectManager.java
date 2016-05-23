@@ -1,8 +1,8 @@
 package org.md2k.study.model_view.datakit_connect;
 
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
-import org.md2k.datakitapi.messagehandler.OnExceptionListener;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -36,7 +36,7 @@ import org.md2k.utilities.Report.Log;
  */
 public class DataKitConnectManager extends Model {
     private static final String TAG = DataKitConnectManager.class.getSimpleName();
-    DataKitAPI dataKitAPI;
+    DataKitAPI dataKitAPI=null;
 
     public DataKitConnectManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -51,31 +51,29 @@ public class DataKitConnectManager extends Model {
     }
 
     @Override
-    public void set() {
+    public void set() throws DataKitException {
         dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         Log.d(TAG,"DataKitConnectManager...set()..before...isConnected="+dataKitAPI.isConnected());
         if (dataKitAPI.isConnected()) {
             notifyIfRequired(new Status(rank, Status.SUCCESS));
         }else{
-            dataKitAPI.close();
             dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
             dataKitAPI.connect(new OnConnectionListener() {
                 @Override
                 public void onConnected() {
                     Log.d(TAG,"connected...");
-                    notifyIfRequired(new Status(rank, Status.SUCCESS));
-                }
-            }, new OnExceptionListener() {
-                @Override
-                public void onException(org.md2k.datakitapi.status.Status status) {
-                    notifyIfRequired(new Status(rank, Status.DATAKIT_NOT_AVAILABLE));
+                    try {
+                        notifyIfRequired(new Status(rank, Status.SUCCESS));
+                    } catch (DataKitException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataKitException {
         Log.d(TAG, "clear(0)...dataKitAPI="+dataKitAPI);
         if (dataKitAPI != null && dataKitAPI.isConnected()) {
             Log.d(TAG,"DataKitConnectManager...clear(1)...datakitAPI="+dataKitAPI+"...isConnected="+dataKitAPI.isConnected());
@@ -83,8 +81,8 @@ public class DataKitConnectManager extends Model {
         }
         if (dataKitAPI != null) {
             Log.d(TAG,"DataKitConnectManager...clear(2)..datakitAPI="+dataKitAPI+"...isConnected="+dataKitAPI.isConnected());
-            dataKitAPI.close();
         }
+        dataKitAPI=null;
         Log.d(TAG,"DataKitConnectManager...clear(3)..datakitAPI="+dataKitAPI);
         notifyIfRequired(new Status(rank, Status.DATAKIT_NOT_AVAILABLE));
     }

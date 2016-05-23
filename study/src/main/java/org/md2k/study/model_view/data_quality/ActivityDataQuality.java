@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.study.R;
@@ -35,7 +36,7 @@ public class ActivityDataQuality extends AppCompatActivity {
     }
     void setupButtonPlotter() {
         final Button button = (Button) findViewById(R.id.button_plotter);
-        if (!dataQualityInfo.configDataQualityView.plotter.enable) {
+        if (!dataQualityInfo.configDataQualityView.getPlotter().isEnable()) {
             button.setVisibility(View.INVISIBLE);
             return;
         }
@@ -43,23 +44,24 @@ public class ActivityDataQuality extends AppCompatActivity {
         button.setText("Graph of " + dataQualityInfo.getTitle());
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                ConfigApp app = ModelManager.getInstance(ActivityDataQuality.this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
-                Intent intent = new Intent();
-                intent.setClassName(app.getPackage_name(), "org.md2k.plotter.ActivityPlot");
-                DataSourceClient dataSourceClient = getDataSourceClient();
-                if (dataSourceClient != null) {
-                    intent.putExtra(DataSourceClient.class.getSimpleName(), dataSourceClient);
-                    startActivity(intent);
-                }
-                ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(ActivityDataQuality.this).find(new DataSourceBuilder(dataQualityInfo.configDataQualityView.plotter.datasource));
-                if (dataSourceClientArrayList.size() > 0) {
+                try {
+                    ConfigApp app = ModelManager.getInstance(ActivityDataQuality.this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
+                    Intent intent = new Intent();
+                    intent.setClassName(app.getPackage_name(), "org.md2k.plotter.ActivityPlot");
+                    DataSourceClient dataSourceClient = getDataSourceClient();
+                    if (dataSourceClient != null) {
+                        intent.putExtra(DataSourceClient.class.getSimpleName(), dataSourceClient);
+                        startActivity(intent);
+                    }
+                } catch (DataKitException e) {
+                    e.printStackTrace();
                 }
             }
         });
     }
 
-    DataSourceClient getDataSourceClient() {
-        ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(ActivityDataQuality.this).find(new DataSourceBuilder(dataQualityInfo.configDataQualityView.plotter.datasource));
+    DataSourceClient getDataSourceClient() throws DataKitException {
+        ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(ActivityDataQuality.this).find(new DataSourceBuilder(dataQualityInfo.configDataQualityView.getPlotter().getDatasource()));
         if (dataSourceClientArrayList.size() > 0)
             return dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
         else return null;
@@ -68,7 +70,7 @@ public class ActivityDataQuality extends AppCompatActivity {
 
     void setupButtonVideo() {
         final Button button = (Button) findViewById(R.id.button_video);
-        if (!dataQualityInfo.configDataQualityView.video.enable) {
+        if (!dataQualityInfo.configDataQualityView.getVideo().isEnable()) {
             button.setVisibility(View.INVISIBLE);
             return;
         }
@@ -76,7 +78,7 @@ public class ActivityDataQuality extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(ActivityDataQuality.this, ActivityYouTube.class);
-                intent.putExtra(VIDEO_LINK, dataQualityInfo.configDataQualityView.video.link);
+                intent.putExtra(VIDEO_LINK, dataQualityInfo.configDataQualityView.getVideo().getLink());
                 startActivity(intent);
             }
         });
@@ -84,7 +86,7 @@ public class ActivityDataQuality extends AppCompatActivity {
 
     void setupMessage() {
         TextView textView = (TextView) findViewById(R.id.textView_message);
-        textView.setText(dataQualityInfo.configDataQualityView.message.text);
+        textView.setText(dataQualityInfo.configDataQualityView.getMessage().getText());
         TextView textView1 = (TextView) findViewById(R.id.textView_message_header);
         textView1.setText("If you are experiencing bad data quality:");
 

@@ -1,11 +1,10 @@
-package org.md2k.study.model_view.study_info;
+package org.md2k.study.model_view.selfreport_eating;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
-import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
@@ -17,12 +16,13 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
-import org.md2k.study.config.ConfigStudyInfo;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.Event;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -50,96 +50,63 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class StudyInfoManager extends Model {
-    private static final String TAG = StudyInfoManager.class.getSimpleName();
+public class SelfReportManagerEating extends Model {
+    private static final String TAG = SelfReportManagerEating.class.getSimpleName();
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
     DataKitAPI dataKitAPI;
-    ConfigStudyInfo studyInfoDB;
-    ConfigStudyInfo studyInfoFile;
 
-
-    public StudyInfoManager(ModelManager modelManager, String id, int rank) {
-        super(modelManager,id,rank);
+    public SelfReportManagerEating(ModelManager modelManager, String id, int rank) {
+        super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-        status=new Status(rank, Status.CLEAR_OLD_DATA);
-        studyInfoDB=null;
-        studyInfoFile=null;
     }
 
+    public void clear(){
+        status=new Status(rank, Status.NOT_DEFINED);
+    }
     public void set() throws DataKitException {
-        Log.d(TAG,"set()...");
-        studyInfoFile = modelManager.getConfigManager().getConfig().getStudy_info();
+        dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
-        dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
-        studyInfoDB = readFromDataKit();
-        if (studyInfoDB == null && studyInfoFile != null) {
-            writeToDataKit();
-            studyInfoDB = studyInfoFile;
-        }
-        update();
-    }
-
-    public void clear() {
-        studyInfoDB = null;
-        studyInfoFile = null;
-        status=new Status(rank, Status.CLEAR_OLD_DATA);
-    }
-
-    public void update() throws DataKitException {
-        Log.d(TAG,"update()...");
+        dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         Status lastStatus;
-        if (studyInfoDB == null) lastStatus = new Status(rank,Status.DATAKIT_NOT_AVAILABLE);
-        else if (!studyInfoDB.getId().equals(studyInfoFile.getId()) || !studyInfoDB.getName().equals(studyInfoFile.getName()))
-            lastStatus = new Status(rank,Status.CLEAR_OLD_DATA);
-        else lastStatus = new Status(rank,Status.SUCCESS);
-        Log.d(TAG,"lastStatus="+lastStatus.log());
+        lastStatus= new Status(rank,Status.SUCCESS);
         notifyIfRequired(lastStatus);
     }
 
-    private ConfigStudyInfo readFromDataKit() throws DataKitException {
-        ConfigStudyInfo studyInfo = null;
-
-        if (dataKitAPI.isConnected()) {
-            dataSourceClient = dataKitAPI.register(dataSourceBuilder);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-            if (dataTypes.size() != 0) {
-                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                Gson gson = new Gson();
-                studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), ConfigStudyInfo.class);
-            }
-        }
-        return studyInfo;
-    }
-
-    public boolean writeToDataKit() throws DataKitException {
-        Log.d(TAG, "StudyInfoManager...writeToDataKit()");
+    private boolean writeToDataKit() throws DataKitException {
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
-        JsonObject sample = new JsonParser().parse(gson.toJson(studyInfoFile)).getAsJsonObject();
-
-        dataSourceClient = dataKitAPI.register(dataSourceBuilder);
+        JsonObject sample = new JsonParser().parse(gson.toJson(new Event(Event.EATING, Event.TYPE_SELF_REPORT))).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
-        studyInfoDB = studyInfoFile;
         return true;
     }
-
     DataSourceBuilder createDataSourceBuilder() {
-        Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.STUDY_INFO).setPlatform(platform);
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Study Info");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Contains study_id and study_name as a json object");
+        Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EVENT).setPlatform(platform);
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Event");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Event with type (ex: eating, selfreport) as a json object");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
+        dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
         return dataSourceBuilder;
     }
 
-    public String getStudy_id() {
-        return studyInfoFile.getId();
+    ArrayList<HashMap<String, String>> createDataDescriptors() {
+        ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
+        dataDescriptors.add(createDescriptor("Event with type (ex: eating, selfreport)"));
+        return dataDescriptors;
     }
 
-    public String getStudy_name() {
-        return studyInfoFile.getName();
+    HashMap<String, String> createDescriptor(String name) {
+        HashMap<String, String> dataDescriptor = new HashMap<>();
+        dataDescriptor.put(METADATA.NAME, name);
+        dataDescriptor.put(METADATA.UNIT, "String");
+        dataDescriptor.put(METADATA.DESCRIPTION, "contains event as a json object");
+        dataDescriptor.put(METADATA.DATA_TYPE, Event.class.getName());
+        return dataDescriptor;
     }
-
+    public void save() throws DataKitException {
+        writeToDataKit();
+    }
 }
+

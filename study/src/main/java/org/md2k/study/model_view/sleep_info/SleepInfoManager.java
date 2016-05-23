@@ -3,6 +3,7 @@ package org.md2k.study.model_view.sleep_info;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -67,13 +68,13 @@ public class SleepInfoManager extends Model {
         sleepTimeDB = -1;
         status=new Status(rank, Status.SLEEP_NOT_DEFINED);
     }
-    public void set(){
+    public void set() throws DataKitException {
         dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
         update();
     }
-    public void update(){
+    public void update() throws DataKitException {
         Status lastStatus;
         if (sleepTimeDB == -1)
             lastStatus= new Status(rank,Status.SLEEP_NOT_DEFINED);
@@ -88,7 +89,7 @@ public class SleepInfoManager extends Model {
         return true;
     }
 
-    private void readStudyInfoFromDataKit() {
+    private void readStudyInfoFromDataKit() throws DataKitException {
         sleepTimeDB = -1;
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
@@ -100,7 +101,7 @@ public class SleepInfoManager extends Model {
         }
     }
 
-    private boolean writeToDataKit() {
+    private boolean writeToDataKit() throws DataKitException {
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), sleepTimeNew);
@@ -135,7 +136,7 @@ public class SleepInfoManager extends Model {
         dataDescriptor.put(METADATA.DATA_TYPE, long.class.getName());
         return dataDescriptor;
     }
-    public void save(){
+    public void save() throws DataKitException {
         if(writeToDataKit())
             sleepTimeDB = sleepTimeNew;
         set();

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -15,14 +16,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
-import com.crashlytics.android.Crashlytics;
-
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.config.ConfigViewContent;
-import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
-import org.md2k.study.model_view.app_reset.AppResetManager;
+import org.md2k.study.model_view.app_reset.ActivityAppReset;
 import org.md2k.study.model_view.privacy_control.PrivacyControlManager;
 import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.FileManager;
@@ -33,8 +31,6 @@ import org.md2k.utilities.UI.ActivityCopyright;
 import java.io.File;
 import java.util.ArrayList;
 
-import io.fabric.sdk.android.Fabric;
-
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
     ModelManager modelManager;
@@ -44,8 +40,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG,"onCreate()...");
-        Fabric.with(this, new Crashlytics());
+        Log.d(TAG, "onCreate()...");
         if (getIntent().getExtras() != null && getIntent().getExtras().getBoolean("EXIT", false)) {
             Log.d(TAG, "closing...");
             Intent intent = new Intent(this, ServiceSystemHealth.class);
@@ -54,25 +49,41 @@ public class ActivityMain extends AppCompatActivity {
             return;
         }
         setContentView(R.layout.activity_main);
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(Status.class.getSimpleName()));
         Log.d(TAG, "broadcast...set...");
         userViews = new ArrayList<>();
         Log.d(TAG, "onCreate()..isServiceRunning=" + ServiceSystemHealth.isRunning);
+        modelManager = ModelManager.getInstance(ActivityMain.this);
+        if(getSupportActionBar()!=null) {
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle("mCerebrum");
+            try {
+                String logoName = modelManager.getConfigManager().getConfig().getStudy_info().getLogo();
+                if (logoName != null) {
+                    String path = Constants.CONFIG_DIRECTORY + logoName;
+                    Drawable d = Drawable.createFromPath(path);
+                    getSupportActionBar().setIcon(d);
+                }
+            } catch (Exception ignored) {
+
+            }
+            try {
+                String title = modelManager.getConfigManager().getConfig().getStudy_info().getTitle();
+                if (title != null) {
+                    getSupportActionBar().setDisplayShowHomeEnabled(true);
+                    getSupportActionBar().setTitle(title);
+                }
+            } catch (Exception ignored) {
+
+            }
+        }
+        addUserView();
     }
 
     @Override
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         super.onDestroy();
-    }
-
-    void createUI() {
-        Log.d(TAG, "createUI()...");
-        modelManager = ModelManager.getInstance(ActivityMain.this);
-        Status status = modelManager.getStatus();
-        Log.d(TAG, "createUI()...status=" + status.log());
-        Log.d(TAG, "here");
-        updateUI();
     }
 
 
@@ -85,11 +96,9 @@ public class ActivityMain extends AppCompatActivity {
         else menuItemStatus.setIcon(R.drawable.ic_ok_green_48dp);
     }
 
-    void updateUI() {
-        if (modelManager == null) return;
+    void updateUI() throws DataKitException {
+        modelManager=ModelManager.getInstance(this);
         Status status = modelManager.getStatus();
-        if (userViews.size() == 0)
-            addUserView();
         updateMenu();
 
         for (int i = 0; i < userViews.size(); i++) {
@@ -127,20 +136,29 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        Log.d(TAG, "onResume()...");
-        createUI();
+        try {
+
+            Log.d(TAG, "onResume()...");
+            updateUI();
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
         super.onResume();
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Status status = intent.getParcelableExtra(Status.class.getSimpleName());
-            Log.d(TAG, "received broadcast...rank =" + status.getRank());
-            if(status.getStatus()==Status.CONFIG_FILE_NOT_EXIST)
-                finish();
-            else
-                createUI();
+            try {
+                Status status = intent.getParcelableExtra(Status.class.getSimpleName());
+                Log.d(TAG, "received broadcast...rank =" + status.getRank());
+                if (status.getStatus() == Status.CONFIG_FILE_NOT_EXIST)
+                    finish();
+                else
+                    updateUI();
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -157,28 +175,6 @@ public class ActivityMain extends AppCompatActivity {
         menuItemStatus = menu.findItem(R.id.action_status);
         updateMenu();
         return true;
-    }
-
-    void showStatus() {
-        Status status = modelManager.getStatus();
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("System Status");
-        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
-            builder.setIcon(R.drawable.ic_error_red_48dp);
-            builder.setMessage(status.getMessage());
-        } else {
-            builder.setIcon(R.drawable.ic_ok_green_48dp);
-            builder.setMessage("System is Okay.");
-
-        }
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.show();
-
     }
 
     @Override
@@ -214,15 +210,32 @@ public class ActivityMain extends AppCompatActivity {
                 openPDF();
                 break;
             case R.id.action_reset_app:
-                Model model = modelManager.getModel(ModelFactory.MODEL_APP_RESET);
-                if (model != null) {
-                    ((AppResetManager) model).resetApp();
-                }
+                intent = new Intent(this, ActivityAppReset.class);
+                startActivity(intent);
                 break;
 
 
         }
         return super.onOptionsItemSelected(item);
+    }
+    void showStatus() {
+        Status status = ModelManager.getInstance(this).getStatus();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("System Status");
+        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
+            builder.setIcon(R.drawable.ic_error_red_48dp);
+            builder.setMessage(status.getMessage());
+        } else {
+            builder.setIcon(R.drawable.ic_ok_green_48dp);
+            builder.setMessage("System is Okay.");
+        }
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
     }
 
     void openPDF() {

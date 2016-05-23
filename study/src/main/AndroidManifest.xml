@@ -70,7 +70,12 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.selfreport.ActivitySelfReport"
-            android:label="Self Report"
+            android:label="Self Report Smoking"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
+        <activity
+            android:name=".model_view.selfreport_eating.ActivitySelfReportEating"
+            android:label="Self Report Eating"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity

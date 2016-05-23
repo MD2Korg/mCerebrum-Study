@@ -3,6 +3,7 @@ package org.md2k.study.model_view.clear_data;
 import android.app.Activity;
 import android.content.Intent;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -41,7 +42,7 @@ public class ClearDataManager extends Model {
         status = new Status(rank,Status.SUCCESS);
     }
 
-    public void delete(Activity activity) {
+    public void delete(Activity activity) throws DataKitException {
         ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_APP_SERVICE).clear();
         Intent intent = new Intent();
         intent.putExtra("delete",true);

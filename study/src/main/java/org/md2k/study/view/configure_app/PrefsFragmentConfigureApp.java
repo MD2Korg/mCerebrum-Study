@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import org.md2k.study.R;
-import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigView;
 import org.md2k.study.controller.ModelManager;
@@ -62,7 +61,7 @@ public class PrefsFragmentConfigureApp extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(Status.class.getSimpleName()));
         modelManager= ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_system);
         ArrayList<String> views= modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(ConfigView.CONFIGURE_APP).getValues();

@@ -17,8 +17,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.R;
-import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigView;
 import org.md2k.study.controller.ModelManager;
@@ -61,7 +61,7 @@ public class PrefsFragmentConfigureStudy extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(Status.class.getSimpleName()));
 
         modelManager = ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_study_setup);
@@ -107,7 +107,11 @@ public class PrefsFragmentConfigureStudy extends PreferenceFragment {
     public void onDestroy() {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
         for (int i = 0; i < preferences.size(); i++)
-            modelManager.getModel(preferences.get(i).getKey()).reset();
+            try {
+                modelManager.getModel(preferences.get(i).getKey()).reset();
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
         super.onDestroy();
     }
 
@@ -126,9 +130,16 @@ public class PrefsFragmentConfigureStudy extends PreferenceFragment {
         button.setText("Save");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                for (int i = 0; i < preferences.size(); i++)
-                    modelManager.getModel(preferences.get(i).getKey()).save();
-                Toast.makeText(getActivity(), "Saved...", Toast.LENGTH_LONG).show();
+                try {
+                    for (int i = 0; i < preferences.size(); i++)
+                        modelManager.getModel(preferences.get(i).getKey()).save();
+                    Toast.makeText(getActivity(), "Saved...", Toast.LENGTH_LONG).show();
+                    modelManager.clear();
+                    modelManager.set();
+                } catch (DataKitException e) {
+                    e.printStackTrace();
+                }
+
             }
         });
     }
@@ -154,12 +165,10 @@ public class PrefsFragmentConfigureStudy extends PreferenceFragment {
             Model model = modelManager.getModel(preferences.get(i).getKey());
             Status status = model.getStatus();
             Log.d(TAG, "id=" + preferences.get(i).getKey() + " status=" + status.log());
-            if(model.getAction()!=null && model.getAction().getType()!=null && model.getAction().getType().equals("reset")){
+            if (model.getAction() != null && model.getAction().getType() != null && model.getAction().getType().equals("reset")) {
                 preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_delete_blue_48dp));
                 preferences.get(i).setSummary("");
-            }
-
-            else if (status.getStatus() == Status.SUCCESS) {
+            } else if (status.getStatus() == Status.SUCCESS) {
                 preferences.get(i).setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
                 preferences.get(i).setSummary(status.getMessage());
             } else if (status.getStatus() == Status.APP_UPDATE_AVAILABLE) {

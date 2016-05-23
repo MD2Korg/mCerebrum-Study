@@ -31,18 +31,16 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Config {
-    ConfigInfo config_info;
-    ConfigStudyInfo study_info;
-    ArrayList<ConfigApp> apps;
-    ArrayList<ConfigAction> actions;
-    ConfigView admin_view;
-    ConfigView user_view;
-    ArrayList<DataSource> data_quality;
-    ArrayList<ConfigDataQualityView> data_quality_view;
-
-    public ConfigInfo getConfig_info() {
-        return config_info;
-    }
+    private ConfigInfo config_info;
+    private ConfigStudyInfo study_info;
+    private ArrayList<ConfigApp> apps;
+    private ArrayList<ConfigAction> actions;
+    private ConfigView admin_view;
+    private ConfigView user_view;
+    private ArrayList<DataSource> data_quality;
+    private ArrayList<ConfigDataQualityView> data_quality_view;
+    private ConfigDayStartEnd day_start;
+    private ConfigDayStartEnd day_end;
 
     public ArrayList<ConfigApp> getApps() {
         ArrayList<ConfigApp> appList=new ArrayList<>();
@@ -50,7 +48,7 @@ public class Config {
             return appList;
         else {
             for(int i=0;i<apps.size();i++){
-                if(apps.get(i).enable)
+                if(apps.get(i).isEnable())
                     appList.add(apps.get(i));
             }
         }
@@ -61,15 +59,29 @@ public class Config {
             return null;
         else {
             for(int i=0;i<apps.size();i++){
-                if(apps.get(i).enable && apps.get(i).id.equals(id))
+                if(apps.get(i).isEnable() && apps.get(i).getId().equals(id))
                     return apps.get(i);
             }
         }
         return null;
     }
 
+    public ConfigAction getAction(String id){
+        for(int i=0;i< actions.size();i++)
+            if(actions.get(i).getId().equals(id)) return actions.get(i);
+        return null;
+    }
+
+    public ConfigInfo getConfig_info() {
+        return config_info;
+    }
+
     public ConfigStudyInfo getStudy_info() {
         return study_info;
+    }
+
+    public ArrayList<ConfigAction> getActions() {
+        return actions;
     }
 
     public ConfigView getAdmin_view() {
@@ -80,20 +92,19 @@ public class Config {
         return user_view;
     }
 
-    public ArrayList<ConfigAction> getActions() {
-        return actions;
-    }
-    public ConfigAction getAction(String id){
-        for(int i=0;i< actions.size();i++)
-            if(actions.get(i).getId().equals(id)) return actions.get(i);
-        return null;
-    }
-
     public ArrayList<DataSource> getData_quality() {
         return data_quality;
     }
 
     public ArrayList<ConfigDataQualityView> getData_quality_view() {
         return data_quality_view;
+    }
+
+    public ConfigDayStartEnd getDay_start() {
+        return day_start;
+    }
+
+    public ConfigDayStartEnd getDay_end() {
+        return day_end;
     }
 }

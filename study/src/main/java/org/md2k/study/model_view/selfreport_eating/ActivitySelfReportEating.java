@@ -1,10 +1,14 @@
-package org.md2k.study.model_view.plotter;
+package org.md2k.study.model_view.selfreport_eating;
+
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import org.md2k.datakitapi.exception.DataKitException;
-import org.md2k.study.Status;
+import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.model_view.Model;
-import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.UI.AlertDialogs;
+
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -32,20 +36,22 @@ import org.md2k.utilities.Report.Log;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class PlotterManager extends Model {
-    private static final String TAG = PlotterManager.class.getSimpleName();
-    public PlotterManager(ModelManager modelManager, String id, int rank) {
-        super(modelManager,id,rank);
-        Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-    }
-
-    public void clear(){
-        status=new Status(rank, Status.NOT_DEFINED);
-    }
-    public void set() throws DataKitException {
-        Status lastStatus;
-        lastStatus= new Status(rank,Status.SUCCESS);
-        notifyIfRequired(lastStatus);
-    }
-}
-
+public class ActivitySelfReportEating extends AppCompatActivity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        AlertDialogs.showAlertDialogConfirm(ActivitySelfReportEating.this, "Eating Self Report", "Have you just ate?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    SelfReportManagerEating selfReportManagerEating = ((SelfReportManagerEating) ModelManager.getInstance(ActivitySelfReportEating.this).getModel(ModelFactory.MODEL_EATING_SELF_REPORT));
+                    try {
+                        selfReportManagerEating.save();
+                    } catch (DataKitException e) {
+                        e.printStackTrace();
+                    }
+                }
+                finish();
+            }
+        });
+    }}

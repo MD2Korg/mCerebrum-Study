@@ -1,5 +1,6 @@
 package org.md2k.study.model_view.app_install;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelManager;
@@ -53,7 +54,7 @@ public class AppInstallManager extends Model {
         status=new Status(rank, Status.APP_NOT_INSTALLED);
     }
 
-    public void set() {
+    public void set() throws DataKitException {
         Log.d(TAG, "set()...");
         Status curStatus;
         for(int i=0;i<appInstallList.size();i++)

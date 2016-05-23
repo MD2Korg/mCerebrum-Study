@@ -35,8 +35,8 @@ public class ConfigView {
     public static final String STOP_STUDY ="key_stop_study";
     public static final String OTHER="key_other";
 
-    String password;
-    ArrayList<ConfigViewContent> view_contents;
+    private String password;
+    private ArrayList<ConfigViewContent> view_contents;
 
     public String getPassword() {
         return password;

@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.UI.AlertDialogs;
@@ -44,7 +45,11 @@ public class ActivitySelfReport extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
                     SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
-                    selfReportManager.save();
+                    try {
+                        selfReportManager.save();
+                    } catch (DataKitException e) {
+                        e.printStackTrace();
+                    }
                 }
                 finish();
             }

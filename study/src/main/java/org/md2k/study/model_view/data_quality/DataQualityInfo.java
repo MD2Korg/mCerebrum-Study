@@ -33,7 +33,7 @@ public class DataQualityInfo {
 
     public String getTitle() {
         if(configDataQualityView==null) return "";
-        return configDataQualityView.name;
+        return configDataQualityView.getName();
     }
 
     public int getQuality() {
@@ -52,7 +52,7 @@ public class DataQualityInfo {
 
     public void setConfigDataQualityView(ArrayList<ConfigDataQualityView> configDataQualityViews, DataSource dataSource) {
         for(int i=0;i<configDataQualityViews.size();i++){
-            DataSource confDataSource=configDataQualityViews.get(i).plotter.datasource;
+            DataSource confDataSource=configDataQualityViews.get(i).getPlotter().getDatasource();
             if(confDataSource.getType().equals(DataSourceType.RESPIRATION) && confDataSource.getType().equals(dataSource.getId())) {
                 configDataQualityView = configDataQualityViews.get(i);
                 return;

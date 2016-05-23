@@ -29,10 +29,10 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConfigViewContent {
-    String id;
-    String name;
-    boolean enable;
-    ArrayList<String> values;
+    private String id;
+    private String name;
+    private boolean enable;
+    private ArrayList<String> values;
 
     public String getId() {
         return id;

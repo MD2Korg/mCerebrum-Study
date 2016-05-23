@@ -2,6 +2,7 @@ package org.md2k.study.model_view.app_service;
 
 import android.os.Handler;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelManager;
@@ -87,7 +88,11 @@ public class AppServiceManager extends Model {
             Log.d(TAG, "runnable ServiceRun...");
             Status curStatus=getCurrentStatus();
             if(!curStatus.equals(status))
-                notifyIfRequired(curStatus);
+                try {
+                    notifyIfRequired(curStatus);
+                } catch (DataKitException e) {
+                    e.printStackTrace();
+                }
             handler.postDelayed(this,30000);
         }
     };

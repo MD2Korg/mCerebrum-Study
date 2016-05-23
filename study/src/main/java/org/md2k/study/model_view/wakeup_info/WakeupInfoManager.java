@@ -3,6 +3,7 @@ package org.md2k.study.model_view.wakeup_info;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -67,14 +68,14 @@ public class WakeupInfoManager extends Model {
         status = new Status(rank, Status.WAKEUP_NOT_DEFINED);
     }
 
-    public void set() {
+    public void set() throws DataKitException {
         dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
         update();
     }
 
-    public void update() {
+    public void update() throws DataKitException {
         Status lastStatus;
         if (wakeupTimeDB == -1)
             lastStatus = new Status(rank, Status.WAKEUP_NOT_DEFINED);
@@ -90,7 +91,7 @@ public class WakeupInfoManager extends Model {
         return true;
     }
 
-    private void readStudyInfoFromDataKit() {
+    private void readStudyInfoFromDataKit() throws DataKitException {
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
@@ -102,7 +103,7 @@ public class WakeupInfoManager extends Model {
     }
 
 
-    private boolean writeToDataKit() {
+    private boolean writeToDataKit() throws DataKitException {
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), wakeupTimeNew);
@@ -139,7 +140,7 @@ public class WakeupInfoManager extends Model {
         return dataDescriptor;
     }
 
-    public void save() {
+    public void save() throws DataKitException {
         if (writeToDataKit())
             wakeupTimeDB = wakeupTimeNew;
         set();

@@ -3,6 +3,7 @@ package org.md2k.study.model_view;
 import android.app.Activity;
 import android.view.View;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.data_quality.UserViewDataQuality;
@@ -44,7 +45,7 @@ public abstract class UserView {
     protected Model model;
     protected Activity activity;
 
-    public abstract void enableView();
+    public abstract void enableView() throws DataKitException;
     public UserView(Activity activity, Model model){
         this.activity=activity;
         this.model=model;

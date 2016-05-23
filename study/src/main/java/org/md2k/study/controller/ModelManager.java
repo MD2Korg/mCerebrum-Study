@@ -1,7 +1,10 @@
 package org.md2k.study.controller;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigManager;
@@ -42,7 +45,6 @@ public class ModelManager {
     Context context;
     HashMap<String, Model> modelHashMap;
     ConfigManager configManager;
-    Callback callback;
     Status status;
     private boolean isUpdating;
 
@@ -59,7 +61,7 @@ public class ModelManager {
         isUpdating = false;
     }
 
-    public void clear() {
+    public void clear() throws DataKitException {
         isUpdating = true;
         for (int i = Status.RANK_SUCCESS; i <= Status.RANK_BEGIN; i++) {
             for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
@@ -75,7 +77,7 @@ public class ModelManager {
         ConfigManager.clear();
     }
 
-    public void set() {
+    public void set() throws DataKitException {
         configManager = ConfigManager.getInstance(context);
         if (!modelHashMap.containsKey(ModelFactory.MODEL_CONFIG_INFO))
             modelHashMap.put(ModelFactory.MODEL_CONFIG_INFO, ModelFactory.getModel(this, ModelFactory.MODEL_CONFIG_INFO, Status.RANK_CONFIG));
@@ -94,15 +96,15 @@ public class ModelManager {
         update();
     }
 
-    public void update() {
+    public void update() throws DataKitException {
         if (isUpdating) return;
         isUpdating = true;
         Log.d(TAG, "update()...");
         Status lastStatus = status;
         while (true) {
             Status curStatus = findLatestStatus();
-            Log.d(TAG, "update()...lastStatus=" + lastStatus.log() + " curStatus=" + curStatus.log()+" rankLimit="+ServiceSystemHealth.RANK_LIMIT);
-            if (curStatus.getRank() == lastStatus.getRank() || curStatus.getStatus() == Status.SUCCESS || curStatus.getRank()==ServiceSystemHealth.RANK_LIMIT){
+            Log.d(TAG, "update()...lastStatus=" + lastStatus.log() + " curStatus=" + curStatus.log() + " rankLimit=" + ServiceSystemHealth.RANK_LIMIT);
+            if (curStatus.getRank() == lastStatus.getRank() || curStatus.getStatus() == Status.SUCCESS || curStatus.getRank() == ServiceSystemHealth.RANK_LIMIT) {
                 lastStatus = curStatus;
                 break;
             } else {
@@ -116,8 +118,9 @@ public class ModelManager {
         }
         if (!status.equals(lastStatus)) {
             status = lastStatus;
-            if (callback != null)
-                callback.onStatusChange(status);
+            Intent intent = new Intent(Status.class.getSimpleName());
+            intent.putExtra(Status.class.getSimpleName(), status);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
         isUpdating = false;
     }
@@ -137,7 +140,7 @@ public class ModelManager {
         return curStatus;
     }
 
-    private void setNow(int state) {
+    private void setNow(int state) throws DataKitException {
         Log.d(TAG, "set(" + state + ")...");
         if (state < Status.RANK_SUCCESS || state > Status.RANK_BEGIN) return;
         for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
@@ -148,7 +151,7 @@ public class ModelManager {
         }
     }
 
-    private void clear(int state) {
+    private void clear(int state) throws DataKitException {
         Log.d(TAG, "clear(" + Status.RANK_SUCCESS + "..." + state + ")...");
         for (int s = Status.RANK_SUCCESS; s <= state; s++) {
             for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet())
@@ -173,9 +176,5 @@ public class ModelManager {
     public Model getModel(String id) {
         if (modelHashMap.containsKey(id)) return modelHashMap.get(id);
         return null;
-    }
-
-    public void setOnStatusChange(Callback callback) {
-        this.callback = callback;
     }
 }

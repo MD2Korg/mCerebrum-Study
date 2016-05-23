@@ -1,3 +1,6 @@
+version = '0.5.0'
+apply from: 'versioning.gradle'
+
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
@@ -22,8 +25,8 @@ android {
         applicationId 'org.md2k.study'
         minSdkVersion 19
         targetSdkVersion 21
-        versionCode 20
-        versionName '0.4.10'
+        versionCode buildVersionCode()
+        versionName version
         // Enabling multidex support.
         multiDexEnabled true
     }

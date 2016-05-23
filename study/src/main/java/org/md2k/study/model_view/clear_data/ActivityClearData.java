@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 
@@ -41,22 +42,30 @@ public class ActivityClearData extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ModelManager.getInstance(this).clear();
-        Intent intent = new Intent();
-        intent.putExtra("delete",true);
-        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsArchive");
-        startActivity(intent);
-        intent.putExtra("delete",true);
-        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsDatabase");
-        startActivity(intent);
+        try {
+            ModelManager.getInstance(this).clear();
+            Intent intent = new Intent();
+            intent.putExtra("delete", true);
+            intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsArchive");
+            startActivity(intent);
+            intent.putExtra("delete", true);
+            intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsDatabase");
+            startActivity(intent);
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
     }
     @Override
     public void onResume(){
-        Log.d(TAG, "onResume...");
-        resume++;
-        if(resume==2) {
-            ModelManager.getInstance(this).set();
-            finish();
+        try {
+            Log.d(TAG, "onResume...");
+            resume++;
+            if (resume == 2) {
+                ModelManager.getInstance(this).set();
+                finish();
+            }
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
         super.onResume();
     }

@@ -72,7 +72,7 @@ public class ActivityAdmin extends AppCompatActivity {
 
     public void showPasswordWindow() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("PASSWORD (Admin Access)");
+        alertDialogBuilder.setTitle("Admin Access");
         alertDialogBuilder.setMessage("Enter Password");
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT |

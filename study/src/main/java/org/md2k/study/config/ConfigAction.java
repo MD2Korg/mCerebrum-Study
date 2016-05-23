@@ -1,5 +1,7 @@
 package org.md2k.study.config;
 
+import java.util.HashMap;
+
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -27,16 +29,16 @@ package org.md2k.study.config;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConfigAction {
-    String id;
-    String type;
-    String name;
-    String icon;
-    int rank;
-    String package_name;
-    String class_name;
-    boolean enable;
-    String [] parameters;
-    public ConfigAction(){}
+    private String id;
+    private String type;
+    private String name;
+    private String icon;
+    protected int rank;
+    private String package_name;
+    private String class_name;
+    protected boolean enable;
+    private HashMap<String, String> parameters;
+    private ConfigAction(){}
 
     public String getId() {
         return id;
@@ -70,7 +72,7 @@ public class ConfigAction {
         return enable;
     }
 
-    public String[] getParameters() {
+    public HashMap<String, String> getParameters() {
         return parameters;
     }
 }

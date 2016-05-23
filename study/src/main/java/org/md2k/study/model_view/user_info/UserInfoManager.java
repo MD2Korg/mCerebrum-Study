@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -74,7 +75,7 @@ public class UserInfoManager extends Model {
         status = new Status(rank, Status.USERID_NOT_DEFINED);
     }
 
-    public void set() {
+    public void set() throws DataKitException {
         dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         isInDatabase = false;
@@ -82,7 +83,7 @@ public class UserInfoManager extends Model {
         update();
     }
 
-    public void update() {
+    public void update() throws DataKitException {
         Status lastStatus;
         if (isInDatabase) lastStatus = new Status(rank, Status.SUCCESS);
         else lastStatus = new Status(rank, Status.USERID_NOT_DEFINED);
@@ -104,7 +105,7 @@ public class UserInfoManager extends Model {
         else return new Status(rank,Status.USERID_NOT_DEFINED);
     }
 
-    private void readFromDataKit() {
+    private void readFromDataKit() throws DataKitException {
         if (!dataKitAPI.isConnected()) return;
         DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
@@ -116,12 +117,12 @@ public class UserInfoManager extends Model {
         }
     }
 
-    public void save() {
+    public void save() throws DataKitException {
         writeToDataKit();
         update();
     }
 
-    private boolean writeToDataKit() {
+    private boolean writeToDataKit() throws DataKitException {
         if (!dataKitAPI.isConnected()) return false;
         if (isInDatabase) return false;
         if (userInfo == null) return false;

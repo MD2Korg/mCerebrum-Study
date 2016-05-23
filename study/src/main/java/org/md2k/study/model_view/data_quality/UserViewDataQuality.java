@@ -1,15 +1,20 @@
 package org.md2k.study.model_view.data_quality;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelFactory;
@@ -51,21 +56,20 @@ public class UserViewDataQuality extends UserView {
     private static final String TAG = UserViewDataQuality.class.getSimpleName();
     ImageView[] imageView;
     TextView[] textViews;
-    DataQualityManager dataQualityManager;
     Handler handler;
 
     public UserViewDataQuality(Activity activity, Model model) {
         super(activity, model);
-        dataQualityManager= (DataQualityManager) model;
+        Log.d(TAG, "UserViewDataQuality()...");
         handler = new Handler();
         addView();
+        LocalBroadcastManager.getInstance(activity).registerReceiver(receiver, new IntentFilter(DataQualityManager.class.getSimpleName()));
     }
 
     @Override
     public void disableView() {
         Log.d(TAG, "disableView...");
-        handler.removeCallbacks(runnableUpdateView);
-        if(imageView!=null) {
+        if (imageView != null) {
             for (int i = 0; i < imageView.length; i++) {
                 imageView[i].setImageResource(R.drawable.ic_error_red_50dp);
             }
@@ -75,12 +79,12 @@ public class UserViewDataQuality extends UserView {
     }
 
     public void addView() {
+        Log.d(TAG, "addView()...");
         addLayout();
         addImageView();
     }
 
     public void stop() {
-        handler.removeCallbacks(runnableUpdateView);;
     }
 
     private void addLayout() {
@@ -90,10 +94,12 @@ public class UserViewDataQuality extends UserView {
     }
 
     private void addImageView() {
+        Log.d(TAG, "addImageView()...");
+        ArrayList<DataSource> dataSources = ModelManager.getInstance(activity).getConfigManager().getConfig().getData_quality();
         LinearLayout linearLayout = (LinearLayout) activity.findViewById(R.id.linear_layout_dataquality_all);
-        imageView = new ImageView[dataQualityManager.dataQualityInfos.size()];
-        textViews = new TextView[dataQualityManager.dataQualityInfos.size()];
-        for (int i = 0; i < dataQualityManager.dataQualityInfos.size(); i++) {
+        imageView = new ImageView[dataSources.size()];
+        textViews = new TextView[dataSources.size()];
+        for (int i = 0; i < dataSources.size(); i++) {
             LinearLayout linearLayoutOne = new LinearLayout(activity);
             linearLayoutOne.setClickable(true);
             linearLayoutOne.setBackground(ContextCompat.getDrawable(activity, android.R.drawable.btn_default_small));
@@ -101,13 +107,13 @@ public class UserViewDataQuality extends UserView {
             linearLayoutOne.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent=new Intent(activity, ActivityDataQuality.class);
+                    Intent intent = new Intent(activity, ActivityDataQuality.class);
                     intent.putExtra("id", finalI);
                     activity.startActivity(intent);
                 }
             });
             linearLayoutOne.setOrientation(LinearLayout.VERTICAL);
-            LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataQualityManager.dataQualityInfos.size()));
+            LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataSources.size()));
             linearLayoutOne.setLayoutParams(LLParams);
             TextView textViewOne = new TextView(activity);
             textViewOne.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -118,26 +124,28 @@ public class UserViewDataQuality extends UserView {
             textViews[i] = textViewOne;
             linearLayout.addView(linearLayoutOne);
             imageViewOne.setImageResource(R.drawable.ic_error_red_50dp);
-            LinearLayout.LayoutParams ll_params_imageView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataQualityManager.dataQualityInfos.size()));
+            LinearLayout.LayoutParams ll_params_imageView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataSources.size()));
             ll_params_imageView.gravity = Gravity.CENTER_HORIZONTAL;
 
             imageViewOne.setLayoutParams(ll_params_imageView);
             imageViewOne.requestLayout();
             imageViewOne.getLayoutParams().height = 60;
             imageViewOne.getLayoutParams().width = 60;
-            textViewOne.setText(dataQualityManager.dataQualityInfos.get(i).getTitle());
+            if (dataSources.get(i).getId() != null)
+                textViewOne.setText(dataSources.get(i).getId().toLowerCase());
+            else
+                textViewOne.setText(dataSources.get(i).getType().toLowerCase());
         }
     }
 
-    Runnable runnableUpdateView = new Runnable() {
+    BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
-        public void run() {
+        public void onReceive(Context context, Intent intent) {
             String message = null;
             boolean isAllGood = true;
             boolean isStatusSuccess;
-            DataQualityManager dataQualityManager= (DataQualityManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DATA_QUALITY);
-            if(dataQualityManager==null){
-                handler.postDelayed(this, 5000);
+            DataQualityManager dataQualityManager = (DataQualityManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DATA_QUALITY);
+            if (dataQualityManager == null || textViews.length == 0) {
                 return;
             }
             if (dataQualityManager.getStatus().getStatus() == Status.SUCCESS)
@@ -146,11 +154,12 @@ public class UserViewDataQuality extends UserView {
 
             ArrayList<DataQualityInfo> dataQualityInfos = dataQualityManager.dataQualityInfos;
             for (int i = 0; i < dataQualityInfos.size(); i++) {
-                textViews[i].setText(dataQualityInfos.get(i).getTitle());
                 if (isStatusSuccess == false) {
                     imageView[i].setImageResource(R.drawable.ic_error_red_50dp);
                     message = "";
                 } else {
+                    if(dataQualityInfos.get(i).getTitle()!="")
+                        textViews[i].setText(dataQualityInfos.get(i).getTitle());
                     switch (dataQualityInfos.get(i).getQuality()) {
                         case Status.DATAQUALITY_GOOD:
                             imageView[i].setImageResource(R.drawable.ic_ok_teal_50dp);
@@ -177,15 +186,11 @@ public class UserViewDataQuality extends UserView {
                 ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setText(message);
                 ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setTextColor(ContextCompat.getColor(activity, R.color.red_900));
             }
-
-            handler.postDelayed(this, 5000);
         }
     };
 
     @Override
     public void enableView() {
-        handler.removeCallbacks(runnableUpdateView);
         Log.d(TAG, "updateView()...");
-        handler.post(runnableUpdateView);
     }
 }

@@ -1,5 +1,6 @@
 package org.md2k.study.model_view.user_app;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -45,7 +46,7 @@ public class UserAppManager extends Model {
         userApps=new ArrayList<>();
     }
 
-    public void set() {
+    public void set() throws DataKitException {
         Log.d(TAG,"set()..");
         userApps.clear();
         ArrayList<String> modelNames=modelManager.getConfigManager().getConfig().getUser_view().getView_contents(ModelFactory.MODEL_USER_APP).getValues();
@@ -63,7 +64,7 @@ public class UserAppManager extends Model {
         status=new Status(rank, Status.NOT_DEFINED);
     }
 
-    public ArrayList<Model> getUserApps() {
+    public ArrayList<Model> getUserApps() throws DataKitException {
         set();
         return userApps;
     }

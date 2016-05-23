@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Constants;
 import org.md2k.study.R;
 import org.md2k.study.Status;
@@ -83,12 +84,16 @@ public class ActivityConfigDownload extends Activity {
                         @Override
                         public void OnCompleted(int status) {
                             if (status == Download.SUCCESS) {
-                                ModelManager.getInstance(ActivityConfigDownload.this).clear();
-                                FileManager.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
-                                ModelManager.getInstance(ActivityConfigDownload.this).remove();
-                                ModelManager.getInstance(ActivityConfigDownload.this).set();
-                                Intent returnIntent = new Intent();
-                                setResult(Activity.RESULT_OK, returnIntent);
+                                try {
+                                    ModelManager.getInstance(ActivityConfigDownload.this).clear();
+                                    FileManager.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
+                                    ModelManager.getInstance(ActivityConfigDownload.this).remove();
+                                    ModelManager.getInstance(ActivityConfigDownload.this).set();
+                                    Intent returnIntent = new Intent();
+                                    setResult(Activity.RESULT_OK, returnIntent);
+                                } catch (DataKitException e) {
+                                    e.printStackTrace();
+                                }
                                 finish();
                             } else {
                                 Toast.makeText(ActivityConfigDownload.this, "Error!!! File not found...", Toast.LENGTH_LONG).show();
@@ -122,10 +127,14 @@ public class ActivityConfigDownload extends Activity {
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ModelManager.getInstance(ActivityConfigDownload.this).clear();
-                ModelManager.getInstance(ActivityConfigDownload.this).remove();
-                FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
-                ModelManager.getInstance(ActivityConfigDownload.this).set();
+                try {
+                    ModelManager.getInstance(ActivityConfigDownload.this).clear();
+                    ModelManager.getInstance(ActivityConfigDownload.this).remove();
+                    FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+                    ModelManager.getInstance(ActivityConfigDownload.this).set();
+                } catch (DataKitException e) {
+                    e.printStackTrace();
+                }
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_OK, returnIntent);
                 dialog.cancel();

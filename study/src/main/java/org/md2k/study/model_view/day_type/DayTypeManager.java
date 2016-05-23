@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -75,13 +76,13 @@ public class DayTypeManager extends Model {
     public void setDayType(int dayType){
         dayTypeNew=new DayTypeInfo(dayType);
     }
-    public void set(){
+    public void set() throws DataKitException {
         dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         readFromDataKit();
         update();
     }
-    public void update(){
+    public void update() throws DataKitException {
         Status lastStatus;
         if (dayTypeDB==null)
             lastStatus= new Status(rank,Status.DAY_TYPE_NOT_DEFINED);
@@ -96,7 +97,7 @@ public class DayTypeManager extends Model {
         return true;
     }
 
-    private void readFromDataKit() {
+    private void readFromDataKit() throws DataKitException {
         dayTypeDB = null;
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
@@ -109,7 +110,7 @@ public class DayTypeManager extends Model {
         }
     }
 
-    private boolean writeToDataKit() {
+    private boolean writeToDataKit() throws DataKitException {
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         Gson gson = new Gson();
@@ -144,7 +145,7 @@ public class DayTypeManager extends Model {
         dataDescriptor.put(METADATA.DATA_TYPE, DayTypeInfo.class.getName());
         return dataDescriptor;
     }
-    public void save(){
+    public void save() throws DataKitException {
         if(writeToDataKit())
             dayTypeDB=dayTypeNew;
         set();

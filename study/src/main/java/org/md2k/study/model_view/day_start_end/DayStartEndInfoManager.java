@@ -1,8 +1,13 @@
 package org.md2k.study.model_view.day_start_end;
 
+import android.content.Intent;
+import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
+
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -15,6 +20,7 @@ import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.NotificationRequest;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -48,68 +54,307 @@ import java.util.HashMap;
  */
 public class DayStartEndInfoManager extends Model {
     private static final String TAG = DayStartEndInfoManager.class.getSimpleName();
-    DataSourceBuilder dataSourceBuilderDayStart;
-    DataSourceClient dataSourceClientDayStart;
-    DataSourceBuilder dataSourceBuilderDayEnd;
-    DataSourceClient dataSourceClientDayEnd;
+    public static final int NO_BUTTON = 1;
+    public static final int START_BUTTON = 2;
+    public static final int END_BUTTON = 3;
+    public static final int COMPLETE_BUTTON = 4;
+    public static final String BUTTON = "button";
+    public static final String PROMPT = "prompt";
+    public static final String NOTIFICATION = "notification";
+    public static final String WAKEUP = "wakeup";
+    public static final String SLEEP = "sleep";
+    public static final String DAY_START = "day_start";
+    public static final String DAY_END = "day_end";
+    public static final long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+    Handler handler;
+
     long dayStartTime;
     long dayEndTime;
+    long wakeupOffset;
+    long sleepOffset;
+    NotifierManager notifierManager;
+    int stateDayStart;
+    int stateDayEnd;
 
     public DayStartEndInfoManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
+        handler = new Handler();
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-        dataSourceBuilderDayStart = createDataSourceBuilderDayStart();
-        dataSourceBuilderDayEnd = createDataSourceBuilderDayEnd();
         dayStartTime = -1;
         dayEndTime = -1;
+        wakeupOffset = -1;
+        sleepOffset = -1;
+        stateDayStart = NO_BUTTON;
+        stateDayEnd = NO_BUTTON;
+        notifierManager = new NotifierManager(modelManager.getContext());
     }
 
-    public void set() {
+    public void set() throws DataKitException {
         Status lastStatus;
         readDayStartFromDataKit();
         readDayEndFromDataKit();
-        Log.d(TAG, "dayStartTime=" + dayStartTime+" dayEndTime="+dayEndTime+" curTime="+DateTime.getDateTime()+" diff="+(DateTime.getDateTime()-dayStartTime));
-
-        if(isNewDay())
+        readWakeupTimeFromDataKit();
+        readSleepTimeFromDataKit();
+        Log.d(TAG, "dayStartTime=" + dayStartTime + " dayEndTime=" + dayEndTime + " curTime=" + DateTime.getDateTime() + " diff=" + (DateTime.getDateTime() - dayStartTime));
+        if (!isDayStarted())
             lastStatus = new Status(rank, Status.DAY_START_NOT_AVAILABLE);
-        else lastStatus=new Status(rank,Status.SUCCESS);
+        else lastStatus = new Status(rank, Status.SUCCESS);
         notifyIfRequired(lastStatus);
-    }
-    private boolean isNewDay(){
-        long curTime=DateTime.getDateTime();
-        if(dayStartTime==-1) return true;
-        if(dayStartTime<dayEndTime){
-            if(!isToday(dayStartTime) && dayEndTime+4*60*60*1000<curTime) return true;
-            else return false;
-        }else{
-            if(!isToday(dayStartTime) && dayStartTime+16*60*60*1000<curTime) return true;
-            return false;
-        }
+        handler.post(runnableDayStartButton);
+        handler.post(runnableDayEndButton);
+        handler.post(runnableDayStartPrompt);
+        handler.post(runnableDayEndPrompt);
+        handler.post(runnableDayStartNotification);
+        handler.post(runnableDayEndNotification);
     }
 
     public void clear() {
         Log.d(TAG, "clear()...");
         dayStartTime = -1;
         dayEndTime = -1;
+        wakeupOffset = -1;
+        sleepOffset = -1;
+        stateDayStart = NO_BUTTON;
+        stateDayEnd = NO_BUTTON;
         status = new Status(rank, Status.NOT_DEFINED);
+        if (notifierManager != null)
+            notifierManager.clear();
+        handler.removeCallbacks(runnableDayStartButton);
+        handler.removeCallbacks(runnableDayEndButton);
+        handler.removeCallbacks(runnableDayStartPrompt);
+        handler.removeCallbacks(runnableDayEndPrompt);
+        handler.removeCallbacks(runnableDayStartNotification);
+        handler.removeCallbacks(runnableDayEndNotification);
     }
 
-    boolean isToday(long timestamp) {
+    Runnable runnableDayStartButton = new Runnable() {
+        @Override
+        public void run() {
+            stateDayStart = NO_BUTTON;
+            if (modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON) == null)
+                return;
+            long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
+            String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
+            long curTime = DateTime.getDateTime();
+            long triggerTime = getTime(base, offset);
+            if (isDayStarted()) {
+                stateDayStart = NO_BUTTON;
+                handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
+            } else {
+                if (curTime < triggerTime) {
+                    stateDayStart = NO_BUTTON;
+                    handler.postDelayed(this, triggerTime - curTime);
+                } else {
+                    stateDayStart = START_BUTTON;
+                    handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
+                }
+            }
+            Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
+        }
+    };
+    Runnable runnableDayEndButton = new Runnable() {
+        @Override
+        public void run() {
+            stateDayEnd = NO_BUTTON;
+            if (modelManager.getConfigManager().getConfig().getDay_end().getNotify(BUTTON) == null)
+                return;
+            if (!isDayStarted()) return;
+            if (isDayEnded()) {
+                stateDayEnd = COMPLETE_BUTTON;
+                return;
+            }
+            long offset = modelManager.getConfigManager().getConfig().getDay_end().getNotify(BUTTON).getOffset();
+            String base = modelManager.getConfigManager().getConfig().getDay_end().getBase();
+            long curTime = DateTime.getDateTime();
+            long triggerTime = getTime(base, offset);
+            if (curTime < triggerTime) {
+                stateDayEnd = NO_BUTTON;
+                handler.postDelayed(this, triggerTime - curTime);
+            } else {
+                stateDayEnd = END_BUTTON;
+            }
+            Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
+        }
+    };
+    public long getWakeupShowTimestamp(){
+        long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
+        String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
+        return getTime(base,offset);
+
+    }
+
+    Runnable runnableDayStartPrompt = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if (modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT) == null)
+                    return;
+                long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getOffset();
+                String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
+                long curTime = DateTime.getDateTime();
+                long triggerTime = getTime(base, offset);
+                if (isDayStarted())
+                    handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
+                else {
+                    if (curTime < triggerTime)
+                        handler.postDelayed(this, triggerTime - curTime);
+                    else {
+                        showPrompt(DAY_START, modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getParameters());
+                        handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
+                    }
+                }
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    Runnable runnableDayEndPrompt = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if (modelManager.getConfigManager().getConfig().getDay_end().getNotify(PROMPT) == null)
+                    return;
+                if (!isDayStarted()) return;
+                if (isDayEnded()) return;
+                long offset = modelManager.getConfigManager().getConfig().getDay_end().getNotify(PROMPT).getOffset();
+                String base = modelManager.getConfigManager().getConfig().getDay_end().getBase();
+                long curTime = DateTime.getDateTime();
+                long triggerTime = getTime(base, offset);
+                if (curTime < triggerTime)
+                    handler.postDelayed(this, triggerTime - curTime);
+                else {
+                    showPrompt(DAY_END, modelManager.getConfigManager().getConfig().getDay_end().getNotify(PROMPT).getParameters());
+                }
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    Runnable runnableDayStartNotification = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if (modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION) == null)
+                    return;
+
+                long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getOffset();
+                String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
+                long curTime = DateTime.getDateTime();
+                long triggerTime = getTime(base, offset);
+                if (isDayStarted())
+                    handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
+                else {
+                    if (curTime < triggerTime)
+                        handler.postDelayed(this, triggerTime - curTime);
+                    else {
+                        showNotification(DAY_START, modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getParameters());
+                        handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
+                    }
+                }
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    Runnable runnableDayEndNotification = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if (modelManager.getConfigManager().getConfig().getDay_end().getNotify(NOTIFICATION) == null)
+                    return;
+                if (!isDayStarted()) return;
+                if (isDayEnded()) return;
+                long offset = modelManager.getConfigManager().getConfig().getDay_end().getNotify(NOTIFICATION).getOffset();
+                String base = modelManager.getConfigManager().getConfig().getDay_end().getBase();
+                long curTime = DateTime.getDateTime();
+                long triggerTime = getTime(base, offset);
+                if (curTime < triggerTime)
+                    handler.postDelayed(this, triggerTime - curTime);
+                else {
+                    showNotification(DAY_END, modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getParameters());
+                }
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    void showPrompt(final String type, ArrayList<String> parameters) throws DataKitException {
+        Log.d(TAG, "showPrompt()...");
+        ArrayList<NotificationRequest> notificationRequests = new ArrayList<>();
+        for (int i = 0; i < parameters.size(); i++)
+            for (int j = 0; j < modelManager.getConfigManager().getNotificationRequests().length; j++) {
+                if (modelManager.getConfigManager().getNotificationRequests()[j].getId().equals(parameters.get(i))) {
+                    notificationRequests.add(modelManager.getConfigManager().getNotificationRequests()[j]);
+                }
+            }
+        notifierManager.clear();
+        if (notificationRequests.size() == 0) return;
+        notifierManager.set(new Callback() {
+            @Override
+            public void onResponse(String response) throws DataKitException {
+                if(type.equals(DAY_START))
+                    setDayStartTime(DateTime.getDateTime());
+                else if(type.equals(DAY_END))
+                    setDayEndTime(DateTime.getDateTime());
+                reset();
+            }
+        }, notificationRequests);
+
+    }
+
+    void showNotification(String type, ArrayList<String> parameters) throws DataKitException {
+        showPrompt(type, parameters);
+    }
+
+    int getButtonStatus() {
+        if (stateDayStart == START_BUTTON) return START_BUTTON;
+        else if (stateDayEnd == END_BUTTON) return END_BUTTON;
+        else if (stateDayEnd == COMPLETE_BUTTON) return COMPLETE_BUTTON;
+        else return NO_BUTTON;
+    }
+
+
+    protected long getTime(String base, long offset) {
         Calendar calendar = Calendar.getInstance();
-        Calendar calendarNow = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-        if (calendar.get(Calendar.YEAR) != calendarNow.get(Calendar.YEAR)) return false;
-        if (calendar.get(Calendar.MONTH) != calendarNow.get(Calendar.MONTH)) return false;
-        if (calendar.get(Calendar.DAY_OF_MONTH) != calendarNow.get(Calendar.DAY_OF_MONTH))
-            return false;
-        return true;
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        switch (base) {
+            case WAKEUP:
+                return calendar.getTimeInMillis() + wakeupOffset + offset;
+            case SLEEP:
+                return calendar.getTimeInMillis() + sleepOffset + offset;
+            case DAY_START:
+                return dayStartTime + offset;
+            case DAY_END:
+                return dayEndTime + offset;
+        }
+        return 0;
     }
 
-    private void readDayStartFromDataKit() {
+    public boolean isDayStarted() {
+        if (dayStartTime == -1) return false;
+        long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
+        if(dayStartTime<getTime(WAKEUP, offset)) return false;
+        else return true;
+    }
+
+    public boolean isDayEnded() {
+        if (!isDayStarted()) return false;
+        else if (dayStartTime < dayEndTime) return true;
+        else return false;
+    }
+
+    private void readDayStartFromDataKit() throws DataKitException {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayStartTime = -1;
-        if(!dataKitAPI.isConnected()) return;
-        dataSourceClientDayStart = dataKitAPI.register(dataSourceBuilderDayStart);
+        if (!dataKitAPI.isConnected()) return;
+        DataSourceClient dataSourceClientDayStart = dataKitAPI.register(createDataSourceBuilderDayStart());
         ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
         if (dataTypes.size() != 0) {
             DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
@@ -117,19 +362,40 @@ public class DayStartEndInfoManager extends Model {
         }
     }
 
-    public Status getCurrentStatusDetails() {
-        if(status.getStatus()==Status.NOT_DEFINED) return status;
-        set();
-        if(status.getStatus()==Status.DAY_START_NOT_AVAILABLE) return status;
-        if (dayEndTime > dayStartTime) return new Status(rank, Status.DAY_COMPLETED);
-        return new Status(rank, Status.SUCCESS);
+    private void readWakeupTimeFromDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+        wakeupOffset = -1;
+        if (!dataKitAPI.isConnected()) return;
+        ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.WAKEUP));
+        if (dataSourceClients.size() > 0) {
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+            if (dataTypes.size() != 0) {
+                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                wakeupOffset = dataTypeLong.getSample();
+            }
+        }
     }
 
-    private void readDayEndFromDataKit() {
+    private void readSleepTimeFromDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+        sleepOffset = -1;
+        if (!dataKitAPI.isConnected()) return;
+        ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.SLEEP));
+        if (dataSourceClients.size() > 0) {
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+            if (dataTypes.size() != 0) {
+                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                sleepOffset = dataTypeLong.getSample();
+            }
+        }
+    }
+
+
+    private void readDayEndFromDataKit() throws DataKitException {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayEndTime = -1;
-        if(!dataKitAPI.isConnected()) return;
-        dataSourceClientDayEnd = dataKitAPI.register(dataSourceBuilderDayEnd);
+        if (!dataKitAPI.isConnected()) return;
+        DataSourceClient dataSourceClientDayEnd = dataKitAPI.register(createDataSourceBuilderDayEnd());
         ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);
         if (dataTypes.size() != 0) {
             DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
@@ -138,21 +404,21 @@ public class DayStartEndInfoManager extends Model {
 
     }
 
-    private boolean writeDayStartToDataKit() {
-        Log.d(TAG,"writeDayStartToDataKit()...");
+    private boolean writeDayStartToDataKit() throws DataKitException {
+        Log.d(TAG, "writeDayStartToDataKit()...");
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), dayStartTime);
-        dataSourceClientDayStart = dataKitAPI.register(dataSourceBuilderDayStart);
+        DataSourceClient dataSourceClientDayStart = dataKitAPI.register(createDataSourceBuilderDayStart());
         dataKitAPI.insert(dataSourceClientDayStart, dataTypeLong);
         return true;
     }
 
-    private boolean writeDayEndToDataKit() {
-        Log.d(TAG,"writeDayEndToDataKit()...");
+    private boolean writeDayEndToDataKit() throws DataKitException {
+        Log.d(TAG, "writeDayEndToDataKit()...");
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), dayEndTime);
-        dataSourceClientDayEnd = dataKitAPI.register(dataSourceBuilderDayEnd);
+        DataSourceClient dataSourceClientDayEnd = dataKitAPI.register(createDataSourceBuilderDayEnd());
         dataKitAPI.insert(dataSourceClientDayEnd, dataTypeLong);
         return true;
     }
@@ -196,15 +462,15 @@ public class DayStartEndInfoManager extends Model {
     }
 
 
-    public void setDayStartTime(long dayStartTime) {
-        Log.d(TAG,"setDayStartTime()...");
+    public void setDayStartTime(long dayStartTime) throws DataKitException {
+        Log.d(TAG, "setDayStartTime()...");
         this.dayStartTime = dayStartTime;
         writeDayStartToDataKit();
         reset();
     }
 
-    public void setDayEndTime(long dayEndTime) {
-        Log.d(TAG,"setDayEndTime()...");
+    public void setDayEndTime(long dayEndTime) throws DataKitException {
+        Log.d(TAG, "setDayEndTime()...");
         this.dayEndTime = dayEndTime;
         writeDayEndToDataKit();
         reset();

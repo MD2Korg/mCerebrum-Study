@@ -1,5 +1,6 @@
 package org.md2k.study.model_view;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigAction;
 import org.md2k.study.controller.ModelManager;
@@ -59,13 +60,13 @@ public abstract class Model {
     public Status getStatus(){
         return status;
     }
-    public abstract void set();
-    public abstract void clear();
-    public void reset(){
+    public abstract void set() throws DataKitException;
+    public abstract void clear() throws DataKitException;
+    public void reset() throws DataKitException {
         clear();
         set();
     }
-    public void notifyIfRequired(Status curStatus){
+    public void notifyIfRequired(Status curStatus) throws DataKitException {
         if(curStatus==null) return;
         Log.d(TAG, "notifyIfRequired...old_status="+status.log()+" cur_status="+curStatus.log());
         if(status==null || status.getRank()!=curStatus.getRank() || status.getStatus()!=curStatus.getStatus()) {
@@ -74,7 +75,7 @@ public abstract class Model {
             modelManager.update();
         }
     }
-    public void save(){
+    public void save() throws DataKitException {
 
     }
 }

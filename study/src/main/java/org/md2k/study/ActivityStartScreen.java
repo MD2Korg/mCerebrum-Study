@@ -1,7 +1,7 @@
 package org.md2k.study;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,8 +22,8 @@ import io.fabric.sdk.android.Fabric;
 public class ActivityStartScreen extends AppCompatActivity {
     private static final String TAG = ActivityStartScreen.class.getSimpleName();
     Handler handler;
-    ProgressDialog progress;
-    boolean firstTime=true;
+//    ProgressDialog progress;
+    boolean hasUpdate =true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +43,13 @@ public class ActivityStartScreen extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        firstTime=true;
+        hasUpdate =true;
         Log.d(TAG, "onStart()...");
         handler.removeCallbacks(runnableWaitEnd);
         handler.removeCallbacks(runnableWaitStart);
         handler.removeCallbacks(runnableWaitStartCheck);
-        if (progress != null)
-            progress.dismiss();
+//        if (progress != null)
+//            progress.dismiss();
         if (ServiceSystemHealth.isRunning && ModelManager.getInstance(this).getStatus().getRank() <= Status.RANK_ADMIN_OPTIONAL && ServiceSystemHealth.RANK_LIMIT==Status.RANK_SUCCESS) {
             Log.d(TAG, "service running..with rank=" + ServiceSystemHealth.RANK_LIMIT);
             Intent intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
@@ -59,7 +59,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
             Intent intent = new Intent(ActivityStartScreen.this, ServiceSystemHealth.class);
             startService(intent);
-            progress = ProgressDialog.show(this, "Loading...", "", true);
+//            progress = ProgressDialog.show(this, "Loading...", "", true);
             handler.post(runnableWaitStartCheck);
         } else {
             Log.d(TAG, "service running...");
@@ -97,7 +97,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "runnableWaitStart...isServiceRunning=" + ServiceSystemHealth.isRunning+" Service_Rank="+ServiceSystemHealth.RANK_LIMIT);
                 ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
-                progress = ProgressDialog.show(ActivityStartScreen.this, "Loading...", "", true);
+//                progress = ProgressDialog.show(ActivityStartScreen.this, "Loading...", "", true);
                 Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
                 startService(intent);
                 handler.post(runnableWaitStart);
@@ -111,7 +111,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
-                progress = ProgressDialog.show(ActivityStartScreen.this, "Loading...", "", true);
+  //              progress = ProgressDialog.show(ActivityStartScreen.this, "Loading...", "", true);
                 Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
                 startService(intent);
                 handler.post(runnableWaitStart);
@@ -137,26 +137,32 @@ public class ActivityStartScreen extends AppCompatActivity {
             if (!ServiceSystemHealth.isRunning)
                 handler.postDelayed(this, 100);
             else {
-                if(firstTime) {firstTime=false;handler.postDelayed(runnableWaitStartCheck, 500);}
+                if(hasUpdate) {
+                    hasUpdate =false;handler.postDelayed(runnableWaitStartCheck, 1000);}
                 else {
-                    if(progress!=null)
-                    progress.dismiss();
+//                    if(progress!=null)
+//                    progress.dismiss();
                     Status status = ModelManager.getInstance(ActivityStartScreen.this).getStatus();
                     Log.d(TAG, "status=" + status.log());
                     if (status.getStatus() == Status.CONFIG_FILE_NOT_EXIST) {
                         findViewById(R.id.button_start).setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
                         findViewById(R.id.button_start).setEnabled(false);
                         findViewById(R.id.button_settings).setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_red));
+                        ((Button) findViewById(R.id.button_settings)).setTextColor(Color.WHITE);
                     } else if (status.getRank() <= Status.RANK_ADMIN_OPTIONAL) {
                         findViewById(R.id.button_start).setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_red));
                         findViewById(R.id.button_start).setEnabled(true);
+                        ((Button) findViewById(R.id.button_start)).setTextColor(Color.WHITE);
+                        ((Button) findViewById(R.id.button_settings)).setTextColor(Color.BLACK);
                         findViewById(R.id.button_settings).setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
                     } else {
                         findViewById(R.id.button_start).setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
                         findViewById(R.id.button_start).setEnabled(true);
+                        ((Button) findViewById(R.id.button_start)).setTextColor(Color.BLACK);
+                        ((Button) findViewById(R.id.button_settings)).setTextColor(Color.WHITE);
                         findViewById(R.id.button_settings).setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_red));
                     }
-                    progress = ProgressDialog.show(ActivityStartScreen.this, "Loading...", "", true);
+//                    progress = ProgressDialog.show(ActivityStartScreen.this, "Loading...", "", true);
                     Intent intent = new Intent(ActivityStartScreen.this, ServiceSystemHealth.class);
                     stopService(intent);
                     Log.d(TAG, "service stopping...");
@@ -172,7 +178,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             if (ServiceSystemHealth.isRunning)
                 handler.postDelayed(this, 100);
             else {
-                progress.dismiss();
+//                progress.dismiss();
             }
         }
     };
@@ -183,7 +189,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             if (!ServiceSystemHealth.isRunning)
                 handler.postDelayed(this, 100);
             else {
-                progress.dismiss();
+//                progress.dismiss();
                 if (ServiceSystemHealth.RANK_LIMIT == Status.RANK_SUCCESS) {
                     Intent intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
                     startActivity(intent);

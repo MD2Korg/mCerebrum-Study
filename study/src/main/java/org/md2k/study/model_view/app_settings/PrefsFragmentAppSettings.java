@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelFactory;
@@ -125,12 +126,16 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
 
     @Override
     public void onResume(){
-        if(isRefreshRequired) {
-            ModelManager.getInstance(getActivity()).clear();
-            ModelManager.getInstance(getActivity()).set();
+        try {
+            if (isRefreshRequired) {
+                ModelManager.getInstance(getActivity()).clear();
+                ModelManager.getInstance(getActivity()).set();
+            }
+            appSettingsManager.update();
+            setupAppSettings();
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
-        appSettingsManager.update();
-        setupAppSettings();
         super.onResume();
     }
 }

@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -63,7 +64,7 @@ public class SelfReportManager extends Model {
     public void clear(){
         status=new Status(rank, Status.NOT_DEFINED);
     }
-    public void set(){
+    public void set() throws DataKitException {
         dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
@@ -72,7 +73,7 @@ public class SelfReportManager extends Model {
         notifyIfRequired(lastStatus);
     }
 
-    private boolean writeToDataKit() {
+    private boolean writeToDataKit() throws DataKitException {
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(new Event(Event.SMOKING, Event.TYPE_SELF_REPORT))).getAsJsonObject();
@@ -104,7 +105,7 @@ public class SelfReportManager extends Model {
         dataDescriptor.put(METADATA.DATA_TYPE, Event.class.getName());
         return dataDescriptor;
     }
-    public void save(){
+    public void save() throws DataKitException {
         writeToDataKit();
     }
 }

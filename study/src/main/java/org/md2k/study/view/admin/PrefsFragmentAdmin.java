@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.R;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
@@ -64,7 +65,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(ServiceSystemHealth.INTENT_NAME));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(Status.class.getSimpleName()));
         modelManager = ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_admin);
 
@@ -98,10 +99,14 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
-                modelManager.clear();
-                modelManager.remove();
-                modelManager.set();
+                try {
+                    ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
+                    modelManager.clear();
+                    modelManager.remove();
+                    modelManager.set();
+                } catch (DataKitException e) {
+                    e.printStackTrace();
+                }
                 return false;
             }
         });
@@ -113,10 +118,14 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
-                modelManager.clear();
-                modelManager.remove();
-                modelManager.set();
+                try {
+                    ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                    modelManager.clear();
+                    modelManager.remove();
+                    modelManager.set();
+                } catch (DataKitException e) {
+                    e.printStackTrace();
+                }
                 return false;
             }
         });

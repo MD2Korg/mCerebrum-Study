@@ -1,17 +1,16 @@
 package org.md2k.study.config;
 
-import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
-import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.FileManager;
 import org.md2k.utilities.data_format.NotificationRequest;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 
@@ -41,65 +40,39 @@ import java.lang.reflect.Type;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigManager {
-    private static final String TAG = ConfigManager.class.getSimpleName();
-    private Config config;
-    private NotificationRequest[] notificationRequests;
-    private boolean valid;
-
-    private static ConfigManager instance=null;
-    public static ConfigManager getInstance(Context context){
+public class ConfigNotification{
+    NotificationRequest[] notificationRequests;
+    private static ConfigNotification instance=null;
+    public static ConfigNotification getInstance(){
         if(instance==null)
-            instance=new ConfigManager(context);
+            instance=new ConfigNotification();
         return instance;
-    }
-
-    private ConfigManager(Context context) {
-        Log.d(TAG, "ConfigManager()...");
-        valid=read();
-        Log.d(TAG,"read()...valid="+valid);
-        if(valid) {
-            if(config.getConfig_info()==null) {
-                valid = false;
-                Log.d(TAG,"read()...getConfig_info()=null");
-            }
-            else {
-                valid = config.getConfig_info().isValid(context);
-                Log.d(TAG,"read()...getConfig_info().isValid()="+valid);
-            }
-        }
-        notificationRequests=ConfigNotification.getInstance().notificationRequests;
-    }
-
-    private boolean read() {
-        BufferedReader br;
-        config=null;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(Constants.CONFIG_DIRECTORY + Constants.CONFIG_FILENAME)));
-            Gson gson = new Gson();
-            Type collectionType = new TypeToken<Config>() {
-            }.getType();
-            config = gson.fromJson(br, collectionType);
-            if(config.getUser_view()==null || config.getUser_view().getView_contents()==null)
-                return false;
-            else return true;
-        } catch (FileNotFoundException e) {
-            return false;
-        }
     }
     public static void clear(){
         instance=null;
     }
-
-    public Config getConfig() {
-        return config;
+    private ConfigNotification(){
+        readNotifications();
     }
+    private void readNotifications(){
+        BufferedReader br;
+        String filepath= Constants.CONFIG_DIRECTORY+Constants.NOTIFICATION_FILENAME;
+        if(!FileManager.isExist(filepath))
+            notificationRequests =null;
+        else {
+            try {
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
+                Gson gson = new Gson();
+                Type collectionType = new TypeToken<NotificationRequest[]>() {
+                }.getType();
+                notificationRequests = gson.fromJson(br, collectionType);
+            } catch (IOException e) {
+                notificationRequests = null;
+            }
+        }
 
+    }
     public NotificationRequest[] getNotificationRequests() {
         return notificationRequests;
-    }
-
-    public boolean isValid() {
-        return valid;
     }
 }
