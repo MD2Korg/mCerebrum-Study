@@ -39,6 +39,7 @@ public abstract class Model {
     protected int rank;
     protected Status status;
     protected ConfigAction action;
+    protected boolean isSet;
 
     public Model(ModelManager modelManager, String id, int rank) {
         this.id=id;
@@ -47,6 +48,7 @@ public abstract class Model {
         if(modelManager.getConfigManager()!=null && modelManager.getConfigManager().isValid())
             action =modelManager.getConfigManager().getConfig().getAction(id);
         status=new Status(rank, Status.NOT_DEFINED);
+        isSet=false;
     }
 
     public ConfigAction getAction() {

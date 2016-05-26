@@ -52,7 +52,6 @@ public class DataQuality {
     private static final String TAG = DataQuality.class.getSimpleName();
     public static final long RESTART_TIME = 120000;
     DataSource dataSource;
-    DataKitAPI dataKitAPI;
     ReceiveCallBack receiveCallBack;
     Context context;
     DataSourceClient dataSourceClient;
@@ -72,22 +71,26 @@ public class DataQuality {
     }
 
     public void start() {
-        dataKitAPI = DataKitAPI.getInstance(context);
+        Log.d(TAG,"DataQuality start()..."+dataSource.getType()+" "+dataSource.getId());
         handler.post(runnableSubscribe);
     }
 
     Runnable runnableSubscribe = new Runnable() {
         @Override
         public void run() {
+            Log.d(TAG,"runnableSubscribe..."+dataSource.getType()+" "+dataSource.getId());
+//            if(dataSource.getId().equals("ECG"))
+//                Log.d(TAG,"here");
+
             try {
-                ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(new DataSourceBuilder(createDataSource(dataSource)));
+                ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(context).find(new DataSourceBuilder(createDataSource(dataSource)));
                 if (dataSourceClientArrayList.size() == 0)
                     handler.postDelayed(this, 1000);
                 else {
                     lastReceivedTimeStamp = DateTime.getDateTime();
                     handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
                     dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
-                    dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
+                    DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
                         @Override
                         public void onReceived(DataType dataType) {
                             int sample = ((DataTypeInt) dataType).getSample();
@@ -98,6 +101,7 @@ public class DataQuality {
                     });
                 }
             } catch (DataKitException e) {
+                Log.e(TAG,"error subscribing..runnableSubscribe...");
                 e.printStackTrace();
             }
         }
@@ -130,7 +134,7 @@ public class DataQuality {
     public void stop() throws DataKitException {
         handler.removeCallbacks(runnableSubscribe);
         handler.removeCallbacks(runnableCheckAvailability);
-            if (dataSourceClient != null && dataKitAPI != null && dataKitAPI.isConnected())
-                dataKitAPI.unsubscribe(dataSourceClient);
+            if (dataSourceClient != null && DataKitAPI.getInstance(context).isConnected())
+                DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
     }
 }

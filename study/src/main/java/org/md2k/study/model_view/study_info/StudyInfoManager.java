@@ -54,7 +54,6 @@ public class StudyInfoManager extends Model {
     private static final String TAG = StudyInfoManager.class.getSimpleName();
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    DataKitAPI dataKitAPI;
     ConfigStudyInfo studyInfoDB;
     ConfigStudyInfo studyInfoFile;
 
@@ -71,7 +70,6 @@ public class StudyInfoManager extends Model {
         Log.d(TAG,"set()...");
         studyInfoFile = modelManager.getConfigManager().getConfig().getStudy_info();
         dataSourceBuilder = createDataSourceBuilder();
-        dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         studyInfoDB = readFromDataKit();
         if (studyInfoDB == null && studyInfoFile != null) {
             writeToDataKit();
@@ -99,6 +97,7 @@ public class StudyInfoManager extends Model {
 
     private ConfigStudyInfo readFromDataKit() throws DataKitException {
         ConfigStudyInfo studyInfo = null;
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
 
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
@@ -113,6 +112,7 @@ public class StudyInfoManager extends Model {
     }
 
     public boolean writeToDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         Log.d(TAG, "StudyInfoManager...writeToDataKit()");
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();

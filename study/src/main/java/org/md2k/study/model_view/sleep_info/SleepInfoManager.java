@@ -50,7 +50,6 @@ public class SleepInfoManager extends Model {
     private static final String TAG = SleepInfoManager.class.getSimpleName();
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    DataKitAPI dataKitAPI;
 
     long sleepTimeDB;
     long sleepTimeNew;
@@ -69,7 +68,6 @@ public class SleepInfoManager extends Model {
         status=new Status(rank, Status.SLEEP_NOT_DEFINED);
     }
     public void set() throws DataKitException {
-        dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
         update();
@@ -91,6 +89,7 @@ public class SleepInfoManager extends Model {
 
     private void readStudyInfoFromDataKit() throws DataKitException {
         sleepTimeDB = -1;
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
@@ -102,6 +101,7 @@ public class SleepInfoManager extends Model {
     }
 
     private boolean writeToDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), sleepTimeNew);

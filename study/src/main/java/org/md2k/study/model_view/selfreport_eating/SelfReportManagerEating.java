@@ -54,7 +54,6 @@ public class SelfReportManagerEating extends Model {
     private static final String TAG = SelfReportManagerEating.class.getSimpleName();
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    DataKitAPI dataKitAPI;
 
     public SelfReportManagerEating(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -65,7 +64,7 @@ public class SelfReportManagerEating extends Model {
         status=new Status(rank, Status.NOT_DEFINED);
     }
     public void set() throws DataKitException {
-        dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         Status lastStatus;
@@ -74,6 +73,7 @@ public class SelfReportManagerEating extends Model {
     }
 
     private boolean writeToDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(new Event(Event.EATING, Event.TYPE_SELF_REPORT))).getAsJsonObject();

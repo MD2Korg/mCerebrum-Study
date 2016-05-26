@@ -57,6 +57,7 @@ public class ServiceSystemHealth extends Service {
             modelManager.remove();
             modelManager.set();
         } catch (DataKitException e) {
+            Log.e(TAG,"Error...in clearing ... onStartCommand()..");
             e.printStackTrace();
         }
         isRunning=true;

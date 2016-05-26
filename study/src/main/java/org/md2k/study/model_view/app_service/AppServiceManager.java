@@ -76,11 +76,11 @@ public class AppServiceManager extends Model {
 
     public void clear() {
         Log.d(TAG,"clear()...");
+        handler.removeCallbacks(runnableServiceRun);
         for (int i = 0; i < appServiceList.size(); i++)
             appServiceList.get(i).stop();
 //        appServiceList.clear();
         status=new Status(rank,Status.NOT_DEFINED);
-        handler.removeCallbacks(runnableServiceRun);
     }
     Runnable runnableServiceRun=new Runnable() {
         @Override

@@ -55,7 +55,6 @@ public class DayTypeManager extends Model {
     private static final String TAG = DayTypeManager.class.getSimpleName();
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    DataKitAPI dataKitAPI;
 
     DayTypeInfo dayTypeDB;
     DayTypeInfo dayTypeNew;
@@ -77,7 +76,6 @@ public class DayTypeManager extends Model {
         dayTypeNew=new DayTypeInfo(dayType);
     }
     public void set() throws DataKitException {
-        dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         readFromDataKit();
         update();
@@ -99,6 +97,7 @@ public class DayTypeManager extends Model {
 
     private void readFromDataKit() throws DataKitException {
         dayTypeDB = null;
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
@@ -111,6 +110,7 @@ public class DayTypeManager extends Model {
     }
 
     private boolean writeToDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         Gson gson = new Gson();

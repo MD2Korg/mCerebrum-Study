@@ -59,7 +59,6 @@ public class UserInfoManager extends Model {
     boolean isInDatabase;
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    DataKitAPI dataKitAPI;
 
     public UserInfoManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -76,7 +75,7 @@ public class UserInfoManager extends Model {
     }
 
     public void set() throws DataKitException {
-        dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         isInDatabase = false;
         readFromDataKit();
@@ -106,6 +105,7 @@ public class UserInfoManager extends Model {
     }
 
     private void readFromDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return;
         DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
@@ -123,6 +123,7 @@ public class UserInfoManager extends Model {
     }
 
     private boolean writeToDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         if (isInDatabase) return false;
         if (userInfo == null) return false;

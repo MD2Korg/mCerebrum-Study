@@ -50,7 +50,6 @@ public class WakeupInfoManager extends Model {
     private static final String TAG = WakeupInfoManager.class.getSimpleName();
     DataSourceBuilder dataSourceBuilder;
     DataSourceClient dataSourceClient;
-    DataKitAPI dataKitAPI;
     long wakeupTimeDB;
     long wakeupTimeNew;
 
@@ -69,6 +68,7 @@ public class WakeupInfoManager extends Model {
     }
 
     public void set() throws DataKitException {
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
@@ -92,6 +92,7 @@ public class WakeupInfoManager extends Model {
     }
 
     private void readStudyInfoFromDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
             dataSourceClient = dataKitAPI.register(dataSourceBuilder);
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
@@ -104,6 +105,7 @@ public class WakeupInfoManager extends Model {
 
 
     private boolean writeToDataKit() throws DataKitException {
+        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), wakeupTimeNew);

@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import com.crashlytics.android.Crashlytics;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.Report.Log;
@@ -85,6 +86,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG,"datakit is connected="+ DataKitAPI.getInstance(ActivityStartScreen.this).isConnected());
                 finish();
             }
         });
@@ -121,6 +123,9 @@ public class ActivityStartScreen extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        handler.removeCallbacks(runnableWaitEnd);
+        handler.removeCallbacks(runnableWaitStart);
+        handler.removeCallbacks(runnableWaitStartCheck);
         if (ServiceSystemHealth.isRunning) {
             if (ModelManager.getInstance(this).getStatus().getRank() >= Status.RANK_ADMIN_OPTIONAL) {
                 Intent intent = new Intent(ActivityStartScreen.this, ServiceSystemHealth.class);

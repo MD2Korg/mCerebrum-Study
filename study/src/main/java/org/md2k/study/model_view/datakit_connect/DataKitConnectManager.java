@@ -36,13 +36,10 @@ import org.md2k.utilities.Report.Log;
  */
 public class DataKitConnectManager extends Model {
     private static final String TAG = DataKitConnectManager.class.getSimpleName();
-    DataKitAPI dataKitAPI=null;
-
     public DataKitConnectManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
         status=new Status(rank,Status.DATAKIT_NOT_AVAILABLE);
-        dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
     }
 
     @Override
@@ -52,7 +49,7 @@ public class DataKitConnectManager extends Model {
 
     @Override
     public void set() throws DataKitException {
-        dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         Log.d(TAG,"DataKitConnectManager...set()..before...isConnected="+dataKitAPI.isConnected());
         if (dataKitAPI.isConnected()) {
             notifyIfRequired(new Status(rank, Status.SUCCESS));
@@ -65,6 +62,7 @@ public class DataKitConnectManager extends Model {
                     try {
                         notifyIfRequired(new Status(rank, Status.SUCCESS));
                     } catch (DataKitException e) {
+                        Log.e(TAG,"error connecting...set()");
                         e.printStackTrace();
                     }
                 }
@@ -74,16 +72,12 @@ public class DataKitConnectManager extends Model {
 
     @Override
     public void clear() throws DataKitException {
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         Log.d(TAG, "clear(0)...dataKitAPI="+dataKitAPI);
-        if (dataKitAPI != null && dataKitAPI.isConnected()) {
+        if (dataKitAPI.isConnected()) {
             Log.d(TAG,"DataKitConnectManager...clear(1)...datakitAPI="+dataKitAPI+"...isConnected="+dataKitAPI.isConnected());
             dataKitAPI.disconnect();
         }
-        if (dataKitAPI != null) {
-            Log.d(TAG,"DataKitConnectManager...clear(2)..datakitAPI="+dataKitAPI+"...isConnected="+dataKitAPI.isConnected());
-        }
-        dataKitAPI=null;
-        Log.d(TAG,"DataKitConnectManager...clear(3)..datakitAPI="+dataKitAPI);
         notifyIfRequired(new Status(rank, Status.DATAKIT_NOT_AVAILABLE));
     }
 }
