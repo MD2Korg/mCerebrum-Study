@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -45,7 +44,7 @@ import org.md2k.utilities.Report.Log;
  */
 public class UserViewUserApp extends UserView {
     private static final String TAG = UserViewUserApp.class.getSimpleName();
-    public GridView gridViewApplication;
+    public ExpandableHeightGridView gridViewApplication;
     boolean disable = false;
 
     public UserViewUserApp(Activity activity, Model model) {
@@ -76,7 +75,7 @@ public class UserViewUserApp extends UserView {
     void addUserApp() throws DataKitException {
         Log.d(TAG, "addUserApp()...");
         final UserAppManager userAppManager = (UserAppManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_USER_APP);
-        gridViewApplication = (GridView) activity.findViewById(R.id.gridview);
+        gridViewApplication = (ExpandableHeightGridView) activity.findViewById(R.id.gridview);
         Log.d(TAG,"addUserApp()...size="+userAppManager.getUserApps().size());
         AppAdapter appAdapter = new AppAdapter(activity, userAppManager.getUserApps());
         gridViewApplication.setAdapter(appAdapter);

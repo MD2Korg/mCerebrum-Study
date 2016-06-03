@@ -72,11 +72,11 @@ public class SelfReportManagerEating extends Model {
         notifyIfRequired(lastStatus);
     }
 
-    private boolean writeToDataKit() throws DataKitException {
+    private boolean writeToDataKit(String msg) throws DataKitException {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();
-        JsonObject sample = new JsonParser().parse(gson.toJson(new Event(Event.EATING, Event.TYPE_SELF_REPORT))).getAsJsonObject();
+        JsonObject sample = new JsonParser().parse(gson.toJson(new Event(Event.EATING, Event.TYPE_SELF_REPORT, msg))).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
         return true;
@@ -105,8 +105,8 @@ public class SelfReportManagerEating extends Model {
         dataDescriptor.put(METADATA.DATA_TYPE, Event.class.getName());
         return dataDescriptor;
     }
-    public void save() throws DataKitException {
-        writeToDataKit();
+    public void save(String msg) throws DataKitException {
+        writeToDataKit(msg);
     }
 }
 

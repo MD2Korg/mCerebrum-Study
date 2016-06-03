@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -33,9 +34,9 @@ import java.util.ArrayList;
 
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
-    ModelManager modelManager;
     ArrayList<UserView> userViews;
     MenuItem menuItemStatus;
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +54,11 @@ public class ActivityMain extends AppCompatActivity {
         Log.d(TAG, "broadcast...set...");
         userViews = new ArrayList<>();
         Log.d(TAG, "onCreate()..isServiceRunning=" + ServiceSystemHealth.isRunning);
-        modelManager = ModelManager.getInstance(ActivityMain.this);
-        if(getSupportActionBar()!=null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setTitle("mCerebrum");
             try {
-                String logoName = modelManager.getConfigManager().getConfig().getStudy_info().getLogo();
+                String logoName = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getStudy_info().getLogo();
                 if (logoName != null) {
                     String path = Constants.CONFIG_DIRECTORY + logoName;
                     Drawable d = Drawable.createFromPath(path);
@@ -68,7 +68,7 @@ public class ActivityMain extends AppCompatActivity {
 
             }
             try {
-                String title = modelManager.getConfigManager().getConfig().getStudy_info().getTitle();
+                String title = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getStudy_info().getTitle();
                 if (title != null) {
                     getSupportActionBar().setDisplayShowHomeEnabled(true);
                     getSupportActionBar().setTitle(title);
@@ -77,6 +77,7 @@ public class ActivityMain extends AppCompatActivity {
 
             }
         }
+        handler = new Handler();
         addUserView();
     }
 
@@ -89,17 +90,36 @@ public class ActivityMain extends AppCompatActivity {
 
     void updateMenu() {
         if (menuItemStatus == null) return;
-        if (modelManager == null) return;
-        Status status = modelManager.getStatus();
+        Status status = ModelManager.getInstance(ActivityMain.this).getStatus();
         if (status.getRank() > Status.RANK_ADMIN_OPTIONAL)
             menuItemStatus.setIcon(R.drawable.ic_error_red_48dp);
         else menuItemStatus.setIcon(R.drawable.ic_ok_green_48dp);
     }
 
+    Runnable runnableUpdateUI = new Runnable() {
+        @Override
+        public void run() {
+            ModelManager modelManager = ModelManager.getInstance(ActivityMain.this);
+            Status status = modelManager.getStatus();
+            updateMenu();
+            if (status.getRank() > Status.RANK_ADMIN_OPTIONAL)
+                handler.postDelayed(runnableUpdateUI, 1000);
+            else try {
+                updateUI();
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     void updateUI() throws DataKitException {
-        modelManager=ModelManager.getInstance(this);
+
+        Log.d(TAG, "updateUI()...");
+        ModelManager modelManager = ModelManager.getInstance(this);
         Status status = modelManager.getStatus();
         updateMenu();
+        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) return;
+
 
         for (int i = 0; i < userViews.size(); i++) {
             Log.d(TAG, "modelmanager Status=" + status.log() + " view status=" + userViews.get(i).getModel().getRank());
@@ -121,7 +141,8 @@ public class ActivityMain extends AppCompatActivity {
 
 
     public void addUserView() {
-        ArrayList<ConfigViewContent> viewContents = modelManager.getConfigManager().getConfig().getUser_view().getView_contents();
+        Log.d(TAG, "addUserView()...");
+        ArrayList<ConfigViewContent> viewContents = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getUser_view().getView_contents();
         LinearLayout linearLayoutMain = (LinearLayout) findViewById(R.id.linear_layout_main);
         linearLayoutMain.removeAllViews();
 
@@ -136,13 +157,9 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        try {
-
-            Log.d(TAG, "onResume()...");
-            updateUI();
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
+        Log.d(TAG, "onResume()...");
+        handler.removeCallbacks(runnableUpdateUI);
+        handler.post(runnableUpdateUI);
         super.onResume();
     }
 
@@ -154,8 +171,11 @@ public class ActivityMain extends AppCompatActivity {
                 Log.d(TAG, "received broadcast...rank =" + status.getRank());
                 if (status.getStatus() == Status.CONFIG_FILE_NOT_EXIST)
                     finish();
-                else
+                else {
+                    handler.removeCallbacks(runnableUpdateUI);
+                    handler.post(runnableUpdateUI);
                     updateUI();
+                }
             } catch (DataKitException e) {
                 e.printStackTrace();
             }
@@ -218,6 +238,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     void showStatus() {
         Status status = ModelManager.getInstance(this).getStatus();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

@@ -14,11 +14,13 @@
     </LinearLayout>
 
 
-    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+    <org.md2k.study.model_view.user_app.ExpandableHeightGridView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/gridview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-
+        android:layout_height="250dp"
+        android:scrollingCache="false"
+        android:stretchMode="columnWidth"
+        android:isScrollContainer="false"
         android:horizontalSpacing="20dp"
         android:numColumns="3"
         android:paddingLeft="20dp"

@@ -2,12 +2,17 @@ package org.md2k.study.model_view.selfreport;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.UI.AlertDialogs;
+
+import java.util.HashMap;
 
 
 /**
@@ -37,21 +42,61 @@ import org.md2k.utilities.UI.AlertDialogs;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ActivitySelfReport extends AppCompatActivity {
+    AlertDialog levelDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AlertDialogs.showAlertDialogConfirm(ActivitySelfReport.this, "Smoking Self Report", "Have you just smoked?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
+        HashMap<String, String> parameters = ModelManager.getInstance(ActivitySelfReport.this).getConfigManager().getConfig().getAction(ModelFactory.MODEL_SMOKING_SELF_REPORT).getParameters();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        String title = parameters.get("s1");
+        final String message = parameters.get("s2");
+        if (parameters.size() > 2) {
+            builder.setTitle(message);
+            CharSequence[] items = new CharSequence[parameters.size() - 2];
+            for (int i = 2; i < parameters.size(); i++) {
+                items[i - 2] = (parameters.get("s" + Integer.toString(i + 1)));
+            }
+            builder.setSingleChoiceItems(items, -1, null);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    ListView lw = ((AlertDialog)dialog).getListView();
+                    Object checkedItem = lw.getAdapter().getItem(lw.getCheckedItemPosition());
+                    if (checkedItem == null) return;
+                    dialog.dismiss();
                     SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
                     try {
-                        selfReportManager.save();
+                        selfReportManager.save(checkedItem.toString());
                     } catch (DataKitException e) {
                         e.printStackTrace();
                     }
+                    finish();
                 }
-                finish();
-            }
-        });
-    }}
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    dialog.dismiss();
+                    finish();
+                }
+            });
+            levelDialog = builder.create();
+            levelDialog.show();
+        } else {
+            AlertDialogs.showAlertDialogConfirm(ActivitySelfReport.this, title, message, "Yes", "Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        Toast.makeText(ActivitySelfReport.this, "Smoking report saved...", Toast.LENGTH_SHORT).show();
+                        SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
+                        try {
+                            selfReportManager.save(message);
+                        } catch (DataKitException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    finish();
+                }
+            });
+        }
+    }
+}

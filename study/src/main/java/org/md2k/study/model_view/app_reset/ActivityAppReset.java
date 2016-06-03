@@ -3,7 +3,6 @@ package org.md2k.study.model_view.app_reset;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -40,13 +39,12 @@ public class ActivityAppReset extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AlertDialogs.showAlertDialogConfirm(ActivityAppReset.this, "Reset ConfigApp", "Do you want to reset application?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+        AlertDialogs.showAlertDialogConfirm(ActivityAppReset.this, "Reset Application", "Do you want to reset application?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
                     AppResetManager appResetManager = ((AppResetManager) ModelManager.getInstance(ActivityAppReset.this).getModel(ModelFactory.MODEL_APP_RESET));
                     appResetManager.resetApp();
-                    Toast.makeText(ActivityAppReset.this, "app resetting...", Toast.LENGTH_LONG).show();
                 }
                 finish();
             }

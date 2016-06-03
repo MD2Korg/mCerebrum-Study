@@ -46,13 +46,11 @@ import java.util.ArrayList;
  */
 public class PrivacyControlManager extends Model {
     private static final String TAG = PrivacyControlManager.class.getSimpleName();
-    DataSourceBuilder dataSourceBuilder;
     PrivacyData privacyData;
 
     public PrivacyControlManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-        dataSourceBuilder = createDataSourceBuilder();
         privacyData = null;
     }
 
@@ -71,13 +69,17 @@ public class PrivacyControlManager extends Model {
     private PrivacyData readFromDataKit() throws DataKitException {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         PrivacyData privacyData = null;
-        ArrayList<DataSourceClient> dataSourceClients= dataKitAPI.find(dataSourceBuilder);
+        ArrayList<DataSourceClient> dataSourceClients= dataKitAPI.find(createDataSourceBuilder());
         if(dataSourceClients.size()>0) {
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
             if (dataTypes.size() != 0) {
-                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                Gson gson = new Gson();
-                privacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
+                try {
+                    DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                    Gson gson = new Gson();
+                    privacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
+                }catch(Exception ignored){
+                    privacyData=null;
+                }
             }
         }
         return privacyData;

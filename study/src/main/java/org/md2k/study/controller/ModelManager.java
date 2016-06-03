@@ -70,6 +70,7 @@ public class ModelManager {
                     entry.getValue().clear();
             }
         }
+        isUpdating=false;
     }
 
     public void remove() {

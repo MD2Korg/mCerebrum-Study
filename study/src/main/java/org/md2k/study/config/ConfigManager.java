@@ -11,7 +11,6 @@ import org.md2k.utilities.data_format.NotificationRequest;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 
@@ -83,7 +82,7 @@ public class ConfigManager {
             if(config.getUser_view()==null || config.getUser_view().getView_contents()==null)
                 return false;
             else return true;
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             return false;
         }
     }
