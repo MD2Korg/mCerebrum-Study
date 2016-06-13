@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -63,17 +64,6 @@ public class ActivitySelfReportEating extends AppCompatActivity {
             builder.setSingleChoiceItems(items, -1, null);
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    ListView lw = ((AlertDialog)dialog).getListView();
-                    Object checkedItem = lw.getAdapter().getItem(lw.getCheckedItemPosition());
-                    if (checkedItem == null) return;
-                    dialog.dismiss();
-                    SelfReportManagerEating selfReportManager = ((SelfReportManagerEating) ModelManager.getInstance(ActivitySelfReportEating.this).getModel(ModelFactory.MODEL_EATING_SELF_REPORT));
-                    try {
-                        selfReportManager.save(checkedItem.toString());
-                    } catch (DataKitException e) {
-                        e.printStackTrace();
-                    }
-                    finish();
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -84,6 +74,24 @@ public class ActivitySelfReportEating extends AppCompatActivity {
             });
             levelDialog = builder.create();
             levelDialog.show();
+            levelDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    ListView lw = levelDialog.getListView();
+                    if(lw.getCheckedItemPosition()<0) return;
+                    Object checkedItem = lw.getAdapter().getItem(lw.getCheckedItemPosition());
+                    levelDialog.dismiss();
+                    SelfReportManagerEating selfReportManager = ((SelfReportManagerEating) ModelManager.getInstance(ActivitySelfReportEating.this).getModel(ModelFactory.MODEL_EATING_SELF_REPORT));
+                    try {
+                        selfReportManager.save(checkedItem.toString());
+                    } catch (DataKitException e) {
+                        e.printStackTrace();
+                    }
+                    finish();
+                }
+            });
         } else {
             AlertDialogs.showAlertDialogConfirm(ActivitySelfReportEating.this, title, message, "Yes", "Cancel", new DialogInterface.OnClickListener() {
                 @Override

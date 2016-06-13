@@ -32,6 +32,7 @@ import java.util.ArrayList;
  */
 public class Config {
     private ConfigInfo config_info;
+    private ConfigStartScreen start_screen;
     private ConfigStudyInfo study_info;
     private ArrayList<ConfigApp> apps;
     private ArrayList<ConfigAction> actions;
@@ -106,5 +107,9 @@ public class Config {
 
     public ConfigDayStartEnd getDay_end() {
         return day_end;
+    }
+
+    public ConfigStartScreen getStart_screen() {
+        return start_screen;
     }
 }

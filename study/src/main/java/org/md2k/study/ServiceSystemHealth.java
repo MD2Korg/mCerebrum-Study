@@ -39,7 +39,7 @@ public class ServiceSystemHealth extends Service {
     private static final String TAG = ServiceSystemHealth.class.getSimpleName();
     ModelManager modelManager;
     public static boolean isRunning=false;
-    public static int RANK_LIMIT;
+    public static int RANK_LIMIT=Status.RANK_BEGIN;
 
     public void onCreate() {
         Log.d(TAG, "onCreate...");
@@ -54,7 +54,7 @@ public class ServiceSystemHealth extends Service {
         Log.d(TAG,"onStartCommand()...");
         try {
             modelManager.clear();
-            modelManager.remove();
+            modelManager.read();
             modelManager.set();
         } catch (DataKitException e) {
             Log.e(TAG,"Error...in clearing ... onStartCommand()..");
@@ -73,7 +73,6 @@ public class ServiceSystemHealth extends Service {
         Log.d(TAG, "onDestroy()");
         try {
             modelManager.clear();
-            modelManager.remove();
         } catch (DataKitException e) {
             e.printStackTrace();
         }

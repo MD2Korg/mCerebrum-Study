@@ -53,14 +53,7 @@ public class UserViewStudyStartEnd extends UserView {
     }
 
     @Override
-    public void disableView() {
-        activity.findViewById(R.id.button_study_start_end).setEnabled(false);
-        ((Button) activity.findViewById(R.id.button_study_start_end)).setText("Start Study");
-        ((TextView) activity.findViewById(R.id.text_view_study_start)).setText("-");
-        ((TextView) activity.findViewById(R.id.text_view_study_end)).setText("-");
-    }
-
-    private void addView() {
+    public void addView() {
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
         view = activity.getLayoutInflater().inflate(R.layout.layout_study_start_end, null);
         linearLayoutMain.addView(view);
@@ -68,7 +61,7 @@ public class UserViewStudyStartEnd extends UserView {
     }
 
     @Override
-    public void enableView() {
+    public void updateView() {
         if (view == null) return;
 
         activity.findViewById(R.id.button_study_start_end).setEnabled(true);
@@ -88,11 +81,12 @@ public class UserViewStudyStartEnd extends UserView {
             ((TextView) activity.findViewById(R.id.text_view_study_end)).setText(formatTime(studyStartEndInfoManager.getStudyEndTime()));
         }
     }
-    public void stop(){}
+    @Override
+    public void stopView(){}
 
 
 
-    void prepareButton() {
+    private void prepareButton() {
         Button button = (Button) activity.findViewById(R.id.button_study_start_end);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,7 +98,7 @@ public class UserViewStudyStartEnd extends UserView {
                         studyStartEndInfoManager.setStudyStartTime(DateTime.getDateTime());
                     else if (status.getStatus() == Status.STUDY_RUNNING)
                         studyStartEndInfoManager.setStudyEndTime(DateTime.getDateTime());
-                    enableView();
+                    updateView();
                 } catch (DataKitException e) {
                     e.printStackTrace();
                 }

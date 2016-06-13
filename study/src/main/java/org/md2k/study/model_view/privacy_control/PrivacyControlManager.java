@@ -11,8 +11,10 @@ import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
+import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
+import org.md2k.study.model_view.day_start_end.DayStartEndInfoManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.privacy.PrivacyData;
 
@@ -47,6 +49,7 @@ import java.util.ArrayList;
 public class PrivacyControlManager extends Model {
     private static final String TAG = PrivacyControlManager.class.getSimpleName();
     PrivacyData privacyData;
+    public static final String MAX_TIME="max_time";
 
     public PrivacyControlManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -64,6 +67,55 @@ public class PrivacyControlManager extends Model {
     public void clear() {
         privacyData = null;
         status = new Status(rank, Status.NOT_DEFINED);
+    }
+    public long getRemainingTime(){
+        if(!action.getParameters().containsKey(MAX_TIME)) return Integer.MAX_VALUE;
+        long maxTime= Long.parseLong(action.getParameters().get(MAX_TIME));
+        return maxTime-getRunningTime();
+    }
+    public long getRunningTime(){
+        long runningTime = 0;
+        try {
+            PrivacyData lastPrivacyData = null;
+            PrivacyData curPrivacyData = null;
+            long lastTime=0;
+            long curTime=0;
+            DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) modelManager.getModel(ModelFactory.MODEL_DAY_START_END);
+            long dayStartTime = dayStartEndInfoManager.getDayStartTime();
+            long dayEndTime = dayStartEndInfoManager.getDayEndTime();
+            if (dayStartTime == -1 || dayStartTime < dayEndTime) return 0;
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
+            if (dataSourceClients.size() > 0) {
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), dayStartTime, DateTime.getDateTime());
+                for (int i = 0; i < dataTypes.size(); i++) {
+                    try {
+                        DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(i);
+                        Gson gson = new Gson();
+                        curPrivacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
+                        curTime=dataTypeJSONObject.getDateTime();
+                        Log.d(TAG,"privacyData...cur_status="+curPrivacyData.isStatus()+" cur_duration="+curPrivacyData.getDuration().getValue()+" curTime="+curTime+" starttime="+curPrivacyData.getStartTimeStamp());
+                        if (curPrivacyData.isStatus()) {
+                            lastPrivacyData = curPrivacyData;
+                            lastTime=curTime;
+                            runningTime += curPrivacyData.getDuration().getValue();
+                            Log.d(TAG,"privacyData...cur_status="+curPrivacyData.isStatus()+" cur_duration="+curPrivacyData.getDuration().getValue()+" curTime="+curTime+" starttime="+curPrivacyData.getStartTimeStamp()+" runningtime="+runningTime);
+                        } else {
+                            if (lastPrivacyData != null) {
+                                runningTime -= lastPrivacyData.getDuration().getValue();
+                                runningTime += curTime - lastTime;
+                                Log.d(TAG,"privacyData...cur_status="+curPrivacyData.isStatus()+" cur_duration="+curPrivacyData.getDuration().getValue()+" curTime="+curTime+" starttime="+curPrivacyData.getStartTimeStamp()+" lastTime="+lastTime+" lastStarttime="+lastPrivacyData.getStartTimeStamp()+" runningtime="+runningTime+" used="+(curTime - lastTime));
+                                lastPrivacyData = null;
+                            }
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
+        return runningTime;
     }
 
     private PrivacyData readFromDataKit() throws DataKitException {
@@ -85,6 +137,11 @@ public class PrivacyControlManager extends Model {
         return privacyData;
     }
     public Status getCurrentStatusDetails(){
+        try {
+            set();
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
         if (privacyData == null) return new Status(rank, Status.SUCCESS);
         if (!privacyData.isStatus()) return new Status(rank, Status.SUCCESS);
         if (privacyData.getStartTimeStamp() + privacyData.getDuration().getValue() < DateTime.getDateTime())

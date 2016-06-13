@@ -7,7 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.NotificationRequest;
+import org.md2k.utilities.data_format.notification.NotificationRequests;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -43,17 +43,10 @@ import java.lang.reflect.Type;
 public class ConfigManager {
     private static final String TAG = ConfigManager.class.getSimpleName();
     private Config config;
-    private NotificationRequest[] notificationRequests;
+    private NotificationRequests notificationRequests;
     private boolean valid;
 
-    private static ConfigManager instance=null;
-    public static ConfigManager getInstance(Context context){
-        if(instance==null)
-            instance=new ConfigManager(context);
-        return instance;
-    }
-
-    private ConfigManager(Context context) {
+    public ConfigManager(Context context) {
         Log.d(TAG, "ConfigManager()...");
         valid=read();
         Log.d(TAG,"read()...valid="+valid);
@@ -86,15 +79,11 @@ public class ConfigManager {
             return false;
         }
     }
-    public static void clear(){
-        instance=null;
-    }
-
     public Config getConfig() {
         return config;
     }
 
-    public NotificationRequest[] getNotificationRequests() {
+    public NotificationRequests getNotificationRequests() {
         return notificationRequests;
     }
 

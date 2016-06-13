@@ -4,14 +4,12 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
-import org.md2k.datakitapi.datatype.DataTypeJSONObjectArray;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.application.Application;
@@ -21,8 +19,8 @@ import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.NotificationRequest;
-import org.md2k.utilities.data_format.NotificationResponse;
+import org.md2k.utilities.data_format.notification.NotificationRequests;
+import org.md2k.utilities.data_format.notification.NotificationResponse;
 
 import java.util.ArrayList;
 
@@ -38,7 +36,7 @@ public class NotifierManager {
     private DataSourceClient dataSourceClientRequest;
     private ArrayList<DataSourceClient> dataSourceClientResponses;
     private ArrayList<DataSourceClient> dataSourceClientAcks;
-    private ArrayList<NotificationRequest> notificationRequests;
+    private NotificationRequests notificationRequests;
     private Callback callback;
     long lastAckTimeStamp=0;
     long lastRequestTimeStamp=0;
@@ -51,7 +49,7 @@ public class NotifierManager {
         handlerSubscribeAck=new Handler();
     }
 
-    public void set(Callback callback, ArrayList<NotificationRequest> notificationRequests) throws DataKitException {
+    public void set(Callback callback, NotificationRequests notificationRequests) throws DataKitException {
         Log.d(TAG,"NotifierManager...set()...");
         Log.d(TAG, "datakit register ... before register()");
         dataSourceClientRequest = DataKitAPI.getInstance(context).register(new DataSourceBuilder().setType(DataSourceType.NOTIFICATION_REQUEST));
@@ -189,17 +187,12 @@ public class NotifierManager {
     }
 
 
-    private void insertDataToDataKit(ArrayList<NotificationRequest> notificationRequests) throws DataKitException {
-        Log.d(TAG, "insertDataToDataKit()...notificationRequests..size="+notificationRequests.size());
+    private void insertDataToDataKit(NotificationRequests notificationRequests) throws DataKitException {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
-        JsonArray jsonArray=new JsonArray();
-        for (NotificationRequest notificationRequest : notificationRequests) {
-            Gson gson = new Gson();
-            JsonObject sample = new JsonParser().parse(gson.toJson(notificationRequest)).getAsJsonObject();
-            jsonArray.add(sample);
-        }
-        DataTypeJSONObjectArray dataTypeJSONObjectArray=new DataTypeJSONObjectArray(DateTime.getDateTime(), jsonArray);
-        dataKitAPI.insert(dataSourceClientRequest, dataTypeJSONObjectArray);
+        Gson gson=new Gson();
+        JsonObject sample = new JsonParser().parse(gson.toJson(notificationRequests)).getAsJsonObject();
+        DataTypeJSONObject dataTypeJSONObject=new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        dataKitAPI.insert(dataSourceClientRequest, dataTypeJSONObject);
         Log.d(TAG, "...insertDataToDataKit()");
     }
 }

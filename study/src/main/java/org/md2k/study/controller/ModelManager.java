@@ -59,6 +59,7 @@ public class ModelManager {
         this.context = context;
         modelHashMap = new HashMap<>();
         isUpdating = false;
+        read();
     }
 
     public void clear() throws DataKitException {
@@ -73,13 +74,9 @@ public class ModelManager {
         isUpdating=false;
     }
 
-    public void remove() {
+    public void read() {
         modelHashMap.clear();
-        ConfigManager.clear();
-    }
-
-    public void set() throws DataKitException {
-        configManager = ConfigManager.getInstance(context);
+        configManager = new ConfigManager(context);
         if (!modelHashMap.containsKey(ModelFactory.MODEL_CONFIG_INFO))
             modelHashMap.put(ModelFactory.MODEL_CONFIG_INFO, ModelFactory.getModel(this, ModelFactory.MODEL_CONFIG_INFO, Status.RANK_CONFIG));
         if (configManager.isValid()) {
@@ -92,6 +89,11 @@ public class ModelManager {
                 modelHashMap.put(id, ModelFactory.getModel(this, id, rank));
             }
         }
+        status = new Status(Status.RANK_BEGIN, Status.NOT_DEFINED);
+        isUpdating = false;
+    }
+
+    public void set() throws DataKitException {
         status = new Status(Status.RANK_BEGIN, Status.NOT_DEFINED);
         isUpdating = false;
         update();
@@ -177,5 +179,9 @@ public class ModelManager {
     public Model getModel(String id) {
         if (modelHashMap.containsKey(id)) return modelHashMap.get(id);
         return null;
+    }
+
+    public boolean isUpdating() {
+        return isUpdating;
     }
 }

@@ -59,7 +59,7 @@ public class ActivityClearConfig extends Activity {
                     Log.d(TAG, "clearConfigManager...=" + clearConfigManager);
                     clearConfigManager.delete();
                     modelManager.clear();
-                    modelManager.remove();
+                    modelManager.read();
                     modelManager.set();
                 } catch (DataKitException e) {
                     e.printStackTrace();

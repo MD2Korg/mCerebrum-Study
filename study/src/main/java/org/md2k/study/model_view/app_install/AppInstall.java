@@ -54,7 +54,6 @@ public class AppInstall {
     private String curVersion;
     private String latestVersion;
     private boolean installed;
-    private boolean isDownloadOnGoing;
     Context context;
 
     AppInstall(Context context, ConfigApp app) {

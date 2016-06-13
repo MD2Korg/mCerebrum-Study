@@ -29,6 +29,24 @@
             android:textStyle="italic"
             android:gravity="center"
             android:textColor="@color/teal_900" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_view_version"
+            android:textStyle="italic"
+            android:textColor="@color/teal_900"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Configuration"
+            android:id="@+id/text_view_config"
+            android:textColor="@color/lightblue_900"
+            android:gravity="center"
+            android:layout_marginTop="20dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -43,7 +61,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Start Study"
-            android:id="@+id/button_start"
+            android:id="@+id/button_start_study"
             style="@style/app_theme_teal_light.button"
             android:layout_margin="5dp" />
 
@@ -53,6 +71,13 @@
             android:layout_height="wrap_content"
             android:text="Settings"
             android:id="@+id/button_settings"
+            android:layout_margin="5dp" />
+        <Button
+            style="@style/app_theme_teal_light.button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update mCerebrum"
+            android:id="@+id/button_update"
             android:layout_margin="5dp" />
 
         <Button

@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -17,12 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.config.ConfigViewContent;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.UserView;
 import org.md2k.study.model_view.app_reset.ActivityAppReset;
-import org.md2k.study.model_view.privacy_control.PrivacyControlManager;
 import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
@@ -36,54 +33,24 @@ public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
     ArrayList<UserView> userViews;
     MenuItem menuItemStatus;
-    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate()...");
-        if (getIntent().getExtras() != null && getIntent().getExtras().getBoolean("EXIT", false)) {
-            Log.d(TAG, "closing...");
-            Intent intent = new Intent(this, ServiceSystemHealth.class);
-            stopService(intent);
-            finish();
-            return;
-        }
+        userViews = new ArrayList<>();
         setContentView(R.layout.activity_main);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(Status.class.getSimpleName()));
-        Log.d(TAG, "broadcast...set...");
-        userViews = new ArrayList<>();
-        Log.d(TAG, "onCreate()..isServiceRunning=" + ServiceSystemHealth.isRunning);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setTitle("mCerebrum");
-            try {
-                String logoName = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getStudy_info().getLogo();
-                if (logoName != null) {
-                    String path = Constants.CONFIG_DIRECTORY + logoName;
-                    Drawable d = Drawable.createFromPath(path);
-                    getSupportActionBar().setIcon(d);
-                }
-            } catch (Exception ignored) {
-
-            }
-            try {
-                String title = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getStudy_info().getTitle();
-                if (title != null) {
-                    getSupportActionBar().setDisplayShowHomeEnabled(true);
-                    getSupportActionBar().setTitle(title);
-                }
-            } catch (Exception ignored) {
-
-            }
-        }
-        handler = new Handler();
+        setTitleBar();
         addUserView();
     }
+
 
     @Override
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        for(int i=0;i<userViews.size();i++)
+            userViews.get(i).stopView();
+        userViews.clear();
         super.onDestroy();
     }
 
@@ -94,49 +61,6 @@ public class ActivityMain extends AppCompatActivity {
         if (status.getRank() > Status.RANK_ADMIN_OPTIONAL)
             menuItemStatus.setIcon(R.drawable.ic_error_red_48dp);
         else menuItemStatus.setIcon(R.drawable.ic_ok_green_48dp);
-    }
-
-    Runnable runnableUpdateUI = new Runnable() {
-        @Override
-        public void run() {
-            ModelManager modelManager = ModelManager.getInstance(ActivityMain.this);
-            Status status = modelManager.getStatus();
-            updateMenu();
-            if (status.getRank() > Status.RANK_ADMIN_OPTIONAL)
-                handler.postDelayed(runnableUpdateUI, 1000);
-            else try {
-                updateUI();
-            } catch (DataKitException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    void updateUI() throws DataKitException {
-
-        Log.d(TAG, "updateUI()...");
-        ModelManager modelManager = ModelManager.getInstance(this);
-        Status status = modelManager.getStatus();
-        updateMenu();
-        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) return;
-
-
-        for (int i = 0; i < userViews.size(); i++) {
-            Log.d(TAG, "modelmanager Status=" + status.log() + " view status=" + userViews.get(i).getModel().getRank());
-            if (status.getRank() > Status.RANK_USER_REQUIRED) {
-                userViews.get(i).disableView();
-                Log.d(TAG, "userView disabled");
-            } else {
-                if (userViews.get(i).getModel() instanceof PrivacyControlManager) {
-                    Log.d(TAG, "privacyManager..view.." + i);
-                    PrivacyControlManager privacyControlManager = ((PrivacyControlManager) userViews.get(i).getModel());
-                    privacyControlManager.set();
-                }
-                userViews.get(i).enableView();
-                Log.d(TAG, "userView enabled");
-            }
-        }
-        Log.d(TAG, "updateUI...");
     }
 
 
@@ -151,6 +75,7 @@ public class ActivityMain extends AppCompatActivity {
             UserView userView = UserView.getUserView(this, viewContents.get(i).getId());
             if (userView != null) {
                 userViews.add(userView);
+                userView.addView();
             }
         }
     }
@@ -158,34 +83,23 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onResume() {
         Log.d(TAG, "onResume()...");
-        handler.removeCallbacks(runnableUpdateUI);
-        handler.post(runnableUpdateUI);
+        for (int i = 0; i < userViews.size(); i++)
+            userViews.get(i).updateView();
+        updateMenu();
         super.onResume();
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            try {
-                Status status = intent.getParcelableExtra(Status.class.getSimpleName());
-                Log.d(TAG, "received broadcast...rank =" + status.getRank());
-                if (status.getStatus() == Status.CONFIG_FILE_NOT_EXIST)
-                    finish();
-                else {
-                    handler.removeCallbacks(runnableUpdateUI);
-                    handler.post(runnableUpdateUI);
-                    updateUI();
-                }
-            } catch (DataKitException e) {
-                e.printStackTrace();
-            }
+            updateMenu();
         }
     };
 
     @Override
     public void onStart() {
         super.onStart();
-        if (ServiceSystemHealth.RANK_LIMIT == Status.RANK_ADMIN_OPTIONAL)
+        if (ServiceSystemHealth.RANK_LIMIT >= Status.RANK_ADMIN_OPTIONAL)
             finish();
     }
 
@@ -233,8 +147,6 @@ public class ActivityMain extends AppCompatActivity {
                 intent = new Intent(this, ActivityAppReset.class);
                 startActivity(intent);
                 break;
-
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -269,4 +181,39 @@ public class ActivityMain extends AppCompatActivity {
         startActivity(intent);
     }
 
+    void setTitleBar() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            setLogo();
+            setTitle();
+        }
+    }
+
+    void setLogo() {
+        try {
+            if (getSupportActionBar() != null) {
+                String logoName = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getStudy_info().getLogo();
+                if (logoName != null) {
+                    String path = Constants.CONFIG_DIRECTORY + logoName;
+                    Drawable d = Drawable.createFromPath(path);
+                    getSupportActionBar().setIcon(d);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    void setTitle() {
+        try {
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("mCerebrum");
+                String title = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getStudy_info().getTitle();
+                if (title != null) {
+                    getSupportActionBar().setDisplayShowHomeEnabled(true);
+                    getSupportActionBar().setTitle(title);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
 }

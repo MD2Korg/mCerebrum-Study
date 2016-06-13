@@ -20,7 +20,7 @@ import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.NotificationRequest;
+import org.md2k.utilities.data_format.notification.NotificationRequests;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -284,15 +284,15 @@ public class DayStartEndInfoManager extends Model {
 
     void showPrompt(final String type, ArrayList<String> parameters) throws DataKitException {
         Log.d(TAG, "showPrompt()...");
-        ArrayList<NotificationRequest> notificationRequests = new ArrayList<>();
+        NotificationRequests notificationRequests = new NotificationRequests();
         for (int i = 0; i < parameters.size(); i++)
-            for (int j = 0; j < modelManager.getConfigManager().getNotificationRequests().length; j++) {
-                if (modelManager.getConfigManager().getNotificationRequests()[j].getId().equals(parameters.get(i))) {
-                    notificationRequests.add(modelManager.getConfigManager().getNotificationRequests()[j]);
+            for (int j = 0; j < modelManager.getConfigManager().getNotificationRequests().getNotification_option().size(); j++) {
+                if (modelManager.getConfigManager().getNotificationRequests().getNotification_option().get(j).getId().equals(parameters.get(i))) {
+                    notificationRequests.getNotification_option().add(modelManager.getConfigManager().getNotificationRequests().getNotification_option().get(j));
                 }
             }
         notifierManager.clear();
-        if (notificationRequests.size() == 0) return;
+        if (notificationRequests.getNotification_option().size() == 0) return;
         notifierManager.set(new Callback() {
             @Override
             public void onResponse(String response) throws DataKitException {

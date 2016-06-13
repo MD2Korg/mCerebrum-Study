@@ -2,6 +2,7 @@ package org.md2k.study.config;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.widget.Toast;
 
 import org.md2k.study.Constants;
 import org.md2k.utilities.FileManager;
@@ -39,12 +40,19 @@ public class ConfigInfo {
     private static final String TAG = ConfigInfo.class.getSimpleName();
     private String id;
     private String name;
+    private String filename;
     private int version_code;
     private ArrayList<String> required_files;
 
     public boolean isValid(Context context){
-        if(!isValidVersion(context)) return false;
-        if(!isValidRequiredFiles()) return false;
+        if(!isValidVersion(context)) {
+            Toast.makeText(context, "Please update Study App ...",Toast.LENGTH_LONG).show();
+            return false;
+        }
+        if(!isValidRequiredFiles()) {
+            Toast.makeText(context, "Error: Required file not exists ...",Toast.LENGTH_LONG).show();
+            return false;
+        }
         return true;
     }
     private boolean isValidVersion(Context context){
@@ -82,5 +90,9 @@ public class ConfigInfo {
 
     public ArrayList<String> getRequired_files() {
         return required_files;
+    }
+
+    public String getFilename() {
+        return filename;
     }
 }

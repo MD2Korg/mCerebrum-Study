@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.R;
@@ -45,7 +44,6 @@ import org.md2k.utilities.Report.Log;
 public class UserViewUserApp extends UserView {
     private static final String TAG = UserViewUserApp.class.getSimpleName();
     public ExpandableHeightGridView gridViewApplication;
-    boolean disable = false;
 
     public UserViewUserApp(Activity activity, Model model) {
         super(activity, model);
@@ -53,39 +51,38 @@ public class UserViewUserApp extends UserView {
     }
 
     @Override
-    public void disableView() {
-        disable = true;
-    }
-    @Override
-    public void enableView() throws DataKitException {
-        addUserApp();
-        disable = false;
-    }
-
-    private void addView() {
+    public void addView() {
         Log.d(TAG, "addView()...");
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
-        if(view==null) {
+        if (view == null) {
             view = activity.getLayoutInflater().inflate(R.layout.layout_user_app, null);
             linearLayoutMain.addView(view);
+            addUserApp();
         }
     }
-    public void stop(){}
 
-    void addUserApp() throws DataKitException {
-        Log.d(TAG, "addUserApp()...");
-        final UserAppManager userAppManager = (UserAppManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_USER_APP);
-        gridViewApplication = (ExpandableHeightGridView) activity.findViewById(R.id.gridview);
-        Log.d(TAG,"addUserApp()...size="+userAppManager.getUserApps().size());
-        AppAdapter appAdapter = new AppAdapter(activity, userAppManager.getUserApps());
-        gridViewApplication.setAdapter(appAdapter);
-        gridViewApplication.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String packageName = userAppManager.userApps.get(position).getAction().getPackage_name();
-                if (disable) {
-                    Toast.makeText(activity, "Please setup the study first...", Toast.LENGTH_LONG).show();
-                }else {
+    @Override
+    public void updateView() {
+
+    }
+
+    @Override
+    public void stopView() {
+
+    }
+
+    private void addUserApp() {
+        try {
+            Log.d(TAG, "addUserApp()...");
+            final UserAppManager userAppManager = (UserAppManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_USER_APP);
+            gridViewApplication = (ExpandableHeightGridView) activity.findViewById(R.id.gridview);
+            Log.d(TAG, "addUserApp()...size=" + userAppManager.getUserApps().size());
+            AppAdapter appAdapter = new AppAdapter(activity, userAppManager.getUserApps());
+            gridViewApplication.setAdapter(appAdapter);
+            gridViewApplication.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String packageName = userAppManager.userApps.get(position).getAction().getPackage_name();
                     String className = userAppManager.userApps.get(position).getAction().getClass_name();
                     if (packageName != null && className != null) {
                         Intent intent = new Intent();
@@ -104,8 +101,10 @@ public class UserViewUserApp extends UserView {
                         }
                     }
                 }
-            }
-        });
+            });
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
     }
 
 }

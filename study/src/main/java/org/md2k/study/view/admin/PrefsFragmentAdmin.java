@@ -102,7 +102,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                 try {
                     ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
                     modelManager.clear();
-                    modelManager.remove();
+                    modelManager.read();
                     modelManager.set();
                 } catch (DataKitException e) {
                     e.printStackTrace();
@@ -121,7 +121,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
                 try {
                     ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
                     modelManager.clear();
-                    modelManager.remove();
+                    modelManager.read();
                     modelManager.set();
                 } catch (DataKitException e) {
                     e.printStackTrace();

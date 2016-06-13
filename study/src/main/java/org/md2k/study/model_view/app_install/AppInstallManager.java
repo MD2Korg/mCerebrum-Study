@@ -41,6 +41,12 @@ public class AppInstallManager extends Model {
     public ArrayList<AppInstall> getAppInstallList() {
         return appInstallList;
     }
+    public AppInstall getAppInstallList(String id){
+        for(int i=0;i<appInstallList.size();i++)
+            if(appInstallList.get(i).app.getId().equals(id))
+                return appInstallList.get(i);
+        return null;
+    }
 
     public AppInstallManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);

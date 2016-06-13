@@ -2,17 +2,15 @@ package org.md2k.study.config;
 
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.md2k.study.Constants;
 import org.md2k.utilities.FileManager;
-import org.md2k.utilities.data_format.NotificationRequest;
+import org.md2k.utilities.data_format.notification.NotificationRequests;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -41,7 +39,7 @@ import java.lang.reflect.Type;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConfigNotification{
-    NotificationRequest[] notificationRequests;
+    NotificationRequests notificationRequests;
     private static ConfigNotification instance=null;
     public static ConfigNotification getInstance(){
         if(instance==null)
@@ -54,6 +52,11 @@ public class ConfigNotification{
     private ConfigNotification(){
         readNotifications();
     }
+
+    public NotificationRequests getNotificationRequests() {
+        return notificationRequests;
+    }
+
     private void readNotifications(){
         BufferedReader br;
         String filepath= Constants.CONFIG_DIRECTORY+Constants.NOTIFICATION_FILENAME;
@@ -63,16 +66,11 @@ public class ConfigNotification{
             try {
                 br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
                 Gson gson = new Gson();
-                Type collectionType = new TypeToken<NotificationRequest[]>() {
-                }.getType();
-                notificationRequests = gson.fromJson(br, collectionType);
+                notificationRequests = gson.fromJson(br, NotificationRequests.class);
             } catch (IOException e) {
                 notificationRequests = null;
             }
         }
 
-    }
-    public NotificationRequest[] getNotificationRequests() {
-        return notificationRequests;
     }
 }

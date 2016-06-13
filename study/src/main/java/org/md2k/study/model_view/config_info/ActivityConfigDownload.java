@@ -87,7 +87,7 @@ public class ActivityConfigDownload extends Activity {
                                 try {
                                     ModelManager.getInstance(ActivityConfigDownload.this).clear();
                                     FileManager.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
-                                    ModelManager.getInstance(ActivityConfigDownload.this).remove();
+                                    ModelManager.getInstance(ActivityConfigDownload.this).read();
                                     ModelManager.getInstance(ActivityConfigDownload.this).set();
                                     Intent returnIntent = new Intent();
                                     setResult(Activity.RESULT_OK, returnIntent);
@@ -129,8 +129,8 @@ public class ActivityConfigDownload extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 try {
                     ModelManager.getInstance(ActivityConfigDownload.this).clear();
-                    ModelManager.getInstance(ActivityConfigDownload.this).remove();
                     FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+                    ModelManager.getInstance(ActivityConfigDownload.this).read();
                     ModelManager.getInstance(ActivityConfigDownload.this).set();
                 } catch (DataKitException e) {
                     e.printStackTrace();

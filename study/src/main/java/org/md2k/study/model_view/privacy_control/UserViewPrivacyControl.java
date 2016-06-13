@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.R;
@@ -49,30 +50,21 @@ import org.md2k.utilities.Report.Log;
 public class UserViewPrivacyControl extends UserView {
     private static final String TAG = UserViewPrivacyControl.class.getSimpleName();
     Handler handler;
+    boolean isActive;
 
     public UserViewPrivacyControl(Activity activity, Model model) {
         super(activity, model);
         handler=new Handler();
-        addView();
+        isActive=false;
     }
 
     @Override
-    public void disableView() {
-        handler.removeCallbacks(runnablePrivacy);
-        if (view == null) return;
-        activity.findViewById(R.id.button_privacy).setEnabled(false);
-        Log.d(TAG, "updateView()...");
-        ((TextView) activity.findViewById(R.id.text_view_privacy)).setText("Not Active");
-        ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
-        activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
-        ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn On");
-    }
-    public void stop(){
+    public void stopView(){
         handler.removeCallbacks(runnablePrivacy);
     }
 
     @Override
-    public void enableView() {
+    public void updateView() {
         if (view == null) return;
         handler.removeCallbacks(runnablePrivacy);
         handler.post(runnablePrivacy);
@@ -83,9 +75,9 @@ public class UserViewPrivacyControl extends UserView {
             activity.findViewById(R.id.button_privacy).setEnabled(true);
             Log.d(TAG, "updateView()...");
             PrivacyControlManager privacyControlManager = (PrivacyControlManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_PRIVACY);
+            long timeLeft=privacyControlManager.getRemainingTime();
 
             Status status = privacyControlManager.getCurrentStatusDetails();
-
             if (status.getStatus() == Status.PRIVACY_ACTIVE) {
                 long remainingTime = privacyControlManager.getPrivacyData().getStartTimeStamp() + privacyControlManager.getPrivacyData().getDuration().getValue() - DateTime.getDateTime();
                 if (remainingTime > 0) {
@@ -98,6 +90,14 @@ public class UserViewPrivacyControl extends UserView {
                     ((Button)activity.findViewById(R.id.button_privacy)).setTextColor(Color.WHITE);
                     ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn Off");
                     handler.postDelayed(this,1000);
+                    isActive=true;
+                }else{
+                    ((TextView) activity.findViewById(R.id.text_view_privacy)).setText("Not Active");
+                    ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
+                    activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
+                    ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn On");
+                    ((Button)activity.findViewById(R.id.button_privacy)).setTextColor(Color.BLACK);
+                    isActive=false;
                 }
             }else {
                 ((TextView) activity.findViewById(R.id.text_view_privacy)).setText("Not Active");
@@ -105,11 +105,17 @@ public class UserViewPrivacyControl extends UserView {
                 activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
                 ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn On");
                 ((Button)activity.findViewById(R.id.button_privacy)).setTextColor(Color.BLACK);
+                isActive=false;
+            }
+            if(!isActive && timeLeft<=0){
+                ((Button) activity.findViewById(R.id.button_privacy)).setText("Finished");
+
             }
         }
     };
 
-    private void addView() {
+    @Override
+    public void addView() {
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
         view = activity.getLayoutInflater().inflate(R.layout.layout_privacy_control, null);
         linearLayoutMain.addView(view);
@@ -122,8 +128,16 @@ public class UserViewPrivacyControl extends UserView {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                PrivacyControlManager privacyControlManager = (PrivacyControlManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_PRIVACY);
+                PrivacyControlManager privacyControlManager = (PrivacyControlManager) model;//ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_PRIVACY);
                 intent.setClassName(privacyControlManager.getAction().getPackage_name(), privacyControlManager.getAction().getClass_name());
+                if(!isActive){
+                    long remainingTime=privacyControlManager.getRemainingTime();
+                    if(remainingTime<=0){
+                        Toast.makeText(activity, "Privacy usage exceeded",Toast.LENGTH_SHORT).show();
+                    }
+                    Log.d(TAG,"remaining time="+remainingTime);
+                    intent.putExtra("REMAINING_TIME",remainingTime);
+                }
                 activity.startActivity(intent);
             }
         });

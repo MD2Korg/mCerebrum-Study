@@ -40,15 +40,18 @@ public class UserViewUserStatus extends UserView {
     }
 
     @Override
-    public void disableView() {
+    public void addView() {
 
     }
-
 
     @Override
-    public void enableView() {
-    }
-    public void stop(){}
+    public void updateView() {
 
+    }
+
+    @Override
+    public void stopView() {
+
+    }
 
 }

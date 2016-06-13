@@ -15,7 +15,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.config.ConfigApp;
-import org.md2k.study.config.ConfigManager;
+import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DATA_QUALITY;
 
@@ -114,14 +114,14 @@ public class DataQuality {
                 if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_CHEST) || dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST)) {
                     Log.d(TAG, "runnableCheckAvailability()...autosense");
                     Intent intent = new Intent();
-                    ConfigApp app = ConfigManager.getInstance(context).getConfig().getApps("autosense");
+                    ConfigApp app = ModelManager.getInstance(context).getConfigManager().getConfig().getApps("autosense");
                     intent.setClassName(app.getPackage_name(), app.getService());
                     context.stopService(intent);
                     context.startService(intent);
                 } else if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.MICROSOFT_BAND)) {
                     Log.d(TAG, "runnableCheckAvailability()...microsoftband");
                     Intent intent = new Intent();
-                    ConfigApp app = ConfigManager.getInstance(context).getConfig().getApps("microsoftband");
+                    ConfigApp app = ModelManager.getInstance(context).getConfigManager().getConfig().getApps("microsoftband");
                     intent.setClassName(app.getPackage_name(), app.getService());
                     context.stopService(intent);
                     context.startService(intent);

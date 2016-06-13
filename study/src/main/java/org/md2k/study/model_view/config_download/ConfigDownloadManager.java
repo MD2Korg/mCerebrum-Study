@@ -6,8 +6,6 @@ import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.FileManager;
 
-import java.util.ArrayList;
-
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -43,7 +41,6 @@ public class ConfigDownloadManager extends Model {
     }
 
     public void delete(){
-        ArrayList<String> requiredFiles=modelManager.getConfigManager().getConfig().getConfig_info().getRequired_files();
         FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
     }
 

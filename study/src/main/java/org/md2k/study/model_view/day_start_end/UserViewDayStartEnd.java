@@ -58,94 +58,27 @@ import java.util.Date;
  */
 public class UserViewDayStartEnd extends UserView {
     private static final String TAG = UserViewDayStartEnd.class.getSimpleName();
-    boolean isEnable;
 
     public UserViewDayStartEnd(Activity activity, Model model) {
         super(activity, model);
         LocalBroadcastManager.getInstance(activity).registerReceiver(receiver,new IntentFilter(DayStartEndInfoManager.class.getSimpleName()));
-        isEnable=false;
-        addView();
     }
 
     @Override
-    public void disableView() {
-        isEnable=false;
-        activity.findViewById(R.id.button_day_start_end).setEnabled(false);
-        ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Start Day");
-        activity.findViewById(R.id.button_day_start_end).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_red));
-        ((Button) activity.findViewById(R.id.button_day_start_end)).setTextColor(Color.WHITE);
-        ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(" - ");
-        ((TextView) activity.findViewById(R.id.text_view_day_end)).setText(" - ");
-        ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.INVISIBLE);
-        ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.INVISIBLE);
-    }
-
-    private void addView() {
+    public void addView() {
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
         view = activity.getLayoutInflater().inflate(R.layout.layout_day_start_end, null);
         linearLayoutMain.addView(view);
         prepareButton();
     }
 
-    public void stop() {
+    @Override
+    public void stopView() {
     }
 
-    void prepareButton() {
-        Button button = (Button) activity.findViewById(R.id.button_day_start_end);
-        Log.d(TAG, "Button clicked");
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
-                int state = dayStartEndInfoManager.getButtonStatus();
-                if (state == DayStartEndInfoManager.START_BUTTON) {
-                    showAlertDialog(Status.DAY_START_NOT_AVAILABLE);
-                } else if (state == DayStartEndInfoManager.END_BUTTON) {
-                    showAlertDialog(Status.SUCCESS);
-                }
-                enableView();
-            }
-        });
-    }
-
-    public void showAlertDialog(final int status) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
-        if (status == Status.DAY_START_NOT_AVAILABLE) {
-            builder.setTitle("Start Day");
-            builder.setMessage("Do you want to start the day?");
-        } else {
-            builder.setTitle("End Day");
-            builder.setMessage("Do you want to end the day?");
-        }
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    if (status == Status.DAY_START_NOT_AVAILABLE)
-                        dayStartEndInfoManager.setDayStartTime(DateTime.getDateTime());
-                    else if (status == Status.SUCCESS)
-                        dayStartEndInfoManager.setDayEndTime(DateTime.getDateTime());
-                    enableView();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
-                dialog.dismiss();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.show();
-
-    }
 
     @Override
-    public void enableView() {
-        isEnable=true;
+    public void updateView() {
         Log.d(TAG, "enableView () .. UserViewDayStartEnd");
         if (view == null) return;
         activity.findViewById(R.id.button_day_start_end).setEnabled(true);
@@ -201,7 +134,7 @@ public class UserViewDayStartEnd extends UserView {
         }
     }
 
-    String formatTime(long timestamp) {
+    private String formatTime(long timestamp) {
         if(timestamp==-1) return "-";
         try {
             Calendar calendar = Calendar.getInstance();
@@ -217,8 +150,60 @@ public class UserViewDayStartEnd extends UserView {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(isEnable)
-                enableView();
+                updateView();
         }
     };
+    private void prepareButton() {
+        Button button = (Button) activity.findViewById(R.id.button_day_start_end);
+        Log.d(TAG, "Button clicked");
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
+                int state = dayStartEndInfoManager.getButtonStatus();
+                if (state == DayStartEndInfoManager.START_BUTTON) {
+                    showAlertDialog(Status.DAY_START_NOT_AVAILABLE);
+                } else if (state == DayStartEndInfoManager.END_BUTTON) {
+                    showAlertDialog(Status.SUCCESS);
+                }
+                updateView();
+            }
+        });
+    }
+
+    public void showAlertDialog(final int status) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
+        if (status == Status.DAY_START_NOT_AVAILABLE) {
+            builder.setTitle("Start Day");
+            builder.setMessage("Do you want to start the day?");
+        } else {
+            builder.setTitle("End Day");
+            builder.setMessage("Do you want to end the day?");
+        }
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    if (status == Status.DAY_START_NOT_AVAILABLE)
+                        dayStartEndInfoManager.setDayStartTime(DateTime.getDateTime());
+                    else if (status == Status.SUCCESS)
+                        dayStartEndInfoManager.setDayEndTime(DateTime.getDateTime());
+                    updateView();
+                } catch (DataKitException e) {
+                    e.printStackTrace();
+                }
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+
+    }
+
 }

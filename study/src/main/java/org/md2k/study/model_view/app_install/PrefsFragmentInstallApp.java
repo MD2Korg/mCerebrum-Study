@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.OnDataChangeListener;
@@ -99,7 +100,12 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     void updateVersion(final int now) {
         Log.d(TAG, "updateVersion()...now=" + now);
-        if (now >= appInstallManager.getAppInstallList().size()) return;
+        if(now==0)
+            Toast.makeText(context, "Checking updates...",Toast.LENGTH_SHORT).show();
+        if (now >= appInstallManager.getAppInstallList().size()) {
+            Toast.makeText(context, "Checking updates...done",Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (appInstallManager.getAppInstallList().get(now).getDownload_link().endsWith("releases")) {
             appInstallManager.getAppInstallList().get(now).setLatestVersionName(context, new OnDataChangeListener() {
                 @Override

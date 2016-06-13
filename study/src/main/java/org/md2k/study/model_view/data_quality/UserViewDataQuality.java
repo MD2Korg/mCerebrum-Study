@@ -1,13 +1,9 @@
 package org.md2k.study.model_view.data_quality;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
@@ -61,30 +57,71 @@ public class UserViewDataQuality extends UserView {
     public UserViewDataQuality(Activity activity, Model model) {
         super(activity, model);
         Log.d(TAG, "UserViewDataQuality()...");
-        handler = new Handler();
-        addView();
-        LocalBroadcastManager.getInstance(activity).registerReceiver(receiver, new IntentFilter(DataQualityManager.class.getSimpleName()));
+        handler=new Handler();
     }
 
     @Override
-    public void disableView() {
-        Log.d(TAG, "disableView...");
-        if (imageView != null) {
-            for (int i = 0; i < imageView.length; i++) {
+    public void updateView(){
+        String message = null;
+        boolean isAllGood = true;
+        boolean isStatusSuccess;
+        DataQualityManager dataQualityManager = (DataQualityManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DATA_QUALITY);
+        if (dataQualityManager == null || textViews.length == 0) {
+            return;
+        }
+        if (dataQualityManager.getStatus().getStatus() == Status.SUCCESS)
+            isStatusSuccess = true;
+        else isStatusSuccess = false;
+
+        ArrayList<DataQualityInfo> dataQualityInfos = dataQualityManager.dataQualityInfos;
+        for (int i = 0; i < dataQualityInfos.size(); i++) {
+            if (isStatusSuccess == false) {
                 imageView[i].setImageResource(R.drawable.ic_error_red_50dp);
+                message = "";
+            } else {
+                if(dataQualityInfos.get(i).getTitle()!="")
+                    textViews[i].setText(dataQualityInfos.get(i).getTitle());
+                switch (dataQualityInfos.get(i).getQuality()) {
+                    case Status.DATAQUALITY_GOOD:
+                        imageView[i].setImageResource(R.drawable.ic_ok_teal_50dp);
+                        break;
+                    case Status.DATAQUALITY_OFF:
+                        imageView[i].setImageResource(R.drawable.ic_error_red_50dp);
+                        message = dataQualityInfos.get(i).getMessage();
+                        isAllGood = false;
+                        break;
+                    case Status.DATAQUALITY_NOT_WORN:
+                    case Status.DATAQUALITY_LOOSE:
+                    case Status.DATAQUALITY_NOISY:
+                        if (message == null) message = dataQualityInfos.get(i).getMessage();
+                        imageView[i].setImageResource(R.drawable.ic_warning_red_48dp);
+                        isAllGood = false;
+                        break;
+                }
             }
-            ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setText("");
+        }
+        if (isAllGood && isStatusSuccess) {
+            ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setText("Everything is good");
+            ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
+        } else {
+            ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setText(message);
             ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setTextColor(ContextCompat.getColor(activity, R.color.red_900));
         }
+
     }
 
+    @Override
+    public void stopView() {
+        handler.removeCallbacks(runnableUpdateView);
+
+    }
+
+    @Override
     public void addView() {
         Log.d(TAG, "addView()...");
         addLayout();
         addImageView();
-    }
-
-    public void stop() {
+        handler.post(runnableUpdateView);
     }
 
     private void addLayout() {
@@ -123,7 +160,7 @@ public class UserViewDataQuality extends UserView {
             imageView[i] = imageViewOne;
             textViews[i] = textViewOne;
             linearLayout.addView(linearLayoutOne);
-            imageViewOne.setImageResource(R.drawable.ic_error_red_50dp);
+            imageViewOne.setImageResource(R.drawable.ic_ok_teal_50dp);
             LinearLayout.LayoutParams ll_params_imageView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f / (dataSources.size()));
             ll_params_imageView.gravity = Gravity.CENTER_HORIZONTAL;
 
@@ -138,59 +175,12 @@ public class UserViewDataQuality extends UserView {
         }
     }
 
-    BroadcastReceiver receiver = new BroadcastReceiver() {
+    Runnable runnableUpdateView = new Runnable() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            String message = null;
-            boolean isAllGood = true;
-            boolean isStatusSuccess;
-            DataQualityManager dataQualityManager = (DataQualityManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DATA_QUALITY);
-            if (dataQualityManager == null || textViews.length == 0) {
-                return;
-            }
-            if (dataQualityManager.getStatus().getStatus() == Status.SUCCESS)
-                isStatusSuccess = true;
-            else isStatusSuccess = false;
-
-            ArrayList<DataQualityInfo> dataQualityInfos = dataQualityManager.dataQualityInfos;
-            for (int i = 0; i < dataQualityInfos.size(); i++) {
-                if (isStatusSuccess == false) {
-                    imageView[i].setImageResource(R.drawable.ic_error_red_50dp);
-                    message = "";
-                } else {
-                    if(dataQualityInfos.get(i).getTitle()!="")
-                        textViews[i].setText(dataQualityInfos.get(i).getTitle());
-                    switch (dataQualityInfos.get(i).getQuality()) {
-                        case Status.DATAQUALITY_GOOD:
-                            imageView[i].setImageResource(R.drawable.ic_ok_teal_50dp);
-                            break;
-                        case Status.DATAQUALITY_OFF:
-                            imageView[i].setImageResource(R.drawable.ic_error_red_50dp);
-                            message = dataQualityInfos.get(i).getMessage();
-                            isAllGood = false;
-                            break;
-                        case Status.DATAQUALITY_NOT_WORN:
-                        case Status.DATAQUALITY_LOOSE:
-                        case Status.DATAQUALITY_NOISY:
-                            if (message == null) message = dataQualityInfos.get(i).getMessage();
-                            imageView[i].setImageResource(R.drawable.ic_warning_red_48dp);
-                            isAllGood = false;
-                            break;
-                    }
-                }
-            }
-            if (isAllGood && isStatusSuccess) {
-                ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setText("Everything is good");
-                ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
-            } else {
-                ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setText(message);
-                ((TextView) activity.findViewById(R.id.text_view_data_quality_message)).setTextColor(ContextCompat.getColor(activity, R.color.red_900));
-            }
+        public void run() {
+            updateView();
+            handler.postDelayed(this, 5000);
         }
     };
 
-    @Override
-    public void enableView() {
-        Log.d(TAG, "updateView()...");
-    }
 }
