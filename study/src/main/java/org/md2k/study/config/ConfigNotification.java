@@ -9,7 +9,6 @@ import org.md2k.utilities.data_format.notification.NotificationRequests;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
@@ -38,18 +37,21 @@ import java.io.InputStreamReader;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigNotification{
+public class ConfigNotification {
     NotificationRequests notificationRequests;
-    private static ConfigNotification instance=null;
-    public static ConfigNotification getInstance(){
-        if(instance==null)
-            instance=new ConfigNotification();
+    private static ConfigNotification instance = null;
+
+    public static ConfigNotification getInstance() {
+        if (instance == null)
+            instance = new ConfigNotification();
         return instance;
     }
-    public static void clear(){
-        instance=null;
+
+    public static void clear() {
+        instance = null;
     }
-    private ConfigNotification(){
+
+    private ConfigNotification() {
         readNotifications();
     }
 
@@ -57,17 +59,17 @@ public class ConfigNotification{
         return notificationRequests;
     }
 
-    private void readNotifications(){
+    private void readNotifications() {
         BufferedReader br;
-        String filepath= Constants.CONFIG_DIRECTORY+Constants.NOTIFICATION_FILENAME;
-        if(!FileManager.isExist(filepath))
-            notificationRequests =null;
+        String filepath = Constants.CONFIG_DIRECTORY + Constants.NOTIFICATION_FILENAME;
+        if (!FileManager.isExist(filepath))
+            notificationRequests = null;
         else {
             try {
                 br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
                 Gson gson = new Gson();
                 notificationRequests = gson.fromJson(br, NotificationRequests.class);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 notificationRequests = null;
             }
         }

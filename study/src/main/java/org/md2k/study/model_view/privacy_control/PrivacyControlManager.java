@@ -69,7 +69,7 @@ public class PrivacyControlManager extends Model {
         status = new Status(rank, Status.NOT_DEFINED);
     }
     public long getRemainingTime(){
-        if(!action.getParameters().containsKey(MAX_TIME)) return Integer.MAX_VALUE;
+        if(action.getParameters()==null || !action.getParameters().containsKey(MAX_TIME)) return Integer.MAX_VALUE;
         long maxTime= Long.parseLong(action.getParameters().get(MAX_TIME));
         return maxTime-getRunningTime();
     }
