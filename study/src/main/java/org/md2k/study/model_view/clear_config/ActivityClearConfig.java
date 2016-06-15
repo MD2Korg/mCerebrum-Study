@@ -3,12 +3,12 @@ package org.md2k.study.model_view.clear_config;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.UI.AlertDialogs;
 
 
 /**
@@ -45,36 +45,27 @@ public class ActivityClearConfig extends Activity {
         super.onCreate(savedInstanceState);
         showDeleteDirectory();
     }
+
     public void showDeleteDirectory() {
         Log.d(TAG, "showDeleteDirectory()...");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Reset the System");
-        builder.setMessage("Do you want to reset the system?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        AlertDialogs.AlertDialog(this, "Reset the System", "Do you want to reset the system?", org.md2k.utilities.R.drawable.ic_warning_red_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                try {
-                    ModelManager modelManager = ModelManager.getInstance(ActivityClearConfig.this);
-                    ClearConfigManager clearConfigManager = (ClearConfigManager) modelManager.getModel(ModelFactory.MODEL_CLEAR_CONFIG);
-                    Log.d(TAG, "clearConfigManager...=" + clearConfigManager);
-                    clearConfigManager.delete();
-                    modelManager.clear();
-                    modelManager.read();
-                    modelManager.set();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    try {
+                        ModelManager modelManager = ModelManager.getInstance(ActivityClearConfig.this);
+                        ClearConfigManager clearConfigManager = (ClearConfigManager) modelManager.getModel(ModelFactory.MODEL_CLEAR_CONFIG);
+                        Log.d(TAG, "clearConfigManager...=" + clearConfigManager);
+                        clearConfigManager.delete();
+                        modelManager.clear();
+                        modelManager.read();
+                        modelManager.set();
+                    } catch (DataKitException e) {
+                        e.printStackTrace();
+                    }
                 }
                 finish();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                finish();
-            }
-        });
-        builder.show();
-
     }
 }

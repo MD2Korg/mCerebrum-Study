@@ -2,11 +2,11 @@ package org.md2k.study.model_view.day_type;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
+import org.md2k.utilities.UI.AlertDialogs;
 import org.md2k.utilities.data_format.DayTypeInfo;
 
 
@@ -37,7 +37,6 @@ import org.md2k.utilities.data_format.DayTypeInfo;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ActivityDayType extends AppCompatActivity {
-    AlertDialog levelDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,28 +45,17 @@ public class ActivityDayType extends AppCompatActivity {
 
     }
 
-    int selected;
     void showAlertDialog() {
-        final CharSequence[] items = {DayTypeInfo.PRE_QUIT_NAME, DayTypeInfo.POST_QUIT_NAME};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Pre/Post Quit Day");
-        builder.setCancelable(false);
-        builder.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                selected=item;
-            }
-        });
-        builder.setPositiveButton("Select", new DialogInterface.OnClickListener() {
+        final String[] items = {DayTypeInfo.PRE_QUIT_NAME, DayTypeInfo.POST_QUIT_NAME};
+        AlertDialogs.AlertDialogSingleChoice(this, "Pre/Post Quit Day", items, -1, "Select", "Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                DayTypeManager dayTypeManager = (DayTypeManager) ModelManager.getInstance(ActivityDayType.this).getModel(ModelFactory.MODEL_DAY_TYPE);
-                dayTypeManager.setDayType(selected);
-                levelDialog.dismiss();
-                finish();
+                if (which != -1) {
+                    DayTypeManager dayTypeManager = (DayTypeManager) ModelManager.getInstance(ActivityDayType.this).getModel(ModelFactory.MODEL_DAY_TYPE);
+                    dayTypeManager.setDayType(which);
+                    finish();
+                }
             }
         });
-        levelDialog = builder.create();
-
-        levelDialog.show();
     }
 }

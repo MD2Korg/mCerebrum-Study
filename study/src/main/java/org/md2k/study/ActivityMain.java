@@ -10,7 +10,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +24,7 @@ import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
+import org.md2k.utilities.UI.AlertDialogs;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -153,22 +153,21 @@ public class ActivityMain extends AppCompatActivity {
 
     void showStatus() {
         Status status = ModelManager.getInstance(this).getStatus();
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("System Status");
         if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
-            builder.setIcon(R.drawable.ic_error_red_48dp);
-            builder.setMessage(status.getMessage());
+            AlertDialogs.AlertDialog(this, "System Status", status.getMessage(), R.drawable.ic_error_red_48dp, "Ok", null, null, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
         } else {
-            builder.setIcon(R.drawable.ic_ok_green_48dp);
-            builder.setMessage("System is Okay.");
+            AlertDialogs.AlertDialog(this, "System Status", "System is Okay", R.drawable.ic_ok_green_48dp, "Ok", null, null, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
         }
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.show();
     }
 
     void openPDF() {

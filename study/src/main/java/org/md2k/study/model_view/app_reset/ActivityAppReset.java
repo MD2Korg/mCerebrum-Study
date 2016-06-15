@@ -39,7 +39,7 @@ public class ActivityAppReset extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AlertDialogs.showAlertDialogConfirm(ActivityAppReset.this, "Reset Application", "Do you want to reset application?", "Yes", "Cancel", new DialogInterface.OnClickListener() {
+        AlertDialogs.AlertDialog(ActivityAppReset.this, "Reset Application", "Do you want to reset application?", org.md2k.utilities.R.drawable.ic_refresh_teal_48dp, "Yes", "Cancel", null,new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {

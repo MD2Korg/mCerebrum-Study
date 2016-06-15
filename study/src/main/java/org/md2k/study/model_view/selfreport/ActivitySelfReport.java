@@ -90,7 +90,7 @@ public class ActivitySelfReport extends AppCompatActivity {
                 }
             });
         } else {
-            AlertDialogs.showAlertDialogConfirm(ActivitySelfReport.this, title, message, "Yes", "Cancel", new DialogInterface.OnClickListener() {
+            AlertDialogs.AlertDialog(ActivitySelfReport.this, title, message, org.md2k.utilities.R.drawable.ic_info_teal_48dp, "Yes", "Cancel",null, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_POSITIVE) {

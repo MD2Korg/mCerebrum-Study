@@ -237,7 +237,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                             if (!appInstallManager.getAppInstallList("study").isUpdateAvailable())
                                 Toast.makeText(ActivityStartScreen.this, "mCerebrum is up-to-date...", Toast.LENGTH_SHORT).show();
                             else {
-                                AlertDialogs.showAlertDialogConfirm(ActivityStartScreen.this, "Update Available(" + str + ")", "Do you want to update now?", "Yes", "No", new DialogInterface.OnClickListener() {
+                                AlertDialogs.AlertDialog(ActivityStartScreen.this, "Update Available(" + str + ")", "Do you want to update now?",R.drawable.ic_info_teal_48dp, "Yes", "No",null, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         if (which == DialogInterface.BUTTON_POSITIVE) {

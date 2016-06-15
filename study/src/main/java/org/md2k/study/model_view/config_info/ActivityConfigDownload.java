@@ -17,6 +17,7 @@ import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
 import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.UI.AlertDialogs;
 
 
 /**
@@ -121,35 +122,31 @@ public class ActivityConfigDownload extends Activity {
 
     public void showDeleteDirectory() {
         Log.d(TAG, "showDeleteDirectory()...");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete configuration files?");
-        builder.setMessage("Do you want to delete configuration files?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        AlertDialogs.AlertDialog(this, "Delete configuration files?", "Do you want to delete configuration files?", R.drawable.ic_delete_red_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                try {
-                    ModelManager.getInstance(ActivityConfigDownload.this).clear();
-                    FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
-                    ModelManager.getInstance(ActivityConfigDownload.this).read();
-                    ModelManager.getInstance(ActivityConfigDownload.this).set();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
+                if(which==DialogInterface.BUTTON_POSITIVE){
+                    try {
+                        ModelManager.getInstance(ActivityConfigDownload.this).clear();
+                        FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+                        ModelManager.getInstance(ActivityConfigDownload.this).read();
+                        ModelManager.getInstance(ActivityConfigDownload.this).set();
+                    } catch (DataKitException e) {
+                        e.printStackTrace();
+                    }
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_OK, returnIntent);
+                    dialog.cancel();
+                    finish();
+
+                }else{
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_OK, returnIntent);
+                    dialog.cancel();
+                    finish();
                 }
-                Intent returnIntent = new Intent();
-                setResult(Activity.RESULT_OK, returnIntent);
-                dialog.cancel();
-                finish();
+
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent returnIntent = new Intent();
-                setResult(Activity.RESULT_OK, returnIntent);
-                dialog.cancel();
-                finish();
-            }
-        });
-        builder.show();
     }
 }

@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -24,6 +23,7 @@ import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.UI.AlertDialogs;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -61,7 +61,7 @@ public class UserViewDayStartEnd extends UserView {
 
     public UserViewDayStartEnd(Activity activity, Model model) {
         super(activity, model);
-        LocalBroadcastManager.getInstance(activity).registerReceiver(receiver,new IntentFilter(DayStartEndInfoManager.class.getSimpleName()));
+        LocalBroadcastManager.getInstance(activity).registerReceiver(receiver, new IntentFilter(DayStartEndInfoManager.class.getSimpleName()));
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UserViewDayStartEnd extends UserView {
             ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.INVISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.INVISIBLE);
 
-        } else if(dayStartEndInfoManager.isDayStarted() && dayStartEndInfoManager.isDayEnded()){
+        } else if (dayStartEndInfoManager.isDayStarted() && dayStartEndInfoManager.isDayEnded()) {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Day Ended");
             activity.findViewById(R.id.button_day_start_end).setVisibility(View.VISIBLE);
             activity.findViewById(R.id.button_day_start_end).setEnabled(false);
@@ -116,14 +116,14 @@ public class UserViewDayStartEnd extends UserView {
             ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.VISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.VISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_resume)).setText(formatTime(dayStartEndInfoManager.getTime(DayStartEndInfoManager.WAKEUP, 0)));
-        }else if(dayStartEndInfoManager.isDayStarted()){
+        } else if (dayStartEndInfoManager.isDayStarted()) {
             activity.findViewById(R.id.button_day_start_end).setEnabled(false);
             activity.findViewById(R.id.button_day_start_end).setVisibility(View.INVISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(formatTime(dayStartEndInfoManager.getDayStartTime()));
             ((TextView) activity.findViewById(R.id.text_view_day_end)).setText("-");
             ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.INVISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             activity.findViewById(R.id.button_day_start_end).setEnabled(false);
             activity.findViewById(R.id.button_day_start_end).setVisibility(View.INVISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText("-");
@@ -135,7 +135,7 @@ public class UserViewDayStartEnd extends UserView {
     }
 
     private String formatTime(long timestamp) {
-        if(timestamp==-1) return "-";
+        if (timestamp == -1) return "-";
         try {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(timestamp);
@@ -150,9 +150,10 @@ public class UserViewDayStartEnd extends UserView {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-                updateView();
+            updateView();
         }
     };
+
     private void prepareButton() {
         Button button = (Button) activity.findViewById(R.id.button_day_start_end);
         Log.d(TAG, "Button clicked");
@@ -172,38 +173,46 @@ public class UserViewDayStartEnd extends UserView {
     }
 
     public void showAlertDialog(final int status) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
         if (status == Status.DAY_START_NOT_AVAILABLE) {
-            builder.setTitle("Start Day");
-            builder.setMessage("Do you want to start the day?");
-        } else {
-            builder.setTitle("End Day");
-            builder.setMessage("Do you want to end the day?");
-        }
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    if (status == Status.DAY_START_NOT_AVAILABLE)
-                        dayStartEndInfoManager.setDayStartTime(DateTime.getDateTime());
-                    else if (status == Status.SUCCESS)
-                        dayStartEndInfoManager.setDayEndTime(DateTime.getDateTime());
-                    updateView();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
+            AlertDialogs.AlertDialog(activity, "Start Day", "Do you want to start the day?", R.drawable.ic_info_teal_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        try {
+                            dayStartEndInfoManager.setDayStartTime(DateTime.getDateTime());
+                            updateView();
+                        } catch (DataKitException e) {
+                            e.printStackTrace();
+                        }
+                        dialog.dismiss();
+
+                    } else {
+                        dialog.dismiss();
+                    }
                 }
-                dialog.dismiss();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.show();
+            });
+        } else {
+            AlertDialogs.AlertDialog(activity, "End Day", "Do you want to end the day?", R.drawable.ic_info_teal_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        try {
+                            if (status == Status.SUCCESS)
+                                dayStartEndInfoManager.setDayEndTime(DateTime.getDateTime());
+                            updateView();
+                        } catch (DataKitException e) {
+                            e.printStackTrace();
+                        }
+                        dialog.dismiss();
+
+                    } else {
+                        dialog.dismiss();
+                    }
+                }
+            });
+        }
 
     }
-
 }
+
