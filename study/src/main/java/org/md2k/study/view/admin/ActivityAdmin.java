@@ -5,10 +5,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ContextThemeWrapper;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -19,6 +21,7 @@ import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.config_info.ActivityConfigDownload;
+import org.md2k.utilities.UI.AlertDialogs;
 
 public class ActivityAdmin extends AppCompatActivity {
     AlertDialog alertDialog;
@@ -71,8 +74,8 @@ public class ActivityAdmin extends AppCompatActivity {
     }
 
     public void showPasswordWindow() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Admin Access");
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(this, org.md2k.utilities.R.style.app_theme_teal_light_dialog));
+        alertDialogBuilder.setTitle("Admin Access Required");
         alertDialogBuilder.setMessage("Enter Password");
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT |
@@ -123,9 +126,12 @@ public class ActivityAdmin extends AppCompatActivity {
                 });
             }
         });
+        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alertDialog.show();
         TextView messageText = (TextView) alertDialog.findViewById(android.R.id.message);
         messageText.setGravity(Gravity.CENTER);
+        AlertDialogs.AlertDialogStyle(this, alertDialog);
+
     }
 
     @Override

@@ -8,6 +8,7 @@ import android.os.PowerManager;
 import android.support.v7.view.ContextThemeWrapper;
 
 import org.md2k.study.Constants;
+import org.md2k.study.R;
 import org.md2k.utilities.Report.Log;
 
 import java.io.File;
@@ -59,7 +60,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
 
         this.onCompletionListener = onCompletionListener;
         if (isProgressShow) {
-            mProgressDialog = new ProgressDialog(new ContextThemeWrapper(context, android.support.v7.appcompat.R.style.AlertDialog_AppCompat_Light));
+            mProgressDialog = new ProgressDialog(new ContextThemeWrapper(context, R.style.app_theme_teal_light_dialog));
             mProgressDialog.setTitle("Download");
             mProgressDialog.setMessage("Download in progress...");
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);

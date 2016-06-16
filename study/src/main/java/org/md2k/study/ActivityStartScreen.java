@@ -297,7 +297,10 @@ public class ActivityStartScreen extends AppCompatActivity {
         Log.d(TAG,"startService...rank="+rank);
         ServiceSystemHealth.RANK_LIMIT = rank;
         Intent intent = new Intent(ActivityStartScreen.this, ServiceSystemHealth.class);
-        mProgressDialog = ProgressDialog.show(ActivityStartScreen.this, "Please wait ...", "Loading ...", true);
+        mProgressDialog=new ProgressDialog(this,android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
+        mProgressDialog.setMessage("Loading...");
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.show();
         handler.post(runnableWaitServiceStart);
         startService(intent);
     }

@@ -2,17 +2,12 @@ package org.md2k.study.model_view.selfreport_eating;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import org.md2k.datakitapi.exception.DataKitException;
-import org.md2k.study.config.Config;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.study.model_view.selfreport.SelfReportManager;
 import org.md2k.utilities.UI.AlertDialogs;
 
 import java.util.HashMap;
@@ -45,62 +40,20 @@ import java.util.HashMap;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ActivitySelfReportEating extends AppCompatActivity {
-    AlertDialog levelDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Config config = ModelManager.getInstance(ActivitySelfReportEating.this).getConfigManager().getConfig();
-        HashMap<String, String> parameters = config.getAction(ModelFactory.MODEL_EATING_SELF_REPORT).getParameters();
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        String title = parameters.get("s1");
-        final String message = parameters.get("s2");
-        if (parameters.size() > 2) {
-            builder.setTitle(message);
-            CharSequence[] items = new CharSequence[parameters.size() - 2];
-            for (int i = 2; i < parameters.size(); i++) {
-                items[i - 2] = (parameters.get("s" + Integer.toString(i + 1)));
-            }
-            builder.setSingleChoiceItems(items, -1, null);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-            });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    dialog.dismiss();
-                    finish();
-                }
-            });
-            levelDialog = builder.create();
-            levelDialog.show();
-            levelDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    ListView lw = levelDialog.getListView();
-                    if(lw.getCheckedItemPosition()<0) return;
-                    Object checkedItem = lw.getAdapter().getItem(lw.getCheckedItemPosition());
-                    levelDialog.dismiss();
-                    SelfReportManagerEating selfReportManager = ((SelfReportManagerEating) ModelManager.getInstance(ActivitySelfReportEating.this).getModel(ModelFactory.MODEL_EATING_SELF_REPORT));
-                    try {
-                        selfReportManager.save(checkedItem.toString());
-                    } catch (DataKitException e) {
-                        e.printStackTrace();
-                    }
-                    finish();
-                }
-            });
-        } else {
-            AlertDialogs.AlertDialog(ActivitySelfReportEating.this, title, message, org.md2k.utilities.R.drawable.ic_info_teal_48dp,"Yes", "Cancel", null, new DialogInterface.OnClickListener() {
+        final HashMap<String, String> parameters = ModelManager.getInstance(ActivitySelfReportEating.this).getConfigManager().getConfig().getAction(ModelFactory.MODEL_EATING_SELF_REPORT).getParameters();
+        if (parameters.size() == 2) {
+            AlertDialogs.AlertDialog(this, parameters.get("s1"), parameters.get("s2"), org.md2k.utilities.R.drawable.ic_eating_teal_48dp, "Ok", "Cancel", null, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_POSITIVE) {
                         Toast.makeText(ActivitySelfReportEating.this, "Eating report saved...", Toast.LENGTH_SHORT).show();
-                        SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReportEating.this).getModel(ModelFactory.MODEL_EATING_SELF_REPORT));
+                        SelfReportManagerEating selfReportManager = ((SelfReportManagerEating) ModelManager.getInstance(ActivitySelfReportEating.this).getModel(ModelFactory.MODEL_EATING_SELF_REPORT));
                         try {
-                            selfReportManager.save(message);
+                            selfReportManager.save(parameters.get("s2"));
                         } catch (DataKitException e) {
                             e.printStackTrace();
                         }
@@ -108,6 +61,29 @@ public class ActivitySelfReportEating extends AppCompatActivity {
                     finish();
                 }
             });
+        } else {
+            final String[] items = new String[parameters.size() - 2];
+            for (int i = 2; i < parameters.size(); i++) {
+                items[i - 2] = (parameters.get("s" + Integer.toString(i + 1)));
+            }
+            AlertDialogs.AlertDialogSingleChoice(this, parameters.get("s2"), items, 0, "Ok", "Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == DialogInterface.BUTTON_NEGATIVE) {
+                        dialog.dismiss();
+                        finish();
+                    } else {
+                        SelfReportManagerEating selfReportManager = ((SelfReportManagerEating) ModelManager.getInstance(ActivitySelfReportEating.this).getModel(ModelFactory.MODEL_EATING_SELF_REPORT));
+                        try {
+                            selfReportManager.save(parameters.get("s2") + " (" + items[which] + ")");
+                        } catch (DataKitException e) {
+                            e.printStackTrace();
+                        }
+                        finish();
+                    }
+                }
+            });
+
         }
     }
 }

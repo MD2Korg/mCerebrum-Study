@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import org.md2k.datakitapi.exception.DataKitException;
@@ -18,6 +16,7 @@ import org.md2k.study.utilities.OnCompletionListener;
 import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.AlertDialogs;
+import org.md2k.utilities.UI.OnClickListener;
 
 
 /**
@@ -48,7 +47,6 @@ import org.md2k.utilities.UI.AlertDialogs;
  */
 public class ActivityConfigDownload extends Activity {
     private static final String TAG = ActivityConfigDownload.class.getSimpleName();
-    String m_Text = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,56 +66,44 @@ public class ActivityConfigDownload extends Activity {
 
     public void showDownloadConfig() {
         Log.d(TAG, "showDownloadConfig()...");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Download Configuration File");
-        builder.setMessage("Please enter the file name (example: default)");
-        builder.setIcon(R.drawable.ic_download_teal_48dp);
-        builder.setCancelable(false);
-        final EditText input = new EditText(this);
-        builder.setView(input);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        AlertDialogs.AlertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                m_Text = input.getText().toString().trim();
-                final String filename = m_Text + ".zip";
-                if (m_Text.length() > 0) {
-                    Download download = new Download(ActivityConfigDownload.this, true, new OnCompletionListener() {
-                        @Override
-                        public void OnCompleted(int status) {
-                            if (status == Download.SUCCESS) {
-                                try {
-                                    ModelManager.getInstance(ActivityConfigDownload.this).clear();
-                                    FileManager.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
-                                    ModelManager.getInstance(ActivityConfigDownload.this).read();
-                                    ModelManager.getInstance(ActivityConfigDownload.this).set();
-                                    Intent returnIntent = new Intent();
-                                    setResult(Activity.RESULT_OK, returnIntent);
-                                } catch (DataKitException e) {
-                                    e.printStackTrace();
+            public void onClick(DialogInterface dialog, int which, String result) {
+                if(which==DialogInterface.BUTTON_POSITIVE){
+                    final String filename = result + ".zip";
+                    if (result.length() > 0) {
+                        Download download = new Download(ActivityConfigDownload.this, true, new OnCompletionListener() {
+                            @Override
+                            public void OnCompleted(int status) {
+                                if (status == Download.SUCCESS) {
+                                    try {
+                                        ModelManager.getInstance(ActivityConfigDownload.this).clear();
+                                        FileManager.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
+                                        ModelManager.getInstance(ActivityConfigDownload.this).read();
+                                        ModelManager.getInstance(ActivityConfigDownload.this).set();
+                                        Intent returnIntent = new Intent();
+                                        setResult(Activity.RESULT_OK, returnIntent);
+                                    } catch (DataKitException e) {
+                                        e.printStackTrace();
+                                    }
+                                    finish();
+                                } else {
+                                    Toast.makeText(ActivityConfigDownload.this, "Error!!! File not found...", Toast.LENGTH_LONG).show();
+                                    showDownloadConfig();
                                 }
-                                finish();
-                            } else {
-                                Toast.makeText(ActivityConfigDownload.this, "Error!!! File not found...", Toast.LENGTH_LONG).show();
-                                showDownloadConfig();
                             }
-                        }
-                    });
-                    download.execute(Constants.CONFIG_DOWNLOAD_LINK + m_Text + ".zip", filename);
-                } else
-                    showDownloadConfig();
+                        });
+                        download.execute(Constants.CONFIG_DOWNLOAD_LINK + filename, filename);
+                    } else
+                        showDownloadConfig();
+                }else{
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_CANCELED, returnIntent);
+                    dialog.cancel();
+                    finish();
+                }
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent returnIntent = new Intent();
-                setResult(Activity.RESULT_CANCELED, returnIntent);
-                dialog.cancel();
-                finish();
-            }
-        });
-        builder.show();
-
     }
 
     public void showDeleteDirectory() {

@@ -2,13 +2,13 @@ package org.md2k.study.model_view.user_info;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
+import org.md2k.utilities.UI.AlertDialogs;
+import org.md2k.utilities.UI.OnClickListener;
 
 
 /**
@@ -50,32 +50,20 @@ public class ActivityUserInfo extends AppCompatActivity {
     }
 
     void showAlertDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("User ID");
-        builder.setMessage("Enter User ID");
-
-        final EditText input = new EditText(this);
-//        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        AlertDialogs.AlertDialogEditText(this, "User ID", "Enter User ID", org.md2k.utilities.R.drawable.ic_user_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String m_Text = input.getText().toString().trim();
-                if (m_Text != null && m_Text.length() != 0) {
-                    UserInfoManager userInfoManager = (UserInfoManager) ModelManager.getInstance(ActivityUserInfo.this).getModel(ModelFactory.MODEL_USER_INFO);
-                    userInfoManager.setUserId(m_Text);
+            public void onClick(DialogInterface dialog, int which, String result) {
+                if(which==DialogInterface.BUTTON_POSITIVE){
+                    if (result != null && result.length() != 0) {
+                        UserInfoManager userInfoManager = (UserInfoManager) ModelManager.getInstance(ActivityUserInfo.this).getModel(ModelFactory.MODEL_USER_INFO);
+                        userInfoManager.setUserId(result);
+                        finish();
+                    }
+                }else{
+                    dialog.cancel();
                     finish();
                 }
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                finish();
-            }
-        });
-        builder.setCancelable(false);
-        builder.show();
     }
 }
