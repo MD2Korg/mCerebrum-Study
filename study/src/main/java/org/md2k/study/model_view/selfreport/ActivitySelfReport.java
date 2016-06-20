@@ -46,8 +46,8 @@ public class ActivitySelfReport extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final HashMap<String, String> parameters = ModelManager.getInstance(ActivitySelfReport.this).getConfigManager().getConfig().getAction(ModelFactory.MODEL_SMOKING_SELF_REPORT).getParameters();
-        if(parameters.size()==2){
-            AlertDialogs.AlertDialog(this, parameters.get("s1"), parameters.get("s2"), org.md2k.utilities.R.drawable.ic_smoking_teal_48dp , "Ok", "Cancel",null, new DialogInterface.OnClickListener() {
+        if (parameters.size() == 2) {
+            AlertDialogs.AlertDialog(this, parameters.get("s1"), parameters.get("s2"), org.md2k.utilities.R.drawable.ic_smoking_teal_48dp, "Ok", "Cancel", null, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_POSITIVE) {
@@ -62,7 +62,7 @@ public class ActivitySelfReport extends AppCompatActivity {
                     finish();
                 }
             });
-        }else{
+        } else {
             final String[] items = new String[parameters.size() - 2];
             for (int i = 2; i < parameters.size(); i++) {
                 items[i - 2] = (parameters.get("s" + Integer.toString(i + 1)));
@@ -70,19 +70,18 @@ public class ActivitySelfReport extends AppCompatActivity {
             AlertDialogs.AlertDialogSingleChoice(this, parameters.get("s2"), items, 0, "Ok", "Cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                 if(which==DialogInterface.BUTTON_NEGATIVE){
-                     dialog.dismiss();
-                     finish();
-                 }
-                    else{
-                     SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
-                     try {
-                         selfReportManager.save(parameters.get("s2")+" ("+items[which]+")");
-                     } catch (DataKitException e) {
-                         e.printStackTrace();
-                     }
-                     finish();
-                 }
+                    if (which == -1) {
+                        dialog.dismiss();
+                        finish();
+                    } else {
+                        SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
+                        try {
+                            selfReportManager.save(parameters.get("s2") + " (" + items[which] + ")");
+                        } catch (DataKitException e) {
+                            e.printStackTrace();
+                        }
+                        finish();
+                    }
                 }
             });
 

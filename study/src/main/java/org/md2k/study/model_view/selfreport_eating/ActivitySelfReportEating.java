@@ -69,7 +69,7 @@ public class ActivitySelfReportEating extends AppCompatActivity {
             AlertDialogs.AlertDialogSingleChoice(this, parameters.get("s2"), items, 0, "Ok", "Cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    if (which == DialogInterface.BUTTON_NEGATIVE) {
+                    if (which == -1) {
                         dialog.dismiss();
                         finish();
                     } else {
