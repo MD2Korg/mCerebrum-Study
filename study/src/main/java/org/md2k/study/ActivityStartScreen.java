@@ -243,7 +243,6 @@ public class ActivityStartScreen extends AppCompatActivity {
                                         if (which == DialogInterface.BUTTON_POSITIVE) {
                                             appInstallManager.getAppInstallList().get(0).downloadAndInstallApp(ActivityStartScreen.this);
                                         }
-                                        finish();
                                     }
                                 });
 

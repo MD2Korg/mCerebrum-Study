@@ -75,6 +75,7 @@ public class ActivitySelfReport extends AppCompatActivity {
                         finish();
                     } else {
                         SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
+                        Toast.makeText(ActivitySelfReport.this, "Smoking report saved...", Toast.LENGTH_SHORT).show();
                         try {
                             selfReportManager.save(parameters.get("s2") + " (" + items[which] + ")");
                         } catch (DataKitException e) {

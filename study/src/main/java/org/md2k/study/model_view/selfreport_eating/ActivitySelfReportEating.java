@@ -73,6 +73,7 @@ public class ActivitySelfReportEating extends AppCompatActivity {
                         dialog.dismiss();
                         finish();
                     } else {
+                        Toast.makeText(ActivitySelfReportEating.this, "Eating report saved...", Toast.LENGTH_SHORT).show();
                         SelfReportManagerEating selfReportManager = ((SelfReportManagerEating) ModelManager.getInstance(ActivitySelfReportEating.this).getModel(ModelFactory.MODEL_EATING_SELF_REPORT));
                         try {
                             selfReportManager.save(parameters.get("s2") + " (" + items[which] + ")");
