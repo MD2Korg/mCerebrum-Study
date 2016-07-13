@@ -17,7 +17,7 @@
             android:layout_height="200dp"
             android:id="@+id/imageView2"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/mcerebrum" />
+            android:src="@drawable/mcerebrum_icon" />
 
         <TextView
             android:layout_width="match_parent"

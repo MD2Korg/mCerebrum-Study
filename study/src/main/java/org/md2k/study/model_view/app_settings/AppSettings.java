@@ -95,8 +95,9 @@ public class AppSettings {
         return false;
     }
     boolean isEqual(){
+        if(app.getConfig()!=null && !FileManager.isExist(Constants.CONFIG_DIRECTORY_BASE+app.getPackage_name()+File.separator+app.getConfig()))
+            return false;
         if(app.getDefault_config()==null) return true;
-        if(app.getConfig()==null) return false;
         if(!(app.getPackage_name().equals("org.md2k.phonesensor") || app.getPackage_name().equals("org.md2k.autosense") || app.getPackage_name().equals("org.md2k.microsoftband") || app.getPackage_name().equals("org.md2k.plotter"))) {
             //TODO: need to clear the code
             return true;

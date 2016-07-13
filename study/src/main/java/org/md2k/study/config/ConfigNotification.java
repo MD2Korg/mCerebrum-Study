@@ -39,19 +39,8 @@ import java.io.InputStreamReader;
  */
 public class ConfigNotification {
     NotificationRequests notificationRequests;
-    private static ConfigNotification instance = null;
 
-    public static ConfigNotification getInstance() {
-        if (instance == null)
-            instance = new ConfigNotification();
-        return instance;
-    }
-
-    public static void clear() {
-        instance = null;
-    }
-
-    private ConfigNotification() {
+    public ConfigNotification() {
         readNotifications();
     }
 

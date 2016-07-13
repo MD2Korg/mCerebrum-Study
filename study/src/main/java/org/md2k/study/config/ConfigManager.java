@@ -60,7 +60,7 @@ public class ConfigManager {
                 Log.d(TAG,"read()...getConfig_info().isValid()="+valid);
             }
         }
-        notificationRequests=ConfigNotification.getInstance().notificationRequests;
+        notificationRequests=new ConfigNotification().notificationRequests;
     }
 
     private boolean read() {

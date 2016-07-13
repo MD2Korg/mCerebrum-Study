@@ -287,6 +287,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
     void copyDefaultConfig() {
+        Log.d(TAG,"copyDefaultConfig()...");
         FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
         FileManager.copyAssets(ActivityStartScreen.this, "default.zip", Constants.TEMP_DIRECTORY);
         FileManager.unzip(Constants.TEMP_DIRECTORY + "default.zip", Constants.CONFIG_DIRECTORY_ROOT);
