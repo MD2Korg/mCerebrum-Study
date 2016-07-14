@@ -20,6 +20,8 @@ import org.md2k.study.model_view.Model;
 import org.md2k.study.model_view.UserView;
 import org.md2k.utilities.Report.Log;
 
+import java.util.Locale;
+
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -92,7 +94,13 @@ public class UserViewPrivacyControl extends UserView {
                     handler.postDelayed(this, 1000);
                     isActive = true;
                 } else {
-                    ((TextView) activity.findViewById(R.id.text_view_privacy)).setText("Not Active");
+                    String text="Not Active";
+                    long remainingUsage = privacyControlManager.getRemainingTime();
+                    if(remainingUsage!=Long.MAX_VALUE) {
+                        remainingUsage = remainingUsage / (1000 * 60);
+                        text = text+String.format(Locale.ENGLISH, "\n(Usage Remaining: %02d Hour %02d Minute)", remainingUsage / 60, remainingUsage % 60);
+                    }
+                    ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
                     ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
                     activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
                     ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn On");
@@ -100,7 +108,13 @@ public class UserViewPrivacyControl extends UserView {
                     isActive = false;
                 }
             } else {
-                ((TextView) activity.findViewById(R.id.text_view_privacy)).setText("Not Active");
+                String text="Not Active";
+                long remainingUsage = privacyControlManager.getRemainingTime();
+                if(remainingUsage!=Long.MAX_VALUE) {
+                    remainingUsage = remainingUsage / (1000 * 60);
+                    text = text+String.format(Locale.ENGLISH, "\n(Usage Remaining: %02d Hour %02d Minute)", remainingUsage / 60, remainingUsage % 60);
+                }
+                ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
                 ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
                 activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
                 ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn On");
@@ -110,6 +124,9 @@ public class UserViewPrivacyControl extends UserView {
             if (!isActive) {
                 long timeLeft = privacyControlManager.getRemainingTime();
                 if (timeLeft < 5 * 60 * 1000) {
+                    String text="Not Active\n(Usage Remaining: 00 Hour 00 Minute)";
+                    ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
+
                     ((Button) activity.findViewById(R.id.button_privacy)).setText("Max Used");
                     ((Button) activity.findViewById(R.id.button_privacy)).setEnabled(false);
                     ((Button) activity.findViewById(R.id.button_privacy)).setTextColor(Color.GRAY);

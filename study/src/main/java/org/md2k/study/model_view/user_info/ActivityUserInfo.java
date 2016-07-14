@@ -50,6 +50,7 @@ public class ActivityUserInfo extends AppCompatActivity {
         UserInfoManager userInfoManager= (UserInfoManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_USER_INFO);
         if(userInfoManager.isInDatabase){
             Toast.makeText(this,"UserID exists. To change it, clear all data...",Toast.LENGTH_LONG).show();
+            finish();
         }else
             showAlertDialog();
     }

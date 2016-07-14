@@ -83,9 +83,13 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onResume() {
         Log.d(TAG, "onResume()...");
-        for (int i = 0; i < userViews.size(); i++)
-            userViews.get(i).updateView();
-        updateMenu();
+        try {
+            for (int i = 0; i < userViews.size(); i++)
+                userViews.get(i).updateView();
+            updateMenu();
+        }catch (Exception e){
+            finish();
+        }
         super.onResume();
     }
 

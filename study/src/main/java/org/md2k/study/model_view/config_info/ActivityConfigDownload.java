@@ -1,9 +1,14 @@
 package org.md2k.study.model_view.config_info;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.view.ContextThemeWrapper;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import org.md2k.datakitapi.exception.DataKitException;
@@ -47,6 +52,7 @@ import org.md2k.utilities.UI.OnClickListener;
  */
 public class ActivityConfigDownload extends Activity {
     private static final String TAG = ActivityConfigDownload.class.getSimpleName();
+    AlertDialog alertDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,7 +72,7 @@ public class ActivityConfigDownload extends Activity {
 
     public void showDownloadConfig() {
         Log.d(TAG, "showDownloadConfig()...");
-        AlertDialogs.AlertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
+        alertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, String result) {
                 if(which==DialogInterface.BUTTON_POSITIVE){
@@ -104,6 +110,40 @@ public class ActivityConfigDownload extends Activity {
                 }
             }
         });
+    }
+
+    public void alertDialogEditText(final Context context, String title, String message, int iconId, String positive, String negative, final OnClickListener onClickListener){
+        AlertDialog.Builder alertDialogBuilder= new AlertDialog.Builder(new ContextThemeWrapper(context, org.md2k.utilities.R.style.app_theme_teal_light_dialog))
+                .setTitle(title)
+                .setIcon(iconId)
+                .setMessage(message);
+        final EditText input = new EditText(context);
+        input.setSingleLine();
+        alertDialogBuilder.setView(input);
+
+        if(positive!=null)
+            alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String str = input.getText().toString().trim();
+                    onClickListener.onClick(dialog,which, str);
+                }
+            });
+        if(negative!=null)
+            alertDialogBuilder.setNegativeButton(negative, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    onClickListener.onClick(dialog,which, null);
+                }
+            });
+        alertDialog=alertDialogBuilder.create();
+        alertDialog.setCancelable(false);
+        alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        alertDialog.show();
+        AlertDialogs.AlertDialogStyle(context, alertDialog);
+    }
+    @Override
+    public void onBackPressed() {
     }
 
     public void showDeleteDirectory() {
