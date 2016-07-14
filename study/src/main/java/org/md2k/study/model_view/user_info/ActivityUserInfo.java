@@ -1,8 +1,13 @@
 package org.md2k.study.model_view.user_info;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ContextThemeWrapper;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import org.md2k.study.controller.ModelFactory;
@@ -38,19 +43,19 @@ import org.md2k.utilities.UI.OnClickListener;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ActivityUserInfo extends AppCompatActivity {
+    AlertDialog alertDialog;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         UserInfoManager userInfoManager= (UserInfoManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_USER_INFO);
         if(userInfoManager.isInDatabase){
             Toast.makeText(this,"UserID exists. To change it, clear all data...",Toast.LENGTH_LONG).show();
-            finish();
         }else
             showAlertDialog();
     }
 
     void showAlertDialog() {
-        AlertDialogs.AlertDialogEditText(this, "User ID", "Enter User ID", org.md2k.utilities.R.drawable.ic_user_teal_48dp, "Ok", "Cancel", new OnClickListener() {
+        alertDialogEditText(this, "User ID", "Enter User ID", org.md2k.utilities.R.drawable.ic_user_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, String result) {
                 if(which==DialogInterface.BUTTON_POSITIVE){
@@ -65,5 +70,39 @@ public class ActivityUserInfo extends AppCompatActivity {
                 }
             }
         });
+    }
+    public void alertDialogEditText(final Context context, String title, String message, int iconId, String positive, String negative, final OnClickListener onClickListener){
+        AlertDialog.Builder alertDialogBuilder= new AlertDialog.Builder(new ContextThemeWrapper(context, org.md2k.utilities.R.style.app_theme_teal_light_dialog))
+                .setTitle(title)
+                .setIcon(iconId)
+                .setMessage(message);
+        final EditText input = new EditText(context);
+        input.setSingleLine();
+        alertDialogBuilder.setView(input);
+
+        if(positive!=null)
+            alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String str = input.getText().toString().trim();
+                    onClickListener.onClick(dialog,which, str);
+                }
+            });
+        if(negative!=null)
+            alertDialogBuilder.setNegativeButton(negative, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    onClickListener.onClick(dialog,which, null);
+                }
+            });
+        alertDialog=alertDialogBuilder.create();
+        alertDialog.setCancelable(false);
+        alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        alertDialog.show();
+//        alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        AlertDialogs.AlertDialogStyle(context, alertDialog);
+    }
+    @Override
+    public void onBackPressed() {
     }
 }
