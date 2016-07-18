@@ -93,10 +93,12 @@ public class DataQuality {
                     DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
                         @Override
                         public void onReceived(DataType dataType) {
-                            int sample = ((DataTypeInt) dataType).getSample();
-                            if (sample != DATA_QUALITY.BAND_OFF)
-                                lastReceivedTimeStamp = DateTime.getDateTime();
-                            receiveCallBack.onReceive(dataSourceClient, sample);
+                            if(dataType instanceof DataTypeInt) {
+                                int sample = ((DataTypeInt) dataType).getSample();
+                                if (sample != DATA_QUALITY.BAND_OFF)
+                                    lastReceivedTimeStamp = DateTime.getDateTime();
+                                receiveCallBack.onReceive(dataSourceClient, sample);
+                            }
                         }
                     });
                 }

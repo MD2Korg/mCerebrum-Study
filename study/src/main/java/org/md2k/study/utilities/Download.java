@@ -9,7 +9,6 @@ import android.support.v7.view.ContextThemeWrapper;
 
 import org.md2k.study.Constants;
 import org.md2k.study.R;
-import org.md2k.utilities.Report.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -79,7 +78,6 @@ public class Download extends AsyncTask<String, Integer, Integer> {
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        Log.d(TAG, "onCanceled");
     }
 
     @Override
@@ -89,7 +87,6 @@ public class Download extends AsyncTask<String, Integer, Integer> {
         HttpURLConnection connection = null;
         try {
             URL url = new URL(str[0]);
-            Log.d(TAG, "URL=" + str[0]);
             connection = (HttpURLConnection) url.openConnection();
             connection.connect();
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
@@ -98,10 +95,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
 
             int fileLength = connection.getContentLength();
 //            if(fileLength!=0) mProgressDialog.setIndeterminate(false);
-            Log.d(TAG, "filelength=" + fileLength);
-            Log.d(TAG, "filename=" + str[1]);
             input = connection.getInputStream();
-            Log.d(TAG, "Directory=" + Constants.TEMP_DIRECTORY);
             File dir = new File(Constants.TEMP_DIRECTORY);
             if (!dir.exists()) dir.mkdirs();
             output = new FileOutputStream(Constants.TEMP_DIRECTORY + str[1]);
@@ -111,7 +105,6 @@ public class Download extends AsyncTask<String, Integer, Integer> {
             int count;
             while ((count = input.read(data)) != -1) {
                 if (isCancelled()) {
-                    Log.d(TAG, "isCanceled...");
                     input.close();
                     output.close();
                     connection.disconnect();
