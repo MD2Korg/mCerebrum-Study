@@ -29,6 +29,13 @@ public class ActivityAdmin extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_admin);
+        getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
+                new PrefsFragmentAdmin()).commit();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
     @Override
     public void onStart(){
@@ -41,16 +48,8 @@ public class ActivityAdmin extends AppCompatActivity {
             startActivityForResult(intent,1);
         }
         else {
-            if (passwordFirst==false && isPasswordRequired()) {
+            if (!passwordFirst && isPasswordRequired()) {
                 showPasswordWindow();
-            } else {
-                setContentView(R.layout.activity_admin);
-                getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
-                        new PrefsFragmentAdmin()).commit();
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setDisplayShowTitleEnabled(true);
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                }
             }
         }
     }
