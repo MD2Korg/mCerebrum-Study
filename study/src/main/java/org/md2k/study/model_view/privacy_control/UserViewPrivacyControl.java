@@ -98,7 +98,7 @@ public class UserViewPrivacyControl extends UserView {
                     long remainingUsage = privacyControlManager.getRemainingTime();
                     if(remainingUsage!=Long.MAX_VALUE) {
                         remainingUsage = remainingUsage / (1000 * 60);
-                        text = text+String.format(Locale.ENGLISH, "\n(Usage Remaining: %02d Hour %02d Minute)", remainingUsage / 60, remainingUsage % 60);
+                        text = text+String.format(Locale.ENGLISH, "\n(Daily Remaining Usage: %0d Minutes)", remainingUsage);
                     }
                     ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
                     ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));

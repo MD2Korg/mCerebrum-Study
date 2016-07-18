@@ -21,7 +21,6 @@ import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.R;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.utilities.Report.Log;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -93,32 +92,17 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         buttonUpdate.setText("Check Updates");
         buttonUpdate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                updateVersion(0);
+                Toast.makeText(getActivity(), "Checking updates...",Toast.LENGTH_SHORT).show();
+                appInstallManager.updateVersionAll(0, new OnDataChangeListener() {
+                    @Override
+                    public void onDataChange(int now, String str) {
+                        if (now >= appInstallManager.getAppInstallList().size())
+                            Toast.makeText(getActivity(), "Checking updates...done",Toast.LENGTH_SHORT).show();
+                        else updatePreference(appInstallManager.getAppInstallList().get(now));
+                    }
+                });
             }
         });
-    }
-
-    void updateVersion(final int now) {
-        Log.d(TAG, "updateVersion()...now=" + now);
-        if(now==0)
-            Toast.makeText(context, "Checking updates...",Toast.LENGTH_SHORT).show();
-        if (now >= appInstallManager.getAppInstallList().size()) {
-            Toast.makeText(context, "Checking updates...done",Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (appInstallManager.getAppInstallList().get(now).getDownload_link().endsWith("releases")) {
-            appInstallManager.getAppInstallList().get(now).setLatestVersionName(context, new OnDataChangeListener() {
-                @Override
-                public void onDataChange(String str) {
-                    Log.d(TAG, "updateVersion()..." + str);
-                    updatePreference(appInstallManager.getAppInstallList().get(now));
-                    updateVersion(now + 1);
-
-                }
-            });
-        } else {
-            updateVersion(now + 1);
-        }
     }
 
     void updatePreference(AppInstall appInstall) {

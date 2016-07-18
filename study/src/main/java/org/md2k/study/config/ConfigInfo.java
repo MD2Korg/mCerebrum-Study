@@ -41,6 +41,7 @@ public class ConfigInfo {
     private String id;
     private String name;
     private String filename;
+    private boolean auto_update;
     private int version_code;
     private ArrayList<String> required_files;
 
@@ -94,5 +95,9 @@ public class ConfigInfo {
 
     public String getFilename() {
         return filename;
+    }
+
+    public boolean isAuto_update() {
+        return auto_update;
     }
 }

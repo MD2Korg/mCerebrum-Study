@@ -101,7 +101,7 @@ public class AppInstall {
             if (latestVersion == null) {
                 setLatestVersionName(context, new OnDataChangeListener() {
                     @Override
-                    public void onDataChange(String str) {
+                    public void onDataChange(int now, String str) {
                         String link = app.getDownload_link() +
                                 "/download/" + latestVersion +
                                 "/" + app.getId() +
@@ -158,8 +158,8 @@ public class AppInstall {
     public void setLatestVersionName(final Context context, final OnDataChangeListener onDataChangeListener) {
         String link = app.getDownload_link() + "/latest";
         final String filename = "version_" + UUID.randomUUID().toString() + ".txt";
-        if (app.getPackage_name().startsWith("market")) {
-            onDataChangeListener.onDataChange(latestVersion);
+        if (app.getDownload_link().startsWith("market")) {
+            onDataChangeListener.onDataChange(0, latestVersion);
             return;
         }
         download(context, filename, link,false, new OnCompletionListener() {
@@ -167,14 +167,14 @@ public class AppInstall {
             public void OnCompleted(int curStatus) {
                 if (curStatus == Status.SUCCESS) {
                     latestVersion = retrieveAndVerifyLatestVersion(Constants.TEMP_DIRECTORY + filename);
-                    onDataChangeListener.onDataChange(latestVersion);
+                    onDataChangeListener.onDataChange(0, latestVersion);
                 } else
                     Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
                 FileManager.deleteFile(Constants.TEMP_DIRECTORY + filename);
             }
         });
     }
-    String retrieveAndVerifyLatestVersion(String filename){
+    private String retrieveAndVerifyLatestVersion(String filename){
         String curLatestVersion=retrieveLatestVersion(filename);
         if(curLatestVersion==null)  return curLatestVersion;
         String[] vals1 = curLatestVersion.split("\\.");
@@ -182,7 +182,7 @@ public class AppInstall {
         return curLatestVersion;
     }
 
-    String retrieveLatestVersion(String filename) {
+    private String retrieveLatestVersion(String filename) {
         BufferedReader in;
         String versionName = null;
         try {

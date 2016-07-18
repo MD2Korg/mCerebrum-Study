@@ -39,6 +39,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     private static final int SETTINGS = 2;
     Handler handler;
     ProgressDialog mProgressDialog;
+    boolean isCheckStatusRequired=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +49,18 @@ public class ActivityStartScreen extends AppCompatActivity {
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start_screen);
         Log.d(TAG, "...onCreate()");
+        checkStatus();
     }
 
     @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG,"onStart()...");
+        if(isCheckStatusRequired)
+            checkStatus();
+    }
+    void checkStatus(){
+        isCheckStatusRequired=false;
         handler.removeCallbacks(runnableWaitServiceStart);
         fixConfigIfRequired();
         setButtonExit();
@@ -233,7 +240,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                     final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
                     appInstallManager.getAppInstallList("study").setLatestVersionName(ActivityStartScreen.this, new OnDataChangeListener() {
                         @Override
-                        public void onDataChange(String str) {
+                        public void onDataChange(int now, String str) {
                             if (!appInstallManager.getAppInstallList("study").isUpdateAvailable())
                                 Toast.makeText(ActivityStartScreen.this, "mCerebrum is up-to-date...", Toast.LENGTH_SHORT).show();
                             else {
@@ -241,6 +248,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         if (which == DialogInterface.BUTTON_POSITIVE) {
+                                            isCheckStatusRequired=true;
                                             appInstallManager.getAppInstallList().get(0).downloadAndInstallApp(ActivityStartScreen.this);
                                         }
                                     }
@@ -263,6 +271,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isCheckStatusRequired=true;
                 state=SETTINGS;
                 startService(Status.RANK_ADMIN_OPTIONAL);
             }

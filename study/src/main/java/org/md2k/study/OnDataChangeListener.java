@@ -27,5 +27,5 @@ package org.md2k.study;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public interface OnDataChangeListener {
-        void onDataChange(String str);
+        void onDataChange(int index, String str);
 }
