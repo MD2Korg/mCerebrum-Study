@@ -74,11 +74,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
-            android:name=".model_view.selfreport_eating.ActivitySelfReportEating"
-            android:label="Self Report Eating"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.Dialog" />
-        <activity
             android:name=".model_view.app_reset.ActivityAppReset"
             android:label="Reset App"
             android:screenOrientation="portrait"

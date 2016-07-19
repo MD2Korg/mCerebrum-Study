@@ -46,7 +46,7 @@ public class ConfigInfoManager extends Model {
         Log.d(TAG, "set()...");
         Status curStatus;
         if(modelManager.getConfigManager().isValid())
-            curStatus=new Status(rank,Status.SUCCESS, modelManager.getConfigManager().getConfig().getConfig_info().getName()+"("+modelManager.getConfigManager().getConfig().getConfig_info().getVersion_code()+")");
+            curStatus=new Status(rank,Status.SUCCESS, modelManager.getConfigManager().getConfig().getConfig_info().getName()+"("+modelManager.getConfigManager().getConfig().getConfig_info().getVersion()+")");
         else
             curStatus=new Status(rank,Status.CONFIG_FILE_NOT_EXIST);
         notifyIfRequired(curStatus);

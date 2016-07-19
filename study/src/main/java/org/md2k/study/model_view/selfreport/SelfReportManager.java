@@ -1,28 +1,10 @@
 package org.md2k.study.model_view.selfreport;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import org.md2k.datakitapi.DataKitAPI;
-import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.exception.DataKitException;
-import org.md2k.datakitapi.source.METADATA;
-import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
-import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.datakitapi.source.platform.PlatformBuilder;
-import org.md2k.datakitapi.source.platform.PlatformType;
-import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.Event;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -52,8 +34,6 @@ import java.util.HashMap;
  */
 public class SelfReportManager extends Model {
     private static final String TAG = SelfReportManager.class.getSimpleName();
-    DataSourceBuilder dataSourceBuilder;
-    DataSourceClient dataSourceClient;
 
     public SelfReportManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -64,49 +44,9 @@ public class SelfReportManager extends Model {
         status=new Status(rank, Status.NOT_DEFINED);
     }
     public void set() throws DataKitException {
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
-        dataSourceBuilder = createDataSourceBuilder();
-        dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         Status lastStatus;
         lastStatus= new Status(rank,Status.SUCCESS);
         notifyIfRequired(lastStatus);
-    }
-
-    private boolean writeToDataKit(String msg) throws DataKitException {
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
-        if (!dataKitAPI.isConnected()) return false;
-        Gson gson = new Gson();
-        JsonObject sample = new JsonParser().parse(gson.toJson(new Event(Event.SMOKING, Event.TYPE_SELF_REPORT, msg))).getAsJsonObject();
-        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
-        return true;
-    }
-    DataSourceBuilder createDataSourceBuilder() {
-        Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EVENT).setPlatform(platform);
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Event");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Event with type (ex: smoking, selfreport) as a json object");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
-        dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
-        return dataSourceBuilder;
-    }
-
-    ArrayList<HashMap<String, String>> createDataDescriptors() {
-        ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
-        dataDescriptors.add(createDescriptor("Event with type (ex: smoking, selfreport)"));
-        return dataDescriptors;
-    }
-
-    HashMap<String, String> createDescriptor(String name) {
-        HashMap<String, String> dataDescriptor = new HashMap<>();
-        dataDescriptor.put(METADATA.NAME, name);
-        dataDescriptor.put(METADATA.UNIT, "String");
-        dataDescriptor.put(METADATA.DESCRIPTION, "contains event as a json object");
-        dataDescriptor.put(METADATA.DATA_TYPE, Event.class.getName());
-        return dataDescriptor;
-    }
-    public void save(String msg) throws DataKitException {
-        writeToDataKit(msg);
     }
 }
 

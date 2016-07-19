@@ -195,7 +195,7 @@ public class ActivityMain extends AppCompatActivity {
     void setLogo() {
         try {
             if (getSupportActionBar() != null) {
-                String logoName = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getStudy_info().getLogo();
+                String logoName = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getConfig_info().getLogo();
                 if (logoName != null) {
                     String path = Constants.CONFIG_DIRECTORY + logoName;
                     Drawable d = Drawable.createFromPath(path);
@@ -210,7 +210,7 @@ public class ActivityMain extends AppCompatActivity {
         try {
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle("mCerebrum");
-                String title = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getStudy_info().getTitle();
+                String title = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getConfig_info().getTitle();
                 if (title != null) {
                     getSupportActionBar().setDisplayShowHomeEnabled(true);
                     getSupportActionBar().setTitle(title);

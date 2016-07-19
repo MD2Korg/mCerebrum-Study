@@ -39,15 +39,17 @@ import java.util.ArrayList;
 public class ConfigInfo {
     private static final String TAG = ConfigInfo.class.getSimpleName();
     private String id;
+    private String version;
     private String name;
     private String filename;
     private boolean auto_update;
-    private int version_code;
+    private String logo;
+    private String title;
+
     private ArrayList<String> required_files;
 
     public boolean isValid(Context context){
         if(!isValidVersion(context)) {
-            Toast.makeText(context, "Please update Study App ...",Toast.LENGTH_LONG).show();
             return false;
         }
         if(!isValidRequiredFiles()) {
@@ -58,9 +60,14 @@ public class ConfigInfo {
     }
     private boolean isValidVersion(Context context){
         try {
-            int appVersion = (context.getPackageManager().getPackageInfo(context.getPackageName(), 0)).versionCode;
-            if(version_code>appVersion) return false;
-            if(version_code< Constants.CONFIG_MIN_VERSION) return false;
+            if(version==null) return false;
+            String appVersion = (context.getPackageManager().getPackageInfo(context.getPackageName(), 0)).versionName;
+            String[] vals1 = appVersion.split("\\.");
+            if(vals1.length!=3) return false;
+            String[] vals2 = version.split("\\.");
+            if(vals2.length!=3) return false;
+            if(!vals1[0].equals(vals2[0])) return false;
+            if(!vals1[1].equals(vals2[1])) return false;
             return true;
         } catch (PackageManager.NameNotFoundException e) {
             return false;
@@ -85,10 +92,6 @@ public class ConfigInfo {
         return name;
     }
 
-    public int getVersion_code() {
-        return version_code;
-    }
-
     public ArrayList<String> getRequired_files() {
         return required_files;
     }
@@ -99,5 +102,17 @@ public class ConfigInfo {
 
     public boolean isAuto_update() {
         return auto_update;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

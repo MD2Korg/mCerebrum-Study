@@ -44,20 +44,18 @@ public class ConfigManager {
     private static final String TAG = ConfigManager.class.getSimpleName();
     private Config config;
     private NotificationRequests notificationRequests;
-    private boolean valid;
+    private boolean isExist;
+    Context context;
 
     public ConfigManager(Context context) {
         Log.d(TAG, "ConfigManager()...");
-        valid=read();
-        Log.d(TAG,"read()...valid="+valid);
-        if(valid) {
+        this.context=context;
+        isExist=false;
+        isExist=read();
+        if(isExist) {
             if(config.getConfig_info()==null) {
-                valid = false;
+                isExist=false;
                 Log.d(TAG,"read()...getConfig_info()=null");
-            }
-            else {
-                valid = config.getConfig_info().isValid(context);
-                Log.d(TAG,"read()...getConfig_info().isValid()="+valid);
             }
         }
         notificationRequests=new ConfigNotification().notificationRequests;
@@ -88,6 +86,9 @@ public class ConfigManager {
     }
 
     public boolean isValid() {
-        return valid;
+        return isExist && config.getConfig_info().isValid(context);
+    }
+    public boolean isExist(){
+        return isExist;
     }
 }

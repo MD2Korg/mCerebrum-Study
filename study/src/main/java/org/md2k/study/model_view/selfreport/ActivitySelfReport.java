@@ -1,16 +1,11 @@
 package org.md2k.study.model_view.selfreport;
 
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.utilities.UI.AlertDialogs;
-
-import java.util.HashMap;
 
 
 /**
@@ -45,47 +40,11 @@ public class ActivitySelfReport extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final HashMap<String, String> parameters = ModelManager.getInstance(ActivitySelfReport.this).getConfigManager().getConfig().getAction(ModelFactory.MODEL_SMOKING_SELF_REPORT).getParameters();
-        if (parameters.size() == 2) {
-            AlertDialogs.AlertDialog(this, parameters.get("s1"), parameters.get("s2"), org.md2k.utilities.R.drawable.ic_smoking_teal_48dp, "Ok", "Cancel", null, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        Toast.makeText(ActivitySelfReport.this, "Smoking report saved...", Toast.LENGTH_SHORT).show();
-                        SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
-                        try {
-                            selfReportManager.save(parameters.get("s2"));
-                        } catch (DataKitException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    finish();
-                }
-            });
-        } else {
-            final String[] items = new String[parameters.size() - 2];
-            for (int i = 2; i < parameters.size(); i++) {
-                items[i - 2] = (parameters.get("s" + Integer.toString(i + 1)));
-            }
-            AlertDialogs.AlertDialogSingleChoice(this, parameters.get("s2"), items, 0, "Ok", "Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (which == -1) {
-                        dialog.dismiss();
-                        finish();
-                    } else {
-                        SelfReportManager selfReportManager = ((SelfReportManager) ModelManager.getInstance(ActivitySelfReport.this).getModel(ModelFactory.MODEL_SMOKING_SELF_REPORT));
-                        Toast.makeText(ActivitySelfReport.this, "Smoking report saved...", Toast.LENGTH_SHORT).show();
-                        try {
-                            selfReportManager.save(parameters.get("s2") + " (" + items[which] + ")");
-                        } catch (DataKitException e) {
-                            e.printStackTrace();
-                        }
-                        finish();
-                    }
-                }
-            });
-
-        }
+        Intent intent = new Intent();
+        SelfReportManager selfReportManager = (SelfReportManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_SELF_REPORT);
+        intent.setClassName(selfReportManager.getAction().getPackage_name(), selfReportManager.getAction().getClass_name());
+        intent.putExtra("id", selfReportManager.getAction().getParameters().get("id"));
+        startActivity(intent);
+        finish();
     }
 }

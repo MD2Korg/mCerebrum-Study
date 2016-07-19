@@ -104,7 +104,7 @@ public class Status implements Parcelable {
             case CONFIG_FILE_NOT_EXIST:
                 return "Error: Missing configuration files";
             case CLEAR_OLD_DATA:
-                return "Error: Incorrect StudyName in Database. Clear old Data";
+                return "Error: Incorrect StudyInfo in DB. Clear old Data";
             case DATAKIT_NOT_AVAILABLE:
                 return "Error: DataKit not available";
             case PRIVACY_ACTIVE:

@@ -33,7 +33,6 @@ import java.util.ArrayList;
 public class Config {
     private ConfigInfo config_info;
     private ConfigStartScreen start_screen;
-    private ConfigStudyInfo study_info;
     private ArrayList<ConfigApp> apps;
     private ArrayList<ConfigAction> actions;
     private ConfigView admin_view;
@@ -75,10 +74,6 @@ public class Config {
 
     public ConfigInfo getConfig_info() {
         return config_info;
-    }
-
-    public ConfigStudyInfo getStudy_info() {
-        return study_info;
     }
 
     public ArrayList<ConfigAction> getActions() {

@@ -17,10 +17,11 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Status;
-import org.md2k.study.config.ConfigStudyInfo;
+import org.md2k.study.config.ConfigInfo;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.StudyInfo;
 
 import java.util.ArrayList;
 
@@ -52,10 +53,8 @@ import java.util.ArrayList;
  */
 public class StudyInfoManager extends Model {
     private static final String TAG = StudyInfoManager.class.getSimpleName();
-    DataSourceBuilder dataSourceBuilder;
-    DataSourceClient dataSourceClient;
-    ConfigStudyInfo studyInfoDB;
-    ConfigStudyInfo studyInfoFile;
+    StudyInfo studyInfoDB;
+    StudyInfo studyInfoFile;
 
 
     public StudyInfoManager(ModelManager modelManager, String id, int rank) {
@@ -68,8 +67,8 @@ public class StudyInfoManager extends Model {
 
     public void set() throws DataKitException {
         Log.d(TAG,"set()...");
-        studyInfoFile = modelManager.getConfigManager().getConfig().getStudy_info();
-        dataSourceBuilder = createDataSourceBuilder();
+        ConfigInfo configInfo=modelManager.getConfigManager().getConfig().getConfig_info();
+        studyInfoFile = new StudyInfo(configInfo.getId(), configInfo.getName(), configInfo.getVersion(), configInfo.getFilename());
         studyInfoDB = readFromDataKit();
         if (studyInfoDB == null && studyInfoFile != null) {
             writeToDataKit();
@@ -88,25 +87,31 @@ public class StudyInfoManager extends Model {
         Log.d(TAG,"update()...");
         Status lastStatus;
         if (studyInfoDB == null) lastStatus = new Status(rank,Status.DATAKIT_NOT_AVAILABLE);
-        else if (!studyInfoDB.getId().equals(studyInfoFile.getId()) || !studyInfoDB.getName().equals(studyInfoFile.getName()))
+        else if (!studyInfoDB.equals(studyInfoFile))
             lastStatus = new Status(rank,Status.CLEAR_OLD_DATA);
         else lastStatus = new Status(rank,Status.SUCCESS);
         Log.d(TAG,"lastStatus="+lastStatus.log());
         notifyIfRequired(lastStatus);
     }
 
-    private ConfigStudyInfo readFromDataKit() throws DataKitException {
-        ConfigStudyInfo studyInfo = null;
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
+    private StudyInfo readFromDataKit() throws DataKitException {
+        StudyInfo studyInfo = null;
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
 
-        if (dataKitAPI.isConnected()) {
-            dataSourceClient = dataKitAPI.register(dataSourceBuilder);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-            if (dataTypes.size() != 0) {
-                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                Gson gson = new Gson();
-                studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), ConfigStudyInfo.class);
+            if (dataKitAPI.isConnected()) {
+                ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
+                if (dataSourceClients.size() >= 1) {
+                    ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+                    if (dataTypes.size() != 0) {
+                        DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                        Gson gson = new Gson();
+                        studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), StudyInfo.class);
+                    }
+                }
             }
+        }catch (Exception ignored){
+            studyInfo=new StudyInfo();
         }
         return studyInfo;
     }
@@ -118,7 +123,7 @@ public class StudyInfoManager extends Model {
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(studyInfoFile)).getAsJsonObject();
 
-        dataSourceClient = dataKitAPI.register(dataSourceBuilder);
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
         studyInfoDB = studyInfoFile;
@@ -136,10 +141,6 @@ public class StudyInfoManager extends Model {
 
     public String getStudy_id() {
         return studyInfoFile.getId();
-    }
-
-    public String getStudy_name() {
-        return studyInfoFile.getName();
     }
 
 }

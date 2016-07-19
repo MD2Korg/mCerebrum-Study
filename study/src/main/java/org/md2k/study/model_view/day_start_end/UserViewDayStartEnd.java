@@ -83,6 +83,7 @@ public class UserViewDayStartEnd extends UserView {
         if (view == null) return;
         activity.findViewById(R.id.button_day_start_end).setEnabled(true);
         DayStartEndInfoManager dayStartEndInfoManager = ((DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END));
+        if(dayStartEndInfoManager==null) return;
         int buttonStatus = dayStartEndInfoManager.getButtonStatus();
         if (buttonStatus == DayStartEndInfoManager.START_BUTTON) {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Start Day");

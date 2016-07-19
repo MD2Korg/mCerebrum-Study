@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
-import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -34,12 +33,12 @@ import io.fabric.sdk.android.Fabric;
 public class ActivityStartScreen extends AppCompatActivity {
     private static final String TAG = ActivityStartScreen.class.getSimpleName();
     int state;
-    private static final int UI = 0;
-    private static final int START = 1;
-    private static final int SETTINGS = 2;
+    private static final int START_SCREEN = 0;
+    private static final int SETTINGS = 1;
+    private static final int START_STUDY = 2;
+    private static final int EXIT = 3;
     Handler handler;
-    ProgressDialog mProgressDialog;
-    boolean isCheckStatusRequired=false;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,141 +48,198 @@ public class ActivityStartScreen extends AppCompatActivity {
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start_screen);
         Log.d(TAG, "...onCreate()");
-        checkStatus();
+        progressDialog = new ProgressDialog(this, android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
+        progressDialog.setMessage("Loading...");
+        progressDialog.setIndeterminate(true);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG,"onStart()...");
-        if(isCheckStatusRequired)
-            checkStatus();
+        Log.d(TAG, "onStart()...");
+        prepare();
     }
-    void checkStatus(){
-        isCheckStatusRequired=false;
-        handler.removeCallbacks(runnableWaitServiceStart);
-        fixConfigIfRequired();
-        setButtonExit();
-        setButtonStartStudy();
-        setButtonUpdatemCerebrum();
-        setImageViewLogo();
-        setButtonSettings();
-        updateTextConfigFileName();
-        updateTextVersion();
-        Log.d(TAG,"isServiceRunning="+ServiceSystemHealth.isRunning);
-
-        if (!ServiceSystemHealth.isRunning) {
-            state=UI;
-            startService(Status.RANK_ADMIN_OPTIONAL);
+    void prepare(){
+        if (isStudyRunning()) {
+            state = START_STUDY;
+            serviceStarted();
         } else {
-            if (ModelManager.getInstance(this).getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL) {
-                state=UI;
-                handler.post(runnableWaitServiceStart);
-            }
-            else {
-                if (ServiceSystemHealth.RANK_LIMIT == Status.RANK_SUCCESS) {
-                    state=START;
-                    handler.post(runnableWaitServiceStart);
-                } else {
-                    state=UI;
-                    handler.post(runnableWaitServiceStart);
-                }
-            }
+            state = START_SCREEN;
+            handler.post(runnableStopService);
         }
+    }
+
+    boolean isStudyRunning() {
+        return ServiceSystemHealth.isRunning && ServiceSystemHealth.RANK_LIMIT == Status.RANK_SUCCESS;
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG,"onDestroy()...");
-        handler.removeCallbacks(runnableWaitServiceStart);
-        if (ServiceSystemHealth.isRunning) {
-            if (ModelManager.getInstance(this).getStatus().getRank() >= Status.RANK_ADMIN_OPTIONAL)
-                stopService();
-        }
+        Log.d(TAG, "onDestroy()...");
+        handler.removeCallbacks(runnableWaitLoading);
+        state = EXIT;
+        handler.post(runnableStopService);
         super.onDestroy();
     }
 
-    Runnable runnableWaitServiceStart = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "runnableWaitServiceStart...isServiceRunning=" + ServiceSystemHealth.isRunning);
-            if (!ServiceSystemHealth.isRunning)
-                handler.postDelayed(this, 2000);
-            else {
-                Log.d(TAG,"isUpdating="+ModelManager.getInstance(ActivityStartScreen.this).isUpdating());
-                if (ModelManager.getInstance(ActivityStartScreen.this).isUpdating())
-                    handler.postDelayed(this, 500);
-                else {
-                    if(mProgressDialog!=null && mProgressDialog.isShowing())
-                        mProgressDialog.dismiss();
-                    doWork();
+
+    void fixConfigIfRequired() {
+        if (!ModelManager.getInstance(this).getConfigManager().isExist()) {
+            clearModelManager();
+            copyDefaultConfig();
+            loadModelManager(Status.RANK_ADMIN_OPTIONAL);
+        } else if (!ModelManager.getInstance(this).getConfigManager().isValid()) {
+            AlertDialogs.AlertDialog(this, "Configuration file is out of date", "Please download the latest configuration file.", R.drawable.ic_info_teal_48dp, "Ok", "Cancel", null, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (DialogInterface.BUTTON_POSITIVE == which) {
+                    } else {
+                        clearModelManager();
+                        copyDefaultConfig();
+                        loadModelManager(Status.RANK_ADMIN_OPTIONAL);
+                    }
                 }
-            }
-        }
-    };
-    void doWork(){
-        Log.d(TAG,"doWork...state="+state);
-        if(state==UI){
-            Status status = ModelManager.getInstance(ActivityStartScreen.this).getStatus();
-            Log.d(TAG,"doWork...state="+state+" status="+status.log());
-            if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
-                disableButton((Button) findViewById(R.id.button_start_study));
-                activeButton((Button) findViewById(R.id.button_settings));
-            } else {
-                activeButton((Button) findViewById(R.id.button_start_study));
-                enableButton((Button) findViewById(R.id.button_settings));
-            }
-            stopService();
-        }
-        else if (state==START){
-            startActivityMain();
-        }else if(state==SETTINGS){
-            startActivitySettings();
-        }
-
+            });
+        } else
+        setUI();
     }
 
-    void disableButton(Button button) {
-        button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
-        button.setEnabled(false);
-        button.setTextColor(Color.GRAY);
-    }
-
-    void enableButton(Button button) {
-        button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
-        button.setEnabled(true);
-        button.setTextColor(Color.BLACK);
-    }
-
-    void activeButton(Button button) {
-        button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_red));
-        button.setEnabled(true);
-        button.setTextColor(Color.WHITE);
-
-    }
-
-    void updateTextVersion() {
+    void clearModelManager() {
         try {
-            ((TextView) findViewById(R.id.text_view_version)).setMovementMethod(LinkMovementMethod.getInstance());
-            String version = "Version: " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-            ((TextView) findViewById(R.id.text_view_version)).setText(version);
-        } catch (PackageManager.NameNotFoundException e) {
+            ModelManager.getInstance(this).clear();
+        } catch (DataKitException e) {
             e.printStackTrace();
         }
     }
 
-    void updateTextConfigFileName() {
+    void readLoadManager() {
         try {
-            if (ModelManager.getInstance(this).getConfigManager().getConfig().getStart_screen().isConfig_text()) {
-                findViewById(R.id.text_view_config).setVisibility(View.VISIBLE);
-                String configName = ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getFilename();
-                ((TextView) findViewById(R.id.text_view_config)).setText("Config File: " + configName);
-            } else {
-                findViewById(R.id.text_view_config).setVisibility(View.INVISIBLE);
-            }
-        } catch (Exception e) {
-            ((TextView) findViewById(R.id.text_view_config)).setText("");
+            ModelManager.getInstance(this).clear();
+            ModelManager.getInstance(this).read();
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
+    }
+    void showProgressBar(){
+        progressDialog.show();
+    }
+    void hideProgressBar(){
+        if(progressDialog.isShowing())
+            progressDialog.dismiss();
+
+    }
+
+    void loadModelManager(int rank) {
+        try {
+            Log.d(TAG, "startService...rank=" + rank);
+            ServiceSystemHealth.RANK_LIMIT = rank;
+            ModelManager.getInstance(this).clear();
+            ModelManager.getInstance(this).read();
+            ModelManager.getInstance(this).set();
+            handler.postDelayed(runnableWaitLoading,500);
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    void copyDefaultConfig() {
+        Log.d(TAG, "copyDefaultConfig()...");
+        FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+        FileManager.copyAssets(ActivityStartScreen.this, "default.zip", Constants.TEMP_DIRECTORY);
+        FileManager.unzip(Constants.TEMP_DIRECTORY + "default.zip", Constants.CONFIG_DIRECTORY_ROOT);
+    }
+
+    void setUI() {
+        setButtonStartStudy();
+        setButtonSettings();
+        setButtonUpdatemCerebrum();
+        setButtonExit();
+        setImageViewLogo();
+        setTextConfigFileName();
+        setTextVersion();
+        Log.d(TAG, "updateUI...state=" + state);
+        Status status = ModelManager.getInstance(ActivityStartScreen.this).getStatus();
+        Log.d(TAG, "updateUI...state=" + state + " status=" + status.log());
+        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
+            disableButton((Button) findViewById(R.id.button_start_study));
+            activeButton((Button) findViewById(R.id.button_settings));
+        } else {
+            activeButton((Button) findViewById(R.id.button_start_study));
+            enableButton((Button) findViewById(R.id.button_settings));
+        }
+    }
+
+    void setButtonStartStudy() {
+        Button button = (Button) findViewById(R.id.button_start_study);
+        button.setEnabled(false);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "runnableWaitStart...isServiceRunning=" + ServiceSystemHealth.isRunning + " Service_Rank=" + ServiceSystemHealth.RANK_LIMIT);
+                state = START_STUDY;
+                ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
+                handler.post(runnableStartService);
+            }
+        });
+    }
+
+    void setButtonSettings() {
+        Button button = (Button) findViewById(R.id.button_settings);
+        button.setEnabled(false);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                state = SETTINGS;
+                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                handler.post(runnableStartService);
+            }
+        });
+    }
+
+    void setButtonUpdatemCerebrum() {
+        Button button = (Button) findViewById(R.id.button_update);
+        if (ModelManager.getInstance(this).getConfigManager().getConfig().getStart_screen().isUpdate_app()) {
+            button.setVisibility(View.VISIBLE);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
+                    appInstallManager.getAppInstallList("study").setLatestVersionName(ActivityStartScreen.this, new OnDataChangeListener() {
+                        @Override
+                        public void onDataChange(int now, String str) {
+                            if (!appInstallManager.getAppInstallList("study").isUpdateAvailable())
+                                Toast.makeText(ActivityStartScreen.this, "mCerebrum is up-to-date...", Toast.LENGTH_SHORT).show();
+                            else {
+                                AlertDialogs.AlertDialog(ActivityStartScreen.this, "Update Available(" + str + ")", "Do you want to update now?", R.drawable.ic_info_teal_48dp, "Yes", "No", null, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (which == DialogInterface.BUTTON_POSITIVE) {
+                                            appInstallManager.getAppInstallList().get(0).downloadAndInstallApp(ActivityStartScreen.this);
+                                        }
+                                    }
+                                });
+
+                            }
+
+                        }
+                    });
+                }
+            });
+        } else {
+            button.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    void setButtonExit() {
+        Button button = (Button) findViewById(R.id.button_exit);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                state = EXIT;
+                handler.post(runnableStopService);
+                finish();
+            }
+        });
     }
 
     void setImageViewLogo() {
@@ -206,125 +262,125 @@ public class ActivityStartScreen extends AppCompatActivity {
         } else imageView.setVisibility(View.INVISIBLE);
     }
 
-    void setButtonExit() {
-        Button button = (Button) findViewById(R.id.button_exit);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "datakit is connected=" + DataKitAPI.getInstance(ActivityStartScreen.this).isConnected());
-                finish();
-            }
-        });
-    }
-
-    void setButtonStartStudy() {
-        Button button = (Button) findViewById(R.id.button_start_study);
-        button.setEnabled(false);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "runnableWaitStart...isServiceRunning=" + ServiceSystemHealth.isRunning + " Service_Rank=" + ServiceSystemHealth.RANK_LIMIT);
-                state=START;
-                startService(Status.RANK_SUCCESS);
-            }
-        });
-    }
-
-    void setButtonUpdatemCerebrum() {
-        Button button = (Button) findViewById(R.id.button_update);
-        if (ModelManager.getInstance(this).getConfigManager().getConfig().getStart_screen().isUpdate_app()) {
-            button.setVisibility(View.VISIBLE);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
-                    appInstallManager.getAppInstallList("study").setLatestVersionName(ActivityStartScreen.this, new OnDataChangeListener() {
-                        @Override
-                        public void onDataChange(int now, String str) {
-                            if (!appInstallManager.getAppInstallList("study").isUpdateAvailable())
-                                Toast.makeText(ActivityStartScreen.this, "mCerebrum is up-to-date...", Toast.LENGTH_SHORT).show();
-                            else {
-                                AlertDialogs.AlertDialog(ActivityStartScreen.this, "Update Available(" + str + ")", "Do you want to update now?",R.drawable.ic_info_teal_48dp, "Yes", "No",null, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        if (which == DialogInterface.BUTTON_POSITIVE) {
-                                            isCheckStatusRequired=true;
-                                            appInstallManager.getAppInstallList().get(0).downloadAndInstallApp(ActivityStartScreen.this);
-                                        }
-                                    }
-                                });
-
-                            }
-
-                        }
-                    });
-                }
-            });
-        } else {
-            button.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    void setButtonSettings() {
-        Button button = (Button) findViewById(R.id.button_settings);
-        button.setEnabled(false);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isCheckStatusRequired=true;
-                state=SETTINGS;
-                startService(Status.RANK_ADMIN_OPTIONAL);
-            }
-        });
-    }
-
-    void fixConfigIfRequired() {
+    void setTextVersion() {
         try {
-            if (!ModelManager.getInstance(this).getConfigManager().isValid()) {
-                stopService();
-                copyDefaultConfig();
-                readConfig();
-            }
-        } catch (DataKitException e) {
+            ((TextView) findViewById(R.id.text_view_version)).setMovementMethod(LinkMovementMethod.getInstance());
+            String version = "Version: " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            ((TextView) findViewById(R.id.text_view_version)).setText(version);
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    void readConfig() throws DataKitException {
-        ModelManager.getInstance(this).clear();
-        ModelManager.getInstance(this).read();
+    void setTextConfigFileName() {
+        try {
+            if (ModelManager.getInstance(this).getConfigManager().getConfig().getStart_screen().isConfig_text()) {
+                findViewById(R.id.text_view_config).setVisibility(View.VISIBLE);
+                String configName = ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getFilename();
+                String configVersion = ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getVersion();
+                ((TextView) findViewById(R.id.text_view_config)).setText("Config File: " + configName+" ("+configVersion+")");
+            } else {
+                findViewById(R.id.text_view_config).setVisibility(View.INVISIBLE);
+            }
+        } catch (Exception e) {
+            ((TextView) findViewById(R.id.text_view_config)).setText("");
+        }
     }
 
-    void copyDefaultConfig() {
-        Log.d(TAG,"copyDefaultConfig()...");
-        FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
-        FileManager.copyAssets(ActivityStartScreen.this, "default.zip", Constants.TEMP_DIRECTORY);
-        FileManager.unzip(Constants.TEMP_DIRECTORY + "default.zip", Constants.CONFIG_DIRECTORY_ROOT);
+    void disableButton(Button button) {
+        button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
+        button.setEnabled(false);
+        button.setTextColor(Color.GRAY);
     }
 
-    void startService(int rank) {
-        Log.d(TAG,"startService...rank="+rank);
-        ServiceSystemHealth.RANK_LIMIT = rank;
-        Intent intent = new Intent(ActivityStartScreen.this, ServiceSystemHealth.class);
-        mProgressDialog=new ProgressDialog(this,android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
-        mProgressDialog.setMessage("Loading...");
-        mProgressDialog.setIndeterminate(true);
-        mProgressDialog.show();
-        handler.post(runnableWaitServiceStart);
-        startService(intent);
+    void enableButton(Button button) {
+        button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
+        button.setEnabled(true);
+        button.setTextColor(Color.BLACK);
     }
 
-    void stopService() {
-        Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-        stopService(intent);
+    void activeButton(Button button) {
+        button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_red));
+        button.setEnabled(true);
+        button.setTextColor(Color.WHITE);
+
     }
 
-    void startActivityMain() {
-        Intent intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
-        startActivity(intent);
+    void serviceStarted() {
+        Intent intent;
+        try {
+            switch (state) {
+                case SETTINGS:
+                    intent = new Intent(ActivityStartScreen.this, ActivityAdmin.class);
+                    startActivity(intent);
+                    break;
+                case START_STUDY:
+                    intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
+                    startActivity(intent);
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
-    void startActivitySettings() {
-        Intent intent = new Intent(ActivityStartScreen.this, ActivityAdmin.class);
-        startActivity(intent);
+
+    void serviceStopped() {
+        switch (state) {
+            case EXIT:
+                clearModelManager();
+                break;
+            case START_SCREEN:
+                loadModelManager(Status.RANK_ADMIN_OPTIONAL);
+                handler.postDelayed(runnableWaitLoading,500);
+                break;
+        }
     }
+
+    Runnable runnableStartService = new Runnable() {
+        @Override
+        public void run() {
+            if (!ServiceSystemHealth.isRunning) {
+                hideProgressBar();
+                showProgressBar();
+                Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
+                startService(intent);
+                handler.postDelayed(this, 500);
+            } else {
+                hideProgressBar();
+                serviceStarted();
+            }
+        }
+    };
+    Runnable runnableStopService = new Runnable() {
+        @Override
+        public void run() {
+            if (ServiceSystemHealth.isRunning) {
+                hideProgressBar();
+                showProgressBar();
+                Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
+                stopService(intent);
+                handler.postDelayed(this, 500);
+            } else {
+                hideProgressBar();
+                serviceStopped();
+            }
+        }
+    };
+    Runnable runnableWaitLoading = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "isUpdating=" + ModelManager.getInstance(ActivityStartScreen.this).isUpdating());
+            if (ModelManager.getInstance(ActivityStartScreen.this).isUpdating()) {
+                hideProgressBar();
+                showProgressBar();
+                handler.postDelayed(this, 500);
+            }
+            else {
+                hideProgressBar();
+                fixConfigIfRequired();
+                setUI();
+            }
+        }
+    };
 }

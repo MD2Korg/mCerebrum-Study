@@ -57,8 +57,6 @@ public class UserInfoManager extends Model {
     private static final String TAG = UserInfoManager.class.getSimpleName();
     UserInfo userInfo;
     boolean isInDatabase;
-    DataSourceBuilder dataSourceBuilder;
-    DataSourceClient dataSourceClient;
 
     public UserInfoManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -75,8 +73,6 @@ public class UserInfoManager extends Model {
     }
 
     public void set() throws DataKitException {
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
-        dataSourceBuilder = createDataSourceBuilder();
         isInDatabase = false;
         readFromDataKit();
         update();
@@ -107,13 +103,15 @@ public class UserInfoManager extends Model {
     private void readFromDataKit() throws DataKitException {
         DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return;
-        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-        if (dataTypes.size() != 0) {
-            DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-            Gson gson = new Gson();
-            userInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), UserInfo.class);
-            isInDatabase = true;
+        ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
+        if(dataSourceClients.size()!=0) {
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+            if (dataTypes.size() != 0) {
+                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                Gson gson = new Gson();
+                userInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), UserInfo.class);
+                isInDatabase = true;
+            }
         }
     }
 
@@ -132,7 +130,7 @@ public class UserInfoManager extends Model {
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(userInfo)).getAsJsonObject();
 
-        dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
         isInDatabase = true;
