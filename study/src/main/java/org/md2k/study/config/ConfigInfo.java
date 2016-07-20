@@ -2,7 +2,6 @@ package org.md2k.study.config;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.widget.Toast;
 
 import org.md2k.study.Constants;
 import org.md2k.utilities.FileManager;
@@ -53,7 +52,7 @@ public class ConfigInfo {
             return false;
         }
         if(!isValidRequiredFiles()) {
-            Toast.makeText(context, "Error: Required file not exists ...",Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error: Required file not exists ...",Toast.LENGTH_LONG).show();
             return false;
         }
         return true;

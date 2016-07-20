@@ -90,14 +90,15 @@ public class ActivityStartScreen extends AppCompatActivity {
             copyDefaultConfig();
             loadModelManager();
         } else if (!ModelManager.getInstance(this).getConfigManager().isValid() && !isAlertDialogShown) {
+            isAlertDialogShown=true;
             AlertDialogs.AlertDialog(this, "Configuration file is out of date", "Please download the latest configuration file from \"Settings\".", R.drawable.ic_info_teal_48dp, "Ok", null, null, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (DialogInterface.BUTTON_POSITIVE == which) {
-                        isAlertDialogShown = false;
                         clearModelManager();
                         copyDefaultConfig();
                         loadModelManager();
+                        isAlertDialogShown = false;
                     }
                 }
             });
@@ -130,6 +131,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             ModelManager.getInstance(this).clear();
             ModelManager.getInstance(this).read();
             ModelManager.getInstance(this).set();
+            handler.removeCallbacks(runnableWaitLoading);
             handler.postDelayed(runnableWaitLoading, 500);
         } catch (Exception ignored) {
 
@@ -193,6 +195,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     void checkUpdates(){
         if (ModelManager.getInstance(ActivityStartScreen.this).getConfigManager().getConfig().getConfig_info().isAuto_update()) {
             final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
+            showProgressBar();
             appInstallManager.updateVersionAll(0, new OnDataChangeListener() {
                 @Override
                 public void onDataChange(int index, String str) {
@@ -200,6 +203,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                         int status = Integer.parseInt(str);
                         if (status != Status.SUCCESS)
                             setUI();
+                        hideProgressBar();
                     }
                 }
             });
@@ -344,6 +348,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                 break;
             case START_SCREEN:
                 loadModelManager();
+                handler.removeCallbacks(runnableWaitLoading);
                 handler.postDelayed(runnableWaitLoading, 500);
                 break;
         }
