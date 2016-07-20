@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -25,6 +27,8 @@ import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.AlertDialogs;
+
+import io.fabric.sdk.android.Fabric;
 
 public class ActivityStartScreen extends AppCompatActivity {
     private static final String TAG = ActivityStartScreen.class.getSimpleName();
@@ -42,7 +46,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate()...");
         handler = new Handler();
-//        Fabric.with(this, new Crashlytics());
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start_screen);
         Log.d(TAG, "...onCreate()");
         progressDialog = new ProgressDialog(this, android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
