@@ -26,10 +26,12 @@ import org.md2k.utilities.UI.AlertDialogs;
 public class ActivityAdmin extends AppCompatActivity {
     AlertDialog alertDialog;
     boolean passwordFirst=false;
+    boolean isAlertDialogShown;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
+        isAlertDialogShown=false;
         getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
                 new PrefsFragmentAdmin()).commit();
         if (getSupportActionBar() != null) {
@@ -48,7 +50,7 @@ public class ActivityAdmin extends AppCompatActivity {
             startActivityForResult(intent,1);
         }
         else {
-            if (!passwordFirst && isPasswordRequired()) {
+            if (!passwordFirst && isPasswordRequired() && isAlertDialogShown==false) {
                 showPasswordWindow();
             }
         }
@@ -73,6 +75,7 @@ public class ActivityAdmin extends AppCompatActivity {
     }
 
     public void showPasswordWindow() {
+        isAlertDialogShown=true;
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(this, org.md2k.utilities.R.style.app_theme_teal_light_dialog));
         alertDialogBuilder.setTitle("Admin Access Required");
         alertDialogBuilder.setMessage("Enter Password");
@@ -91,6 +94,7 @@ public class ActivityAdmin extends AppCompatActivity {
         alertDialogBuilder.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        isAlertDialogShown=false;
                         dialog.cancel();
                         finish();
                     }
@@ -106,6 +110,7 @@ public class ActivityAdmin extends AppCompatActivity {
 
                     @Override
                     public void onClick(View view) {
+                        isAlertDialogShown=false;
                         String password = input.getText().toString();
                         if (getPassword().equals(password)) {
                             setContentView(R.layout.activity_admin);

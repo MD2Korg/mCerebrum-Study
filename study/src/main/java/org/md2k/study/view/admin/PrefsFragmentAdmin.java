@@ -234,18 +234,22 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
     }
 
     void updatePreference(String key, boolean enable, boolean status, String message) {
-        Preference preference = findPreference(key);
-        if (preference == null) return;
-        preference.setEnabled(enable);
-        if (status)
-            preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
-        else {
-            if (enable)
-                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
-            else
-                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_grey_50dp));
+        try {
+            Preference preference = findPreference(key);
+            if (preference == null) return;
+            preference.setEnabled(enable);
+            if (status)
+                preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ok_teal_50dp));
+            else {
+                if (enable)
+                    preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_red_50dp));
+                else
+                    preference.setIcon(ContextCompat.getDrawable(getActivity(), R.drawable.ic_error_grey_50dp));
+            }
+            preference.setSummary(message);
+        }catch (Exception ignored){
+
         }
-        preference.setSummary(message);
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -257,6 +261,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
 
     @Override
     public void onDestroy() {
+        Log.d(TAG,"onDestroy()...");
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
         super.onDestroy();
     }

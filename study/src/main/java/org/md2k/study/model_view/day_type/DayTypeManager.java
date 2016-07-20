@@ -53,8 +53,6 @@ import java.util.HashMap;
  */
 public class DayTypeManager extends Model {
     private static final String TAG = DayTypeManager.class.getSimpleName();
-    DataSourceBuilder dataSourceBuilder;
-    DataSourceClient dataSourceClient;
 
     DayTypeInfo dayTypeDB;
     DayTypeInfo dayTypeNew;
@@ -76,7 +74,6 @@ public class DayTypeManager extends Model {
         dayTypeNew=new DayTypeInfo(dayType);
     }
     public void set() throws DataKitException {
-        dataSourceBuilder = createDataSourceBuilder();
         readFromDataKit();
         update();
     }
@@ -99,12 +96,14 @@ public class DayTypeManager extends Model {
         dayTypeDB = null;
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
-            dataSourceClient = dataKitAPI.register(dataSourceBuilder);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-            if (dataTypes.size() != 0) {
-                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                Gson gson = new Gson();
-                dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
+            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
+            if(dataSourceClients.size()>=1) {
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+                if (dataTypes.size() != 0) {
+                    DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                    Gson gson = new Gson();
+                    dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
+                }
             }
         }
     }
@@ -115,7 +114,7 @@ public class DayTypeManager extends Model {
         if (!isValid()) return false;
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(dayTypeNew)).getAsJsonObject();
-        dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
         dayTypeDB = dayTypeNew;

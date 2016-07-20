@@ -98,6 +98,13 @@ public class DataQuality {
                                 if (sample != DATA_QUALITY.BAND_OFF)
                                     lastReceivedTimeStamp = DateTime.getDateTime();
                                 receiveCallBack.onReceive(dataSourceClient, sample);
+                            }else{
+                                try {
+                                    stop();
+                                    start();
+                                } catch (DataKitException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     });

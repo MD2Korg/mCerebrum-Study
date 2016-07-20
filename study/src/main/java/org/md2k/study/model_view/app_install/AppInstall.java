@@ -8,6 +8,7 @@ import android.widget.Toast;
 import org.md2k.study.Constants;
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.Status;
+import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
@@ -66,7 +67,8 @@ public class AppInstall {
 
     public void set() {
         installed = Apps.isPackageInstalled(context, app.getPackage_name());
-        setVersionName();
+        curVersion = setVersionName();
+        latestVersion = MySharedPref.getInstance(context).read(app.getId());
     }
 
     public void clear() {
@@ -74,7 +76,8 @@ public class AppInstall {
 
     public void update() {
         installed = Apps.isPackageInstalled(context, app.getPackage_name());
-        setVersionName();
+        curVersion = setVersionName();
+        latestVersion = MySharedPref.getInstance(context).read(app.getId());
     }
 
     public void downloadAndInstallApp(final Context context) {
@@ -106,7 +109,7 @@ public class AppInstall {
                                 "/download/" + latestVersion +
                                 "/" + app.getId() +
                                 latestVersion + ".apk";
-                        download(context, filename, link,true, new OnCompletionListener() {
+                        download(context, filename, link, true, new OnCompletionListener() {
                             @Override
                             public void OnCompleted(int curStatus) {
                                 if (curStatus == Status.SUCCESS) {
@@ -125,7 +128,7 @@ public class AppInstall {
                         "/download/" + latestVersion +
                         "/" + app.getId() +
                         latestVersion + ".apk";
-                download(context, filename, link, true,new OnCompletionListener() {
+                download(context, filename, link, true, new OnCompletionListener() {
                     @Override
                     public void OnCompleted(int curStatus) {
                         if (curStatus == Status.SUCCESS) {
@@ -162,11 +165,12 @@ public class AppInstall {
             onDataChangeListener.onDataChange(0, latestVersion);
             return;
         }
-        download(context, filename, link,false, new OnCompletionListener() {
+        download(context, filename, link, false, new OnCompletionListener() {
             @Override
             public void OnCompleted(int curStatus) {
                 if (curStatus == Status.SUCCESS) {
                     latestVersion = retrieveAndVerifyLatestVersion(Constants.TEMP_DIRECTORY + filename);
+                    MySharedPref.getInstance(context).write(app.getId(), latestVersion);
                     onDataChangeListener.onDataChange(0, latestVersion);
                 } else
                     Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
@@ -174,11 +178,12 @@ public class AppInstall {
             }
         });
     }
-    private String retrieveAndVerifyLatestVersion(String filename){
-        String curLatestVersion=retrieveLatestVersion(filename);
-        if(curLatestVersion==null)  return curLatestVersion;
+
+    private String retrieveAndVerifyLatestVersion(String filename) {
+        String curLatestVersion = retrieveLatestVersion(filename);
+        if (curLatestVersion == null) return curLatestVersion;
         String[] vals1 = curLatestVersion.split("\\.");
-        if(vals1.length!=3) return null;
+        if (vals1.length != 3) return null;
         return curLatestVersion;
     }
 
@@ -218,28 +223,25 @@ public class AppInstall {
         String[] vals2 = latestVersion.split("\\.");
         int i = 0;
         // set index to first non-equal ordinal or length of shortest version string
-        while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i]))
-        {
+        while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
             i++;
         }
         // compare first non-equal ordinal number
-        if (i < vals1.length && i < vals2.length)
-        {
+        if (i < vals1.length && i < vals2.length) {
             return Integer.parseInt(vals1[i]) <= Integer.parseInt(vals2[i]);
         }
         // the strings are equal or one string is a substring of the other
         // e.g. "1.2.3" = "1.2.3" or "1.2.3" < "1.2.3.4"
-        else
-        {
-            if(vals1.length<=vals1.length) return false;
+        else {
+            if (vals1.length <= vals1.length) return false;
             else return true;
         }
     }
 
-    public void setVersionName() {
+    public String setVersionName() {
         if (installed)
-            curVersion = Apps.getVersionName(context, app.getPackage_name());
-        else curVersion = null;
+            return Apps.getVersionName(context, app.getPackage_name());
+        else return null;
     }
 
     public String getName() {

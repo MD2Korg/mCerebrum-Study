@@ -99,7 +99,6 @@ public class ModelFactory {
                 return new PrivacyControlManager(modelManager, id, rank);
             case MODEL_EMA_TEST:
                 return new EMATestManager(modelManager,id,rank);
-
             case MODEL_DAY_START_END:
                 return new DayStartEndInfoManager(modelManager, id, rank);
             case MODEL_STUDY_START_END:
@@ -114,9 +113,10 @@ public class ModelFactory {
                 return new AppStartManager(modelManager,id,rank);
             case MODEL_APP_STOP:
                 return new AppStopManager(modelManager,id,rank);
-            default:
-                return null;
         }
+        if(id.endsWith(MODEL_SELF_REPORT))
+            return new SelfReportManager(modelManager,id,rank);
+        return null;
     }
 
 }

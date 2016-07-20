@@ -15,7 +15,6 @@ import java.util.ArrayList;
 public class DataQualityInfo {
     public static final int QSIZE = 3;
     private static final String TAG = DataQualityInfo.class.getSimpleName();
-    DataSourceClient dataSourceClient;
     ConfigDataQualityView configDataQualityView;
     String message;
     int qualities[];
@@ -72,7 +71,6 @@ public class DataQualityInfo {
 
     public void set(DataSourceClient dataSourceClient, ArrayList<ConfigDataQualityView> configDataQualityViewArrayList, int value) {
         setConfigDataQualityView(configDataQualityViewArrayList, dataSourceClient.getDataSource());
-        this.dataSourceClient=dataSourceClient;
         lastReceivedTime = DateTime.getDateTime();
         if (dataSourceClient.getDataSource().getId()!=null && (dataSourceClient.getDataSource().getId().equals(DataSourceType.RESPIRATION) || dataSourceClient.getDataSource().getId().equals(DataSourceType.ECG))) {
             now = now % QSIZE;

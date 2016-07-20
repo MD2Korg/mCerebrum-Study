@@ -71,6 +71,13 @@ public class Config {
             if(actions.get(i).getId().equals(id)) return actions.get(i);
         return null;
     }
+    public ConfigAction getAction(String type, String selfReport){
+        for(int i=0;i< actions.size();i++) {
+            if(actions.get(i).getType()==null) continue;
+            if (actions.get(i).getType().equals(type)) return actions.get(i);
+        }
+        return null;
+    }
 
     public ConfigInfo getConfig_info() {
         return config_info;

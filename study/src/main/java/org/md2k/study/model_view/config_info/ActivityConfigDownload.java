@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.view.ContextThemeWrapper;
 import android.view.WindowManager;
@@ -99,7 +100,14 @@ public class ActivityConfigDownload extends Activity {
                                 }
                             }
                         });
-                        download.execute(Constants.CONFIG_DOWNLOAD_LINK + filename, filename);
+                        try {
+                            String version =  getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+                            int lastDot = version.lastIndexOf('.');
+                            String configVersion = version.substring(0, lastDot);
+                            download.execute(Constants.CONFIG_DOWNLOAD_LINK + configVersion+ "/"+filename, filename);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            e.printStackTrace();
+                        }
                     } else
                         showDownloadConfig();
                 }else{

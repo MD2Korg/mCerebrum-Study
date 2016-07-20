@@ -83,6 +83,8 @@ public class ModelManager {
             for (int i = 0; i < configManager.getConfig().getActions().size(); i++) {
                 if (!configManager.getConfig().getActions().get(i).isEnable()) continue;
                 String id = configManager.getConfig().getActions().get(i).getId();
+                if(id.equals(ModelFactory.MODEL_SELF_REPORT))
+                    id=configManager.getConfig().getActions().get(i).getType();
                 int rank = configManager.getConfig().getActions().get(i).getRank();
                 Log.d(TAG, "ModelManager()...id=" + id + " rank=" + rank);
                 if (modelHashMap.containsKey(id)) continue;

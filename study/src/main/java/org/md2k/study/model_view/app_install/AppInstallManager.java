@@ -66,31 +66,31 @@ public class AppInstallManager extends Model {
         Status curStatus;
         for(int i=0;i<appInstallList.size();i++) {
             appInstallList.get(i).update();
-//            if(modelManager.getConfigManager().getConfig().getConfig_info().isAuto_update()) {
+            if(modelManager.getConfigManager().getConfig().getConfig_info().isAuto_update() && appInstallList.get(i).getLatestVersion()==null){
                 final int finalI = i;
                 appInstallList.get(i).setLatestVersionName(modelManager.getContext(), new OnDataChangeListener() {
                     @Override
                     public void onDataChange(int index, String str) {
+                        if(str==null || str.equals(appInstallList.get(finalI).getCurVersion())) return;
                         Status curStatus;
-                        if(appInstallList.get(finalI).isUpdateAvailable()){
-                            int total = size();
-                            int install = sizeInstalled();
-                            int update = sizeUpdate();
-                            if (update == 0 && total == install)
-                                curStatus= new Status(rank,Status.SUCCESS);
-                            else if (total != install)
-                                curStatus= new Status(rank,Status.APP_NOT_INSTALLED);
-                            else curStatus= new Status(rank,Status.APP_UPDATE_AVAILABLE);
-                            Log.d(TAG,"status = "+status.log()+" latestStatus="+curStatus.log());
-                            try {
-                                notifyIfRequired(curStatus);
-                            } catch (DataKitException e) {
-
-                            }
+                        int total = size();
+                        int install = sizeInstalled();
+                        int update = sizeUpdate();
+                        if (update == 0 && total == install)
+                            curStatus= new Status(rank,Status.SUCCESS);
+                        else if (total != install)
+                            curStatus= new Status(rank,Status.APP_NOT_INSTALLED);
+                        else curStatus= new Status(rank,Status.APP_UPDATE_AVAILABLE);
+                        Log.d(TAG,"status = "+status.log()+" latestStatus="+curStatus.log());
+                        try {
+                            notifyIfRequired(curStatus);
+                        } catch (DataKitException e) {
+                            e.printStackTrace();
                         }
                     }
                 });
-//            }
+            }
+
         }
         int total = size();
         int install = sizeInstalled();
@@ -125,10 +125,16 @@ public class AppInstallManager extends Model {
         }
         return count;
     }
-    void updateVersionAll(final int now, final OnDataChangeListener onDataChangeListener) {
+    public void updateVersionAll(final int now, final OnDataChangeListener onDataChangeListener) {
         Log.d(TAG, "updateVersionAll()...now=" + now);
         if (now >= getAppInstallList().size()) {
-            onDataChangeListener.onDataChange(now, "");
+            try {
+                set();
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
+            if(onDataChangeListener!=null)
+                onDataChangeListener.onDataChange(now, String.valueOf(status.getStatus()));
             return;
         }
         if (getAppInstallList().get(now).getDownload_link().endsWith("releases")) {

@@ -87,6 +87,12 @@ public class UserViewUserApp extends UserView {
                     if (packageName != null && className != null) {
                         Intent intent = new Intent();
                         intent.setClassName(packageName, className);
+                        if(userAppManager.userApps.get(position).getAction().getId().endsWith(ModelFactory.MODEL_SELF_REPORT)) {
+                            String idd=userAppManager.userApps.get(position).getAction().getId();
+                            String type=userAppManager.userApps.get(position).getAction().getType();
+                            intent.putExtra("self_report_id",   idd);
+                            intent.putExtra("self_report_type", type);
+                        }
                         activity.startActivity(intent);
                     } else if (packageName != null) {
                         Intent LaunchIntent = activity.getPackageManager().getLaunchIntentForPackage(packageName);

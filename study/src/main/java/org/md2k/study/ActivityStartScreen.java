@@ -17,8 +17,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -27,8 +25,6 @@ import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.AlertDialogs;
-
-import io.fabric.sdk.android.Fabric;
 
 public class ActivityStartScreen extends AppCompatActivity {
     private static final String TAG = ActivityStartScreen.class.getSimpleName();
@@ -39,18 +35,20 @@ public class ActivityStartScreen extends AppCompatActivity {
     private static final int EXIT = 3;
     Handler handler;
     ProgressDialog progressDialog;
+    boolean isAlertDialogShown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate()...");
         handler = new Handler();
-        Fabric.with(this, new Crashlytics());
+//        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start_screen);
         Log.d(TAG, "...onCreate()");
         progressDialog = new ProgressDialog(this, android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
         progressDialog.setMessage("Loading...");
         progressDialog.setIndeterminate(true);
+        isAlertDialogShown = false;
     }
 
     @Override
@@ -59,7 +57,8 @@ public class ActivityStartScreen extends AppCompatActivity {
         Log.d(TAG, "onStart()...");
         prepare();
     }
-    void prepare(){
+
+    void prepare() {
         if (isStudyRunning()) {
             state = START_STUDY;
             serviceStarted();
@@ -77,6 +76,8 @@ public class ActivityStartScreen extends AppCompatActivity {
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
         handler.removeCallbacks(runnableWaitLoading);
+        handler.removeCallbacks(runnableStopService);
+        handler.removeCallbacks(runnableStartService);
         state = EXIT;
         handler.post(runnableStopService);
         super.onDestroy();
@@ -87,21 +88,21 @@ public class ActivityStartScreen extends AppCompatActivity {
         if (!ModelManager.getInstance(this).getConfigManager().isExist()) {
             clearModelManager();
             copyDefaultConfig();
-            loadModelManager(Status.RANK_ADMIN_OPTIONAL);
-        } else if (!ModelManager.getInstance(this).getConfigManager().isValid()) {
-            AlertDialogs.AlertDialog(this, "Configuration file is out of date", "Please download the latest configuration file.", R.drawable.ic_info_teal_48dp, "Ok", "Cancel", null, new DialogInterface.OnClickListener() {
+            loadModelManager();
+        } else if (!ModelManager.getInstance(this).getConfigManager().isValid() && !isAlertDialogShown) {
+            AlertDialogs.AlertDialog(this, "Configuration file is out of date", "Please download the latest configuration file from \"Settings\".", R.drawable.ic_info_teal_48dp, "Ok", null, null, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (DialogInterface.BUTTON_POSITIVE == which) {
-                    } else {
+                        isAlertDialogShown = false;
                         clearModelManager();
                         copyDefaultConfig();
-                        loadModelManager(Status.RANK_ADMIN_OPTIONAL);
+                        loadModelManager();
                     }
                 }
             });
         } else
-        setUI();
+            setUI();
     }
 
     void clearModelManager() {
@@ -112,31 +113,24 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void readLoadManager() {
-        try {
-            ModelManager.getInstance(this).clear();
-            ModelManager.getInstance(this).read();
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
-    }
-    void showProgressBar(){
+    void showProgressBar() {
         progressDialog.show();
     }
-    void hideProgressBar(){
-        if(progressDialog.isShowing())
+
+    void hideProgressBar() {
+        if (progressDialog.isShowing())
             progressDialog.dismiss();
 
     }
 
-    void loadModelManager(int rank) {
+    void loadModelManager() {
         try {
-            Log.d(TAG, "startService...rank=" + rank);
-            ServiceSystemHealth.RANK_LIMIT = rank;
+            Log.d(TAG, "startService...");
+            ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
             ModelManager.getInstance(this).clear();
             ModelManager.getInstance(this).read();
             ModelManager.getInstance(this).set();
-            handler.postDelayed(runnableWaitLoading,500);
+            handler.postDelayed(runnableWaitLoading, 500);
         } catch (Exception ignored) {
 
         }
@@ -150,6 +144,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
     void setUI() {
+        Log.d(TAG,"setUI()...");
         setButtonStartStudy();
         setButtonSettings();
         setButtonUpdatemCerebrum();
@@ -195,6 +190,22 @@ public class ActivityStartScreen extends AppCompatActivity {
             }
         });
     }
+    void checkUpdates(){
+        if (ModelManager.getInstance(ActivityStartScreen.this).getConfigManager().getConfig().getConfig_info().isAuto_update()) {
+            final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
+            appInstallManager.updateVersionAll(0, new OnDataChangeListener() {
+                @Override
+                public void onDataChange(int index, String str) {
+                    if (appInstallManager.getAppInstallList().size() == index) {
+                        int status = Integer.parseInt(str);
+                        if (status != Status.SUCCESS)
+                            setUI();
+                    }
+                }
+            });
+        }
+
+    }
 
     void setButtonUpdatemCerebrum() {
         Button button = (Button) findViewById(R.id.button_update);
@@ -204,6 +215,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
+                    checkUpdates();
                     appInstallManager.getAppInstallList("study").setLatestVersionName(ActivityStartScreen.this, new OnDataChangeListener() {
                         @Override
                         public void onDataChange(int now, String str) {
@@ -278,7 +290,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                 findViewById(R.id.text_view_config).setVisibility(View.VISIBLE);
                 String configName = ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getFilename();
                 String configVersion = ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getVersion();
-                ((TextView) findViewById(R.id.text_view_config)).setText("Config File: " + configName+" ("+configVersion+")");
+                ((TextView) findViewById(R.id.text_view_config)).setText("Config File: " + configName + " (" + configVersion + ")");
             } else {
                 findViewById(R.id.text_view_config).setVisibility(View.INVISIBLE);
             }
@@ -331,8 +343,8 @@ public class ActivityStartScreen extends AppCompatActivity {
                 clearModelManager();
                 break;
             case START_SCREEN:
-                loadModelManager(Status.RANK_ADMIN_OPTIONAL);
-                handler.postDelayed(runnableWaitLoading,500);
+                loadModelManager();
+                handler.postDelayed(runnableWaitLoading, 500);
                 break;
         }
     }
@@ -375,11 +387,11 @@ public class ActivityStartScreen extends AppCompatActivity {
                 hideProgressBar();
                 showProgressBar();
                 handler.postDelayed(this, 500);
-            }
-            else {
+            } else {
                 hideProgressBar();
                 fixConfigIfRequired();
                 setUI();
+
             }
         }
     };

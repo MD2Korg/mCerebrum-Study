@@ -61,11 +61,11 @@ public class UserViewDayStartEnd extends UserView {
 
     public UserViewDayStartEnd(Activity activity, Model model) {
         super(activity, model);
-        LocalBroadcastManager.getInstance(activity).registerReceiver(receiver, new IntentFilter(DayStartEndInfoManager.class.getSimpleName()));
     }
 
     @Override
     public void addView() {
+        LocalBroadcastManager.getInstance(activity).registerReceiver(receiver, new IntentFilter(DayStartEndInfoManager.class.getSimpleName()));
         LinearLayout linearLayoutMain = (LinearLayout) activity.findViewById(R.id.linear_layout_main);
         view = activity.getLayoutInflater().inflate(R.layout.layout_day_start_end, null);
         linearLayoutMain.addView(view);
@@ -74,6 +74,7 @@ public class UserViewDayStartEnd extends UserView {
 
     @Override
     public void stopView() {
+        LocalBroadcastManager.getInstance(activity).unregisterReceiver(receiver);
     }
 
 

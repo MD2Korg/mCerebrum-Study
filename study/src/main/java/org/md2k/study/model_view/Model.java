@@ -3,6 +3,7 @@ package org.md2k.study.model_view;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigAction;
+import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 
@@ -42,41 +43,50 @@ public abstract class Model {
     protected boolean isSet;
 
     public Model(ModelManager modelManager, String id, int rank) {
-        this.id=id;
-        this.modelManager=modelManager;
+        this.id = id;
+        this.modelManager = modelManager;
         this.rank = rank;
-        if(modelManager.getConfigManager()!=null && modelManager.getConfigManager().isValid())
-            action =modelManager.getConfigManager().getConfig().getAction(id);
-        status=new Status(rank, Status.NOT_DEFINED);
-        isSet=false;
+        if (modelManager.getConfigManager() != null && modelManager.getConfigManager().isValid()) {
+            if (id.endsWith(ModelFactory.MODEL_SELF_REPORT))
+                action = modelManager.getConfigManager().getConfig().getAction(id, ModelFactory.MODEL_SELF_REPORT);
+            else
+                action = modelManager.getConfigManager().getConfig().getAction(id);
+        }
+        status = new Status(rank, Status.NOT_DEFINED);
+        isSet = false;
     }
 
     public ConfigAction getAction() {
         return action;
     }
 
-    public int getRank(){
+    public int getRank() {
         return rank;
     }
 
-    public Status getStatus(){
+    public Status getStatus() {
         return status;
     }
+
     public abstract void set() throws DataKitException;
+
     public abstract void clear() throws DataKitException;
+
     public void reset() throws DataKitException {
         clear();
         set();
     }
+
     public void notifyIfRequired(Status curStatus) throws DataKitException {
-        if(curStatus==null) return;
-        Log.d(TAG, "notifyIfRequired...old_status="+status.log()+" cur_status="+curStatus.log());
-        if(status==null || status.getRank()!=curStatus.getRank() || status.getStatus()!=curStatus.getStatus()) {
-            status=curStatus;
-            Log.d(TAG,"notifyIfRequired..notified");
+        if (curStatus == null) return;
+        Log.d(TAG, "notifyIfRequired...old_status=" + status.log() + " cur_status=" + curStatus.log());
+        if (status == null || status.getRank() != curStatus.getRank() || status.getStatus() != curStatus.getStatus()) {
+            status = curStatus;
+            Log.d(TAG, "notifyIfRequired..notified");
             modelManager.update();
         }
     }
+
     public void save() throws DataKitException {
 
     }

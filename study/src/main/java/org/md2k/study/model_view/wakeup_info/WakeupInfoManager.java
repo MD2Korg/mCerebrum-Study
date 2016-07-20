@@ -48,8 +48,6 @@ import java.util.HashMap;
  */
 public class WakeupInfoManager extends Model {
     private static final String TAG = WakeupInfoManager.class.getSimpleName();
-    DataSourceBuilder dataSourceBuilder;
-    DataSourceClient dataSourceClient;
     long wakeupTimeDB;
     long wakeupTimeNew;
 
@@ -68,9 +66,6 @@ public class WakeupInfoManager extends Model {
     }
 
     public void set() throws DataKitException {
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
-        dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-        dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
         update();
     }
@@ -94,11 +89,13 @@ public class WakeupInfoManager extends Model {
     private void readStudyInfoFromDataKit() throws DataKitException {
         DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
-            dataSourceClient = dataKitAPI.register(dataSourceBuilder);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-            if (dataTypes.size() != 0) {
-                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                wakeupTimeDB = dataTypeLong.getSample();
+            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
+            if(dataSourceClients.size()>=1) {
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+                if (dataTypes.size() != 0) {
+                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                    wakeupTimeDB = dataTypeLong.getSample();
+                }
             }
         }
     }
@@ -109,7 +106,7 @@ public class WakeupInfoManager extends Model {
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), wakeupTimeNew);
-        dataSourceClient = dataKitAPI.register(dataSourceBuilder);
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         dataKitAPI.insert(dataSourceClient, dataTypeLong);
         wakeupTimeDB = wakeupTimeNew;
         return true;

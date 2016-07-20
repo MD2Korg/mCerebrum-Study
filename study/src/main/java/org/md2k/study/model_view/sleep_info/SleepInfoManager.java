@@ -48,8 +48,6 @@ import java.util.HashMap;
  */
 public class SleepInfoManager extends Model {
     private static final String TAG = SleepInfoManager.class.getSimpleName();
-    DataSourceBuilder dataSourceBuilder;
-    DataSourceClient dataSourceClient;
 
     long sleepTimeDB;
     long sleepTimeNew;
@@ -68,7 +66,6 @@ public class SleepInfoManager extends Model {
         status=new Status(rank, Status.SLEEP_NOT_DEFINED);
     }
     public void set() throws DataKitException {
-        dataSourceBuilder = createDataSourceBuilder();
         readStudyInfoFromDataKit();
         update();
     }
@@ -91,11 +88,13 @@ public class SleepInfoManager extends Model {
         sleepTimeDB = -1;
         DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
-            dataSourceClient = dataKitAPI.register(dataSourceBuilder);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-            if (dataTypes.size() != 0) {
-                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                sleepTimeDB = dataTypeLong.getSample();
+            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
+            if(dataSourceClients.size()>=1) {
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+                if (dataTypes.size() != 0) {
+                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                    sleepTimeDB = dataTypeLong.getSample();
+                }
             }
         }
     }
@@ -105,7 +104,7 @@ public class SleepInfoManager extends Model {
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), sleepTimeNew);
-        dataSourceClient = dataKitAPI.register(dataSourceBuilder);
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         dataKitAPI.insert(dataSourceClient, dataTypeLong);
         sleepTimeDB = sleepTimeNew;
         return true;
