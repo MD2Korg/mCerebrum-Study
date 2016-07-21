@@ -58,30 +58,33 @@ public class DayTypeManager extends Model {
     DayTypeInfo dayTypeNew;
 
     public DayTypeManager(ModelManager modelManager, String id, int rank) {
-        super(modelManager,id,rank);
+        super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-        status=new Status(rank, Status.DAY_TYPE_NOT_DEFINED);
+        status = new Status(rank, Status.DAY_TYPE_NOT_DEFINED);
         dayTypeNew = null;
         dayTypeDB = null;
     }
 
-    public void clear(){
+    public void clear() {
         dayTypeNew = null;
         dayTypeDB = null;
-        status=new Status(rank, Status.DAY_TYPE_NOT_DEFINED);
+        status = new Status(rank, Status.DAY_TYPE_NOT_DEFINED);
     }
-    public void setDayType(int dayType){
-        dayTypeNew=new DayTypeInfo(dayType);
+
+    public void setDayType(int dayType) {
+        dayTypeNew = new DayTypeInfo(dayType);
     }
+
     public void set() throws DataKitException {
         readFromDataKit();
         update();
     }
+
     public void update() throws DataKitException {
         Status lastStatus;
-        if (dayTypeDB==null)
-            lastStatus= new Status(rank,Status.DAY_TYPE_NOT_DEFINED);
-        else lastStatus= new Status(rank,Status.SUCCESS);
+        if (dayTypeDB == null)
+            lastStatus = new Status(rank, Status.DAY_TYPE_NOT_DEFINED);
+        else lastStatus = new Status(rank, Status.SUCCESS);
         notifyIfRequired(lastStatus);
     }
 
@@ -94,22 +97,20 @@ public class DayTypeManager extends Model {
 
     private void readFromDataKit() throws DataKitException {
         dayTypeDB = null;
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
-            if(dataSourceClients.size()>=1) {
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
-                if (dataTypes.size() != 0) {
-                    DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                    Gson gson = new Gson();
-                    dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
-                }
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                Gson gson = new Gson();
+                dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
             }
         }
     }
 
     private boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         Gson gson = new Gson();
@@ -120,6 +121,7 @@ public class DayTypeManager extends Model {
         dayTypeDB = dayTypeNew;
         return true;
     }
+
     DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.TYPE_OF_DAY).setPlatform(platform);
@@ -144,17 +146,19 @@ public class DayTypeManager extends Model {
         dataDescriptor.put(METADATA.DATA_TYPE, DayTypeInfo.class.getName());
         return dataDescriptor;
     }
+
     public void save() throws DataKitException {
-        if(writeToDataKit())
-            dayTypeDB=dayTypeNew;
+        if (writeToDataKit())
+            dayTypeDB = dayTypeNew;
         set();
     }
-    public Status getStatus(){
-        String msg="";
-        if(dayTypeNew!=null) msg=dayTypeNew.getDay_type_name();
-        else if(dayTypeDB!=null) msg=dayTypeDB.getDay_type_name();
-        if(dayTypeDB!=null || dayTypeNew!=null) return new Status(rank,Status.SUCCESS, msg);
-        return new Status(rank,Status.DAY_TYPE_NOT_DEFINED);
+
+    public Status getStatus() {
+        String msg = "";
+        if (dayTypeNew != null) msg = dayTypeNew.getDay_type_name();
+        else if (dayTypeDB != null) msg = dayTypeDB.getDay_type_name();
+        if (dayTypeDB != null || dayTypeNew != null) return new Status(rank, Status.SUCCESS, msg);
+        return new Status(rank, Status.DAY_TYPE_NOT_DEFINED);
     }
 }
 

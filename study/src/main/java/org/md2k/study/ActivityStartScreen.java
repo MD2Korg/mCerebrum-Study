@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 
 import org.md2k.datakitapi.exception.DataKitException;
+import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.app_install.AppInstallManager;
@@ -53,6 +54,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         progressDialog.setMessage("Loading...");
         progressDialog.setIndeterminate(true);
         isAlertDialogShown = false;
+        MySharedPref.getInstance(this).clear();
     }
 
     @Override

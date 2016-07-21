@@ -2,10 +2,12 @@ package org.md2k.study.model_view.app_stop;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import org.md2k.study.ActivityMain;
+import org.md2k.study.Status;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 
@@ -43,10 +45,9 @@ public class ActivityAppStop extends AppCompatActivity {
         AppStopManager appStopManager= (AppStopManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_APP_STOP);
         Toast.makeText(this, "Stopping...", Toast.LENGTH_LONG).show();
         appStopManager.stopApp();
-        Intent intent = new Intent(getApplicationContext(), ActivityMain.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("EXIT", true);
-        startActivity(intent);
+        Intent intent = new Intent(Status.class.getSimpleName());
+        intent.putExtra(ActivityMain.EXIT,"EXIT");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
 //        Intent intent=new Intent(this, ServiceSystemHealth.class);
 //        stopService(intent);

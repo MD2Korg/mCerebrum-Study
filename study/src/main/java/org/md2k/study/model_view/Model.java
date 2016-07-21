@@ -53,7 +53,6 @@ public abstract class Model {
                 action = modelManager.getConfigManager().getConfig().getAction(id);
         }
         status = new Status(rank, Status.NOT_DEFINED);
-        isSet = false;
     }
 
     public ConfigAction getAction() {

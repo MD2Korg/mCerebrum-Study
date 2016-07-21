@@ -52,11 +52,6 @@ public class DataQualityManager extends Model {
 
     @Override
     public void set() {
-        if(isSet) try {
-            clear();
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
         Log.d(TAG, "set()...");
         dataQualities.clear();
         dataQualityInfos.clear();
@@ -76,13 +71,11 @@ public class DataQualityManager extends Model {
         }
         for (int i = 0; i < dataQuality.size(); i++)
             dataQualities.get(i).start();
-        isSet=true;
         status = new Status(rank, Status.SUCCESS);
     }
 
     @Override
     public void clear() throws DataKitException {
-        if(isSet==false) return;
         Log.d(TAG, "clear()...");
         status = new Status(rank, Status.NOT_DEFINED);
         if (dataQualities != null) {
@@ -92,7 +85,6 @@ public class DataQualityManager extends Model {
         }
         if (dataQualityInfos != null)
             dataQualityInfos.clear();
-        isSet=false;
     }
 
     int translate(int value) {

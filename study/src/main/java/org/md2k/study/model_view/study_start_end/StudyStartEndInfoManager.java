@@ -83,14 +83,12 @@ public class StudyStartEndInfoManager extends Model {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         studyStartTime=-1;
         if (dataKitAPI.isConnected()) {
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilderStudyStart());
-            if (dataSourceClients.size() >= 1) {
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+            DataSourceClient dataSourceClientStudyStart = dataKitAPI.register(createDataSourceBuilderStudyStart());
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyStart, 1);
                 if (dataTypes.size() != 0) {
                     DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                     studyStartTime = dataTypeLong.getSample();
                     if (!isToday(studyStartTime)) studyStartTime = -1;
-                }
             }
         }
     }
@@ -99,14 +97,12 @@ public class StudyStartEndInfoManager extends Model {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         studyEndTime=-1;
         if (dataKitAPI.isConnected()) {
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilderStudyEnd());
-            if (dataSourceClients.size() >= 1) {
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+            DataSourceClient dataSourceClientStudyEnd = dataKitAPI.register(createDataSourceBuilderStudyEnd());
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyEnd, 1);
                 if (dataTypes.size() != 0) {
                     DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                     studyEndTime = dataTypeLong.getSample();
                 }
-            }
         }
     }
     boolean isToday(long timestamp) {

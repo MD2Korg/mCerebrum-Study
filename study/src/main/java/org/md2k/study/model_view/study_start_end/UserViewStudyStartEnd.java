@@ -49,7 +49,6 @@ import java.util.Date;
 public class UserViewStudyStartEnd extends UserView {
     public UserViewStudyStartEnd(Activity activity, Model model) {
         super(activity, model);
-        addView();
     }
 
     @Override

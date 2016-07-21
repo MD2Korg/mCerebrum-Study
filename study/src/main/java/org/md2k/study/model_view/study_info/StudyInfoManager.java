@@ -58,16 +58,16 @@ public class StudyInfoManager extends Model {
 
 
     public StudyInfoManager(ModelManager modelManager, String id, int rank) {
-        super(modelManager,id,rank);
+        super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-        status=new Status(rank, Status.CLEAR_OLD_DATA);
-        studyInfoDB=null;
-        studyInfoFile=null;
+        status = new Status(rank, Status.CLEAR_OLD_DATA);
+        studyInfoDB = null;
+        studyInfoFile = null;
     }
 
     public void set() throws DataKitException {
-        Log.d(TAG,"set()...");
-        ConfigInfo configInfo=modelManager.getConfigManager().getConfig().getConfig_info();
+        Log.d(TAG, "set()...");
+        ConfigInfo configInfo = modelManager.getConfigManager().getConfig().getConfig_info();
         studyInfoFile = new StudyInfo(configInfo.getId(), configInfo.getName(), configInfo.getVersion(), configInfo.getFilename());
         studyInfoDB = readFromDataKit();
         if (studyInfoDB == null && studyInfoFile != null) {
@@ -80,17 +80,17 @@ public class StudyInfoManager extends Model {
     public void clear() {
         studyInfoDB = null;
         studyInfoFile = null;
-        status=new Status(rank, Status.CLEAR_OLD_DATA);
+        status = new Status(rank, Status.CLEAR_OLD_DATA);
     }
 
     public void update() throws DataKitException {
-        Log.d(TAG,"update()...");
+        Log.d(TAG, "update()...");
         Status lastStatus;
-        if (studyInfoDB == null) lastStatus = new Status(rank,Status.DATAKIT_NOT_AVAILABLE);
+        if (studyInfoDB == null) lastStatus = new Status(rank, Status.DATAKIT_NOT_AVAILABLE);
         else if (!studyInfoDB.equals(studyInfoFile))
-            lastStatus = new Status(rank,Status.CLEAR_OLD_DATA);
-        else lastStatus = new Status(rank,Status.SUCCESS);
-        Log.d(TAG,"lastStatus="+lastStatus.log());
+            lastStatus = new Status(rank, Status.CLEAR_OLD_DATA);
+        else lastStatus = new Status(rank, Status.SUCCESS);
+        Log.d(TAG, "lastStatus=" + lastStatus.log());
         notifyIfRequired(lastStatus);
     }
 
@@ -100,24 +100,22 @@ public class StudyInfoManager extends Model {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
 
             if (dataKitAPI.isConnected()) {
-                ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
-                if (dataSourceClients.size() >= 1) {
-                    ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
-                    if (dataTypes.size() != 0) {
-                        DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                        Gson gson = new Gson();
-                        studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), StudyInfo.class);
-                    }
+                DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+                if (dataTypes.size() != 0) {
+                    DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                    Gson gson = new Gson();
+                    studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), StudyInfo.class);
                 }
             }
-        }catch (Exception ignored){
-            studyInfo=new StudyInfo();
+        } catch (Exception ignored) {
+            studyInfo = new StudyInfo();
         }
         return studyInfo;
     }
 
     public boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         Log.d(TAG, "StudyInfoManager...writeToDataKit()");
         if (!dataKitAPI.isConnected()) return false;
         Gson gson = new Gson();

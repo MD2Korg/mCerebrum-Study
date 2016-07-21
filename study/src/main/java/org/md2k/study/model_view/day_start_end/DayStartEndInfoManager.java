@@ -178,10 +178,11 @@ public class DayStartEndInfoManager extends Model {
             LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
         }
     };
-    public long getWakeupShowTimestamp(){
+
+    public long getWakeupShowTimestamp() {
         long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
         String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
-        return getTime(base,offset);
+        return getTime(base, offset);
 
     }
 
@@ -296,9 +297,9 @@ public class DayStartEndInfoManager extends Model {
         notifierManager.set(new Callback() {
             @Override
             public void onResponse(String response) throws DataKitException {
-                if(type.equals(DAY_START))
+                if (type.equals(DAY_START))
                     setDayStartTime(DateTime.getDateTime());
-                else if(type.equals(DAY_END))
+                else if (type.equals(DAY_END))
                     setDayEndTime(DateTime.getDateTime());
                 reset();
             }
@@ -340,7 +341,7 @@ public class DayStartEndInfoManager extends Model {
     public boolean isDayStarted() {
         if (dayStartTime == -1) return false;
         long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
-        if(dayStartTime<getTime(WAKEUP, offset)) return false;
+        if (dayStartTime < getTime(WAKEUP, offset)) return false;
         else return true;
     }
 
@@ -354,13 +355,11 @@ public class DayStartEndInfoManager extends Model {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayStartTime = -1;
         if (!dataKitAPI.isConnected()) return;
-        ArrayList<DataSourceClient> dataSourceClientDayStart = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
-        if(dataSourceClientDayStart.size()>=1) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart.get(0), 1);
-            if (dataTypes.size() != 0) {
-                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                dayStartTime = dataTypeLong.getSample();
-            }
+        DataSourceClient dataSourceClientDayStart = dataKitAPI.register(createDataSourceBuilderDayStart());
+        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
+        if (dataTypes.size() != 0) {
+            DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+            dayStartTime = dataTypeLong.getSample();
         }
     }
 
@@ -397,15 +396,12 @@ public class DayStartEndInfoManager extends Model {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayEndTime = -1;
         if (!dataKitAPI.isConnected()) return;
-        ArrayList<DataSourceClient> dataSourceClientDayEnd = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_END));
-        if(dataSourceClientDayEnd.size()>=1) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd.get(0), 1);
-            if (dataTypes.size() != 0) {
-                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                dayEndTime = dataTypeLong.getSample();
-            }
+        DataSourceClient dataSourceClientDayEnd = dataKitAPI.register(createDataSourceBuilderDayEnd());
+        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);
+        if (dataTypes.size() != 0) {
+            DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+            dayEndTime = dataTypeLong.getSample();
         }
-
     }
 
     private boolean writeDayStartToDataKit() throws DataKitException {

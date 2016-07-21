@@ -87,22 +87,20 @@ public class WakeupInfoManager extends Model {
     }
 
     private void readStudyInfoFromDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         if (dataKitAPI.isConnected()) {
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
-            if(dataSourceClients.size()>=1) {
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
-                if (dataTypes.size() != 0) {
-                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                    wakeupTimeDB = dataTypeLong.getSample();
-                }
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                wakeupTimeDB = dataTypeLong.getSample();
             }
         }
     }
 
 
     private boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         if (!isValid()) return false;
         DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), wakeupTimeNew);
@@ -144,12 +142,13 @@ public class WakeupInfoManager extends Model {
             wakeupTimeDB = wakeupTimeNew;
         set();
     }
-    public Status getStatus(){
-        String msg="";
-        if(wakeupTimeNew!=-1) msg=formatTime(wakeupTimeNew);
-        else if(wakeupTimeDB!=-1) msg=formatTime(wakeupTimeDB);
-        if(wakeupTimeDB!=-1 || wakeupTimeNew!=-1) return new Status(rank,Status.SUCCESS, msg);
-        return new Status(rank,Status.WAKEUP_NOT_DEFINED);
+
+    public Status getStatus() {
+        String msg = "";
+        if (wakeupTimeNew != -1) msg = formatTime(wakeupTimeNew);
+        else if (wakeupTimeDB != -1) msg = formatTime(wakeupTimeDB);
+        if (wakeupTimeDB != -1 || wakeupTimeNew != -1) return new Status(rank, Status.SUCCESS, msg);
+        return new Status(rank, Status.WAKEUP_NOT_DEFINED);
     }
 
     public long getWakeupTimeDB() {

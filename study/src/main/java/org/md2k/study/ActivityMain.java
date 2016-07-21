@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.config.ConfigViewContent;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.UserView;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
+    public static final String EXIT = "EXIT";
     ArrayList<UserView> userViews;
     MenuItem menuItemStatus;
 
@@ -96,7 +98,20 @@ public class ActivityMain extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateMenu();
+            if(intent.hasExtra(EXIT)){
+                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                try {
+                    ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                    ModelManager.getInstance(ActivityMain.this).clear();
+                    ModelManager.getInstance(ActivityMain.this).read();
+                    ModelManager.getInstance(ActivityMain.this).set();
+                    finish();
+                } catch (DataKitException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                updateMenu();
+            }
         }
     };
 

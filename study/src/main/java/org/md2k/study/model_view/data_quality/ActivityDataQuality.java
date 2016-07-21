@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
@@ -26,38 +27,47 @@ public class ActivityDataQuality extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_data_quality);
         int id = getIntent().getIntExtra("id", 0);
         dataQualityInfo=((DataQualityManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_DATA_QUALITY)).dataQualityInfos.get(id);
-        setupButtonPlotter();
-        setupButtonVideo();
-        setupButtonClose();
-        setupMessage();
+        if(dataQualityInfo.configDataQualityView==null){
+            Toast.makeText(this, "Could not connect the device. Wait for a minute...",Toast.LENGTH_SHORT).show();
+            finish();
+        }else {
+            setContentView(R.layout.activity_data_quality);
+            setupButtonPlotter();
+            setupButtonVideo();
+            setupButtonClose();
+            setupMessage();
+        }
     }
     void setupButtonPlotter() {
-        final Button button = (Button) findViewById(R.id.button_plotter);
-        if (!dataQualityInfo.configDataQualityView.getPlotter().isEnable()) {
-            button.setVisibility(View.INVISIBLE);
-            return;
-        }
-        this.setTitle(dataQualityInfo.getTitle());
-        button.setText("Graph of " + dataQualityInfo.getTitle());
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                try {
-                    ConfigApp app = ModelManager.getInstance(ActivityDataQuality.this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
-                    Intent intent = new Intent();
-                    intent.setClassName(app.getPackage_name(), "org.md2k.plotter.ActivityPlot");
-                    DataSourceClient dataSourceClient = getDataSourceClient();
-                    if (dataSourceClient != null) {
-                        intent.putExtra(DataSourceClient.class.getSimpleName(), dataSourceClient);
-                        startActivity(intent);
-                    }
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
+        try {
+            final Button button = (Button) findViewById(R.id.button_plotter);
+            if (!dataQualityInfo.configDataQualityView.getPlotter().isEnable()) {
+                button.setVisibility(View.INVISIBLE);
+                return;
             }
-        });
+            this.setTitle(dataQualityInfo.getTitle());
+            button.setText("Graph of " + dataQualityInfo.getTitle());
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    try {
+                        ConfigApp app = ModelManager.getInstance(ActivityDataQuality.this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
+                        Intent intent = new Intent();
+                        intent.setClassName(app.getPackage_name(), "org.md2k.plotter.ActivityPlot");
+                        DataSourceClient dataSourceClient = getDataSourceClient();
+                        if (dataSourceClient != null) {
+                            intent.putExtra(DataSourceClient.class.getSimpleName(), dataSourceClient);
+                            startActivity(intent);
+                        }
+                    } catch (DataKitException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }catch (Exception ignored){
+
+        }
     }
 
     DataSourceClient getDataSourceClient() throws DataKitException {

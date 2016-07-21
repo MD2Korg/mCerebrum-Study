@@ -29,4 +29,10 @@ public class MySharedPref {
         return sharedPref.getString(key, null);
     }
 
+    public void clear() {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.clear();
+        editor.commit();
+
+    }
 }

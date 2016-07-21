@@ -86,32 +86,30 @@ public class UserInfoManager extends Model {
     }
 
     public void setUserId(String userId) {
-        userInfo=new UserInfo();
+        userInfo = new UserInfo();
         userInfo.setUser_id(userId);
         String study_id = ((StudyInfoManager) ModelManager.getInstance(modelManager.getContext()).getModel(ModelFactory.MODEL_STUDY_INFO)).getStudy_id();
         UUID userUUID = UUID.nameUUIDFromBytes((study_id + userId).getBytes());
         userInfo.setUuid(userUUID.toString());
     }
 
-    public Status getStatus(){
-        if(isInDatabase) return new Status(rank, Status.SUCCESS,userInfo.getUser_id());
-        else if(userInfo!=null && userInfo.getUser_id()!=null && userInfo.getUser_id().length()!=0)
-            return new Status(rank,Status.SUCCESS,userInfo.getUser_id());
-        else return new Status(rank,Status.USERID_NOT_DEFINED);
+    public Status getStatus() {
+        if (isInDatabase) return new Status(rank, Status.SUCCESS, userInfo.getUser_id());
+        else if (userInfo != null && userInfo.getUser_id() != null && userInfo.getUser_id().length() != 0)
+            return new Status(rank, Status.SUCCESS, userInfo.getUser_id());
+        else return new Status(rank, Status.USERID_NOT_DEFINED);
     }
 
     private void readFromDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return;
-        ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
-        if(dataSourceClients.size()!=0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
-            if (dataTypes.size() != 0) {
-                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                Gson gson = new Gson();
-                userInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), UserInfo.class);
-                isInDatabase = true;
-            }
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+        if (dataTypes.size() != 0) {
+            DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+            Gson gson = new Gson();
+            userInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), UserInfo.class);
+            isInDatabase = true;
         }
     }
 
@@ -121,7 +119,7 @@ public class UserInfoManager extends Model {
     }
 
     private boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         if (!dataKitAPI.isConnected()) return false;
         if (isInDatabase) return false;
         if (userInfo == null) return false;

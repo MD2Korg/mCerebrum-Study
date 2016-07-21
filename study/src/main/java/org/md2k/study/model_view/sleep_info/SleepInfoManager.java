@@ -87,15 +87,13 @@ public class SleepInfoManager extends Model {
     private void readStudyInfoFromDataKit() throws DataKitException {
         sleepTimeDB = -1;
         DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
+        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
         if (dataKitAPI.isConnected()) {
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
-            if(dataSourceClients.size()>=1) {
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
                 if (dataTypes.size() != 0) {
                     DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                     sleepTimeDB = dataTypeLong.getSample();
                 }
-            }
         }
     }
 
