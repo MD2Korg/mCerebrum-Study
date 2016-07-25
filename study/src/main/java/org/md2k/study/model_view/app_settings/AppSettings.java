@@ -98,10 +98,10 @@ public class AppSettings {
         if(app.getConfig()!=null && !FileManager.isExist(Constants.CONFIG_DIRECTORY_BASE+app.getPackage_name()+File.separator+app.getConfig()))
             return false;
         if(app.getDefault_config()==null) return true;
-        if(!(app.getPackage_name().equals("org.md2k.phonesensor") || app.getPackage_name().equals("org.md2k.autosense") || app.getPackage_name().equals("org.md2k.microsoftband") || app.getPackage_name().equals("org.md2k.plotter"))) {
-            //TODO: need to clear the code
-            return true;
-        }
+//        if(!(app.getPackage_name().equals("org.md2k.phonesensor") || app.getPackage_name().equals("org.md2k.autosense") || app.getPackage_name().equals("org.md2k.microsoftband") || app.getPackage_name().equals("org.md2k.plotter"))) {
+//            //TODO: need to clear the code
+//            return true;
+//        }
         String outDir= Constants.CONFIG_DIRECTORY_BASE+ app.getPackage_name()+ File.separator;
         try {
             ArrayList<DataSource> dataSourcesDefault = FileManager.readJSONArray(outDir, app.getDefault_config(),DataSource.class);
@@ -115,6 +115,8 @@ public class AppSettings {
         } catch (FileNotFoundException e) {
             return false;
         }catch (IllegalStateException e){
+            return true;
+        }catch(Exception e){
             return true;
         }
     }

@@ -27,17 +27,22 @@ public class ActivityDataQuality extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int id = getIntent().getIntExtra("id", 0);
-        dataQualityInfo=((DataQualityManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_DATA_QUALITY)).dataQualityInfos.get(id);
-        if(dataQualityInfo.configDataQualityView==null){
-            Toast.makeText(this, "Could not connect the device. Wait for a minute...",Toast.LENGTH_SHORT).show();
+        try {
+            int id = getIntent().getIntExtra("id", 0);
+            dataQualityInfo = ((DataQualityManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_DATA_QUALITY)).dataQualityInfos.get(id);
+            if (dataQualityInfo.configDataQualityView == null) {
+                Toast.makeText(this, "Could not connect the device. Wait for a minute and try again...", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                setContentView(R.layout.activity_data_quality);
+                setupButtonPlotter();
+                setupButtonVideo();
+                setupButtonClose();
+                setupMessage();
+            }
+        }catch (Exception e){
+            Toast.makeText(this, "Could not connect the device. Wait for a minute and try again...", Toast.LENGTH_SHORT).show();
             finish();
-        }else {
-            setContentView(R.layout.activity_data_quality);
-            setupButtonPlotter();
-            setupButtonVideo();
-            setupButtonClose();
-            setupMessage();
         }
     }
     void setupButtonPlotter() {

@@ -96,9 +96,14 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
                 appInstallManager.updateVersionAll(0, new OnDataChangeListener() {
                     @Override
                     public void onDataChange(int now, String str) {
-                        if (now >= appInstallManager.getAppInstallList().size())
-                            Toast.makeText(getActivity(), "Checking updates...done",Toast.LENGTH_SHORT).show();
-                        else updatePreference(appInstallManager.getAppInstallList().get(now));
+                        try {
+                            if(getActivity()==null) return;
+                            if (now >= appInstallManager.getAppInstallList().size())
+                                Toast.makeText(getActivity(), "Checking updates...done", Toast.LENGTH_SHORT).show();
+                            else updatePreference(appInstallManager.getAppInstallList().get(now));
+                        }catch (Exception e){
+
+                        }
                     }
                 });
             }

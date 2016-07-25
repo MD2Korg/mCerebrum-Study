@@ -87,10 +87,10 @@ public class UserViewUserApp extends UserView {
                     if (packageName != null && className != null) {
                         Intent intent = new Intent();
                         intent.setClassName(packageName, className);
-                        if(userAppManager.userApps.get(position).getAction().getId().endsWith(ModelFactory.MODEL_SELF_REPORT)) {
-                            String idd=userAppManager.userApps.get(position).getAction().getId();
-                            String type=userAppManager.userApps.get(position).getAction().getType();
-                            intent.putExtra("id",   idd);
+                        if (userAppManager.userApps.get(position).getAction().getId().endsWith(ModelFactory.MODEL_SELF_REPORT)) {
+                            String idd = userAppManager.userApps.get(position).getAction().getId();
+                            String type = userAppManager.userApps.get(position).getAction().getType();
+                            intent.putExtra("id", idd);
                             intent.putExtra("type", type);
                         }
                         activity.startActivity(intent);

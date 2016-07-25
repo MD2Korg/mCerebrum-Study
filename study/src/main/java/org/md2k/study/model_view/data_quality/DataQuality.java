@@ -88,25 +88,27 @@ public class DataQuality {
                     handler.postDelayed(this, 1000);
                 else {
                     lastReceivedTimeStamp = DateTime.getDateTime();
-                    handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
                     dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
+                    handler.removeCallbacks(runnableCheckAvailability);
+                    handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
                     DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
                         @Override
-                        public void onReceived(DataType dataType) {
+                        public void onReceived(final DataType dataType) {
                             if(dataType instanceof DataTypeInt) {
-                                int sample = ((DataTypeInt) dataType).getSample();
-//                                Log.d(TAG,"dataquality=("+dataSourceClient.getDataSource().getPlatform().getType()+","+dataSourceClient.getDataSource().getPlatform().getId()+","+dataSourceClient.getDataSource().getType()+","+dataSourceClient.getDataSource().getId()+","+") datatype=int sample="+sample);
-                                if (sample != DATA_QUALITY.BAND_OFF)
-                                    lastReceivedTimeStamp = DateTime.getDateTime();
-                                receiveCallBack.onReceive(dataSourceClient, sample);
-                            }else{
-                                try {
-//                                    Log.d(TAG,"datatype=other");
-                                    stop();
-                                    start();
-                                } catch (DataKitException e) {
-                                    e.printStackTrace();
-                                }
+                                Thread t = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            int sample = ((DataTypeInt) dataType).getSample();
+                                            if (sample != DATA_QUALITY.BAND_OFF)
+                                                lastReceivedTimeStamp = DateTime.getDateTime();
+                                            receiveCallBack.onReceive(dataSourceClient, sample);
+                                        }catch (Exception ignored){
+
+                                        }
+                                    }
+                                });
+                                t.start();
                             }
                         }
                     });
@@ -122,20 +124,22 @@ public class DataQuality {
         public void run() {
             Log.d(TAG, "runnableCheckAvailability()...check if data received..in time..");
             if (DateTime.getDateTime() - lastReceivedTimeStamp > RESTART_TIME) {
-                if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_CHEST) || dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST)) {
-                    Log.d(TAG, "runnableCheckAvailability()...autosense restart");
-                    Intent intent = new Intent();
-                    ConfigApp app = ModelManager.getInstance(context).getConfigManager().getConfig().getApps("autosense");
-                    intent.setClassName(app.getPackage_name(), app.getService());
-                    context.stopService(intent);
-                    context.startService(intent);
-                } else if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.MICROSOFT_BAND)) {
-                    Log.d(TAG, "runnableCheckAvailability()... microsoft_band restart");
-                    Intent intent = new Intent();
-                    ConfigApp app = ModelManager.getInstance(context).getConfigManager().getConfig().getApps("microsoftband");
-                    intent.setClassName(app.getPackage_name(), app.getService());
-                    context.stopService(intent);
-                    context.startService(intent);
+                try {
+                    if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_CHEST) || dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST)) {
+                        Log.d(TAG, "runnableCheckAvailability()...autosense restart");
+                        Intent intent = new Intent();
+                        ConfigApp app = ModelManager.getInstance(context).getConfigManager().getConfig().getApps("autosense");
+                        intent.setClassName(app.getPackage_name(), app.getService());
+                        context.stopService(intent);
+                    } else if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.MICROSOFT_BAND)) {
+                        Log.d(TAG, "runnableCheckAvailability()... microsoft_band restart");
+                        Intent intent = new Intent();
+                        ConfigApp app = ModelManager.getInstance(context).getConfigManager().getConfig().getApps("microsoftband");
+                        intent.setClassName(app.getPackage_name(), app.getService());
+                        context.stopService(intent);
+                    }
+                }catch (Exception e){
+
                 }
             }
             handler.postDelayed(this, RESTART_TIME);

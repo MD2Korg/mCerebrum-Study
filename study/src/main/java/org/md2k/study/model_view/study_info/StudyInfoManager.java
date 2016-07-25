@@ -138,6 +138,10 @@ public class StudyInfoManager extends Model {
     }
 
     public String getStudy_id() {
+        if(studyInfoFile==null) {
+            ConfigInfo configInfo = modelManager.getConfigManager().getConfig().getConfig_info();
+            studyInfoFile = new StudyInfo(configInfo.getId(), configInfo.getName(), configInfo.getVersion(), configInfo.getFilename());
+        }
         return studyInfoFile.getId();
     }
 

@@ -75,7 +75,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
     boolean isStudyRunning() {
-        return ServiceSystemHealth.isRunning && ServiceSystemHealth.RANK_LIMIT == Status.RANK_SUCCESS;
+        return ServiceSystemHealth.isRunning && ServiceSystemHealth.RANK_LIMIT == Status.RANK_SUCCESS && (ModelManager.getInstance(this).getStatus().getRank()<=Status.RANK_ADMIN_OPTIONAL);
     }
 
     @Override
@@ -121,13 +121,20 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
     void showProgressBar() {
-        progressDialog.show();
+        try {
+            progressDialog.show();
+        }catch (Exception ignored){
+
+        }
     }
 
     void hideProgressBar() {
-        if (progressDialog.isShowing())
-            progressDialog.dismiss();
+        try {
+            if (progressDialog.isShowing())
+                progressDialog.dismiss();
+        }catch (Exception ignored){
 
+        }
     }
 
     void loadModelManager() {

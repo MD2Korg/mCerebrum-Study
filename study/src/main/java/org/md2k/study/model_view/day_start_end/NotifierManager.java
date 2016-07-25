@@ -161,6 +161,8 @@ public class NotifierManager {
                                 }
                             } catch (DataKitException e) {
                                 e.printStackTrace();
+                            }catch (Exception ignored){
+
                             }
                         }
                     });
