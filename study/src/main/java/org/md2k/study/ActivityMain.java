@@ -50,7 +50,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
-        for(int i=0;i<userViews.size();i++)
+        for (int i = 0; i < userViews.size(); i++)
             userViews.get(i).stopView();
         userViews.clear();
         super.onDestroy();
@@ -60,9 +60,9 @@ public class ActivityMain extends AppCompatActivity {
     void updateMenu() {
         if (menuItemStatus == null) return;
         Status status = ModelManager.getInstance(ActivityMain.this).getStatus();
-        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL)
+        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
             menuItemStatus.setIcon(R.drawable.ic_error_red_48dp);
-        else menuItemStatus.setIcon(R.drawable.ic_ok_green_48dp);
+        } else menuItemStatus.setIcon(R.drawable.ic_ok_green_48dp);
     }
 
 
@@ -89,7 +89,7 @@ public class ActivityMain extends AppCompatActivity {
             for (int i = 0; i < userViews.size(); i++)
                 userViews.get(i).updateView();
             updateMenu();
-        }catch (Exception e){
+        } catch (Exception e) {
             finish();
         }
         super.onResume();
@@ -98,8 +98,7 @@ public class ActivityMain extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.hasExtra(EXIT)){
-                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+            if (intent.hasExtra(EXIT)) {
                 try {
                     ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
                     ModelManager.getInstance(ActivityMain.this).clear();
@@ -109,7 +108,7 @@ public class ActivityMain extends AppCompatActivity {
                 } catch (DataKitException e) {
                     e.printStackTrace();
                 }
-            }else {
+            } else {
                 updateMenu();
             }
         }

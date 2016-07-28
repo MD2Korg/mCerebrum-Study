@@ -112,7 +112,7 @@ public class UserViewPrivacyControl extends UserView {
                 long remainingUsage = privacyControlManager.getRemainingTime();
                 if(remainingUsage!=Long.MAX_VALUE) {
                     remainingUsage = remainingUsage / (1000 * 60);
-                    text = text+String.format(Locale.ENGLISH, "\n(Usage Remaining: %02d Hour %02d Minute)", remainingUsage / 60, remainingUsage % 60);
+                    text = text+String.format(Locale.ENGLISH, "\n(Daily Usage Remaining: %d Minutes)", remainingUsage);
                 }
                 ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
                 ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
@@ -124,7 +124,7 @@ public class UserViewPrivacyControl extends UserView {
             if (!isActive) {
                 long timeLeft = privacyControlManager.getRemainingTime();
                 if (timeLeft < 5 * 60 * 1000) {
-                    String text="Not Active\n(Usage Remaining: 00 Hour 00 Minute)";
+                    String text="Not Active\n(Daily Usage Remaining: 0 Minute)";
                     ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
 
                     ((Button) activity.findViewById(R.id.button_privacy)).setText("Max Used");

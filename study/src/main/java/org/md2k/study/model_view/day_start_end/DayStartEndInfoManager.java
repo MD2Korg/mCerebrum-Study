@@ -355,11 +355,15 @@ public class DayStartEndInfoManager extends Model {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayStartTime = -1;
         if (!dataKitAPI.isConnected()) return;
-        DataSourceClient dataSourceClientDayStart = dataKitAPI.register(createDataSourceBuilderDayStart());
-        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
-        if (dataTypes.size() != 0) {
-            DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-            dayStartTime = dataTypeLong.getSample();
+        try {
+            DataSourceClient dataSourceClientDayStart = dataKitAPI.register(createDataSourceBuilderDayStart());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                dayStartTime = dataTypeLong.getSample();
+            }
+        } catch (Exception ignored) {
+
         }
     }
 
@@ -367,13 +371,17 @@ public class DayStartEndInfoManager extends Model {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         wakeupOffset = -1;
         if (!dataKitAPI.isConnected()) return;
-        ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.WAKEUP));
-        if (dataSourceClients.size() > 0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
-            if (dataTypes.size() != 0) {
-                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                wakeupOffset = dataTypeLong.getSample();
+        try {
+            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.WAKEUP));
+            if (dataSourceClients.size() > 0) {
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+                if (dataTypes.size() != 0) {
+                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                    wakeupOffset = dataTypeLong.getSample();
+                }
             }
+        } catch (Exception ignored) {
+
         }
     }
 
@@ -381,13 +389,17 @@ public class DayStartEndInfoManager extends Model {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         sleepOffset = -1;
         if (!dataKitAPI.isConnected()) return;
-        ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.SLEEP));
-        if (dataSourceClients.size() > 0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
-            if (dataTypes.size() != 0) {
-                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                sleepOffset = dataTypeLong.getSample();
+        try {
+            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.SLEEP));
+            if (dataSourceClients.size() > 0) {
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+                if (dataTypes.size() != 0) {
+                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                    sleepOffset = dataTypeLong.getSample();
+                }
             }
+        } catch (Exception ignored) {
+
         }
     }
 
@@ -396,11 +408,15 @@ public class DayStartEndInfoManager extends Model {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayEndTime = -1;
         if (!dataKitAPI.isConnected()) return;
-        DataSourceClient dataSourceClientDayEnd = dataKitAPI.register(createDataSourceBuilderDayEnd());
-        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);
-        if (dataTypes.size() != 0) {
-            DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-            dayEndTime = dataTypeLong.getSample();
+        try {
+            DataSourceClient dataSourceClientDayEnd = dataKitAPI.register(createDataSourceBuilderDayEnd());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                dayEndTime = dataTypeLong.getSample();
+            }
+        } catch (Exception ignored) {
+
         }
     }
 
