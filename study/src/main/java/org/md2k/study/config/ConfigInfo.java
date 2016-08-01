@@ -61,12 +61,19 @@ public class ConfigInfo {
         try {
             if(version==null) return false;
             String appVersion = (context.getPackageManager().getPackageInfo(context.getPackageName(), 0)).versionName;
-            String[] vals1 = appVersion.split("\\.");
-            if(vals1.length!=3) return false;
-            String[] vals2 = version.split("\\.");
-            if(vals2.length!=3) return false;
-            if(!vals1[0].equals(vals2[0])) return false;
-            if(!vals1[1].equals(vals2[1])) return false;
+            String[] appSplit = appVersion.split("\\.");
+            if(appSplit.length!=3) return false;
+            String[] configSplit = version.split("\\.");
+            if(configSplit.length!=3) return false;
+            if(!appSplit[0].equals(configSplit[0])) return false;
+            if(!appSplit[1].equals(configSplit[1])) return false;
+            String[] minConfigSplit=Constants.VERSION_MIN_CONFIG.split("\\.");
+            if(Integer.parseInt(configSplit[0])>Integer.parseInt(minConfigSplit[0])) return true;
+            if(Integer.parseInt(configSplit[0])<Integer.parseInt(minConfigSplit[0])) return false;
+            if(Integer.parseInt(configSplit[1])>Integer.parseInt(minConfigSplit[1])) return true;
+            if(Integer.parseInt(configSplit[1])<Integer.parseInt(minConfigSplit[1])) return false;
+            if(Integer.parseInt(configSplit[2])>Integer.parseInt(minConfigSplit[2])) return true;
+            if(Integer.parseInt(configSplit[2])<Integer.parseInt(minConfigSplit[2])) return false;
             return true;
         } catch (PackageManager.NameNotFoundException e) {
             return false;

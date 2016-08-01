@@ -37,4 +37,5 @@ public class Constants{
     public static final String TEMP_DIRECTORY=Environment.getExternalStorageDirectory().getAbsolutePath()+"/mCerebrum/temp/";
     public static final String CONFIG_DOWNLOAD_LINK="https://github.com/MD2Korg/mCerebrum-Configuration/releases/download/";
     public static final String NOTIFICATION_FILENAME = "notification.json";
+    public static final String VERSION_MIN_CONFIG="1.1.4";
 }

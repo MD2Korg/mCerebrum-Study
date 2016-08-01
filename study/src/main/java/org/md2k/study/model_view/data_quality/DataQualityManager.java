@@ -4,7 +4,6 @@ import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.study.Status;
-import org.md2k.study.config.ConfigDataQualityView;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -53,19 +52,23 @@ public class DataQualityManager extends Model {
     @Override
     public void set() {
         Log.d(TAG, "set()...");
+        try {
+            clear();
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
         dataQualities.clear();
         dataQualityInfos.clear();
         final ArrayList<DataSource> dataQuality = modelManager.getConfigManager().getConfig().getData_quality();
-        final ArrayList<ConfigDataQualityView> configDataQualityViews=modelManager.getConfigManager().getConfig().getData_quality_view();
         if (dataQuality == null || dataQuality.size() == 0) return;
         for (int i = 0; i < dataQuality.size(); i++) {
             dataQualityInfos.add(new DataQualityInfo());
             final int finalI = i;
-            dataQualities.add(new DataQuality(modelManager.getContext(), dataQuality.get(i), new ReceiveCallBack() {
+            dataQualities.add(new DataQuality(modelManager.getContext(), dataQuality.get(i),dataQualityInfos.get(i),  new ReceiveCallBack() {
                 @Override
-                public void onReceive( DataSourceClient dataSourceClient, int sample) {
+                public void onReceive(DataSourceClient dataSourceClient, int sample) {
                     if (dataQualityInfos == null || dataQualityInfos.size() <= finalI) return;
-                    dataQualityInfos.get(finalI).set(dataSourceClient, configDataQualityViews, translate(sample));
+                    dataQualityInfos.get(finalI).set(dataSourceClient, translate(sample));
                 }
             }));
         }
@@ -98,6 +101,7 @@ public class DataQualityManager extends Model {
             case DATA_QUALITY.NOISE:
                 return Status.DATAQUALITY_LOOSE;
             case DATA_QUALITY.NOT_WORN:
+            case DATA_QUALITY.BAD:
                 return Status.DATAQUALITY_NOT_WORN;
             default:
                 return Status.DATAQUALITY_OFF;

@@ -87,14 +87,18 @@ public class WakeupInfoManager extends Model {
     }
 
     private void readStudyInfoFromDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-        if (dataKitAPI.isConnected()) {
-            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-            if (dataTypes.size() != 0) {
-                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                wakeupTimeDB = dataTypeLong.getSample();
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (dataKitAPI.isConnected()) {
+                DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+                if (dataTypes.size() != 0) {
+                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                    wakeupTimeDB = dataTypeLong.getSample();
+                }
             }
+        }catch (Exception ignored){
+
         }
     }
 

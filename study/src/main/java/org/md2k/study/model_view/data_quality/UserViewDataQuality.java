@@ -79,7 +79,7 @@ public class UserViewDataQuality extends UserView {
                 imageView[i].setImageResource(R.drawable.ic_error_red_50dp);
                 message = "";
             } else {
-                if(dataQualityInfos.get(i).getTitle()!="")
+                if(!dataQualityInfos.get(i).getTitle().equals(""))
                     textViews[i].setText(dataQualityInfos.get(i).getTitle());
                 switch (dataQualityInfos.get(i).getQuality()) {
                     case Status.DATAQUALITY_GOOD:
@@ -91,6 +91,7 @@ public class UserViewDataQuality extends UserView {
                         isAllGood = false;
                         break;
                     case Status.DATAQUALITY_NOT_WORN:
+                    case Status.DATAQUALITY_BAD:
                     case Status.DATAQUALITY_LOOSE:
                     case Status.DATAQUALITY_NOISY:
                         if (message == null) message = dataQualityInfos.get(i).getMessage();

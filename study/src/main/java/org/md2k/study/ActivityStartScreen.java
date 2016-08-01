@@ -375,7 +375,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                 showProgressBar();
                 Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
                 startService(intent);
-                handler.postDelayed(this, 500);
+                handler.postDelayed(this, 1000);
             } else {
                 hideProgressBar();
                 serviceStarted();
@@ -390,7 +390,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                 showProgressBar();
                 Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
                 stopService(intent);
-                handler.postDelayed(this, 500);
+                handler.postDelayed(this, 1000);
             } else {
                 hideProgressBar();
                 serviceStopped();
@@ -404,7 +404,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             if (ModelManager.getInstance(ActivityStartScreen.this).isUpdating()) {
                 hideProgressBar();
                 showProgressBar();
-                handler.postDelayed(this, 500);
+                handler.postDelayed(this, 1000);
             } else {
                 hideProgressBar();
                 fixConfigIfRequired();

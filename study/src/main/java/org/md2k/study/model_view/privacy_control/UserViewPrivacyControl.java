@@ -78,6 +78,7 @@ public class UserViewPrivacyControl extends UserView {
             activity.findViewById(R.id.button_privacy).setEnabled(true);
             Log.d(TAG, "updateView()...");
             PrivacyControlManager privacyControlManager = (PrivacyControlManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_PRIVACY);
+            if(privacyControlManager==null)  handler.postDelayed(this, 1000);
 
             Status status = privacyControlManager.getCurrentStatusDetails();
             if (status.getStatus() == Status.PRIVACY_ACTIVE) {

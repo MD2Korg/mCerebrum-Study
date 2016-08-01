@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public class ActivityDataQuality extends AppCompatActivity {
     private static final String TAG = ActivityDataQuality.class.getSimpleName();
-    DataQualityInfo dataQualityInfo;
+
     public static final String VIDEO_LINK = "VIDEO_LINK";
 
     @Override
@@ -29,23 +29,23 @@ public class ActivityDataQuality extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         try {
             int id = getIntent().getIntExtra("id", 0);
-            dataQualityInfo = ((DataQualityManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_DATA_QUALITY)).dataQualityInfos.get(id);
+            DataQualityInfo dataQualityInfo = ((DataQualityManager) ModelManager.getInstance(this).getModel(ModelFactory.MODEL_DATA_QUALITY)).dataQualityInfos.get(id);
             if (dataQualityInfo.configDataQualityView == null) {
                 Toast.makeText(this, "Could not connect the device. Wait for a minute and try again...", Toast.LENGTH_SHORT).show();
                 finish();
             } else {
                 setContentView(R.layout.activity_data_quality);
-                setupButtonPlotter();
-                setupButtonVideo();
+                setupButtonPlotter(dataQualityInfo);
+                setupButtonVideo(dataQualityInfo);
                 setupButtonClose();
-                setupMessage();
+                setupMessage(dataQualityInfo);
             }
         }catch (Exception e){
             Toast.makeText(this, "Could not connect the device. Wait for a minute and try again...", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
-    void setupButtonPlotter() {
+    void setupButtonPlotter(final DataQualityInfo dataQualityInfo) {
         try {
             final Button button = (Button) findViewById(R.id.button_plotter);
             if (!dataQualityInfo.configDataQualityView.getPlotter().isEnable()) {
@@ -60,7 +60,7 @@ public class ActivityDataQuality extends AppCompatActivity {
                         ConfigApp app = ModelManager.getInstance(ActivityDataQuality.this).getConfigManager().getConfig().getApps(ModelFactory.MODEL_PLOTTER);
                         Intent intent = new Intent();
                         intent.setClassName(app.getPackage_name(), "org.md2k.plotter.ActivityPlot");
-                        DataSourceClient dataSourceClient = getDataSourceClient();
+                        DataSourceClient dataSourceClient = getDataSourceClient(dataQualityInfo);
                         if (dataSourceClient != null) {
                             intent.putExtra(DataSourceClient.class.getSimpleName(), dataSourceClient);
                             startActivity(intent);
@@ -75,7 +75,7 @@ public class ActivityDataQuality extends AppCompatActivity {
         }
     }
 
-    DataSourceClient getDataSourceClient() throws DataKitException {
+    DataSourceClient getDataSourceClient(DataQualityInfo dataQualityInfo) throws DataKitException {
         ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(ActivityDataQuality.this).find(new DataSourceBuilder(dataQualityInfo.configDataQualityView.getPlotter().getDatasource()));
         if (dataSourceClientArrayList.size() > 0)
             return dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
@@ -83,7 +83,7 @@ public class ActivityDataQuality extends AppCompatActivity {
     }
 
 
-    void setupButtonVideo() {
+    void setupButtonVideo(final DataQualityInfo dataQualityInfo) {
         final Button button = (Button) findViewById(R.id.button_video);
         if (!dataQualityInfo.configDataQualityView.getVideo().isEnable()) {
             button.setVisibility(View.INVISIBLE);
@@ -99,7 +99,7 @@ public class ActivityDataQuality extends AppCompatActivity {
         });
     }
 
-    void setupMessage() {
+    void setupMessage(DataQualityInfo dataQualityInfo) {
         TextView textView = (TextView) findViewById(R.id.textView_message);
         textView.setText(dataQualityInfo.configDataQualityView.getMessage().getText());
         TextView textView1 = (TextView) findViewById(R.id.textView_message_header);

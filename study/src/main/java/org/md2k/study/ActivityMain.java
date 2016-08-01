@@ -85,6 +85,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onResume() {
         Log.d(TAG, "onResume()...");
+        Status status = ModelManager.getInstance(ActivityMain.this).getStatus();
         try {
             for (int i = 0; i < userViews.size(); i++)
                 userViews.get(i).updateView();

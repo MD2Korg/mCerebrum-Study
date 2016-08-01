@@ -69,8 +69,7 @@ public class DataQualityInfo {
         }
     }
 
-    public void set(DataSourceClient dataSourceClient, ArrayList<ConfigDataQualityView> configDataQualityViewArrayList, int value) {
-        setConfigDataQualityView(configDataQualityViewArrayList, dataSourceClient.getDataSource());
+    public void set(DataSourceClient dataSourceClient, int value) {
         lastReceivedTime = DateTime.getDateTime();
         if (dataSourceClient.getDataSource().getId()!=null && (dataSourceClient.getDataSource().getId().equals(DataSourceType.RESPIRATION) || dataSourceClient.getDataSource().getId().equals(DataSourceType.ECG))) {
             now = now % QSIZE;

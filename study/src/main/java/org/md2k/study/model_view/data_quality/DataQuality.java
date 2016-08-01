@@ -15,6 +15,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.config.ConfigApp;
+import org.md2k.study.config.ConfigDataQualityView;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DATA_QUALITY;
@@ -57,11 +58,13 @@ public class DataQuality {
     DataSourceClient dataSourceClient;
     Handler handler;
     long lastReceivedTimeStamp;
+    DataQualityInfo dataQualityInfo;
 
-    public DataQuality(Context context, DataSource dataSource, ReceiveCallBack receiveCallBack) {
+    public DataQuality(Context context, DataSource dataSource, DataQualityInfo dataQualityInfo, ReceiveCallBack receiveCallBack) {
         this.dataSource = dataSource;
         this.receiveCallBack = receiveCallBack;
         this.context = context;
+        this.dataQualityInfo=dataQualityInfo;
         handler = new Handler();
     }
 
@@ -89,6 +92,8 @@ public class DataQuality {
                 else {
                     lastReceivedTimeStamp = DateTime.getDateTime();
                     dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
+                    final ArrayList<ConfigDataQualityView> configDataQualityViews = ModelManager.getInstance(context).getConfigManager().getConfig().getData_quality_view();
+                    dataQualityInfo.setConfigDataQualityView(configDataQualityViews, dataSourceClient.getDataSource());
                     handler.removeCallbacks(runnableCheckAvailability);
                     handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
                     DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
@@ -114,6 +119,7 @@ public class DataQuality {
                     });
                 }
             } catch (DataKitException e) {
+                handler.postDelayed(this, 1000);
                 Log.e(TAG,"error subscribing..runnableSubscribe...");
                 e.printStackTrace();
             }
