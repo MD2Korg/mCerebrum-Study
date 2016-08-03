@@ -83,15 +83,11 @@ public class NotifierManager {
         @Override
         public void run() {
             Log.d(TAG, "runnableNotify...");
-            try {
-                if(lastRequestTimeStamp>lastAckTimeStamp) {
-                    insertDataToDataKit(notificationRequests);
-                    handler.postDelayed(this,2000);
-                }
-
-            } catch (DataKitException e) {
-                e.printStackTrace();
+            if(lastRequestTimeStamp>lastAckTimeStamp) {
+                insertDataToDataKit(notificationRequests);
+                handler.postDelayed(this,2000);
             }
+
         }
     };
     Runnable runnableSubscribeResponse = new Runnable() {
@@ -189,12 +185,16 @@ public class NotifierManager {
     }
 
 
-    private void insertDataToDataKit(NotificationRequests notificationRequests) throws DataKitException {
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
-        Gson gson=new Gson();
-        JsonObject sample = new JsonParser().parse(gson.toJson(notificationRequests)).getAsJsonObject();
-        DataTypeJSONObject dataTypeJSONObject=new DataTypeJSONObject(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClientRequest, dataTypeJSONObject);
-        Log.d(TAG, "...insertDataToDataKit()");
+    private void insertDataToDataKit(NotificationRequests notificationRequests) {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
+            Gson gson = new Gson();
+            JsonObject sample = new JsonParser().parse(gson.toJson(notificationRequests)).getAsJsonObject();
+            DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+            dataKitAPI.insert(dataSourceClientRequest, dataTypeJSONObject);
+            Log.d(TAG, "...insertDataToDataKit()");
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
     }
 }

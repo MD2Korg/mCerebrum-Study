@@ -65,11 +65,11 @@ public class SleepInfoManager extends Model {
         sleepTimeDB = -1;
         status=new Status(rank, Status.SLEEP_NOT_DEFINED);
     }
-    public void set() throws DataKitException {
+    public void set() {
         readStudyInfoFromDataKit();
         update();
     }
-    public void update() throws DataKitException {
+    public void update() {
         Status lastStatus;
         if (sleepTimeDB == -1)
             lastStatus= new Status(rank,Status.SLEEP_NOT_DEFINED);
@@ -84,28 +84,37 @@ public class SleepInfoManager extends Model {
         return true;
     }
 
-    private void readStudyInfoFromDataKit() throws DataKitException {
-        sleepTimeDB = -1;
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
-        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        if (dataKitAPI.isConnected()) {
+    private void readStudyInfoFromDataKit(){
+        try {
+            sleepTimeDB = -1;
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            if (dataKitAPI.isConnected()) {
                 ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
                 if (dataTypes.size() != 0) {
                     DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                     sleepTimeDB = dataTypeLong.getSample();
                 }
+            }
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
     }
 
-    private boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI =DataKitAPI.getInstance(modelManager.getContext());
-        if (!dataKitAPI.isConnected()) return false;
-        if (!isValid()) return false;
-        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), sleepTimeNew);
-        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        dataKitAPI.insert(dataSourceClient, dataTypeLong);
-        sleepTimeDB = sleepTimeNew;
-        return true;
+    private boolean writeToDataKit() {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (!dataKitAPI.isConnected()) return false;
+            if (!isValid()) return false;
+            DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), sleepTimeNew);
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            dataKitAPI.insert(dataSourceClient, dataTypeLong);
+            sleepTimeDB = sleepTimeNew;
+            return true;
+        } catch (DataKitException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
@@ -133,7 +142,7 @@ public class SleepInfoManager extends Model {
         dataDescriptor.put(METADATA.DATA_TYPE, long.class.getName());
         return dataDescriptor;
     }
-    public void save() throws DataKitException {
+    public void save() {
         if(writeToDataKit())
             sleepTimeDB = sleepTimeNew;
         set();

@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.R;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
@@ -99,14 +98,10 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                try {
-                    ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
-                    modelManager.clear();
-                    modelManager.read();
-                    modelManager.set();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
+                ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
+                modelManager.clear();
+                modelManager.read();
+                modelManager.set();
                 return false;
             }
         });
@@ -118,14 +113,10 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                try {
-                    ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
-                    modelManager.clear();
-                    modelManager.read();
-                    modelManager.set();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
+                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                modelManager.clear();
+                modelManager.read();
+                modelManager.set();
                 return false;
             }
         });

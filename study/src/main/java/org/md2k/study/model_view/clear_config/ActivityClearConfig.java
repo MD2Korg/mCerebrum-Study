@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
@@ -52,17 +51,13 @@ public class ActivityClearConfig extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
-                    try {
-                        ModelManager modelManager = ModelManager.getInstance(ActivityClearConfig.this);
-                        ClearConfigManager clearConfigManager = (ClearConfigManager) modelManager.getModel(ModelFactory.MODEL_CLEAR_CONFIG);
-                        Log.d(TAG, "clearConfigManager...=" + clearConfigManager);
-                        clearConfigManager.delete();
-                        modelManager.clear();
-                        modelManager.read();
-                        modelManager.set();
-                    } catch (DataKitException e) {
-                        e.printStackTrace();
-                    }
+                    ModelManager modelManager = ModelManager.getInstance(ActivityClearConfig.this);
+                    ClearConfigManager clearConfigManager = (ClearConfigManager) modelManager.getModel(ModelFactory.MODEL_CLEAR_CONFIG);
+                    Log.d(TAG, "clearConfigManager...=" + clearConfigManager);
+                    clearConfigManager.delete();
+                    modelManager.clear();
+                    modelManager.read();
+                    modelManager.set();
                 }
                 finish();
             }

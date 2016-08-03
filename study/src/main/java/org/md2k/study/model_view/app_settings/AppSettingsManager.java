@@ -1,6 +1,5 @@
 package org.md2k.study.model_view.app_settings;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelManager;
@@ -45,7 +44,7 @@ public class AppSettingsManager extends Model {
         appSettingsList = new ArrayList<>();
         status=new Status(rank, Status.APP_CONFIG_ERROR);
     }
-    public void set() throws DataKitException {
+    public void set() {
         Log.d(TAG, "set()...");
         appSettingsList.clear();
         ArrayList<ConfigApp> apps = modelManager.getConfigManager().getConfig().getApps();
@@ -69,7 +68,7 @@ public class AppSettingsManager extends Model {
         return appSettingsList;
     }
 
-    public void update() throws DataKitException {
+    public void update() {
         Status curStatus= new Status(rank,Status.SUCCESS);
         for (int i = 0; i < appSettingsList.size(); i++)
             if (!appSettingsList.get(i).isEqual()) {

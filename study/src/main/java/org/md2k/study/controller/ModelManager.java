@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigManager;
@@ -62,7 +61,7 @@ public class ModelManager {
         read();
     }
 
-    public void clear() throws DataKitException {
+    public void clear() {
         isUpdating = true;
         for (int i = Status.RANK_SUCCESS; i <= Status.RANK_BEGIN; i++) {
             for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
@@ -71,7 +70,7 @@ public class ModelManager {
                     entry.getValue().clear();
             }
         }
-        isUpdating=false;
+        isUpdating = false;
     }
 
     public void read() {
@@ -83,8 +82,8 @@ public class ModelManager {
             for (int i = 0; i < configManager.getConfig().getActions().size(); i++) {
                 if (!configManager.getConfig().getActions().get(i).isEnable()) continue;
                 String id = configManager.getConfig().getActions().get(i).getId();
-                if(id.equals(ModelFactory.MODEL_SELF_REPORT))
-                    id=configManager.getConfig().getActions().get(i).getType();
+                if (id.equals(ModelFactory.MODEL_SELF_REPORT))
+                    id = configManager.getConfig().getActions().get(i).getType();
                 int rank = configManager.getConfig().getActions().get(i).getRank();
                 Log.d(TAG, "ModelManager()...id=" + id + " rank=" + rank);
                 if (modelHashMap.containsKey(id)) continue;
@@ -95,13 +94,13 @@ public class ModelManager {
         isUpdating = false;
     }
 
-    public void set() throws DataKitException {
+    public void set() {
         status = new Status(Status.RANK_BEGIN, Status.NOT_DEFINED);
         isUpdating = false;
         update();
     }
 
-    public void update() throws DataKitException {
+    public void update() {
         if (isUpdating) return;
         isUpdating = true;
         Log.d(TAG, "update()...");
@@ -145,7 +144,7 @@ public class ModelManager {
         return curStatus;
     }
 
-    private void setNow(int state) throws DataKitException {
+    private void setNow(int state) {
         Log.d(TAG, "set(" + state + ")...");
         if (state < Status.RANK_SUCCESS || state > Status.RANK_BEGIN) return;
         for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
@@ -156,7 +155,7 @@ public class ModelManager {
         }
     }
 
-    private void clear(int state) throws DataKitException {
+    private void clear(int state) {
         Log.d(TAG, "clear(" + Status.RANK_SUCCESS + "..." + state + ")...");
         for (int s = Status.RANK_SUCCESS; s <= state; s++) {
             for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet())

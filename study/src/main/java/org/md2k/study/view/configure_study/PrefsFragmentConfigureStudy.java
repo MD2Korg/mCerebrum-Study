@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.R;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigView;
@@ -107,11 +106,9 @@ public class PrefsFragmentConfigureStudy extends PreferenceFragment {
     public void onDestroy() {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
         for (int i = 0; i < preferences.size(); i++)
-            try {
-                modelManager.getModel(preferences.get(i).getKey()).reset();
-            } catch (DataKitException e) {
-                e.printStackTrace();
-            }
+        {
+            modelManager.getModel(preferences.get(i).getKey()).reset();
+        }
         super.onDestroy();
     }
 
@@ -130,15 +127,11 @@ public class PrefsFragmentConfigureStudy extends PreferenceFragment {
         button.setText("Save");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    for (int i = 0; i < preferences.size(); i++)
-                        modelManager.getModel(preferences.get(i).getKey()).save();
-                    Toast.makeText(getActivity(), "Saved...", Toast.LENGTH_LONG).show();
-                    modelManager.clear();
-                    modelManager.set();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
+                for (int i = 0; i < preferences.size(); i++)
+                    modelManager.getModel(preferences.get(i).getKey()).save();
+                Toast.makeText(getActivity(), "Saved...", Toast.LENGTH_LONG).show();
+                modelManager.clear();
+                modelManager.set();
 
             }
         });

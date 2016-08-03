@@ -12,7 +12,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Constants;
 import org.md2k.study.R;
 import org.md2k.study.Status;
@@ -76,23 +75,19 @@ public class ActivityConfigDownload extends Activity {
         alertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, String result) {
-                if(which==DialogInterface.BUTTON_POSITIVE){
+                if (which == DialogInterface.BUTTON_POSITIVE) {
                     final String filename = result + ".zip";
                     if (result.length() > 0) {
                         Download download = new Download(ActivityConfigDownload.this, true, new OnCompletionListener() {
                             @Override
                             public void OnCompleted(int status) {
                                 if (status == Download.SUCCESS) {
-                                    try {
-                                        ModelManager.getInstance(ActivityConfigDownload.this).clear();
-                                        FileManager.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
-                                        ModelManager.getInstance(ActivityConfigDownload.this).read();
-                                        ModelManager.getInstance(ActivityConfigDownload.this).set();
-                                        Intent returnIntent = new Intent();
-                                        setResult(Activity.RESULT_OK, returnIntent);
-                                    } catch (DataKitException e) {
-                                        e.printStackTrace();
-                                    }
+                                    ModelManager.getInstance(ActivityConfigDownload.this).clear();
+                                    FileManager.unzip(Constants.TEMP_DIRECTORY + filename, Constants.CONFIG_DIRECTORY_ROOT);
+                                    ModelManager.getInstance(ActivityConfigDownload.this).read();
+                                    ModelManager.getInstance(ActivityConfigDownload.this).set();
+                                    Intent returnIntent = new Intent();
+                                    setResult(Activity.RESULT_OK, returnIntent);
                                     finish();
                                 } else {
                                     Toast.makeText(ActivityConfigDownload.this, "Error!!! File not found...", Toast.LENGTH_LONG).show();
@@ -101,16 +96,16 @@ public class ActivityConfigDownload extends Activity {
                             }
                         });
                         try {
-                            String version =  getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+                            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
                             int lastDot = version.lastIndexOf('.');
                             String configVersion = version.substring(0, lastDot);
-                            download.execute(Constants.CONFIG_DOWNLOAD_LINK + configVersion+ "/"+filename, filename);
+                            download.execute(Constants.CONFIG_DOWNLOAD_LINK + configVersion + "/" + filename, filename);
                         } catch (PackageManager.NameNotFoundException e) {
                             e.printStackTrace();
                         }
                     } else
                         showDownloadConfig();
-                }else{
+                } else {
                     Intent returnIntent = new Intent();
                     setResult(Activity.RESULT_CANCELED, returnIntent);
                     dialog.cancel();
@@ -120,8 +115,8 @@ public class ActivityConfigDownload extends Activity {
         });
     }
 
-    public void alertDialogEditText(final Context context, String title, String message, int iconId, String positive, String negative, final OnClickListener onClickListener){
-        AlertDialog.Builder alertDialogBuilder= new AlertDialog.Builder(new ContextThemeWrapper(context, org.md2k.utilities.R.style.app_theme_teal_light_dialog))
+    public void alertDialogEditText(final Context context, String title, String message, int iconId, String positive, String negative, final OnClickListener onClickListener) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(context, org.md2k.utilities.R.style.app_theme_teal_light_dialog))
                 .setTitle(title)
                 .setIcon(iconId)
                 .setMessage(message);
@@ -129,27 +124,28 @@ public class ActivityConfigDownload extends Activity {
         input.setSingleLine();
         alertDialogBuilder.setView(input);
 
-        if(positive!=null)
+        if (positive != null)
             alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     String str = input.getText().toString().trim();
-                    onClickListener.onClick(dialog,which, str);
+                    onClickListener.onClick(dialog, which, str);
                 }
             });
-        if(negative!=null)
+        if (negative != null)
             alertDialogBuilder.setNegativeButton(negative, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    onClickListener.onClick(dialog,which, null);
+                    onClickListener.onClick(dialog, which, null);
                 }
             });
-        alertDialog=alertDialogBuilder.create();
+        alertDialog = alertDialogBuilder.create();
         alertDialog.setCancelable(false);
         alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         alertDialog.show();
         AlertDialogs.AlertDialogStyle(context, alertDialog);
     }
+
     @Override
     public void onBackPressed() {
     }
@@ -159,21 +155,17 @@ public class ActivityConfigDownload extends Activity {
         AlertDialogs.AlertDialog(this, "Delete configuration files?", "Do you want to delete configuration files?", R.drawable.ic_delete_red_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(which==DialogInterface.BUTTON_POSITIVE){
-                    try {
-                        ModelManager.getInstance(ActivityConfigDownload.this).clear();
-                        FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
-                        ModelManager.getInstance(ActivityConfigDownload.this).read();
-                        ModelManager.getInstance(ActivityConfigDownload.this).set();
-                    } catch (DataKitException e) {
-                        e.printStackTrace();
-                    }
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    ModelManager.getInstance(ActivityConfigDownload.this).clear();
+                    FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+                    ModelManager.getInstance(ActivityConfigDownload.this).read();
+                    ModelManager.getInstance(ActivityConfigDownload.this).set();
                     Intent returnIntent = new Intent();
                     setResult(Activity.RESULT_OK, returnIntent);
                     dialog.cancel();
                     finish();
 
-                }else{
+                } else {
                     Intent returnIntent = new Intent();
                     setResult(Activity.RESULT_OK, returnIntent);
                     dialog.cancel();

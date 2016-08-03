@@ -57,7 +57,7 @@ public class PrivacyControlManager extends Model {
         privacyData = null;
     }
 
-    public void set() throws DataKitException {
+    public void set() {
         privacyData = readFromDataKit();
         Status curStatus=new Status(rank, Status.SUCCESS);
         notifyIfRequired(curStatus);
@@ -118,30 +118,30 @@ public class PrivacyControlManager extends Model {
         return runningTime;
     }
 
-    private PrivacyData readFromDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+    private PrivacyData readFromDataKit() {
         PrivacyData privacyData = null;
-        ArrayList<DataSourceClient> dataSourceClients= dataKitAPI.find(createDataSourceBuilder());
-        if(dataSourceClients.size()>0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
-            if (dataTypes.size() != 0) {
-                try {
-                    DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                    Gson gson = new Gson();
-                    privacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
-                }catch(Exception ignored){
-                    privacyData=null;
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(createDataSourceBuilder());
+            if (dataSourceClients.size() > 0) {
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClients.get(0), 1);
+                if (dataTypes.size() != 0) {
+                    try {
+                        DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                        Gson gson = new Gson();
+                        privacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
+                    } catch (Exception ignored) {
+                        privacyData = null;
+                    }
                 }
             }
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
         return privacyData;
     }
     public Status getCurrentStatusDetails(){
-        try {
-            set();
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
+        set();
         if (privacyData == null) return new Status(rank, Status.SUCCESS);
         if (!privacyData.isStatus()) return new Status(rank, Status.SUCCESS);
         if (privacyData.getStartTimeStamp() + privacyData.getDuration().getValue() < DateTime.getDateTime())

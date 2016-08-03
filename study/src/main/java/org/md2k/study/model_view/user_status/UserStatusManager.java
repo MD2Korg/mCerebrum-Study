@@ -1,6 +1,5 @@
 package org.md2k.study.model_view.user_status;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -38,7 +37,7 @@ public class UserStatusManager extends Model {
         super(modelManager, id, rank);
     }
 
-    public void set() throws DataKitException {
+    public void set() {
         Status curStatus = new Status(rank, Status.SUCCESS);
         notifyIfRequired(curStatus);
     }

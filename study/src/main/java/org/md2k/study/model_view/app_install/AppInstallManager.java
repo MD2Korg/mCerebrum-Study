@@ -1,6 +1,5 @@
 package org.md2k.study.model_view.app_install;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigApp;
@@ -61,7 +60,7 @@ public class AppInstallManager extends Model {
         status=new Status(rank, Status.APP_NOT_INSTALLED);
     }
 
-    public void set() throws DataKitException {
+    public void set()  {
         Log.d(TAG, "set()...");
         Status curStatus;
         for(int i=0;i<appInstallList.size();i++) {
@@ -82,11 +81,7 @@ public class AppInstallManager extends Model {
                             curStatus= new Status(rank,Status.APP_NOT_INSTALLED);
                         else curStatus= new Status(rank,Status.APP_UPDATE_AVAILABLE);
                         Log.d(TAG,"status = "+status.log()+" latestStatus="+curStatus.log());
-                        try {
-                            notifyIfRequired(curStatus);
-                        } catch (DataKitException e) {
-                            e.printStackTrace();
-                        }
+                        notifyIfRequired(curStatus);
                     }
                 });
             }
@@ -128,11 +123,7 @@ public class AppInstallManager extends Model {
     public void updateVersionAll(final int now, final OnDataChangeListener onDataChangeListener) {
         Log.d(TAG, "updateVersionAll()...now=" + now);
         if (now >= getAppInstallList().size()) {
-            try {
-                set();
-            } catch (DataKitException e) {
-                e.printStackTrace();
-            }
+            set();
             if(onDataChangeListener!=null)
                 onDataChangeListener.onDataChange(now, String.valueOf(status.getStatus()));
             return;

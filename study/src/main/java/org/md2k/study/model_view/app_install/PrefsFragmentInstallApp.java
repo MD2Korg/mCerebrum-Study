@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.R;
 import org.md2k.study.controller.ModelFactory;
@@ -80,11 +79,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         buttonClose.setText("Close");
         buttonClose.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    appInstallManager.set();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
+                appInstallManager.set();
                 getActivity().finish();
             }
         });
@@ -183,12 +178,8 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
     @Override
     public void onResume() {
         if (isRefreshRequired) {
-            try {
-                ModelManager.getInstance(getActivity()).clear();
-                ModelManager.getInstance(getActivity()).set();
-            } catch (DataKitException e) {
-                e.printStackTrace();
-            }
+            ModelManager.getInstance(getActivity()).clear();
+            ModelManager.getInstance(getActivity()).set();
         }
         setupAppInstall();
         super.onResume();

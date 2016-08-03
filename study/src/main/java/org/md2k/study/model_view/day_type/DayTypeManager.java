@@ -75,12 +75,12 @@ public class DayTypeManager extends Model {
         dayTypeNew = new DayTypeInfo(dayType);
     }
 
-    public void set() throws DataKitException {
+    public void set() {
         readFromDataKit();
         update();
     }
 
-    public void update() throws DataKitException {
+    public void update() {
         Status lastStatus;
         if (dayTypeDB == null)
             lastStatus = new Status(rank, Status.DAY_TYPE_NOT_DEFINED);
@@ -95,30 +95,39 @@ public class DayTypeManager extends Model {
         return true;
     }
 
-    private void readFromDataKit() throws DataKitException {
-        dayTypeDB = null;
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-        if (dataKitAPI.isConnected()) {
-            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-            if (dataTypes.size() != 0) {
-                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                Gson gson = new Gson();
-                dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
+    private void readFromDataKit(){
+        try {
+            dayTypeDB = null;
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (dataKitAPI.isConnected()) {
+                DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+                if (dataTypes.size() != 0) {
+                    DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                    Gson gson = new Gson();
+                    dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
+                }
             }
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
     }
 
-    private boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-        if (!dataKitAPI.isConnected()) return false;
-        if (!isValid()) return false;
-        Gson gson = new Gson();
-        JsonObject sample = new JsonParser().parse(gson.toJson(dayTypeNew)).getAsJsonObject();
-        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
-        dayTypeDB = dayTypeNew;
+    private boolean writeToDataKit() {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (!dataKitAPI.isConnected()) return false;
+            if (!isValid()) return false;
+            Gson gson = new Gson();
+            JsonObject sample = new JsonParser().parse(gson.toJson(dayTypeNew)).getAsJsonObject();
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+            dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
+            dayTypeDB = dayTypeNew;
+        } catch (DataKitException e) {
+            e.printStackTrace();
+            return false;
+        }
         return true;
     }
 
@@ -147,7 +156,7 @@ public class DayTypeManager extends Model {
         return dataDescriptor;
     }
 
-    public void save() throws DataKitException {
+    public void save() {
         if (writeToDataKit())
             dayTypeDB = dayTypeNew;
         set();

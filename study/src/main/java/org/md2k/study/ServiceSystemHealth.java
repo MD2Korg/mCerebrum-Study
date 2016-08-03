@@ -1,10 +1,13 @@
 package org.md2k.study;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 
@@ -40,28 +43,36 @@ public class ServiceSystemHealth extends Service {
     ModelManager modelManager;
     public static boolean isRunning=false;
     public static int RANK_LIMIT=Status.RANK_BEGIN;
+    public static String INTENT_RESTART="intent_restart";
 
     public void onCreate() {
         Log.d(TAG, "onCreate...");
         super.onCreate();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiverRestart,
+                new IntentFilter(INTENT_RESTART));
         modelManager=ModelManager.getInstance(getApplicationContext());
         Log.d(TAG,"...onCreate");
     }
 
+    private BroadcastReceiver mMessageReceiverRestart = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            restart();
+        }
+    };
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG,"onStartCommand()...");
-        try {
-            modelManager.clear();
-            modelManager.read();
-            modelManager.set();
-        } catch (DataKitException e) {
-            Log.e(TAG,"Error...in clearing ... onStartCommand()..");
-            e.printStackTrace();
-        }
+        restart();
         isRunning=true;
         return START_STICKY;
+    }
+    void restart(){
+        modelManager.clear();
+        modelManager.read();
+        modelManager.set();
+
     }
 
     @Override
@@ -71,11 +82,8 @@ public class ServiceSystemHealth extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
-        try {
-            modelManager.clear();
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverRestart);
+        modelManager.clear();
         isRunning=false;
 
         super.onDestroy();

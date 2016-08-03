@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
 
@@ -37,50 +36,46 @@ import org.md2k.utilities.Report.Log;
  */
 public class ActivityClearData extends Activity {
     private static final String TAG = ActivityClearData.class.getSimpleName();
-    int resume=0;
+    int resume = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            ModelManager.getInstance(this).clear();
-            Intent intent = new Intent();
-            intent.putExtra("delete", true);
-            intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsArchive");
-            startActivity(intent);
-            intent.putExtra("delete", true);
-            intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsDatabase");
-            startActivity(intent);
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
+        ModelManager.getInstance(this).clear();
+        Intent intent = new Intent();
+        intent.putExtra("delete", true);
+        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsArchive");
+        startActivity(intent);
+        intent.putExtra("delete", true);
+        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsDatabase");
+        startActivity(intent);
     }
+
     @Override
-    public void onResume(){
-        try {
-            Log.d(TAG, "onResume...");
-            resume++;
-            if (resume == 2) {
-                ModelManager.getInstance(this).set();
-                finish();
-            }
-        } catch (DataKitException e) {
-            e.printStackTrace();
+    public void onResume() {
+        Log.d(TAG, "onResume...");
+        resume++;
+        if (resume == 2) {
+            ModelManager.getInstance(this).set();
+            finish();
         }
         super.onResume();
     }
+
     @Override
-    public void onPause(){
-        Log.d(TAG,"onPause...");
+    public void onPause() {
+        Log.d(TAG, "onPause...");
         super.onPause();
     }
+
     @Override
-    public void onStop(){
-        Log.d(TAG,"onStop...");
+    public void onStop() {
+        Log.d(TAG, "onStop...");
         super.onStop();
     }
+
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         Log.d(TAG, "onDestroy...");
         super.onDestroy();
     }

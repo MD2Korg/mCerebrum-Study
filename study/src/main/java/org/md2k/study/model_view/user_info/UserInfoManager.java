@@ -72,13 +72,13 @@ public class UserInfoManager extends Model {
         status = new Status(rank, Status.USERID_NOT_DEFINED);
     }
 
-    public void set() throws DataKitException {
+    public void set() {
         isInDatabase = false;
         readFromDataKit();
         update();
     }
 
-    public void update() throws DataKitException {
+    public void update() {
         Status lastStatus;
         if (isInDatabase) lastStatus = new Status(rank, Status.SUCCESS);
         else lastStatus = new Status(rank, Status.USERID_NOT_DEFINED);
@@ -100,39 +100,48 @@ public class UserInfoManager extends Model {
         else return new Status(rank, Status.USERID_NOT_DEFINED);
     }
 
-    private void readFromDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-        if (!dataKitAPI.isConnected()) return;
-        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-        if (dataTypes.size() != 0) {
-            DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-            Gson gson = new Gson();
-            userInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), UserInfo.class);
-            isInDatabase = true;
+    private void readFromDataKit() {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (!dataKitAPI.isConnected()) return;
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                Gson gson = new Gson();
+                userInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), UserInfo.class);
+                isInDatabase = true;
+            }
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
     }
 
-    public void save() throws DataKitException {
+    public void save() {
         writeToDataKit();
         update();
     }
 
-    private boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-        if (!dataKitAPI.isConnected()) return false;
-        if (isInDatabase) return false;
-        if (userInfo == null) return false;
-        if (userInfo.getUser_id() == null) return false;
-        if (userInfo.getUser_id().length() == 0) return false;
-        Gson gson = new Gson();
-        JsonObject sample = new JsonParser().parse(gson.toJson(userInfo)).getAsJsonObject();
+    private boolean writeToDataKit(){
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (!dataKitAPI.isConnected()) return false;
+            if (isInDatabase) return false;
+            if (userInfo == null) return false;
+            if (userInfo.getUser_id() == null) return false;
+            if (userInfo.getUser_id().length() == 0) return false;
+            Gson gson = new Gson();
+            JsonObject sample = new JsonParser().parse(gson.toJson(userInfo)).getAsJsonObject();
 
-        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
-        isInDatabase = true;
-        return true;
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+            dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
+            isInDatabase = true;
+            return true;
+        } catch (DataKitException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     DataSourceBuilder createDataSourceBuilder() {

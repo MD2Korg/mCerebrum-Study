@@ -2,7 +2,6 @@ package org.md2k.study.model_view.app_reset;
 
 import android.widget.Toast;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -41,14 +40,10 @@ public class AppResetManager extends Model {
     }
 
     public void resetApp() {
-        try {
-            Toast.makeText(modelManager.getContext(), "Resetting...", Toast.LENGTH_LONG).show();
-            modelManager.clear();
-            modelManager.read();
-            modelManager.set();
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
+        Toast.makeText(modelManager.getContext(), "Resetting...", Toast.LENGTH_LONG).show();
+        modelManager.clear();
+        modelManager.read();
+        modelManager.set();
         Toast.makeText(modelManager.getContext(),"Resetting...DONE",Toast.LENGTH_LONG).show();
     }
     public void clear(){

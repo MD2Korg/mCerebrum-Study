@@ -1,6 +1,5 @@
 package org.md2k.study.model_view.selfreport;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -43,7 +42,7 @@ public class SelfReportManager extends Model {
     public void clear(){
         status=new Status(rank, Status.NOT_DEFINED);
     }
-    public void set() throws DataKitException {
+    public void set() {
         Status lastStatus;
         lastStatus= new Status(rank,Status.SUCCESS);
         notifyIfRequired(lastStatus);

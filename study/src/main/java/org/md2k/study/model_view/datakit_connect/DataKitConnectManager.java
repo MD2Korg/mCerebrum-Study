@@ -1,8 +1,12 @@
 package org.md2k.study.model_view.datakit_connect;
 
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -48,30 +52,29 @@ public class DataKitConnectManager extends Model {
     }
 
     @Override
-    public void set() throws DataKitException {
+    public void set() {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         Log.d(TAG,"DataKitConnectManager...set()..before...isConnected="+dataKitAPI.isConnected());
         if (dataKitAPI.isConnected()) {
             notifyIfRequired(new Status(rank, Status.SUCCESS));
         }else{
             dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
-            dataKitAPI.connect(new OnConnectionListener() {
-                @Override
-                public void onConnected() {
-                    Log.d(TAG,"connected...");
-                    try {
+            try {
+                dataKitAPI.connect(new OnConnectionListener() {
+                    @Override
+                    public void onConnected() {
+                        Log.d(TAG,"connected...");
                         notifyIfRequired(new Status(rank, Status.SUCCESS));
-                    } catch (DataKitException e) {
-                        Log.e(TAG,"error connecting...set()");
-                        e.printStackTrace();
                     }
-                }
-            });
+                });
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            }
         }
     }
 
     @Override
-    public void clear() throws DataKitException {
+    public void clear() {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         Log.d(TAG, "clear(0)...dataKitAPI="+dataKitAPI);
         if (dataKitAPI.isConnected()) {

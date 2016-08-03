@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.R;
 import org.md2k.study.Status;
@@ -88,50 +87,50 @@ public class UserViewDayStartEnd extends UserView {
         int buttonStatus = dayStartEndInfoManager.getButtonStatus();
         if (buttonStatus == DayStartEndInfoManager.START_BUTTON) {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Start Day");
-            ((Button) activity.findViewById(R.id.button_day_start_end)).setVisibility(View.VISIBLE);
-            ((Button) activity.findViewById(R.id.button_day_start_end)).setEnabled(true);
-            ((Button) activity.findViewById(R.id.button_day_start_end)).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_red));
+            activity.findViewById(R.id.button_day_start_end).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.button_day_start_end).setEnabled(true);
+            activity.findViewById(R.id.button_day_start_end).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_red));
             ((Button) activity.findViewById(R.id.button_day_start_end)).setTextColor(Color.WHITE);
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(" - ");
             ((TextView) activity.findViewById(R.id.text_view_day_end)).setText(" - ");
-            ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.INVISIBLE);
-            ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.INVISIBLE);
+            activity.findViewById(R.id.text_view_day_resume).setVisibility(View.INVISIBLE);
+            activity.findViewById(R.id.text_view_day_resume_title).setVisibility(View.INVISIBLE);
         } else if (buttonStatus == DayStartEndInfoManager.END_BUTTON) {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("End Day");
-            ((Button) activity.findViewById(R.id.button_day_start_end)).setVisibility(View.VISIBLE);
-            ((Button) activity.findViewById(R.id.button_day_start_end)).setEnabled(true);
+            activity.findViewById(R.id.button_day_start_end).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.button_day_start_end).setEnabled(true);
             ((Button) activity.findViewById(R.id.button_day_start_end)).setTextColor(Color.BLACK);
-            ((Button) activity.findViewById(R.id.button_day_start_end)).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
+            activity.findViewById(R.id.button_day_start_end).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(formatTime(dayStartEndInfoManager.getDayStartTime()));
             ((TextView) activity.findViewById(R.id.text_view_day_end)).setText("-");
-            ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.INVISIBLE);
-            ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.INVISIBLE);
+            activity.findViewById(R.id.text_view_day_resume).setVisibility(View.INVISIBLE);
+            activity.findViewById(R.id.text_view_day_resume_title).setVisibility(View.INVISIBLE);
 
         } else if (dayStartEndInfoManager.isDayStarted() && dayStartEndInfoManager.isDayEnded()) {
             ((Button) activity.findViewById(R.id.button_day_start_end)).setText("Day Ended");
             activity.findViewById(R.id.button_day_start_end).setVisibility(View.VISIBLE);
             activity.findViewById(R.id.button_day_start_end).setEnabled(false);
-            ((Button) activity.findViewById(R.id.button_day_start_end)).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
+            activity.findViewById(R.id.button_day_start_end).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
             ((Button) activity.findViewById(R.id.button_day_start_end)).setTextColor(Color.BLACK);
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(formatTime(dayStartEndInfoManager.getDayStartTime()));
             ((TextView) activity.findViewById(R.id.text_view_day_end)).setText(formatTime(dayStartEndInfoManager.getDayEndTime()));
-            ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.VISIBLE);
-            ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.text_view_day_resume).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.text_view_day_resume_title).setVisibility(View.VISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_resume)).setText(formatTime(dayStartEndInfoManager.getTime(DayStartEndInfoManager.WAKEUP, 0)));
         } else if (dayStartEndInfoManager.isDayStarted()) {
             activity.findViewById(R.id.button_day_start_end).setEnabled(false);
             activity.findViewById(R.id.button_day_start_end).setVisibility(View.INVISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText(formatTime(dayStartEndInfoManager.getDayStartTime()));
             ((TextView) activity.findViewById(R.id.text_view_day_end)).setText("-");
-            ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.INVISIBLE);
-            ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.INVISIBLE);
+            activity.findViewById(R.id.text_view_day_resume).setVisibility(View.INVISIBLE);
+            activity.findViewById(R.id.text_view_day_resume_title).setVisibility(View.INVISIBLE);
         } else {
             activity.findViewById(R.id.button_day_start_end).setEnabled(false);
             activity.findViewById(R.id.button_day_start_end).setVisibility(View.INVISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_start)).setText("-");
             ((TextView) activity.findViewById(R.id.text_view_day_end)).setText("-");
-            ((TextView) activity.findViewById(R.id.text_view_day_resume)).setVisibility(View.VISIBLE);
-            ((TextView) activity.findViewById(R.id.text_view_day_resume_title)).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.text_view_day_resume).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.text_view_day_resume_title).setVisibility(View.VISIBLE);
             ((TextView) activity.findViewById(R.id.text_view_day_resume)).setText(formatTime(dayStartEndInfoManager.getWakeupShowTimestamp()));
         }
     }
@@ -181,12 +180,8 @@ public class UserViewDayStartEnd extends UserView {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_POSITIVE) {
-                        try {
-                            dayStartEndInfoManager.setDayStartTime(DateTime.getDateTime());
-                            updateView();
-                        } catch (DataKitException e) {
-                            e.printStackTrace();
-                        }
+                        dayStartEndInfoManager.setDayStartTime(DateTime.getDateTime());
+                        updateView();
                         dialog.dismiss();
 
                     } else {
@@ -199,13 +194,9 @@ public class UserViewDayStartEnd extends UserView {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (which == DialogInterface.BUTTON_POSITIVE) {
-                        try {
-                            if (status == Status.SUCCESS)
-                                dayStartEndInfoManager.setDayEndTime(DateTime.getDateTime());
-                            updateView();
-                        } catch (DataKitException e) {
-                            e.printStackTrace();
-                        }
+                        if (status == Status.SUCCESS)
+                            dayStartEndInfoManager.setDayEndTime(DateTime.getDateTime());
+                        updateView();
                         dialog.dismiss();
 
                     } else {

@@ -65,7 +65,7 @@ public class StudyInfoManager extends Model {
         studyInfoFile = null;
     }
 
-    public void set() throws DataKitException {
+    public void set() {
         Log.d(TAG, "set()...");
         ConfigInfo configInfo = modelManager.getConfigManager().getConfig().getConfig_info();
         studyInfoFile = new StudyInfo(configInfo.getId(), configInfo.getName(), configInfo.getVersion(), configInfo.getFilename());
@@ -83,7 +83,7 @@ public class StudyInfoManager extends Model {
         status = new Status(rank, Status.CLEAR_OLD_DATA);
     }
 
-    public void update() throws DataKitException {
+    public void update() {
         Log.d(TAG, "update()...");
         Status lastStatus;
         if (studyInfoDB == null) lastStatus = new Status(rank, Status.DATAKIT_NOT_AVAILABLE);
@@ -94,7 +94,7 @@ public class StudyInfoManager extends Model {
         notifyIfRequired(lastStatus);
     }
 
-    private StudyInfo readFromDataKit() throws DataKitException {
+    private StudyInfo readFromDataKit() {
         StudyInfo studyInfo = null;
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
@@ -114,18 +114,23 @@ public class StudyInfoManager extends Model {
         return studyInfo;
     }
 
-    public boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-        Log.d(TAG, "StudyInfoManager...writeToDataKit()");
-        if (!dataKitAPI.isConnected()) return false;
-        Gson gson = new Gson();
-        JsonObject sample = new JsonParser().parse(gson.toJson(studyInfoFile)).getAsJsonObject();
+    public boolean writeToDataKit() {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            Log.d(TAG, "StudyInfoManager...writeToDataKit()");
+            if (!dataKitAPI.isConnected()) return false;
+            Gson gson = new Gson();
+            JsonObject sample = new JsonParser().parse(gson.toJson(studyInfoFile)).getAsJsonObject();
 
-        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
-        studyInfoDB = studyInfoFile;
-        return true;
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+            dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
+            studyInfoDB = studyInfoFile;
+            return true;
+        } catch (DataKitException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     DataSourceBuilder createDataSourceBuilder() {

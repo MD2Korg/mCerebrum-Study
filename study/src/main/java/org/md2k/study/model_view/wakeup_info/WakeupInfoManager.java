@@ -65,12 +65,12 @@ public class WakeupInfoManager extends Model {
         status = new Status(rank, Status.WAKEUP_NOT_DEFINED);
     }
 
-    public void set() throws DataKitException {
+    public void set() {
         readStudyInfoFromDataKit();
         update();
     }
 
-    public void update() throws DataKitException {
+    public void update(){
         Status lastStatus;
         if (wakeupTimeDB == -1)
             lastStatus = new Status(rank, Status.WAKEUP_NOT_DEFINED);
@@ -86,7 +86,7 @@ public class WakeupInfoManager extends Model {
         return true;
     }
 
-    private void readStudyInfoFromDataKit() throws DataKitException {
+    private void readStudyInfoFromDataKit(){
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
             if (dataKitAPI.isConnected()) {
@@ -103,15 +103,20 @@ public class WakeupInfoManager extends Model {
     }
 
 
-    private boolean writeToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-        if (!dataKitAPI.isConnected()) return false;
-        if (!isValid()) return false;
-        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), wakeupTimeNew);
-        DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-        dataKitAPI.insert(dataSourceClient, dataTypeLong);
-        wakeupTimeDB = wakeupTimeNew;
-        return true;
+    private boolean writeToDataKit()  {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (!dataKitAPI.isConnected()) return false;
+            if (!isValid()) return false;
+            DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), wakeupTimeNew);
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            dataKitAPI.insert(dataSourceClient, dataTypeLong);
+            wakeupTimeDB = wakeupTimeNew;
+            return true;
+        } catch (DataKitException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     DataSourceBuilder createDataSourceBuilder() {
@@ -141,7 +146,7 @@ public class WakeupInfoManager extends Model {
         return dataDescriptor;
     }
 
-    public void save() throws DataKitException {
+    public void save() {
         if (writeToDataKit())
             wakeupTimeDB = wakeupTimeNew;
         set();

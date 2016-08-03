@@ -15,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.config.ConfigViewContent;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.UserView;
@@ -100,15 +99,11 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.hasExtra(EXIT)) {
-                try {
-                    ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
-                    ModelManager.getInstance(ActivityMain.this).clear();
-                    ModelManager.getInstance(ActivityMain.this).read();
-                    ModelManager.getInstance(ActivityMain.this).set();
-                    finish();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
+                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                ModelManager.getInstance(ActivityMain.this).clear();
+                ModelManager.getInstance(ActivityMain.this).read();
+                ModelManager.getInstance(ActivityMain.this).set();
+                finish();
             } else {
                 updateMenu();
             }

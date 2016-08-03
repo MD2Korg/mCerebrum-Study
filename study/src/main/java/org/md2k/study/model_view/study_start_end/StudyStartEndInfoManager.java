@@ -60,7 +60,7 @@ public class StudyStartEndInfoManager extends Model {
         status=new Status(rank, Status.NOT_DEFINED);
     }
 
-    public void set() throws DataKitException {
+    public void set() {
         Status lastStatus;
         readStudyStartFromDataKit();
         readStudyEndFromDataKit();
@@ -79,30 +79,38 @@ public class StudyStartEndInfoManager extends Model {
         status=new Status(rank, Status.NOT_DEFINED);
     }
 
-    private void readStudyStartFromDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
-        studyStartTime=-1;
-        if (dataKitAPI.isConnected()) {
-            DataSourceClient dataSourceClientStudyStart = dataKitAPI.register(createDataSourceBuilderStudyStart());
+    private void readStudyStartFromDataKit()  {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            studyStartTime = -1;
+            if (dataKitAPI.isConnected()) {
+                DataSourceClient dataSourceClientStudyStart = dataKitAPI.register(createDataSourceBuilderStudyStart());
                 ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyStart, 1);
                 if (dataTypes.size() != 0) {
                     DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                     studyStartTime = dataTypeLong.getSample();
                     if (!isToday(studyStartTime)) studyStartTime = -1;
+                }
             }
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
     }
 
-    private void readStudyEndFromDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
-        studyEndTime=-1;
-        if (dataKitAPI.isConnected()) {
-            DataSourceClient dataSourceClientStudyEnd = dataKitAPI.register(createDataSourceBuilderStudyEnd());
+    private void readStudyEndFromDataKit() {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            studyEndTime = -1;
+            if (dataKitAPI.isConnected()) {
+                DataSourceClient dataSourceClientStudyEnd = dataKitAPI.register(createDataSourceBuilderStudyEnd());
                 ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyEnd, 1);
                 if (dataTypes.size() != 0) {
                     DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                     studyEndTime = dataTypeLong.getSample();
                 }
+            }
+        } catch (DataKitException e) {
+            e.printStackTrace();
         }
     }
     boolean isToday(long timestamp) {
@@ -116,22 +124,31 @@ public class StudyStartEndInfoManager extends Model {
         return true;
     }
 
-    private boolean writeStudyStartToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
-        if (!dataKitAPI.isConnected()) return false;
-        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyStartTime);
-        DataSourceClient dataSourceClientStudyStart = dataKitAPI.register(createDataSourceBuilderStudyStart());
-        dataKitAPI.insert(dataSourceClientStudyStart, dataTypeLong);
+    private boolean writeStudyStartToDataKit()  {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (!dataKitAPI.isConnected()) return false;
+            DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyStartTime);
+            DataSourceClient dataSourceClientStudyStart = dataKitAPI.register(createDataSourceBuilderStudyStart());
+            dataKitAPI.insert(dataSourceClientStudyStart, dataTypeLong);
+        } catch (DataKitException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
-    private boolean writeStudyEndToDataKit() throws DataKitException {
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
-        if (!dataKitAPI.isConnected()) return false;
-        DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyEndTime);
-        DataSourceClient dataSourceClientStudyEnd = dataKitAPI.register(createDataSourceBuilderStudyEnd());
-        dataKitAPI.insert(dataSourceClientStudyEnd, dataTypeLong);
-        return true;
+    private boolean writeStudyEndToDataKit() {
+        try {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
+            if (!dataKitAPI.isConnected()) return false;
+            DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyEndTime);
+            DataSourceClient dataSourceClientStudyEnd = dataKitAPI.register(createDataSourceBuilderStudyEnd());
+            dataKitAPI.insert(dataSourceClientStudyEnd, dataTypeLong);
+            return true;
+        } catch (DataKitException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     DataSourceBuilder createDataSourceBuilderStudyStart() {
@@ -172,14 +189,14 @@ public class StudyStartEndInfoManager extends Model {
         return dataSourceBuilder;
     }
 
-    public void setStudyStartTime(long studyStartTime) throws DataKitException {
+    public void setStudyStartTime(long studyStartTime) {
         this.studyStartTime = studyStartTime;
         writeStudyStartToDataKit();
         reset();
 
     }
 
-    public void setStudyEndTime(long studyEndTime) throws DataKitException {
+    public void setStudyEndTime(long studyEndTime) {
         this.studyEndTime = studyEndTime;
         writeStudyEndToDataKit();
         reset();

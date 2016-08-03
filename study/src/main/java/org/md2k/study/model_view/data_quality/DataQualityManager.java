@@ -1,6 +1,5 @@
 package org.md2k.study.model_view.data_quality;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.study.Status;
@@ -52,11 +51,7 @@ public class DataQualityManager extends Model {
     @Override
     public void set() {
         Log.d(TAG, "set()...");
-        try {
-            clear();
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
+        clear();
         dataQualities.clear();
         dataQualityInfos.clear();
         final ArrayList<DataSource> dataQuality = modelManager.getConfigManager().getConfig().getData_quality();
@@ -78,7 +73,7 @@ public class DataQualityManager extends Model {
     }
 
     @Override
-    public void clear() throws DataKitException {
+    public void clear() {
         Log.d(TAG, "clear()...");
         status = new Status(rank, Status.NOT_DEFINED);
         if (dataQualities != null) {

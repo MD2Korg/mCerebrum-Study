@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -113,11 +112,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
     void clearModelManager() {
-        try {
-            ModelManager.getInstance(this).clear();
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
+        ModelManager.getInstance(this).clear();
     }
 
     void showProgressBar() {

@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.study.R;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -72,45 +71,42 @@ public class UserViewUserApp extends UserView {
     }
 
     private void addUserApp() {
-        try {
-            Log.d(TAG, "addUserApp()...");
-            final UserAppManager userAppManager = (UserAppManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_USER_APP);
-            gridViewApplication = (ExpandableHeightGridView) activity.findViewById(R.id.gridview);
-            Log.d(TAG, "addUserApp()...size=" + userAppManager.getUserApps().size());
-            AppAdapter appAdapter = new AppAdapter(activity, userAppManager.getUserApps());
-            gridViewApplication.setAdapter(appAdapter);
-            gridViewApplication.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String packageName = userAppManager.userApps.get(position).getAction().getPackage_name();
-                    String className = userAppManager.userApps.get(position).getAction().getClass_name();
-                    if (packageName != null && className != null) {
-                        Intent intent = new Intent();
-                        intent.setClassName(packageName, className);
-                        if (userAppManager.userApps.get(position).getAction().getId().endsWith(ModelFactory.MODEL_SELF_REPORT)) {
-                            String idd = userAppManager.userApps.get(position).getAction().getId();
-                            String type = userAppManager.userApps.get(position).getAction().getType();
-                            intent.putExtra("id", idd);
-                            intent.putExtra("type", type);
-                        }
+        Log.d(TAG, "addUserApp()...");
+        final UserAppManager userAppManager = (UserAppManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_USER_APP);
+        gridViewApplication = (ExpandableHeightGridView) activity.findViewById(R.id.gridview);
+        Log.d(TAG, "addUserApp()...size=" + userAppManager.getUserApps().size());
+        AppAdapter appAdapter = new AppAdapter(activity, userAppManager.getUserApps());
+        gridViewApplication.setAdapter(appAdapter);
+        gridViewApplication.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String packageName = userAppManager.userApps.get(position).getAction().getPackage_name();
+                String className = userAppManager.userApps.get(position).getAction().getClass_name();
+                if (packageName != null && className != null) {
+                    Intent intent = new Intent();
+                    intent.setClassName(packageName, className);
+                    if (userAppManager.userApps.get(position).getAction().getId().endsWith(ModelFactory.MODEL_SELF_REPORT)) {
+                        String idd = userAppManager.userApps.get(position).getAction().getId();
+                        String type = userAppManager.userApps.get(position).getAction().getType();
+                        intent.putExtra("id", idd);
+                        intent.putExtra("type", type);
+                    }
+                    activity.startActivity(intent);
+                } else if (packageName != null) {
+                    Intent LaunchIntent = activity.getPackageManager().getLaunchIntentForPackage(packageName);
+                    activity.startActivity(LaunchIntent);
+                } else if (className != null) {
+                    try {
+                        Class<?> c = Class.forName(className);
+                        Intent intent = new Intent(activity, c);
                         activity.startActivity(intent);
-                    } else if (packageName != null) {
-                        Intent LaunchIntent = activity.getPackageManager().getLaunchIntentForPackage(packageName);
-                        activity.startActivity(LaunchIntent);
-                    } else if (className != null) {
-                        try {
-                            Class<?> c = Class.forName(className);
-                            Intent intent = new Intent(activity, c);
-                            activity.startActivity(intent);
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
                     }
                 }
-            });
-        } catch (DataKitException e) {
-            e.printStackTrace();
-        }
+            }
+        });
+
     }
 
 }

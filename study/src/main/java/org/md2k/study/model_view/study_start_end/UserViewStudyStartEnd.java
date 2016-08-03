@@ -6,7 +6,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.R;
 import org.md2k.study.Status;
@@ -90,17 +89,13 @@ public class UserViewStudyStartEnd extends UserView {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    StudyStartEndInfoManager studyStartEndInfoManager = (StudyStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_STUDY_START_END);
-                    Status status = studyStartEndInfoManager.getCurrentStatusDetails();
-                    if (status.getStatus() == Status.STUDY_START_NOT_AVAILABLE || status.getStatus() == Status.STUDY_COMPLETED)
-                        studyStartEndInfoManager.setStudyStartTime(DateTime.getDateTime());
-                    else if (status.getStatus() == Status.STUDY_RUNNING)
-                        studyStartEndInfoManager.setStudyEndTime(DateTime.getDateTime());
-                    updateView();
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
+                StudyStartEndInfoManager studyStartEndInfoManager = (StudyStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_STUDY_START_END);
+                Status status = studyStartEndInfoManager.getCurrentStatusDetails();
+                if (status.getStatus() == Status.STUDY_START_NOT_AVAILABLE || status.getStatus() == Status.STUDY_COMPLETED)
+                    studyStartEndInfoManager.setStudyStartTime(DateTime.getDateTime());
+                else if (status.getStatus() == Status.STUDY_RUNNING)
+                    studyStartEndInfoManager.setStudyEndTime(DateTime.getDateTime());
+                updateView();
             }
         });
     }
