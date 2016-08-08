@@ -1,5 +1,6 @@
 package org.md2k.study.model_view.app_reset;
 
+import android.os.Handler;
 import android.widget.Toast;
 
 import org.md2k.study.Status;
@@ -33,20 +34,38 @@ import org.md2k.study.model_view.Model;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AppResetManager extends Model {
+    Handler handlerReset;
 
     public AppResetManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
         status = new Status(rank,Status.SUCCESS);
+        handlerReset=new Handler();
     }
 
+    Runnable runnableReset=new Runnable() {
+        @Override
+        public void run() {
+            Toast.makeText(modelManager.getContext(), "Resetting...", Toast.LENGTH_LONG).show();
+            modelManager.clear();
+            modelManager.read();
+            modelManager.set();
+            Toast.makeText(modelManager.getContext(),"Resetting...DONE",Toast.LENGTH_LONG).show();
+            handlerReset.postDelayed(this, 60000);
+        }
+    };
+
     public void resetApp() {
-        Toast.makeText(modelManager.getContext(), "Resetting...", Toast.LENGTH_LONG).show();
+/*        Toast.makeText(modelManager.getContext(), "Resetting...", Toast.LENGTH_LONG).show();
         modelManager.clear();
         modelManager.read();
         modelManager.set();
         Toast.makeText(modelManager.getContext(),"Resetting...DONE",Toast.LENGTH_LONG).show();
+*/        handlerReset.removeCallbacks(runnableReset);
+        handlerReset.post(runnableReset);
+
     }
     public void clear(){
+        handlerReset.removeCallbacks(runnableReset);
         status = new Status(rank,Status.SUCCESS);
     }
     @Override

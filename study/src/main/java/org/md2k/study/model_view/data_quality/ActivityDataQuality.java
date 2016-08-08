@@ -2,6 +2,7 @@ package org.md2k.study.model_view.data_quality;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +14,7 @@ import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.study.R;
+import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -66,12 +68,12 @@ public class ActivityDataQuality extends AppCompatActivity {
                             startActivity(intent);
                         }
                     } catch (DataKitException e) {
-                        e.printStackTrace();
+                        LocalBroadcastManager.getInstance(ActivityDataQuality.this).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
                     }
                 }
             });
         }catch (Exception ignored){
-
+            LocalBroadcastManager.getInstance(ActivityDataQuality.this).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
         }
     }
 

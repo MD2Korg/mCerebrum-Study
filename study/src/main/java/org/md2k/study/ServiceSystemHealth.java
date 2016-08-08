@@ -48,8 +48,7 @@ public class ServiceSystemHealth extends Service {
     public void onCreate() {
         Log.d(TAG, "onCreate...");
         super.onCreate();
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiverRestart,
-                new IntentFilter(INTENT_RESTART));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiverRestart, new IntentFilter(INTENT_RESTART));
         modelManager=ModelManager.getInstance(getApplicationContext());
         Log.d(TAG,"...onCreate");
     }
@@ -57,7 +56,7 @@ public class ServiceSystemHealth extends Service {
     private BroadcastReceiver mMessageReceiverRestart = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            restart();
+            stop();
         }
     };
 
@@ -68,11 +67,25 @@ public class ServiceSystemHealth extends Service {
         isRunning=true;
         return START_STICKY;
     }
-    void restart(){
+    void stop(){
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverRestart);
         modelManager.clear();
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        start();
+
+    }
+    void start(){
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiverRestart, new IntentFilter(INTENT_RESTART));
         modelManager.read();
         modelManager.set();
-
+    }
+    void restart(){
+        stop();
+        start();
     }
 
     @Override
@@ -85,7 +98,6 @@ public class ServiceSystemHealth extends Service {
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverRestart);
         modelManager.clear();
         isRunning=false;
-
         super.onDestroy();
     }
 }

@@ -1,5 +1,8 @@
 package org.md2k.study.model_view.day_type;
 
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,6 +19,7 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -109,7 +113,7 @@ public class DayTypeManager extends Model {
                 }
             }
         } catch (DataKitException e) {
-            e.printStackTrace();
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
         }
     }
 
@@ -125,7 +129,7 @@ public class DayTypeManager extends Model {
             dataKitAPI.insert(dataSourceClient, dataTypeJSONObject);
             dayTypeDB = dayTypeNew;
         } catch (DataKitException e) {
-            e.printStackTrace();
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
             return false;
         }
         return true;

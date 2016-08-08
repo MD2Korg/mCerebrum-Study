@@ -74,7 +74,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
     boolean isStudyRunning() {
-        return ServiceSystemHealth.isRunning && ServiceSystemHealth.RANK_LIMIT == Status.RANK_SUCCESS && (ModelManager.getInstance(this).getStatus().getRank()<=Status.RANK_ADMIN_OPTIONAL);
+        return ServiceSystemHealth.isRunning && ServiceSystemHealth.RANK_LIMIT == Status.RANK_SUCCESS && (ModelManager.getInstance(this).getStatus().getRank() <= Status.RANK_ADMIN_OPTIONAL);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ActivityStartScreen extends AppCompatActivity {
             copyDefaultConfig();
             loadModelManager();
         } else if (!ModelManager.getInstance(this).getConfigManager().isValid() && !isAlertDialogShown) {
-            isAlertDialogShown=true;
+            isAlertDialogShown = true;
             AlertDialogs.AlertDialog(this, "Configuration file is out of date", "Please download the latest configuration file from \"Settings\".", R.drawable.ic_info_teal_48dp, "Ok", null, null, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -118,7 +118,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     void showProgressBar() {
         try {
             progressDialog.show();
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
 
         }
     }
@@ -127,23 +127,19 @@ public class ActivityStartScreen extends AppCompatActivity {
         try {
             if (progressDialog.isShowing())
                 progressDialog.dismiss();
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
 
         }
     }
 
     void loadModelManager() {
-        try {
-            Log.d(TAG, "startService...");
-            ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
-            ModelManager.getInstance(this).clear();
-            ModelManager.getInstance(this).read();
-            ModelManager.getInstance(this).set();
-            handler.removeCallbacks(runnableWaitLoading);
-            handler.postDelayed(runnableWaitLoading, 500);
-        } catch (Exception ignored) {
-
-        }
+        Log.d(TAG, "startService...");
+        ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+        ModelManager.getInstance(this).clear();
+        ModelManager.getInstance(this).read();
+        ModelManager.getInstance(this).set();
+        handler.removeCallbacks(runnableWaitLoading);
+        handler.postDelayed(runnableWaitLoading, 500);
     }
 
     void copyDefaultConfig() {
@@ -154,7 +150,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
     void setUI() {
-        Log.d(TAG,"setUI()...");
+        Log.d(TAG, "setUI()...");
         setButtonStartStudy();
         setButtonSettings();
         setButtonUpdatemCerebrum();
@@ -200,7 +196,8 @@ public class ActivityStartScreen extends AppCompatActivity {
             }
         });
     }
-    void checkUpdates(){
+
+    void checkUpdates() {
         if (ModelManager.getInstance(ActivityStartScreen.this).getConfigManager().getConfig().getConfig_info().isAuto_update()) {
             final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
             showProgressBar();

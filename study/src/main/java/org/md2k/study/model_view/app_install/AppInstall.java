@@ -172,8 +172,11 @@ public class AppInstall {
                     latestVersion = retrieveAndVerifyLatestVersion(Constants.TEMP_DIRECTORY + filename);
                     MySharedPref.getInstance(context).write(app.getId(), latestVersion);
                     onDataChangeListener.onDataChange(0, latestVersion);
-                } else
-                    Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
+                } else{
+                    latestVersion=curVersion;
+                    onDataChangeListener.onDataChange(0,null);
+                }
+                //    Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
                 FileManager.deleteFile(Constants.TEMP_DIRECTORY + filename);
             }
         });

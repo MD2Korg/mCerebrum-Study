@@ -1,5 +1,8 @@
 package org.md2k.study.model_view.privacy_control;
 
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+
 import com.google.gson.Gson;
 
 import org.md2k.datakitapi.DataKitAPI;
@@ -10,6 +13,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -109,11 +113,12 @@ public class PrivacyControlManager extends Model {
                             }
                         }
                     } catch (Exception ignored) {
+                        LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
                     }
                 }
             }
         } catch (DataKitException e) {
-            e.printStackTrace();
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
         }
         return runningTime;
     }
@@ -132,11 +137,13 @@ public class PrivacyControlManager extends Model {
                         privacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
                     } catch (Exception ignored) {
                         privacyData = null;
+                        LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
                     }
                 }
             }
         } catch (DataKitException e) {
-            e.printStackTrace();
+            privacyData=null;
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
         }
         return privacyData;
     }

@@ -3,6 +3,7 @@ package org.md2k.study.model_view.data_quality;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
@@ -14,6 +15,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.config.ConfigDataQualityView;
 import org.md2k.study.controller.ModelManager;
@@ -119,9 +121,7 @@ public class DataQuality {
                     });
                 }
             } catch (DataKitException e) {
-                handler.postDelayed(this, 1000);
-                Log.e(TAG,"error subscribing..runnableSubscribe...");
-                e.printStackTrace();
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
             }
         }
     };

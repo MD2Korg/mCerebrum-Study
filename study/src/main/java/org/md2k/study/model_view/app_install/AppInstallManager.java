@@ -1,5 +1,7 @@
 package org.md2k.study.model_view.app_install;
 
+import android.widget.Toast;
+
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigApp;
@@ -38,6 +40,7 @@ import java.util.ArrayList;
 public class AppInstallManager extends Model {
     private static final String TAG = AppInstallManager.class.getSimpleName() ;
     ArrayList<AppInstall> appInstallList;
+    boolean isShown =false;
     public ArrayList<AppInstall> getAppInstallList() {
         return appInstallList;
     }
@@ -60,6 +63,7 @@ public class AppInstallManager extends Model {
         status=new Status(rank, Status.APP_NOT_INSTALLED);
     }
 
+
     public void set()  {
         Log.d(TAG, "set()...");
         Status curStatus;
@@ -70,7 +74,14 @@ public class AppInstallManager extends Model {
                 appInstallList.get(i).setLatestVersionName(modelManager.getContext(), new OnDataChangeListener() {
                     @Override
                     public void onDataChange(int index, String str) {
-                        if(str==null || str.equals(appInstallList.get(finalI).getCurVersion())) return;
+                        if(str==null && !isShown){
+                            Toast.makeText(modelManager.getContext(), "Error: Internet Connection Error", Toast.LENGTH_LONG).show();
+                            isShown =true;
+                            return;
+                        }
+                        else if(str!=null && str.equals(appInstallList.get(finalI).getCurVersion())) {
+                            return;
+                        }
                         Status curStatus;
                         int total = size();
                         int install = sizeInstalled();
@@ -99,7 +110,7 @@ public class AppInstallManager extends Model {
         notifyIfRequired(curStatus);
     }
     public void clear(){
-        status=new Status(rank,Status.APP_NOT_INSTALLED);
+        status=new Status(rank,Status.APP_NOT_INSTALLED); isShown =false;
     }
     private int size(){
         return appInstallList.size();
@@ -132,6 +143,10 @@ public class AppInstallManager extends Model {
             getAppInstallList().get(now).setLatestVersionName(modelManager.getContext(), new OnDataChangeListener() {
                 @Override
                 public void onDataChange(int i, String str) {
+                    if(str==null && !isShown){
+                        Toast.makeText(modelManager.getContext(), "Error: Internet Connection Error", Toast.LENGTH_LONG).show();
+                        isShown =true;
+                    }
                     Log.d(TAG, "updateVersionAll()..." + str);
                     onDataChangeListener.onDataChange(now, str);
                     updateVersionAll(now + 1, onDataChangeListener);

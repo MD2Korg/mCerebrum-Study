@@ -1,5 +1,8 @@
 package org.md2k.study.model_view.sleep_info;
 
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
@@ -12,6 +15,7 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -97,7 +101,7 @@ public class SleepInfoManager extends Model {
                 }
             }
         } catch (DataKitException e) {
-            e.printStackTrace();
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
         }
     }
 
@@ -112,7 +116,7 @@ public class SleepInfoManager extends Model {
             sleepTimeDB = sleepTimeNew;
             return true;
         } catch (DataKitException e) {
-            e.printStackTrace();
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
             return false;
         }
     }
