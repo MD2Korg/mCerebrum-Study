@@ -162,6 +162,7 @@ public class AppInstall {
         String link = app.getDownload_link() + "/latest";
         final String filename = "version_" + UUID.randomUUID().toString() + ".txt";
         if (app.getDownload_link().startsWith("market")) {
+            latestVersion=curVersion;
             onDataChangeListener.onDataChange(0, latestVersion);
             return;
         }

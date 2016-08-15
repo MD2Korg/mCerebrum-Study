@@ -69,6 +69,7 @@ public class AppService {
         Intent intent = new Intent();
         intent.setClassName(package_name, service);
         context.stopService(intent);
+
     }
 
     public Status getStatus() {

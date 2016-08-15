@@ -75,7 +75,7 @@ public class AppInstallManager extends Model {
                     @Override
                     public void onDataChange(int index, String str) {
                         if(str==null && !isShown){
-                            Toast.makeText(modelManager.getContext(), "Error: Internet Connection Error", Toast.LENGTH_LONG).show();
+                            Toast.makeText(modelManager.getContext(), "Error: Internet Connection Error", Toast.LENGTH_SHORT).show();
                             isShown =true;
                             return;
                         }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
+import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigManager;
@@ -62,6 +63,7 @@ public class ModelManager {
     }
 
     public void clear() {
+        org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.clear()");
         isUpdating = true;
         for (int i = Status.RANK_SUCCESS; i <= Status.RANK_BEGIN; i++) {
             for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
@@ -74,6 +76,7 @@ public class ModelManager {
     }
 
     public void read() {
+        org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.read()");
         modelHashMap.clear();
         configManager = new ConfigManager(context);
         if (!modelHashMap.containsKey(ModelFactory.MODEL_CONFIG_INFO))
@@ -95,6 +98,7 @@ public class ModelManager {
     }
 
     public void set() {
+        org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.set()");
         status = new Status(Status.RANK_BEGIN, Status.NOT_DEFINED);
         isUpdating = false;
         update();
@@ -103,6 +107,7 @@ public class ModelManager {
     public void update() {
         if (isUpdating) return;
         isUpdating = true;
+        org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.update()");
         Log.d(TAG, "update()...");
         Status lastStatus = status;
         while (true) {
@@ -145,6 +150,7 @@ public class ModelManager {
     }
 
     private void setNow(int state) {
+        org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.set("+state+")");
         Log.d(TAG, "set(" + state + ")...");
         if (state < Status.RANK_SUCCESS || state > Status.RANK_BEGIN) return;
         for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet()) {
@@ -156,6 +162,7 @@ public class ModelManager {
     }
 
     private void clear(int state) {
+        org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.clear("+state+")");
         Log.d(TAG, "clear(" + Status.RANK_SUCCESS + "..." + state + ")...");
         for (int s = Status.RANK_SUCCESS; s <= state; s++) {
             for (HashMap.Entry<String, Model> entry : modelHashMap.entrySet())

@@ -70,7 +70,7 @@ public class SleepInfoManager extends Model {
         status=new Status(rank, Status.SLEEP_NOT_DEFINED);
     }
     public void set() {
-        readStudyInfoFromDataKit();
+        readSleepInfoFromDataKit();
         update();
     }
     public void update() {
@@ -88,7 +88,7 @@ public class SleepInfoManager extends Model {
         return true;
     }
 
-    private void readStudyInfoFromDataKit(){
+    private void readSleepInfoFromDataKit(){
         try {
             sleepTimeDB = -1;
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());

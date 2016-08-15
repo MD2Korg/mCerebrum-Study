@@ -156,8 +156,10 @@ public class DataQuality {
         try {
             handler.removeCallbacks(runnableSubscribe);
             handler.removeCallbacks(runnableCheckAvailability);
-            if (dataSourceClient != null && DataKitAPI.getInstance(context).isConnected())
+            if (dataSourceClient != null && DataKitAPI.getInstance(context).isConnected()) {
                 DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
+                dataSourceClient=null;
+            }
         } catch (DataKitException e) {
             e.printStackTrace();
         }

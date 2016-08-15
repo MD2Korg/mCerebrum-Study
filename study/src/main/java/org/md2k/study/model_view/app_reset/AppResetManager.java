@@ -55,17 +55,17 @@ public class AppResetManager extends Model {
     };
 
     public void resetApp() {
-/*        Toast.makeText(modelManager.getContext(), "Resetting...", Toast.LENGTH_LONG).show();
+        Toast.makeText(modelManager.getContext(), "Resetting...", Toast.LENGTH_LONG).show();
         modelManager.clear();
         modelManager.read();
         modelManager.set();
         Toast.makeText(modelManager.getContext(),"Resetting...DONE",Toast.LENGTH_LONG).show();
-*/        handlerReset.removeCallbacks(runnableReset);
-        handlerReset.post(runnableReset);
+//        handlerReset.removeCallbacks(runnableReset);
+//        handlerReset.post(runnableReset);
 
     }
     public void clear(){
-        handlerReset.removeCallbacks(runnableReset);
+  //      handlerReset.removeCallbacks(runnableReset);
         status = new Status(rank,Status.SUCCESS);
     }
     @Override

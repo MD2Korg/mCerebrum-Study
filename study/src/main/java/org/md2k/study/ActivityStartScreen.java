@@ -26,6 +26,7 @@ import org.md2k.study.model_view.app_install.AppInstallManager;
 import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.Report.LogStorage;
 import org.md2k.utilities.UI.AlertDialogs;
 
 import io.fabric.sdk.android.Fabric;
@@ -44,6 +45,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         Log.d(TAG, "onCreate()...");
         handler = new Handler();
         Fabric.with(this, new Crashlytics());

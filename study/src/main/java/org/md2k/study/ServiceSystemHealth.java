@@ -56,6 +56,7 @@ public class ServiceSystemHealth extends Service {
     private BroadcastReceiver mMessageReceiverRestart = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             stop();
         }
     };

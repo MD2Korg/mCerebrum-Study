@@ -78,6 +78,11 @@ public class AppServiceManager extends Model {
         handler.removeCallbacks(runnableServiceRun);
         for (int i = 0; i < appServiceList.size(); i++)
             appServiceList.get(i).stop();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 //        appServiceList.clear();
         status=new Status(rank,Status.NOT_DEFINED);
     }
@@ -98,11 +103,21 @@ public class AppServiceManager extends Model {
             appServiceList.get(i).setActive(false);
             appServiceList.get(i).stop();
         }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
     public void startAll(){
         for(int i=0;i<appServiceList.size();i++) {
             appServiceList.get(i).setActive(true);
             appServiceList.get(i).start();
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }
