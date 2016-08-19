@@ -21,6 +21,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -52,10 +54,10 @@ import java.util.UUID;
 public class AppInstall {
     private static final String TAG = AppInstall.class.getSimpleName();
     ConfigApp app;
+    Context context;
     private String curVersion;
     private String latestVersion;
     private boolean installed;
-    Context context;
 
     AppInstall(Context context, ConfigApp app) {
         this.context = context;
@@ -200,14 +202,13 @@ public class AppInstall {
             while ((str = in.readLine()) != null) {
                 str1 += str;
                 if (str1.contains("<title>") && str1.contains("</title>")) {
-                    int start_id = str1.indexOf("<title>") + 7;
-                    int end_id = str1.indexOf("</title>");
 
-                    str = str1.substring(start_id, end_id);
-                    String[] s = str.split(" ");
-                    if (s.length >= 2) {
-                        versionName = s[1];
+                    Matcher matcher = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+").matcher(str);
+                    if (matcher.find()) {
+                        versionName = matcher.group(0).toString();
+                        break;
                     }
+
                 }
             }
             in.close();
