@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import org.md2k.study.R;
-import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigView;
 import org.md2k.study.config.ConfigViewContent;
@@ -98,7 +97,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
+                ModelManager.RANK_LIMIT = Status.RANK_SUCCESS;
                 modelManager.clear();
                 modelManager.read();
                 modelManager.set();
@@ -113,7 +112,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                ModelManager.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
                 modelManager.clear();
                 modelManager.read();
                 modelManager.set();

@@ -6,7 +6,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -68,7 +68,7 @@ public class DataKitConnectManager extends Model {
                     }
                 });
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             }
         }
     }

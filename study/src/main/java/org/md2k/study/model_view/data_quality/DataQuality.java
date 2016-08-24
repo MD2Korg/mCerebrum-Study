@@ -15,7 +15,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.config.ConfigDataQualityView;
 import org.md2k.study.controller.ModelManager;
@@ -77,6 +77,7 @@ public class DataQuality {
 
     public void start() {
         Log.d(TAG,"DataQuality start()..."+dataSource.getType()+" "+dataSource.getId());
+        handler.removeCallbacks(runnableSubscribe);
         handler.post(runnableSubscribe);
     }
 
@@ -121,7 +122,7 @@ public class DataQuality {
                     });
                 }
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             }
         }
     };

@@ -19,7 +19,7 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -117,7 +117,7 @@ public class UserInfoManager extends Model {
                 isInDatabase = true;
             }
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
     }
 
@@ -143,7 +143,7 @@ public class UserInfoManager extends Model {
             isInDatabase = true;
             return true;
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             return false;
         }
     }

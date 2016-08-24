@@ -99,7 +99,7 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.hasExtra(EXIT)) {
-                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+                ModelManager.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
                 ModelManager.getInstance(ActivityMain.this).clear();
                 ModelManager.getInstance(ActivityMain.this).read();
                 ModelManager.getInstance(ActivityMain.this).set();
@@ -113,7 +113,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        if (ServiceSystemHealth.RANK_LIMIT >= Status.RANK_ADMIN_OPTIONAL)
+        if (ModelManager.RANK_LIMIT >= Status.RANK_ADMIN_OPTIONAL)
             finish();
     }
 

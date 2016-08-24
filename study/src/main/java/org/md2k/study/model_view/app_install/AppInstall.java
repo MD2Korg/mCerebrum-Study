@@ -76,12 +76,6 @@ public class AppInstall {
     public void clear() {
     }
 
-    public void update() {
-        installed = Apps.isPackageInstalled(context, app.getPackage_name());
-        curVersion = setVersionName();
-        latestVersion = MySharedPref.getInstance(context).read(app.getId());
-    }
-
     public void downloadAndInstallApp(final Context context) {
         final String filename = "file_" + app.getId() + latestVersion + ".apk";
         if (app.getDownload_link().startsWith("market")) {
@@ -103,46 +97,27 @@ public class AppInstall {
                 }
             });
         } else {
-            if (latestVersion == null) {
-                setLatestVersionName(context, new OnDataChangeListener() {
-                    @Override
-                    public void onDataChange(int now, String str) {
-                        String link = app.getDownload_link() +
-                                "/download/" + latestVersion +
-                                "/" + app.getId() +
-                                latestVersion + ".apk";
-                        download(context, filename, link, true, new OnCompletionListener() {
-                            @Override
-                            public void OnCompleted(int curStatus) {
-                                if (curStatus == Status.SUCCESS) {
-                                    Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY + filename)), "application/vnd.android.package-archive");
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    context.startActivity(intent);
-                                }
+            setLatestVersionName(context, new OnDataChangeListener() {
+                @Override
+                public void onDataChange(int now, String str) {
+                    String link = app.getDownload_link() +
+                            "/download/" + latestVersion +
+                            "/" + app.getId() +
+                            latestVersion + ".apk";
+                    download(context, filename, link, true, new OnCompletionListener() {
+                        @Override
+                        public void OnCompleted(int curStatus) {
+                            if (curStatus == Status.SUCCESS) {
+                                Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY + filename)), "application/vnd.android.package-archive");
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(intent);
                             }
-                        });
-                    }
-                });
-            } else {
-                String link = app.getDownload_link() +
-                        "/download/" + latestVersion +
-                        "/" + app.getId() +
-                        latestVersion + ".apk";
-                download(context, filename, link, true, new OnCompletionListener() {
-                    @Override
-                    public void OnCompleted(int curStatus) {
-                        if (curStatus == Status.SUCCESS) {
-                            Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY + filename)), "application/vnd.android.package-archive");
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(intent);
                         }
-                    }
-                });
-            }
+                    });
+                }
+            });
         }
     }
 
@@ -163,26 +138,26 @@ public class AppInstall {
     public void setLatestVersionName(final Context context, final OnDataChangeListener onDataChangeListener) {
         String link = app.getDownload_link() + "/latest";
         final String filename = "version_" + UUID.randomUUID().toString() + ".txt";
-        if (app.getDownload_link().startsWith("market")) {
-            latestVersion=curVersion;
-            onDataChangeListener.onDataChange(0, latestVersion);
-            return;
-        }
-        download(context, filename, link, false, new OnCompletionListener() {
-            @Override
-            public void OnCompleted(int curStatus) {
-                if (curStatus == Status.SUCCESS) {
-                    latestVersion = retrieveAndVerifyLatestVersion(Constants.TEMP_DIRECTORY + filename);
-                    MySharedPref.getInstance(context).write(app.getId(), latestVersion);
-                    onDataChangeListener.onDataChange(0, latestVersion);
-                } else{
-                    latestVersion=curVersion;
-                    onDataChangeListener.onDataChange(0,null);
+        if (app.getDownload_link().startsWith("market") || app.getDownload_link().endsWith(".apk")) {
+            latestVersion = curVersion;
+            onDataChangeListener.onDataChange(0, "no_version");
+        } else {
+            download(context, filename, link, false, new OnCompletionListener() {
+                @Override
+                public void OnCompleted(int curStatus) {
+                    if (curStatus == Status.SUCCESS) {
+                        latestVersion = retrieveAndVerifyLatestVersion(Constants.TEMP_DIRECTORY + filename);
+                        MySharedPref.getInstance(context).write(app.getId(), latestVersion);
+                        onDataChangeListener.onDataChange(0, latestVersion);
+                    } else {
+                        latestVersion = curVersion;
+                        onDataChangeListener.onDataChange(0, null);
+                    }
+                    //    Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
+                    FileManager.deleteFile(Constants.TEMP_DIRECTORY + filename);
                 }
-                //    Toast.makeText(context, new Status(Status.RANK_SUCCESS, curStatus).getMessage(), Toast.LENGTH_LONG).show();
-                FileManager.deleteFile(Constants.TEMP_DIRECTORY + filename);
-            }
-        });
+            });
+        }
     }
 
     private String retrieveAndVerifyLatestVersion(String filename) {

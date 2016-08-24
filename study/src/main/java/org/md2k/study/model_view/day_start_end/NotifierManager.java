@@ -20,7 +20,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.notification.NotificationRequests;
 import org.md2k.utilities.data_format.notification.NotificationResponse;
@@ -108,7 +108,7 @@ public class NotifierManager {
                     subscribeNotificationResponse();
                 }
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             }
         }
     };
@@ -126,7 +126,7 @@ public class NotifierManager {
                     subscribeNotificationAck();
                 }
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             }
         }
     };
@@ -159,7 +159,7 @@ public class NotifierManager {
                                         break;
                                 }
                             } catch (DataKitException e) {
-                                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
                             }catch (Exception ignored){
 
                             }
@@ -197,7 +197,7 @@ public class NotifierManager {
             dataKitAPI.insert(dataSourceClientRequest, dataTypeJSONObject);
             Log.d(TAG, "...insertDataToDataKit()");
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
     }
 }

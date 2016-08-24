@@ -40,7 +40,6 @@ import java.util.ArrayList;
 public class AppInstallManager extends Model {
     private static final String TAG = AppInstallManager.class.getSimpleName() ;
     ArrayList<AppInstall> appInstallList;
-    boolean isShown =false;
     public ArrayList<AppInstall> getAppInstallList() {
         return appInstallList;
     }
@@ -67,37 +66,8 @@ public class AppInstallManager extends Model {
     public void set()  {
         Log.d(TAG, "set()...");
         Status curStatus;
-        for(int i=0;i<appInstallList.size();i++) {
-            appInstallList.get(i).update();
-            if(modelManager.getConfigManager().getConfig().getConfig_info().isAuto_update() && appInstallList.get(i).getLatestVersion()==null){
-                final int finalI = i;
-                appInstallList.get(i).setLatestVersionName(modelManager.getContext(), new OnDataChangeListener() {
-                    @Override
-                    public void onDataChange(int index, String str) {
-                        if(str==null && !isShown){
-                            Toast.makeText(modelManager.getContext(), "Error: Internet Connection Error", Toast.LENGTH_SHORT).show();
-                            isShown =true;
-                            return;
-                        }
-                        else if(str!=null && str.equals(appInstallList.get(finalI).getCurVersion())) {
-                            return;
-                        }
-                        Status curStatus;
-                        int total = size();
-                        int install = sizeInstalled();
-                        int update = sizeUpdate();
-                        if (update == 0 && total == install)
-                            curStatus= new Status(rank,Status.SUCCESS);
-                        else if (total != install)
-                            curStatus= new Status(rank,Status.APP_NOT_INSTALLED);
-                        else curStatus= new Status(rank,Status.APP_UPDATE_AVAILABLE);
-                        Log.d(TAG,"status = "+status.log()+" latestStatus="+curStatus.log());
-                        notifyIfRequired(curStatus);
-                    }
-                });
-            }
-
-        }
+        for(int i=0;i<appInstallList.size();i++)
+            appInstallList.get(i).set();
         int total = size();
         int install = sizeInstalled();
         int update = sizeUpdate();
@@ -110,7 +80,7 @@ public class AppInstallManager extends Model {
         notifyIfRequired(curStatus);
     }
     public void clear(){
-        status=new Status(rank,Status.APP_NOT_INSTALLED); isShown =false;
+        status=new Status(rank,Status.APP_NOT_INSTALLED);
     }
     private int size(){
         return appInstallList.size();
@@ -136,20 +106,25 @@ public class AppInstallManager extends Model {
         if (now >= getAppInstallList().size()) {
             set();
             if(onDataChangeListener!=null)
-                onDataChangeListener.onDataChange(now, String.valueOf(status.getStatus()));
+                onDataChangeListener.onDataChange(getAppInstallList().size(), String.valueOf(status.getStatus()));
             return;
         }
         if (getAppInstallList().get(now).getDownload_link().endsWith("releases")) {
             getAppInstallList().get(now).setLatestVersionName(modelManager.getContext(), new OnDataChangeListener() {
                 @Override
                 public void onDataChange(int i, String str) {
-                    if(str==null && !isShown){
+                    if(str==null){
                         Toast.makeText(modelManager.getContext(), "Error: Internet Connection Error", Toast.LENGTH_LONG).show();
-                        isShown =true;
+                        onDataChangeListener.onDataChange(now, null);
+                        updateVersionAll(getAppInstallList().size(), onDataChangeListener);
+                    }else if(str.equals("no_version")) {
+                        Log.d(TAG, "updateVersionAll()..." + str);
+                        onDataChangeListener.onDataChange(now, null);
+                        updateVersionAll(now + 1, onDataChangeListener);
+                    }else{
+                        onDataChangeListener.onDataChange(now, str);
+                        updateVersionAll(now + 1, onDataChangeListener);
                     }
-                    Log.d(TAG, "updateVersionAll()..." + str);
-                    onDataChangeListener.onDataChange(now, str);
-                    updateVersionAll(now + 1, onDataChangeListener);
 
                 }
             });

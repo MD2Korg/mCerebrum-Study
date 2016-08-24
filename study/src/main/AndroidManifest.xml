@@ -125,10 +125,6 @@
             android:name=".model_view.data_quality.ActivityYouTube"
             android:label="Video" />
 
-        <service
-            android:name=".ServiceSystemHealth"
-            android:enabled="true"
-            android:exported="true" />
         <receiver android:name=".BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

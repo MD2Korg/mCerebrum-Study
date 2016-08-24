@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
-import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.app_install.AppInstallManager;
@@ -33,67 +32,76 @@ import io.fabric.sdk.android.Fabric;
 
 public class ActivityStartScreen extends AppCompatActivity {
     private static final String TAG = ActivityStartScreen.class.getSimpleName();
-    int state;
-    private static final int START_SCREEN = 0;
-    private static final int SETTINGS = 1;
-    private static final int START_STUDY = 2;
-    private static final int EXIT = 3;
     Handler handler;
     ProgressDialog progressDialog;
     boolean isAlertDialogShown;
+    ModelManager modelManager;
+    boolean isWaitLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
-        Log.d(TAG, "onCreate()...");
         handler = new Handler();
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start_screen);
-        Log.d(TAG, "...onCreate()");
+        modelManager=ModelManager.getInstance(getApplicationContext());
         progressDialog = new ProgressDialog(this, android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
         progressDialog.setMessage("Loading...");
         progressDialog.setIndeterminate(true);
         isAlertDialogShown = false;
-        MySharedPref.getInstance(this).clear();
+        if (isStudyRunning()) {
+            startStudy();
+        } else {
+            loadModelManager();
+        }
+
     }
 
     @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart()...");
-        prepare();
+        if (isStudyRunning()) {
+            startStudy();
+        }else{
+            setUI();
+        }
+    }
+    void startStudy(){
+        Intent intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
+        startActivity(intent);
     }
 
-    void prepare() {
-        if (isStudyRunning()) {
-            state = START_STUDY;
-            serviceStarted();
-        } else {
-            state = START_SCREEN;
-            handler.post(runnableStopService);
-        }
+    void startSettings(){
+        Intent intent = new Intent(ActivityStartScreen.this, ActivityAdmin.class);
+        startActivity(intent);
     }
 
     boolean isStudyRunning() {
-        return ServiceSystemHealth.isRunning && ServiceSystemHealth.RANK_LIMIT == Status.RANK_SUCCESS && (ModelManager.getInstance(this).getStatus().getRank() <= Status.RANK_ADMIN_OPTIONAL);
+        return ModelManager.RANK_LIMIT == Status.RANK_SUCCESS && (ModelManager.getInstance(this).getStatus().getRank() <= Status.RANK_ADMIN_OPTIONAL);
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
-        handler.removeCallbacks(runnableWaitLoading);
-        handler.removeCallbacks(runnableStopService);
-        handler.removeCallbacks(runnableStartService);
-        state = EXIT;
-        handler.post(runnableStopService);
+        modelManager.clear();
         super.onDestroy();
+    }
+    void loadModelManager(){
+        ModelManager.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
+        modelManager.clear();
+        modelManager.read();
+        modelManager.set();
+        handler.removeCallbacks(runnableWaitLoading);
+        isWaitLoading=true;
+        handler.post(runnableWaitLoading);
     }
 
 
     void fixConfigIfRequired() {
-        if (!ModelManager.getInstance(this).getConfigManager().isExist()) {
-            clearModelManager();
+        if (!modelManager.getConfigManager().isExist()) {
+            modelManager.clear();
             copyDefaultConfig();
             loadModelManager();
         } else if (!ModelManager.getInstance(this).getConfigManager().isValid() && !isAlertDialogShown) {
@@ -102,19 +110,17 @@ public class ActivityStartScreen extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (DialogInterface.BUTTON_POSITIVE == which) {
-                        clearModelManager();
+                        modelManager.clear();
                         copyDefaultConfig();
                         loadModelManager();
                         isAlertDialogShown = false;
+                    }else{
+                        setUI();
                     }
                 }
             });
         } else
             setUI();
-    }
-
-    void clearModelManager() {
-        ModelManager.getInstance(this).clear();
     }
 
     void showProgressBar() {
@@ -134,15 +140,6 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void loadModelManager() {
-        Log.d(TAG, "startService...");
-        ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
-        ModelManager.getInstance(this).clear();
-        ModelManager.getInstance(this).read();
-        ModelManager.getInstance(this).set();
-        handler.removeCallbacks(runnableWaitLoading);
-        handler.postDelayed(runnableWaitLoading, 500);
-    }
 
     void copyDefaultConfig() {
         Log.d(TAG, "copyDefaultConfig()...");
@@ -160,90 +157,58 @@ public class ActivityStartScreen extends AppCompatActivity {
         setImageViewLogo();
         setTextConfigFileName();
         setTextVersion();
-        Log.d(TAG, "updateUI...state=" + state);
-        Status status = ModelManager.getInstance(ActivityStartScreen.this).getStatus();
-        Log.d(TAG, "updateUI...state=" + state + " status=" + status.log());
-        if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
-            disableButton((Button) findViewById(R.id.button_start_study));
-            activeButton((Button) findViewById(R.id.button_settings));
-        } else {
-            activeButton((Button) findViewById(R.id.button_start_study));
-            enableButton((Button) findViewById(R.id.button_settings));
-        }
     }
 
     void setButtonStartStudy() {
         Button button = (Button) findViewById(R.id.button_start_study);
-        button.setEnabled(false);
+        if(modelManager.getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL)
+            disableButton((Button) findViewById(R.id.button_start_study));
+        else activeButton((Button) findViewById(R.id.button_start_study));
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "runnableWaitStart...isServiceRunning=" + ServiceSystemHealth.isRunning + " Service_Rank=" + ServiceSystemHealth.RANK_LIMIT);
-                state = START_STUDY;
-                ServiceSystemHealth.RANK_LIMIT = Status.RANK_SUCCESS;
-                handler.post(runnableStartService);
+                ModelManager.RANK_LIMIT = Status.RANK_SUCCESS;
+                modelManager.set();
+                startStudy();
             }
         });
     }
 
     void setButtonSettings() {
         Button button = (Button) findViewById(R.id.button_settings);
-        button.setEnabled(false);
+        if(modelManager.getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL)
+            activeButton((Button) findViewById(R.id.button_settings));
+        else enableButton((Button) findViewById(R.id.button_settings));
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                state = SETTINGS;
-                ServiceSystemHealth.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
-                handler.post(runnableStartService);
+                startSettings();
             }
         });
     }
 
-    void checkUpdates() {
-        if (ModelManager.getInstance(ActivityStartScreen.this).getConfigManager().getConfig().getConfig_info().isAuto_update()) {
-            final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
-            showProgressBar();
-            appInstallManager.updateVersionAll(0, new OnDataChangeListener() {
-                @Override
-                public void onDataChange(int index, String str) {
-                    if (appInstallManager.getAppInstallList().size() == index) {
-                        int status = Integer.parseInt(str);
-                        if (status != Status.SUCCESS)
-                            setUI();
-                        hideProgressBar();
-                    }
-                }
-            });
-        }
-
-    }
-
     void setButtonUpdatemCerebrum() {
         Button button = (Button) findViewById(R.id.button_update);
-        if (ModelManager.getInstance(this).getConfigManager().getConfig().getStart_screen().isUpdate_app()) {
+        if (modelManager.getConfigManager().getConfig().getStart_screen().isUpdate_app()) {
             button.setVisibility(View.VISIBLE);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     final AppInstallManager appInstallManager = (AppInstallManager) ModelManager.getInstance(ActivityStartScreen.this).getModel(ModelFactory.MODEL_APP_INSTALL);
-                    checkUpdates();
-                    appInstallManager.getAppInstallList("study").setLatestVersionName(ActivityStartScreen.this, new OnDataChangeListener() {
+                    showProgressBar();
+                    appInstallManager.updateVersionAll(0, new OnDataChangeListener() {
                         @Override
-                        public void onDataChange(int now, String str) {
-                            if (!appInstallManager.getAppInstallList("study").isUpdateAvailable())
-                                Toast.makeText(ActivityStartScreen.this, "mCerebrum is up-to-date...", Toast.LENGTH_SHORT).show();
-                            else {
-                                AlertDialogs.AlertDialog(ActivityStartScreen.this, "Update Available(" + str + ")", "Do you want to update now?", R.drawable.ic_info_teal_48dp, "Yes", "No", null, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        if (which == DialogInterface.BUTTON_POSITIVE) {
-                                            appInstallManager.getAppInstallList().get(0).downloadAndInstallApp(ActivityStartScreen.this);
-                                        }
-                                    }
-                                });
-
+                        public void onDataChange(int index, String str) {
+                            if (appInstallManager.getAppInstallList().size() == index) {
+                                int status = Integer.parseInt(str);
+                                if (status != Status.SUCCESS) {
+                                    Toast.makeText(ActivityStartScreen.this, "mCerebrum update available...", Toast.LENGTH_SHORT).show();
+                                    setUI();
+                                } else {
+                                    Toast.makeText(ActivityStartScreen.this, "mCerebrum is up-to-date...", Toast.LENGTH_SHORT).show();
+                                }
+                                hideProgressBar();
                             }
-
                         }
                     });
                 }
@@ -258,8 +223,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                state = EXIT;
-                handler.post(runnableStopService);
+                modelManager.clear();
                 finish();
             }
         });
@@ -326,84 +290,25 @@ public class ActivityStartScreen extends AppCompatActivity {
         button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_red));
         button.setEnabled(true);
         button.setTextColor(Color.WHITE);
-
     }
 
-    void serviceStarted() {
-        Intent intent;
-        try {
-            switch (state) {
-                case SETTINGS:
-                    intent = new Intent(ActivityStartScreen.this, ActivityAdmin.class);
-                    startActivity(intent);
-                    break;
-                case START_STUDY:
-                    intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
-                    startActivity(intent);
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    void serviceStopped() {
-        switch (state) {
-            case EXIT:
-                clearModelManager();
-                break;
-            case START_SCREEN:
-                loadModelManager();
-                handler.removeCallbacks(runnableWaitLoading);
-                handler.postDelayed(runnableWaitLoading, 500);
-                break;
-        }
-    }
-
-    Runnable runnableStartService = new Runnable() {
-        @Override
-        public void run() {
-            if (!ServiceSystemHealth.isRunning) {
-                hideProgressBar();
-                showProgressBar();
-                Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-                startService(intent);
-                handler.postDelayed(this, 1000);
-            } else {
-                hideProgressBar();
-                serviceStarted();
-            }
-        }
-    };
-    Runnable runnableStopService = new Runnable() {
-        @Override
-        public void run() {
-            if (ServiceSystemHealth.isRunning) {
-                hideProgressBar();
-                showProgressBar();
-                Intent intent = new Intent(getApplicationContext(), ServiceSystemHealth.class);
-                stopService(intent);
-                handler.postDelayed(this, 1000);
-            } else {
-                hideProgressBar();
-                serviceStopped();
-            }
-        }
-    };
     Runnable runnableWaitLoading = new Runnable() {
         @Override
         public void run() {
-            Log.d(TAG, "isUpdating=" + ModelManager.getInstance(ActivityStartScreen.this).isUpdating());
-            if (ModelManager.getInstance(ActivityStartScreen.this).isUpdating()) {
+            if(isWaitLoading){
                 hideProgressBar();
                 showProgressBar();
-                handler.postDelayed(this, 1000);
-            } else {
-                hideProgressBar();
-                fixConfigIfRequired();
-                setUI();
-
+                isWaitLoading=false;
+                handler.postDelayed(this,1000);
+            }else {
+                Log.d(TAG, "isUpdating=" + ModelManager.getInstance(ActivityStartScreen.this).isUpdating());
+                if (ModelManager.getInstance(ActivityStartScreen.this).isUpdating()) {
+                    handler.postDelayed(this, 1000);
+                } else {
+                    hideProgressBar();
+                    fixConfigIfRequired();
+                    setUI();
+                }
             }
         }
     };
