@@ -96,6 +96,7 @@ public class DayStartEndInfoManager extends Model {
         readDayEndFromDataKit();
         readWakeupTimeFromDataKit();
         readSleepTimeFromDataKit();
+        notifierManager.set();
         Log.d(TAG, "dayStartTime=" + dayStartTime + " dayEndTime=" + dayEndTime + " curTime=" + DateTime.getDateTime() + " diff=" + (DateTime.getDateTime() - dayStartTime));
         if (!isDayStarted())
             lastStatus = new Status(rank, Status.DAY_START_NOT_AVAILABLE);
@@ -280,7 +281,7 @@ public class DayStartEndInfoManager extends Model {
                 }
             notifierManager.clear();
             if (notificationRequests.getNotification_option().size() == 0) return;
-            notifierManager.set(new Callback() {
+            notifierManager.trigger(new Callback() {
                 @Override
                 public void onResponse(String response)  {
                     if (type.equals(DAY_START))
