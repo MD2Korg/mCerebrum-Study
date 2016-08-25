@@ -123,7 +123,7 @@ public class NotifierManager {
             Log.d(TAG, "runnableNotify...");
             if (lastRequestTimeStamp > lastAckTimeStamp) {
                 insertDataToDataKit(notificationRequests);
-                handler.postDelayed(this, 2000);
+                handler.postDelayed(this, 10000);
             }
 
         }
