@@ -44,10 +44,14 @@ public class ActivityClearData extends Activity {
         ModelManager.getInstance(this).clear();
         Intent intent = new Intent();
         intent.putExtra("delete", true);
+/*
         intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsArchive");
         startActivity(intent);
         intent.putExtra("delete", true);
         intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsDatabase");
+        startActivity(intent);
+        */
+        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettings");
         startActivity(intent);
     }
 
