@@ -22,6 +22,7 @@ import com.crashlytics.android.Crashlytics;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.app_install.AppInstallManager;
+import org.md2k.study.model_view.config_info.ActivityConfigDownload;
 import org.md2k.study.view.admin.ActivityAdmin;
 import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
@@ -45,7 +46,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         handler = new Handler();
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start_screen);
-        modelManager=ModelManager.getInstance(getApplicationContext());
+        modelManager = ModelManager.getInstance(getApplicationContext());
         progressDialog = new ProgressDialog(this, android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
         progressDialog.setMessage("Loading...");
         progressDialog.setIndeterminate(true);
@@ -64,16 +65,17 @@ public class ActivityStartScreen extends AppCompatActivity {
         Log.d(TAG, "onStart()...");
         if (isStudyRunning()) {
             startStudy();
-        }else{
+        } else {
             setUI();
         }
     }
-    void startStudy(){
+
+    void startStudy() {
         Intent intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
         startActivity(intent);
     }
 
-    void startSettings(){
+    void startSettings() {
         Intent intent = new Intent(ActivityStartScreen.this, ActivityAdmin.class);
         startActivity(intent);
     }
@@ -88,13 +90,14 @@ public class ActivityStartScreen extends AppCompatActivity {
         modelManager.clear();
         super.onDestroy();
     }
-    void loadModelManager(){
+
+    void loadModelManager() {
         ModelManager.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
         modelManager.clear();
         modelManager.read();
         modelManager.set();
         handler.removeCallbacks(runnableWaitLoading);
-        isWaitLoading=true;
+        isWaitLoading = true;
         handler.post(runnableWaitLoading);
     }
 
@@ -104,23 +107,47 @@ public class ActivityStartScreen extends AppCompatActivity {
             modelManager.clear();
             copyDefaultConfig();
             loadModelManager();
+            setUI();
         } else if (!ModelManager.getInstance(this).getConfigManager().isValid() && !isAlertDialogShown) {
+            try {
+                Constants.CONFIG_ZIP_FILENAME = ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getFilename();
+            } catch (Exception e) {
+                Constants.CONFIG_ZIP_FILENAME = "";
+            }
+
             isAlertDialogShown = true;
             AlertDialogs.AlertDialog(this, "Configuration file is out of date", "Please download the latest configuration file from \"Settings\".", R.drawable.ic_info_teal_48dp, "Ok", null, null, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (DialogInterface.BUTTON_POSITIVE == which) {
                         modelManager.clear();
-                        copyDefaultConfig();
-                        loadModelManager();
-                        isAlertDialogShown = false;
-                    }else{
+                        if (!Constants.CONFIG_ZIP_FILENAME.equals("")) {
+                            FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
+                            Intent intent = new Intent(ActivityStartScreen.this, ActivityConfigDownload.class);
+                            intent.putExtra(Status.class.getSimpleName(), new Status(0,0));
+                            startActivityForResult(intent, 1);
+                        } else {
+                            copyDefaultConfig();
+                            loadModelManager();
+                            isAlertDialogShown = false;
+                            setUI();
+                        }
+                    } else {
                         setUI();
                     }
                 }
             });
         } else
             setUI();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_CANCELED) {
+                loadModelManager();
+                isAlertDialogShown = false;
+            }
+        }
     }
 
     void showProgressBar() {
@@ -150,18 +177,22 @@ public class ActivityStartScreen extends AppCompatActivity {
 
     void setUI() {
         Log.d(TAG, "setUI()...");
-        setButtonStartStudy();
-        setButtonSettings();
-        setButtonUpdatemCerebrum();
-        setButtonExit();
-        setImageViewLogo();
-        setTextConfigFileName();
-        setTextVersion();
+        try {
+            setButtonStartStudy();
+            setButtonSettings();
+            setButtonUpdatemCerebrum();
+            setButtonExit();
+            setImageViewLogo();
+            setTextConfigFileName();
+            setTextVersion();
+        }catch (Exception ignored){
+
+        }
     }
 
     void setButtonStartStudy() {
         Button button = (Button) findViewById(R.id.button_start_study);
-        if(modelManager.getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL)
+        if (modelManager.getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL)
             disableButton((Button) findViewById(R.id.button_start_study));
         else activeButton((Button) findViewById(R.id.button_start_study));
         button.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +207,7 @@ public class ActivityStartScreen extends AppCompatActivity {
 
     void setButtonSettings() {
         Button button = (Button) findViewById(R.id.button_settings);
-        if(modelManager.getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL)
+        if (modelManager.getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL)
             activeButton((Button) findViewById(R.id.button_settings));
         else enableButton((Button) findViewById(R.id.button_settings));
         button.setOnClickListener(new View.OnClickListener() {
@@ -295,19 +326,18 @@ public class ActivityStartScreen extends AppCompatActivity {
     Runnable runnableWaitLoading = new Runnable() {
         @Override
         public void run() {
-            if(isWaitLoading){
+            if (isWaitLoading) {
                 hideProgressBar();
                 showProgressBar();
-                isWaitLoading=false;
-                handler.postDelayed(this,1000);
-            }else {
+                isWaitLoading = false;
+                handler.postDelayed(this, 1000);
+            } else {
                 Log.d(TAG, "isUpdating=" + ModelManager.getInstance(ActivityStartScreen.this).isUpdating());
                 if (ModelManager.getInstance(ActivityStartScreen.this).isUpdating()) {
                     handler.postDelayed(this, 1000);
                 } else {
                     hideProgressBar();
                     fixConfigIfRequired();
-                    setUI();
                 }
             }
         }

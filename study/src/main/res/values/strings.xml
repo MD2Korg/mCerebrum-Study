@@ -13,4 +13,7 @@
     <string name="image_text_warning">Warning</string>
     <string name="button_close">Close</string>
     <string name="button_check_update">Check Updates</string>
+    <string name="button_day_ended">Day Ended</string>
+    <string name="button_end_day">End Day</string>
+    <string name="button_start_day">Start Day</string>
 </resources>

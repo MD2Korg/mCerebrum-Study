@@ -94,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="0.02"
-                    android:text="Will be available at:  "
+                    android:text="Next Day:  "
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textStyle="bold" />
 

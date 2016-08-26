@@ -72,7 +72,7 @@ public class ActivityConfigDownload extends Activity {
 
     public void showDownloadConfig() {
         Log.d(TAG, "showDownloadConfig()...");
-        alertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
+        alertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", Constants.CONFIG_ZIP_FILENAME, R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, String result) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
@@ -115,13 +115,14 @@ public class ActivityConfigDownload extends Activity {
         });
     }
 
-    public void alertDialogEditText(final Context context, String title, String message, int iconId, String positive, String negative, final OnClickListener onClickListener) {
+    public void alertDialogEditText(final Context context, String title, String message, String filename, int iconId, String positive, String negative, final OnClickListener onClickListener) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(context, org.md2k.utilities.R.style.app_theme_teal_light_dialog))
                 .setTitle(title)
                 .setIcon(iconId)
                 .setMessage(message);
         final EditText input = new EditText(context);
         input.setSingleLine();
+        input.setText(filename);
         alertDialogBuilder.setView(input);
 
         if (positive != null)

@@ -91,10 +91,9 @@ public class NotifierManager {
         handler.removeCallbacks(runnableNotify);
         handlerSubscribeResponse.removeCallbacks(runnableSubscribeResponse);
         handlerSubscribeAck.removeCallbacks(runnableSubscribeAcknowledge);
-
-        handlerSubscribeResponse.post(runnableSubscribeResponse);
         lastAckTimeStamp = 0;
         lastRequestTimeStamp = DateTime.getDateTime();
+        handlerSubscribeResponse.post(runnableSubscribeResponse);
     }
 
     public void clear() {
@@ -106,6 +105,7 @@ public class NotifierManager {
             if (dataSourceClientResponses != null)
                 for (int i = 0; i < dataSourceClientResponses.size(); i++)
                     DataKitAPI.getInstance(context).unsubscribe(dataSourceClientResponses.get(i));
+            dataSourceClientResponses=null;
             if (dataSourceClientAcks != null) {
                 for (int i = 0; i < dataSourceClientAcks.size(); i++)
                     DataKitAPI.getInstance(context).unsubscribe(dataSourceClientAcks.get(i));
@@ -187,12 +187,12 @@ public class NotifierManager {
                                 switch (notificationResponse.getStatus()) {
                                     case NotificationResponse.OK:
                                     case NotificationResponse.CANCEL:
-                                        callback.onResponse(notificationResponse.getStatus());
                                         clear();
+                                        callback.onResponse(notificationResponse.getStatus());
                                         break;
                                     case NotificationResponse.TIMEOUT:
-                                        callback.onResponse(notificationResponse.getStatus());
                                         clear();
+                                        callback.onResponse(notificationResponse.getStatus());
                                         break;
                                 }
                             } catch (DataKitException e) {

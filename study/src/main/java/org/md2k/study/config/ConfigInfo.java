@@ -47,15 +47,8 @@ public class ConfigInfo {
 
     private ArrayList<String> required_files;
 
-    public boolean isValid(Context context){
-        if(!isValidVersion(context)) {
-            return false;
-        }
-        if(!isValidRequiredFiles()) {
-//            Toast.makeText(context, "Error: Required file not exists ...",Toast.LENGTH_LONG).show();
-            return false;
-        }
-        return true;
+    public boolean isValid(Context context) {
+        return isValidVersion(context) && isValidRequiredFiles();
     }
     private boolean isValidVersion(Context context){
         try {
