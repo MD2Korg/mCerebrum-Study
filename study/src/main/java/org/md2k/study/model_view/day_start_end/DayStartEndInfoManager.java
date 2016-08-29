@@ -264,8 +264,8 @@ public class DayStartEndInfoManager extends Model {
 
 
     public long getWakeupShowTimestamp() {
-        long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
-        String base = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getBase();
+        long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getOffset();
+        String base = modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getBase();
         long nextDayStart= getTime(base, offset);
         if(nextDayStart<dayStartTime || nextDayStart<dayEndTime) nextDayStart+=DAY_IN_MILLIS;
         return nextDayStart;

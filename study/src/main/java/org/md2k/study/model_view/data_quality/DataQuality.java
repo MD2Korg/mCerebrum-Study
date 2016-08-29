@@ -145,7 +145,7 @@ public class DataQuality {
                         intent.setClassName(app.getPackage_name(), app.getService());
                         context.stopService(intent);
                     }
-                }catch (Exception e){
+                }catch (Exception ignored){
 
                 }
             }

@@ -60,8 +60,8 @@ public class DataQualityInfo {
                 configDataQualityView = configDataQualityViews.get(i);
                 return;
             }
-            if(confDataSource.getPlatform()==null || confDataSource.getPlatform().getId()==null || confDataSource.getPlatform().getType()==null)
-                continue;
+            if(confDataSource.getPlatform()==null || confDataSource.getPlatform().getId()==null || confDataSource.getPlatform().getType()==null) {
+            }
             else if(confDataSource.getPlatform().getType().equals(dataSource.getPlatform().getType()) && confDataSource.getPlatform().getId().equals(dataSource.getPlatform().getId())) {
                 configDataQualityView = configDataQualityViews.get(i);
                 return;

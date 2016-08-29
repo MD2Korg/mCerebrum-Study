@@ -94,6 +94,7 @@ public class DataQualityManager extends Model {
             case DATA_QUALITY.BAND_LOOSE:
                 return Status.DATAQUALITY_LOOSE;
             case DATA_QUALITY.NOISE:
+            case DATA_QUALITY.MISSING:
                 return Status.DATAQUALITY_LOOSE;
             case DATA_QUALITY.NOT_WORN:
             case DATA_QUALITY.BAD:
