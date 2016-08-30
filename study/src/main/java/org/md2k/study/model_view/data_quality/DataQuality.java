@@ -97,8 +97,8 @@ public class DataQuality {
                     dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
                     final ArrayList<ConfigDataQualityView> configDataQualityViews = ModelManager.getInstance(context).getConfigManager().getConfig().getData_quality_view();
                     dataQualityInfo.setConfigDataQualityView(configDataQualityViews, dataSourceClient.getDataSource());
-                    handler.removeCallbacks(runnableCheckAvailability);
-                    handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
+//                    handler.removeCallbacks(runnableCheckAvailability);
+//                    handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
                     DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
                         @Override
                         public void onReceived(final DataType dataType) {
@@ -126,7 +126,7 @@ public class DataQuality {
             }
         }
     };
-    Runnable runnableCheckAvailability = new Runnable() {
+/*    Runnable runnableCheckAvailability = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "runnableCheckAvailability()...check if data received..in time..");
@@ -152,11 +152,11 @@ public class DataQuality {
             handler.postDelayed(this, RESTART_TIME);
         }
     };
-
+*/
     public void stop() {
         try {
             handler.removeCallbacks(runnableSubscribe);
-            handler.removeCallbacks(runnableCheckAvailability);
+//            handler.removeCallbacks(runnableCheckAvailability);
             if (dataSourceClient != null && DataKitAPI.getInstance(context).isConnected()) {
                 DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
                 dataSourceClient=null;
