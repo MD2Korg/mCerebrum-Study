@@ -19,6 +19,7 @@
         android:theme="@style/app_theme_teal_light">
         <activity
             android:name=".ActivityStartScreen"
+            android:launchMode="singleTask"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
@@ -32,46 +33,57 @@
             android:name=".ActivityMain"
             android:label="@string/app_name"
             android:noHistory="false"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".model_view.app_install.ActivityInstallApp"
             android:label="Install Application"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.app_service.ActivityService"
             android:label="Run Application"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.app_settings.ActivityAppSettings"
             android:label="Application Settings"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.intervention.ActivityInterventionApp"
             android:label="@string/title_intervention_apps"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".view.admin.ActivityAdmin"
+            android:launchMode="singleTask"
             android:label="Settings"
             android:screenOrientation="portrait" />
         <activity
             android:name=".view.configure_study.ActivityConfigureStudy"
+            android:launchMode="singleTask"
             android:label="Study Settings"
             android:screenOrientation="portrait" />
         <activity
             android:name=".view.configure_app.ActivityConfigureApp"
+            android:launchMode="singleTask"
             android:label="System Settings"
             android:screenOrientation="portrait" />
         <activity
             android:name=".view.test.ActivityTest"
+            android:launchMode="singleTask"
             android:label="Test"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.EMA_test.ActivityEMA_test"
+            android:launchMode="singleTask"
             android:label="EMA Test"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.app_reset.ActivityAppReset"
             android:label="Reset App"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
@@ -81,48 +93,58 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.clear_data.ActivityClearData"
+            android:launchMode="singleTask"
             android:label="Clear Data"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.user_info.ActivityUserInfo"
             android:label=""
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
             android:name=".model_view.day_type.ActivityDayType"
             android:label="Type of Day"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
             android:name=".model_view.sleep_info.ActivitySleep"
             android:label="Set Sleep Time"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.clear_config.ActivityClearConfig"
             android:label="Clear Configuration"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
 
         <activity
             android:name=".model_view.wakeup_info.ActivityWakeUp"
+            android:launchMode="singleTask"
             android:label="Set WakeUp Time"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.app_start.ActivityAppStart"
             android:label="Set User ID"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
             android:name=".model_view.app_stop.ActivityAppStop"
             android:label="App Stop"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
             android:name=".model_view.data_quality.ActivityDataQuality"
             android:label="Data Quality"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model_view.data_quality.ActivityYouTube"
+            android:launchMode="singleTask"
             android:label="Video" />
 
         <receiver android:name=".BootReceiver">
