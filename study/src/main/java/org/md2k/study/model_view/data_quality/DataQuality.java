@@ -15,7 +15,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.config.ConfigDataQualityView;
 import org.md2k.study.controller.ModelManager;
@@ -77,6 +77,7 @@ public class DataQuality {
 
     public void start() {
         Log.d(TAG,"DataQuality start()..."+dataSource.getType()+" "+dataSource.getId());
+        handler.removeCallbacks(runnableSubscribe);
         handler.post(runnableSubscribe);
     }
 
@@ -96,8 +97,8 @@ public class DataQuality {
                     dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
                     final ArrayList<ConfigDataQualityView> configDataQualityViews = ModelManager.getInstance(context).getConfigManager().getConfig().getData_quality_view();
                     dataQualityInfo.setConfigDataQualityView(configDataQualityViews, dataSourceClient.getDataSource());
-                    handler.removeCallbacks(runnableCheckAvailability);
-                    handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
+//                    handler.removeCallbacks(runnableCheckAvailability);
+//                    handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
                     DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
                         @Override
                         public void onReceived(final DataType dataType) {
@@ -121,11 +122,11 @@ public class DataQuality {
                     });
                 }
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             }
         }
     };
-    Runnable runnableCheckAvailability = new Runnable() {
+/*    Runnable runnableCheckAvailability = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "runnableCheckAvailability()...check if data received..in time..");
@@ -144,18 +145,18 @@ public class DataQuality {
                         intent.setClassName(app.getPackage_name(), app.getService());
                         context.stopService(intent);
                     }
-                }catch (Exception e){
+                }catch (Exception ignored){
 
                 }
             }
             handler.postDelayed(this, RESTART_TIME);
         }
     };
-
+*/
     public void stop() {
         try {
             handler.removeCallbacks(runnableSubscribe);
-            handler.removeCallbacks(runnableCheckAvailability);
+//            handler.removeCallbacks(runnableCheckAvailability);
             if (dataSourceClient != null && DataKitAPI.getInstance(context).isConnected()) {
                 DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
                 dataSourceClient=null;

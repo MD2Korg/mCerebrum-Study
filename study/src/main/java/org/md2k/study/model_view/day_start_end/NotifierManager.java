@@ -20,7 +20,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.notification.NotificationRequests;
 import org.md2k.utilities.data_format.notification.NotificationResponse;
@@ -28,7 +28,30 @@ import org.md2k.utilities.data_format.notification.NotificationResponse;
 import java.util.ArrayList;
 
 /**
- * Created by monowar on 3/10/16.
+ * Copyright (c) 2016, The University of Memphis, MD2K Center
+ * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * All rights reserved.
+ * <p/>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * <p/>
+ * * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ * <p/>
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p/>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class NotifierManager {
     private static final String TAG = NotifierManager.class.getSimpleName();
@@ -41,31 +64,38 @@ public class NotifierManager {
     private ArrayList<DataSourceClient> dataSourceClientAcks;
     private NotificationRequests notificationRequests;
     private Callback callback;
-    long lastAckTimeStamp=0;
-    long lastRequestTimeStamp=0;
+    long lastAckTimeStamp = 0;
+    long lastRequestTimeStamp = 0;
 
     public NotifierManager(Context context) {
         Log.d(TAG, "NotifierManager()...");
         this.context = context;
         handler = new Handler();
         handlerSubscribeResponse = new Handler();
-        handlerSubscribeAck=new Handler();
+        handlerSubscribeAck = new Handler();
     }
 
-    public void set(Callback callback, NotificationRequests notificationRequests) throws DataKitException {
-        Log.d(TAG,"NotifierManager...set()...");
-        Log.d(TAG, "datakit register ... before register()");
-        dataSourceClientRequest = DataKitAPI.getInstance(context).register(new DataSourceBuilder().setType(DataSourceType.NOTIFICATION_REQUEST));
-        Log.d(TAG, "datakit register ... after register() " + dataSourceClientRequest.getStatus().getStatusMessage());
+    public void set() {
+        try {
+            dataSourceClientRequest = DataKitAPI.getInstance(context).register(new DataSourceBuilder().setType(DataSourceType.NOTIFICATION_REQUEST));
+        } catch (DataKitException e) {
+            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
+        }
+    }
+
+    public void trigger(Callback callback, NotificationRequests notificationRequests) throws DataKitException {
         this.notificationRequests = notificationRequests;
         this.callback = callback;
         Log.d(TAG, "before runnableSubscribeResponse..");
+
+        handler.removeCallbacks(runnableNotify);
+        handlerSubscribeResponse.removeCallbacks(runnableSubscribeResponse);
+        handlerSubscribeAck.removeCallbacks(runnableSubscribeAcknowledge);
+        lastAckTimeStamp = 0;
+        lastRequestTimeStamp = DateTime.getDateTime();
         handlerSubscribeResponse.post(runnableSubscribeResponse);
-        handlerSubscribeAck.post(runnableSubscribeAcknowledge);
-        lastAckTimeStamp=0;
-        lastRequestTimeStamp=DateTime.getDateTime();
-        handler.post(runnableNotify);
     }
+
     public void clear() {
         try {
             Log.d(TAG, "clear()...");
@@ -75,9 +105,14 @@ public class NotifierManager {
             if (dataSourceClientResponses != null)
                 for (int i = 0; i < dataSourceClientResponses.size(); i++)
                     DataKitAPI.getInstance(context).unsubscribe(dataSourceClientResponses.get(i));
-            dataSourceClientResponses = null;
+            dataSourceClientResponses=null;
+            if (dataSourceClientAcks != null) {
+                for (int i = 0; i < dataSourceClientAcks.size(); i++)
+                    DataKitAPI.getInstance(context).unsubscribe(dataSourceClientAcks.get(i));
+            }
+            dataSourceClientAcks = null;
             Log.d(TAG, "...clear()");
-        }catch (Exception e){
+        } catch (Exception ignored) {
 
         }
     }
@@ -86,9 +121,9 @@ public class NotifierManager {
         @Override
         public void run() {
             Log.d(TAG, "runnableNotify...");
-            if(lastRequestTimeStamp>lastAckTimeStamp) {
+            if (lastRequestTimeStamp > lastAckTimeStamp) {
                 insertDataToDataKit(notificationRequests);
-                handler.postDelayed(this,2000);
+                handler.postDelayed(this, 10000);
             }
 
         }
@@ -106,9 +141,10 @@ public class NotifierManager {
                     handlerSubscribeResponse.postDelayed(this, 1000);
                 } else {
                     subscribeNotificationResponse();
+                    handlerSubscribeAck.post(runnableSubscribeAcknowledge);
                 }
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             }
         }
     };
@@ -124,9 +160,10 @@ public class NotifierManager {
                     handlerSubscribeAck.postDelayed(this, 1000);
                 } else {
                     subscribeNotificationAck();
+                    handler.post(runnableNotify);
                 }
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             }
         }
     };
@@ -150,17 +187,17 @@ public class NotifierManager {
                                 switch (notificationResponse.getStatus()) {
                                     case NotificationResponse.OK:
                                     case NotificationResponse.CANCEL:
-                                        callback.onResponse(notificationResponse.getStatus());
                                         clear();
+                                        callback.onResponse(notificationResponse.getStatus());
                                         break;
                                     case NotificationResponse.TIMEOUT:
-                                        callback.onResponse(notificationResponse.getStatus());
                                         clear();
+                                        callback.onResponse(notificationResponse.getStatus());
                                         break;
                                 }
                             } catch (DataKitException e) {
-                                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
-                            }catch (Exception ignored){
+                                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
+                            } catch (Exception ignored) {
 
                             }
                         }
@@ -170,18 +207,13 @@ public class NotifierManager {
             });
         }
     }
+
     void subscribeNotificationAck() throws DataKitException {
         for (int i = 0; i < dataSourceClientAcks.size(); i++) {
             DataKitAPI.getInstance(context).subscribe(dataSourceClientAcks.get(i), new OnReceiveListener() {
                 @Override
                 public void onReceived(final DataType dataType) {
-                    Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            lastAckTimeStamp=DateTime.getDateTime();
-                        }
-                    });
-                    t.start();
+                    lastAckTimeStamp = DateTime.getDateTime();
                 }
             });
         }
@@ -197,7 +229,7 @@ public class NotifierManager {
             dataKitAPI.insert(dataSourceClientRequest, dataTypeJSONObject);
             Log.d(TAG, "...insertDataToDataKit()");
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
     }
 }

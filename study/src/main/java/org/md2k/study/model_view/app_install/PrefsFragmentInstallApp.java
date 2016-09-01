@@ -49,7 +49,6 @@ import org.md2k.study.controller.ModelManager;
  */
 public class PrefsFragmentInstallApp extends PreferenceFragment {
 
-    private static final String TAG = PrefsFragmentInstallApp.class.getSimpleName();
     Context context;
     AppInstallManager appInstallManager;
     boolean isRefreshRequired;
@@ -76,7 +75,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     void setupButtons() {
         final Button buttonClose = (Button) getActivity().findViewById(R.id.button_1);
-        buttonClose.setText("Close");
+        buttonClose.setText(R.string.button_close);
         buttonClose.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 appInstallManager.set();
@@ -84,10 +83,10 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
             }
         });
         final Button buttonUpdate = (Button) getActivity().findViewById(R.id.button_2);
-        buttonUpdate.setText("Check Updates");
+        buttonUpdate.setText(R.string.button_check_update);
         buttonUpdate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Checking updates...",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Checking update...",Toast.LENGTH_SHORT).show();
                 appInstallManager.updateVersionAll(0, new OnDataChangeListener() {
                     @Override
                     public void onDataChange(int now, String str) {
@@ -96,7 +95,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
                             if (now >= appInstallManager.getAppInstallList().size())
                                 Toast.makeText(getActivity(), "Checking updates...done", Toast.LENGTH_SHORT).show();
                             else updatePreference(appInstallManager.getAppInstallList().get(now));
-                        }catch (Exception e){
+                        }catch (Exception ignored){
 
                         }
                     }

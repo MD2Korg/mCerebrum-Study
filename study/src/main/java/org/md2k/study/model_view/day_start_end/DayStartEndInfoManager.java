@@ -16,8 +16,9 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.study.Status;
+import org.md2k.study.config.ConfigDayStartEnd;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -62,6 +63,7 @@ public class DayStartEndInfoManager extends Model {
     public static final String BUTTON = "button";
     public static final String PROMPT = "prompt";
     public static final String NOTIFICATION = "notification";
+    public static final String SYSTEM = "system";
     public static final String WAKEUP = "wakeup";
     public static final String SLEEP = "sleep";
     public static final String DAY_START = "day_start";
@@ -96,17 +98,18 @@ public class DayStartEndInfoManager extends Model {
         readDayEndFromDataKit();
         readWakeupTimeFromDataKit();
         readSleepTimeFromDataKit();
+        notifierManager.set();
         Log.d(TAG, "dayStartTime=" + dayStartTime + " dayEndTime=" + dayEndTime + " curTime=" + DateTime.getDateTime() + " diff=" + (DateTime.getDateTime() - dayStartTime));
         if (!isDayStarted())
             lastStatus = new Status(rank, Status.DAY_START_NOT_AVAILABLE);
         else lastStatus = new Status(rank, Status.SUCCESS);
         notifyIfRequired(lastStatus);
-        handler.post(runnableDayStartButton);
-        handler.post(runnableDayEndButton);
-        handler.post(runnableDayStartPrompt);
-        handler.post(runnableDayEndPrompt);
-        handler.post(runnableDayStartNotification);
-        handler.post(runnableDayEndNotification);
+        handler.removeCallbacks(runnableDayStart);
+        handler.removeCallbacks(runnableDayEnd);
+        handler.post(runnableDayStart);
+        handler.post(runnableDayEnd);
+        Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
+        LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
     }
 
     public void clear() {
@@ -120,153 +123,153 @@ public class DayStartEndInfoManager extends Model {
         status = new Status(rank, Status.NOT_DEFINED);
         if (notifierManager != null)
             notifierManager.clear();
-        handler.removeCallbacks(runnableDayStartButton);
-        handler.removeCallbacks(runnableDayEndButton);
-        handler.removeCallbacks(runnableDayStartPrompt);
-        handler.removeCallbacks(runnableDayEndPrompt);
-        handler.removeCallbacks(runnableDayStartNotification);
-        handler.removeCallbacks(runnableDayEndNotification);
+        handler.removeCallbacks(runnableDayStart);
+        handler.removeCallbacks(runnableDayEnd);
     }
 
-    Runnable runnableDayStartButton = new Runnable() {
+    Runnable runnableDayStart = new Runnable() {
         @Override
         public void run() {
             stateDayStart = NO_BUTTON;
-            if (modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON) == null)
-                return;
-            long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
-            String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
-            long curTime = DateTime.getDateTime();
-            long triggerTime = getTime(base, offset);
-            if (isDayStarted()) {
-                stateDayStart = NO_BUTTON;
-                handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
-            } else {
-                if (curTime < triggerTime) {
-                    stateDayStart = NO_BUTTON;
-                    handler.postDelayed(this, triggerTime - curTime);
-                } else {
-                    stateDayStart = START_BUTTON;
-                    handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
-                }
+            boolean showButton = isShowRequired(DAY_START, BUTTON);
+            boolean showPrompt = isShowRequired(DAY_START, PROMPT);
+            boolean showNotification = isShowRequired(DAY_START, NOTIFICATION);
+            boolean showSystem = isShowRequired(DAY_START, SYSTEM);
+            long showButtonTime = getShowTime(DAY_START, BUTTON);
+            long showPromptTime = getShowTime(DAY_START, PROMPT);
+            long showNotificationTime = getShowTime(DAY_START, NOTIFICATION);
+            long showSystemTime = getShowTime(DAY_START, SYSTEM);
+            long minTime = Long.MAX_VALUE;
+            Log.d(TAG,"runnableDayStart...showButton="+showButton+" showButtonTime="+showButtonTime);
+            Log.d(TAG,"runnableDayStart...showPrompt="+showPrompt+" showPromptTime="+showPromptTime);
+            Log.d(TAG,"runnableDayStart...showNotification="+showNotification+" showNotificationTime="+showNotificationTime);
+            Log.d(TAG,"runnableDayStart...showSystem="+showSystem+" showSystemTime="+showSystemTime);
+            if(showSystem){
+                setDayStartTime(DateTime.getDateTime());
             }
-            Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
+            else if (showNotification) {
+                stateDayStart = START_BUTTON;
+                showPrompt(DAY_START, modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getParameters());
+            } else if (showPrompt) {
+                stateDayStart = START_BUTTON;
+                showPrompt(DAY_START, modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getParameters());
+            } else if (showButton) {
+                stateDayStart = START_BUTTON;
+            }
+            if (showButtonTime != -1 && minTime > showButtonTime)
+                minTime = showButtonTime;
+            if (showPromptTime != -1 && minTime > showPromptTime)
+                minTime = showPromptTime;
+            if (showNotificationTime != -1 && minTime > showNotificationTime)
+                minTime = showNotificationTime;
+            if (showSystemTime != -1 && minTime > showSystemTime)
+                minTime = showSystemTime;
+            Log.d(TAG,"runnableDayStart: min_time="+minTime);
+            if (minTime != Long.MAX_VALUE) {
+                handler.postDelayed(this, minTime);
+            }
         }
     };
-    Runnable runnableDayEndButton = new Runnable() {
+    Runnable runnableDayEnd = new Runnable() {
         @Override
         public void run() {
             stateDayEnd = NO_BUTTON;
-            if (modelManager.getConfigManager().getConfig().getDay_end().getNotify(BUTTON) == null)
+            if(!isDayStarted()) {
+                stateDayEnd = NO_BUTTON;
                 return;
-            if (!isDayStarted()) return;
-            if (isDayEnded()) {
+            }else if (isDayEnded()) {
                 stateDayEnd = COMPLETE_BUTTON;
                 return;
             }
-            long offset = modelManager.getConfigManager().getConfig().getDay_end().getNotify(BUTTON).getOffset();
-            String base = modelManager.getConfigManager().getConfig().getDay_end().getBase();
-            long curTime = DateTime.getDateTime();
-            long triggerTime = getTime(base, offset);
-            if (curTime < triggerTime) {
-                stateDayEnd = NO_BUTTON;
-                handler.postDelayed(this, triggerTime - curTime);
-            } else {
-                stateDayEnd = END_BUTTON;
+            boolean showButton = isShowRequired(DAY_END, BUTTON);
+            boolean showPrompt = isShowRequired(DAY_END, PROMPT);
+            boolean showNotification = isShowRequired(DAY_END, NOTIFICATION);
+            boolean showSystem = isShowRequired(DAY_END, SYSTEM);
+            long showButtonTime = getShowTime(DAY_END, BUTTON);
+            long showPromptTime = getShowTime(DAY_END, PROMPT);
+            long showNotificationTime = getShowTime(DAY_END, NOTIFICATION);
+            long showSystemTime = getShowTime(DAY_END, SYSTEM);
+            long minTime = Long.MAX_VALUE;
+            Log.d(TAG,"runnableDayEnd...showButton="+showButton+" showButtonTime="+showButtonTime);
+            Log.d(TAG,"runnableDayEnd...showPrompt="+showPrompt+" showPromptTime="+showPromptTime);
+            Log.d(TAG,"runnableDayEnd...showNotification="+showNotification+" showNotificationTime="+showNotificationTime);
+            Log.d(TAG,"runnableDayEnd...showSystem="+showSystem+" showSystemTime="+showSystemTime);
+            if(showSystem){
+                setDayEndTime(DateTime.getDateTime());
             }
-            Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
+            else if (showNotification) {
+                stateDayEnd = END_BUTTON;
+                showPrompt(DAY_END, modelManager.getConfigManager().getConfig().getDay_end().getNotify(NOTIFICATION).getParameters());
+            } else if (showPrompt) {
+                stateDayEnd = END_BUTTON;
+                showPrompt(DAY_END, modelManager.getConfigManager().getConfig().getDay_end().getNotify(PROMPT).getParameters());
+            } else if (showButton) {
+                stateDayEnd = END_BUTTON;
+                Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
+                LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
+            }
+            if (showButtonTime != -1 && minTime > showButtonTime)
+                minTime = showButtonTime;
+            if (showPromptTime != -1 && minTime > showPromptTime)
+                minTime = showPromptTime;
+            if (showNotificationTime != -1 && minTime > showNotificationTime)
+                minTime = showNotificationTime;
+            if (showSystemTime != -1 && minTime > showSystemTime)
+                minTime = showSystemTime;
+            Log.d(TAG,"runnableDayEndTime...minTime="+minTime);
+            if (minTime != Long.MAX_VALUE) {
+                handler.postDelayed(this, minTime);
+            }
         }
     };
 
-    public long getWakeupShowTimestamp() {
-        long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
-        String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
-        return getTime(base, offset);
-
+    private boolean isShowRequired(String dayType, String type) {
+        ConfigDayStartEnd configDayStartEnd;
+        boolean statusDay;
+        if (dayType.equals(DAY_START)) {
+            statusDay = isDayStarted();
+            configDayStartEnd = modelManager.getConfigManager().getConfig().getDay_start();
+        } else {
+            statusDay = isDayEnded();
+            configDayStartEnd = modelManager.getConfigManager().getConfig().getDay_end();
+        }
+        if (statusDay) return false;
+        if (configDayStartEnd.getNotify(type) == null) return false;
+        long offset = configDayStartEnd.getNotify(type).getOffset();
+        String base = configDayStartEnd.getNotify(type).getBase();
+        long curTime = DateTime.getDateTime();
+        long triggerTime = getTime(base, offset);
+        return curTime >= triggerTime;
     }
 
-    Runnable runnableDayStartPrompt = new Runnable() {
-        @Override
-        public void run() {
-            if (modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT) == null)
-                return;
-            long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getOffset();
-            String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
-            long curTime = DateTime.getDateTime();
-            long triggerTime = getTime(base, offset);
-            if (isDayStarted())
-                handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
-            else {
-                if (curTime < triggerTime)
-                    handler.postDelayed(this, triggerTime - curTime);
-                else {
-                    showPrompt(DAY_START, modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getParameters());
-                    handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
-                }
-            }
+    private long getShowTime(String dayType, String type) {
+        ConfigDayStartEnd configDayStartEnd;
+        boolean statusDay;
+        if (dayType.equals(DAY_START)) {
+            configDayStartEnd = modelManager.getConfigManager().getConfig().getDay_start();
+            statusDay = isDayStarted();
+        } else {
+            configDayStartEnd = modelManager.getConfigManager().getConfig().getDay_end();
+            statusDay = isDayEnded();
         }
-    };
+        if (configDayStartEnd.getNotify(type) == null) return -1;
+        long offset = configDayStartEnd.getNotify(type).getOffset();
+        String base = configDayStartEnd.getNotify(type).getBase();
+        long curTime = DateTime.getDateTime();
+        long triggerTime = getTime(base, offset);
+        if (!statusDay && curTime < triggerTime) {
+            return triggerTime - curTime;
+        } else return triggerTime + DAY_IN_MILLIS - curTime;
+    }
 
-    Runnable runnableDayEndPrompt = new Runnable() {
-        @Override
-        public void run() {
-            if (modelManager.getConfigManager().getConfig().getDay_end().getNotify(PROMPT) == null)
-                return;
-            if (!isDayStarted()) return;
-            if (isDayEnded()) return;
-            long offset = modelManager.getConfigManager().getConfig().getDay_end().getNotify(PROMPT).getOffset();
-            String base = modelManager.getConfigManager().getConfig().getDay_end().getBase();
-            long curTime = DateTime.getDateTime();
-            long triggerTime = getTime(base, offset);
-            if (curTime < triggerTime)
-                handler.postDelayed(this, triggerTime - curTime);
-            else {
-                showPrompt(DAY_END, modelManager.getConfigManager().getConfig().getDay_end().getNotify(PROMPT).getParameters());
-            }
-        }
-    };
-    Runnable runnableDayStartNotification = new Runnable() {
-        @Override
-        public void run() {
-            if (modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION) == null)
-                return;
 
-            long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getOffset();
-            String base = modelManager.getConfigManager().getConfig().getDay_start().getBase();
-            long curTime = DateTime.getDateTime();
-            long triggerTime = getTime(base, offset);
-            if (isDayStarted())
-                handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
-            else {
-                if (curTime < triggerTime)
-                    handler.postDelayed(this, triggerTime - curTime);
-                else {
-                    showNotification(DAY_START, modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getParameters());
-                    handler.postDelayed(this, triggerTime + DAY_IN_MILLIS - curTime);
-                }
-            }
-        }
-    };
-    Runnable runnableDayEndNotification = new Runnable() {
-        @Override
-        public void run() {
-            if (modelManager.getConfigManager().getConfig().getDay_end().getNotify(NOTIFICATION) == null)
-                return;
-            if (!isDayStarted()) return;
-            if (isDayEnded()) return;
-            long offset = modelManager.getConfigManager().getConfig().getDay_end().getNotify(NOTIFICATION).getOffset();
-            String base = modelManager.getConfigManager().getConfig().getDay_end().getBase();
-            long curTime = DateTime.getDateTime();
-            long triggerTime = getTime(base, offset);
-            if (curTime < triggerTime)
-                handler.postDelayed(this, triggerTime - curTime);
-            else {
-                showNotification(DAY_END, modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getParameters());
-            }
-        }
-    };
+    public long getWakeupShowTimestamp() {
+        long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getOffset();
+        String base = modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getBase();
+        long nextDayStart= getTime(base, offset);
+        if(nextDayStart<dayStartTime || nextDayStart<dayEndTime) nextDayStart+=DAY_IN_MILLIS;
+        return nextDayStart;
+    }
 
     void showPrompt(final String type, ArrayList<String> parameters) {
         try {
@@ -280,9 +283,9 @@ public class DayStartEndInfoManager extends Model {
                 }
             notifierManager.clear();
             if (notificationRequests.getNotification_option().size() == 0) return;
-            notifierManager.set(new Callback() {
+            notifierManager.trigger(new Callback() {
                 @Override
-                public void onResponse(String response)  {
+                public void onResponse(String response) {
                     if (type.equals(DAY_START))
                         setDayStartTime(DateTime.getDateTime());
                     else if (type.equals(DAY_END))
@@ -294,10 +297,6 @@ public class DayStartEndInfoManager extends Model {
             e.printStackTrace();
         }
 
-    }
-
-    void showNotification(String type, ArrayList<String> parameters) {
-        showPrompt(type, parameters);
     }
 
     int getButtonStatus() {
@@ -330,14 +329,11 @@ public class DayStartEndInfoManager extends Model {
     public boolean isDayStarted() {
         if (dayStartTime == -1) return false;
         long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(BUTTON).getOffset();
-        if (dayStartTime < getTime(WAKEUP, offset)) return false;
-        else return true;
+        return dayStartTime >= getTime(WAKEUP, offset);
     }
 
     public boolean isDayEnded() {
-        if (!isDayStarted()) return false;
-        else if (dayStartTime < dayEndTime) return true;
-        else return false;
+        return isDayStarted() && dayStartTime < dayEndTime;
     }
 
     private void readDayStartFromDataKit() {
@@ -352,7 +348,7 @@ public class DayStartEndInfoManager extends Model {
                 dayStartTime = dataTypeLong.getSample();
             }
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
     }
 
@@ -388,7 +384,7 @@ public class DayStartEndInfoManager extends Model {
                 }
             }
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
     }
 
@@ -417,12 +413,12 @@ public class DayStartEndInfoManager extends Model {
             DataSourceClient dataSourceClientDayStart = dataKitAPI.register(createDataSourceBuilderDayStart());
             dataKitAPI.insert(dataSourceClientDayStart, dataTypeLong);
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
         return true;
     }
 
-    private boolean writeDayEndToDataKit(){
+    private boolean writeDayEndToDataKit() {
         try {
             Log.d(TAG, "writeDayEndToDataKit()...");
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
@@ -432,12 +428,12 @@ public class DayStartEndInfoManager extends Model {
             dataKitAPI.insert(dataSourceClientDayEnd, dataTypeLong);
             return true;
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             return false;
         }
     }
 
-    DataSourceBuilder createDataSourceBuilderDayStart() {
+    private DataSourceBuilder createDataSourceBuilderDayStart() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.DAY_START).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Day Start");
@@ -456,7 +452,7 @@ public class DayStartEndInfoManager extends Model {
         return dataSourceBuilder;
     }
 
-    DataSourceBuilder createDataSourceBuilderDayEnd() {
+    private DataSourceBuilder createDataSourceBuilderDayEnd() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.DAY_END).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Day End");

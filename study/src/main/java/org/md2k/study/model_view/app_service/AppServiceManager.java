@@ -48,15 +48,20 @@ public class AppServiceManager extends Model {
         status=new Status(rank,Status.NOT_DEFINED);
         handler=new Handler();
         ArrayList<ConfigApp> apps = modelManager.getConfigManager().getConfig().getApps();
+        boolean result=false;
         for (int i = 0; i < apps.size(); i++) {
             if (apps.get(i).getService() != null) {
                 AppService appService = new AppService(modelManager.getContext(), apps.get(i).getName(), apps.get(i).getPackage_name(), apps.get(i).getService(), rank);
                 appServiceList.add(appService);
-                appService.stop();
-
+                result |= appService.stop();
             }
         }
-
+        if(result){
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ignored) {
+            }
+        }
     }
 
     public void set() {
@@ -74,14 +79,16 @@ public class AppServiceManager extends Model {
     }
 
     public void clear() {
+        boolean result=false;
         Log.d(TAG,"clear()...");
         handler.removeCallbacks(runnableServiceRun);
         for (int i = 0; i < appServiceList.size(); i++)
-            appServiceList.get(i).stop();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            result|=appServiceList.get(i).stop();
+        if(result) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
         }
 //        appServiceList.clear();
         status=new Status(rank,Status.NOT_DEFINED);
@@ -99,14 +106,16 @@ public class AppServiceManager extends Model {
     };
 
     public void stopAll(){
+        boolean result=false;
         for(int i=0;i<appServiceList.size();i++) {
             appServiceList.get(i).setActive(false);
-            appServiceList.get(i).stop();
+            result|=appServiceList.get(i).stop();
         }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if(result) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
         }
     }
     public void startAll(){

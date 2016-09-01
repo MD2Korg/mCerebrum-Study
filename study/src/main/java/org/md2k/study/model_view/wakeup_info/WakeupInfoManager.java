@@ -15,7 +15,7 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
@@ -102,7 +102,7 @@ public class WakeupInfoManager extends Model {
                 }
             }
         }catch (Exception ignored){
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
 
         }
     }
@@ -119,7 +119,7 @@ public class WakeupInfoManager extends Model {
             wakeupTimeDB = wakeupTimeNew;
             return true;
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
             return false;
         }
     }

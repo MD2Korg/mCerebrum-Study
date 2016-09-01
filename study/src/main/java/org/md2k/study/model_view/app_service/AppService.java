@@ -62,14 +62,14 @@ public class AppService {
         context.startService(intent);
     }
 
-    public void stop() {
+    public boolean stop() {
         Log.d(TAG,"app_service...package_name="+package_name+" stop()");
-        if (!isInstalled()) return;
-        if (!isRunning()) return;
+        if (!isInstalled()) return false;
+        if (!isRunning()) return false;
         Intent intent = new Intent();
         intent.setClassName(package_name, service);
         context.stopService(intent);
-
+        return true;
     }
 
     public Status getStatus() {

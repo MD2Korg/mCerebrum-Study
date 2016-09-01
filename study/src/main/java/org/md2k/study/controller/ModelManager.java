@@ -1,11 +1,13 @@
 package org.md2k.study.controller;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.study.ServiceSystemHealth;
+import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.study.config.ConfigManager;
 import org.md2k.study.model_view.Model;
@@ -47,6 +49,8 @@ public class ModelManager {
     ConfigManager configManager;
     Status status;
     private boolean isUpdating;
+    public static int RANK_LIMIT;
+
 
 
     public static ModelManager getInstance(Context context) {
@@ -59,10 +63,12 @@ public class ModelManager {
         this.context = context;
         modelHashMap = new HashMap<>();
         isUpdating = false;
+        RANK_LIMIT=Status.RANK_ADMIN_OPTIONAL;
         read();
     }
 
     public void clear() {
+        LocalBroadcastManager.getInstance(context.getApplicationContext()).unregisterReceiver(mMessageReceiverRestart);
         org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.clear()");
         isUpdating = true;
         for (int i = Status.RANK_SUCCESS; i <= Status.RANK_BEGIN; i++) {
@@ -98,11 +104,19 @@ public class ModelManager {
     }
 
     public void set() {
+        LocalBroadcastManager.getInstance(context.getApplicationContext()).registerReceiver(mMessageReceiverRestart, new IntentFilter(Constants.INTENT_RESTART));
         org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.set()");
         status = new Status(Status.RANK_BEGIN, Status.NOT_DEFINED);
         isUpdating = false;
         update();
     }
+    private BroadcastReceiver mMessageReceiverRestart = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            clear();
+            set();
+        }
+    };
 
     public void update() {
         if (isUpdating) return;
@@ -112,8 +126,8 @@ public class ModelManager {
         Status lastStatus = status;
         while (true) {
             Status curStatus = findLatestStatus();
-            Log.d(TAG, "update()...lastStatus=" + lastStatus.log() + " curStatus=" + curStatus.log() + " rankLimit=" + ServiceSystemHealth.RANK_LIMIT);
-            if (curStatus.getRank() == lastStatus.getRank() || curStatus.getStatus() == Status.SUCCESS || curStatus.getRank() == ServiceSystemHealth.RANK_LIMIT) {
+            Log.d(TAG, "update()...lastStatus=" + lastStatus.log() + " curStatus=" + curStatus.log() + " rankLimit=" + ModelManager.RANK_LIMIT);
+            if (curStatus.getRank() == lastStatus.getRank() || curStatus.getStatus() == Status.SUCCESS || curStatus.getRank() == ModelManager.RANK_LIMIT) {
                 lastStatus = curStatus;
                 break;
             } else {

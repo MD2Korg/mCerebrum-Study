@@ -13,8 +13,8 @@ import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.study.Constants;
 import org.md2k.study.R;
-import org.md2k.study.ServiceSystemHealth;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -68,12 +68,12 @@ public class ActivityDataQuality extends AppCompatActivity {
                             startActivity(intent);
                         }
                     } catch (DataKitException e) {
-                        LocalBroadcastManager.getInstance(ActivityDataQuality.this).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+                        LocalBroadcastManager.getInstance(ActivityDataQuality.this).sendBroadcast(new Intent(Constants.INTENT_RESTART));
                     }
                 }
             });
         }catch (Exception ignored){
-            LocalBroadcastManager.getInstance(ActivityDataQuality.this).sendBroadcast(new Intent(ServiceSystemHealth.INTENT_RESTART));
+            LocalBroadcastManager.getInstance(ActivityDataQuality.this).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
     }
 

@@ -9,6 +9,11 @@
     <string name="title_intervention_apps">Intervention Apps</string>
     <string name="button_text_fix">Fix</string>
     <string name="image_text_error">Error</string>
-    <string name="image_text_ok">Ok</string>
+    <string name="image_text_ok">OK</string>
     <string name="image_text_warning">Warning</string>
+    <string name="button_close">Close</string>
+    <string name="button_check_update">Check Updates</string>
+    <string name="button_day_ended">Day Ended</string>
+    <string name="button_end_day">End Day</string>
+    <string name="button_start_day">Start Day</string>
 </resources>
