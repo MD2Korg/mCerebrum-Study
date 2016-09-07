@@ -42,7 +42,6 @@ public class ActivityDayType extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         showAlertDialog();
-
     }
 
     void showAlertDialog() {
@@ -53,8 +52,8 @@ public class ActivityDayType extends AppCompatActivity {
                 if (which != -1) {
                     DayTypeManager dayTypeManager = (DayTypeManager) ModelManager.getInstance(ActivityDayType.this).getModel(ModelFactory.MODEL_DAY_TYPE);
                     dayTypeManager.setDayType(which);
-                    finish();
                 }
+                finish();
             }
         });
     }
