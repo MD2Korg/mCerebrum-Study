@@ -61,6 +61,11 @@ public class ActivityClearData extends Activity {
         resume++;
         if (resume == 2) {
             ModelManager.getInstance(this).set();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             finish();
         }
         super.onResume();

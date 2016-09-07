@@ -1,10 +1,6 @@
 package org.md2k.study.model_view.clear_data;
 
-import android.app.Activity;
-import android.content.Intent;
-
 import org.md2k.study.Status;
-import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 
@@ -41,15 +37,6 @@ public class ClearDataManager extends Model {
         status = new Status(rank,Status.SUCCESS);
     }
 
-    public void delete(Activity activity) {
-        ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_APP_SERVICE).clear();
-        Intent intent = new Intent();
-        intent.putExtra("delete",true);
-        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivityDataKitSettings");
-        status=new Status(Status.RANK_SYSTEM,Status.APP_CONFIG_ERROR);
-        notifyIfRequired(status);
-        activity.startActivityForResult(intent, 1);
-    }
     public void clear(){
         status = new Status(rank,Status.SUCCESS);
     }

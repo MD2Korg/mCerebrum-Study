@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
+import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.app_install.AppInstallManager;
@@ -110,9 +111,9 @@ public class ActivityStartScreen extends AppCompatActivity {
             setUI();
         } else if (!ModelManager.getInstance(this).getConfigManager().isValid() && !isAlertDialogShown) {
             try {
-                Constants.CONFIG_ZIP_FILENAME = ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getFilename();
+                MySharedPref.getInstance(this).write(Constants.CONFIG_ZIP_FILENAME, ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getFilename());
             } catch (Exception e) {
-                Constants.CONFIG_ZIP_FILENAME = "";
+                MySharedPref.getInstance(this).write(Constants.CONFIG_ZIP_FILENAME, "default");
             }
 
             isAlertDialogShown = true;
@@ -121,7 +122,8 @@ public class ActivityStartScreen extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     if (DialogInterface.BUTTON_POSITIVE == which) {
                         modelManager.clear();
-                        if (!Constants.CONFIG_ZIP_FILENAME.equals("")) {
+                        String filename=MySharedPref.getInstance(ActivityStartScreen.this).read(Constants.CONFIG_ZIP_FILENAME);
+                        if(filename!=null && !filename.equals("default")){
                             FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
                             Intent intent = new Intent(ActivityStartScreen.this, ActivityConfigDownload.class);
                             intent.putExtra(Status.class.getSimpleName(), new Status(0,0));

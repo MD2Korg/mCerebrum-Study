@@ -66,29 +66,32 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(Status.class.getSimpleName()));
         modelManager = ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_admin);
-
-        ArrayList<ConfigViewContent> viewContents = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents();
-        for (int i = 0; i < viewContents.size(); i++) {
-            if (!viewContents.get(i).isEnable()) continue;
-            switch (viewContents.get(i).getId()) {
-                case ConfigView.CONFIGURE_APP:
-                    prepareConfigureApp(viewContents.get(i));
-                    break;
-                case ConfigView.CONFIGURE_STUDY:
-                    prepareConfigureStudy(viewContents.get(i));
-                    break;
-                case ConfigView.START_STUDY:
-                    prepareStartStudy(viewContents.get(i));
-                    break;
-                case ConfigView.STOP_STUDY:
-                    prepareStopStudy(viewContents.get(i));
-                    break;
-                case ConfigView.OTHER:
-                    prepareOther(viewContents.get(i));
-                    break;
+        try {
+            ArrayList<ConfigViewContent> viewContents = modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents();
+            for (int i = 0; i < viewContents.size(); i++) {
+                if (!viewContents.get(i).isEnable()) continue;
+                switch (viewContents.get(i).getId()) {
+                    case ConfigView.CONFIGURE_APP:
+                        prepareConfigureApp(viewContents.get(i));
+                        break;
+                    case ConfigView.CONFIGURE_STUDY:
+                        prepareConfigureStudy(viewContents.get(i));
+                        break;
+                    case ConfigView.START_STUDY:
+                        prepareStartStudy(viewContents.get(i));
+                        break;
+                    case ConfigView.STOP_STUDY:
+                        prepareStopStudy(viewContents.get(i));
+                        break;
+                    case ConfigView.OTHER:
+                        prepareOther(viewContents.get(i));
+                        break;
+                }
             }
+            setupCloseButton();
+        }catch (Exception e){
+            getActivity().finish();
         }
-        setupCloseButton();
     }
 
     void prepareStartStudy(ConfigViewContent viewContent) {

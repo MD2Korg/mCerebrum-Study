@@ -9,6 +9,7 @@ import android.support.v7.view.ContextThemeWrapper;
 
 import org.md2k.study.Constants;
 import org.md2k.study.R;
+import org.md2k.utilities.Report.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -77,6 +78,11 @@ public class Download extends AsyncTask<String, Integer, Integer> {
 
     @Override
     protected void onCancelled() {
+        Log.d(TAG,"onCancelled()...");
+        mWakeLock.release();
+        if(isProgressShow)
+            mProgressDialog.dismiss();
+        onCompletionListener.OnCompleted(org.md2k.study.Status.DOWNLOAD_ERROR);
         super.onCancelled();
     }
 
@@ -85,15 +91,19 @@ public class Download extends AsyncTask<String, Integer, Integer> {
         InputStream input = null;
         OutputStream output = null;
         HttpURLConnection connection = null;
+        Integer status=SUCCESS;
         try {
             URL url = new URL(str[0]);
             connection = (HttpURLConnection) url.openConnection();
             connection.connect();
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                return org.md2k.study.Status.CONNECTION_ERROR;
+                status= org.md2k.study.Status.CONNECTION_ERROR;
+                connection=null;
+                return status;
             }
 
             int fileLength = connection.getContentLength();
+            Log.d(TAG,"fileLength="+fileLength);
 //            if(fileLength!=0) mProgressDialog.setIndeterminate(false);
             input = connection.getInputStream();
             File dir = new File(Constants.TEMP_DIRECTORY);
@@ -104,11 +114,19 @@ public class Download extends AsyncTask<String, Integer, Integer> {
             long total = 0;
             int count;
             while ((count = input.read(data)) != -1) {
+                Log.d(TAG,"count="+count);
                 if (isCancelled()) {
-                    input.close();
-                    output.close();
-                    connection.disconnect();
-                    return org.md2k.study.Status.DOWNLOAD_ERROR;
+                    if(input!=null)
+                        input.close();
+                    input=null;
+                    if(output!=null)
+                        output.close();
+                    output=null;
+                    if(connection!=null)
+                        connection.disconnect();
+                    connection=null;
+                    status=org.md2k.study.Status.DOWNLOAD_ERROR;
+                    return status;
                 }
                 total += count;
                 if (isProgressShow) {
@@ -118,22 +136,26 @@ public class Download extends AsyncTask<String, Integer, Integer> {
                 output.write(data, 0, count);
             }
         } catch (Exception e) {
-            return org.md2k.study.Status.CONNECTION_ERROR;
+            status= org.md2k.study.Status.CONNECTION_ERROR;
+            return status;
         } finally {
             try {
                 if (output != null)
                     output.close();
+                output=null;
                 if (input != null)
                     input.close();
+                input=null;
             } catch (IOException ignored) {
-                return org.md2k.study.Status.CONNECTION_ERROR;
-
+                status= org.md2k.study.Status.CONNECTION_ERROR;
+                return status;
             }
 
             if (connection != null)
                 connection.disconnect();
+            connection=null;
         }
-        return SUCCESS;
+        return status;
     }
 
     @Override

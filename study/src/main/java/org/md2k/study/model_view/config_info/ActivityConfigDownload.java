@@ -15,6 +15,7 @@ import android.widget.Toast;
 import org.md2k.study.Constants;
 import org.md2k.study.R;
 import org.md2k.study.Status;
+import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
@@ -72,7 +73,9 @@ public class ActivityConfigDownload extends Activity {
 
     public void showDownloadConfig() {
         Log.d(TAG, "showDownloadConfig()...");
-        alertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", Constants.CONFIG_ZIP_FILENAME, R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
+        String filename=MySharedPref.getInstance(this).read(Constants.CONFIG_ZIP_FILENAME);
+        if(filename==null) filename="";
+        alertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", filename, R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, String result) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
