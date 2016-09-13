@@ -1,8 +1,6 @@
 package org.md2k.study.model_view.app_install;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -20,6 +18,7 @@ import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.R;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
+import org.md2k.study.utilities.OnCompletionListener;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -51,7 +50,6 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     Context context;
     AppInstallManager appInstallManager;
-    boolean isRefreshRequired;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,7 +57,6 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         context = getActivity();
         addPreferencesFromResource(R.xml.pref_app_install);
         appInstallManager = (AppInstallManager) ModelManager.getInstance(getActivity()).getModel(ModelFactory.MODEL_APP_INSTALL);
-        isRefreshRequired = false;
         setupButtons();
     }
 
@@ -82,20 +79,27 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
                 getActivity().finish();
             }
         });
-        final Button buttonUpdate = (Button) getActivity().findViewById(R.id.button_2);
+        final Button buttonFixAll = (Button) getActivity().findViewById(R.id.button_2);
+        buttonFixAll.setText(R.string.buton_fix_all);
+        buttonFixAll.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                appInstallManager.fix(getActivity(), onCompletionListener);
+            }
+        });
+        final Button buttonUpdate = (Button) getActivity().findViewById(R.id.button_3);
         buttonUpdate.setText(R.string.button_check_update);
         buttonUpdate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Checking update...",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Checking update...", Toast.LENGTH_SHORT).show();
                 appInstallManager.updateVersionAll(0, new OnDataChangeListener() {
                     @Override
                     public void onDataChange(int now, String str) {
                         try {
-                            if(getActivity()==null) return;
+                            if (getActivity() == null) return;
                             if (now >= appInstallManager.getAppInstallList().size())
                                 Toast.makeText(getActivity(), "Checking updates...done", Toast.LENGTH_SHORT).show();
                             else updatePreference(appInstallManager.getAppInstallList().get(now));
-                        }catch (Exception ignored){
+                        } catch (Exception ignored) {
 
                         }
                     }
@@ -103,7 +107,36 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
             }
         });
     }
+/*
+    void setPermission(AppInstall appInstall) {
+        try {
+            Intent intent = new Intent();
+//            intent.setAction(appInstall.app.getPermission());
+//            intent.setClassName("org.md2k.study", "org.md2k.study.ActivityPermission");
+//        intent.setClassName(appInstall.getPackage_name(), appInstall.app.getPermission());
+            intent.setComponent(new ComponentName(appInstall.getPackage_name(), "org.md2k.utilities.permission.ActivityPermission"));
+            startActivityForResult(intent, PERMISSION_REQUEST);
+        } catch (Exception e) {
+            isFixAll=false;
+            isRefreshRequired=true;
 
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PERMISSION_REQUEST) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data.getBooleanExtra(PermissionInfo.INTENT_RESULT, false) == true) {
+                    AppInstall appInstall = appInstallManager.getAppInstallList().get(fixIndex);
+                    appInstall.setPermission();
+                    updatePreference(appInstall);
+                    fixIndex++;
+                }
+            }
+        }
+    }
+*/
     void updatePreference(AppInstall appInstall) {
         Preference preference = findPreference(appInstall.getName());
         if (!appInstall.isInstalled()) {
@@ -114,6 +147,9 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         } else if (appInstall.isUpdateAvailable()) {
             preference.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_warning_amber_50dp));
             preference.setSummary(appInstall.getCurVersion() + " (Update Available: " + appInstall.getLatestVersion() + ")");
+        } else if (!appInstall.hasPermission()) {
+            preference.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_warning_amber_50dp));
+            preference.setSummary(appInstall.getCurVersion() + " - permission denied");
         } else {
             preference.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_ok_teal_50dp));
             preference.setSummary(appInstall.getCurVersion());
@@ -134,10 +170,10 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
             listPreference.setEntryValues(options);
             listPreference.setDefaultValue("Run");
         } else {
-            String options[] = {"Uninstall", "Run"};
+            String options[] = {"Uninstall", "Run", "Permission"};
             listPreference.setEntries(options);
             listPreference.setEntryValues(options);
-            listPreference.setDefaultValue("Run");
+            listPreference.setDefaultValue("Permission");
         }
 
     }
@@ -154,17 +190,15 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
             listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    AppInstall appInstall = appInstallManager.getAppInstallList().get(finalI);
                     if (newValue.equals("Install") || newValue.equals("Update")) {
-                        appInstall.downloadAndInstallApp(getActivity());
-                        isRefreshRequired = true;
+                        appInstallManager.install(getActivity(), finalI, onCompletionListener);
+
                     } else if (newValue.equals("Run")) {
-                        appInstall.run(context);
+                        appInstallManager.getAppInstallList().get(finalI).run(context);
                     } else if (newValue.equals("Uninstall")) {
-                        Intent uninstallIntent = new Intent(Intent.ACTION_DELETE,
-                                Uri.parse("package:" + appInstall.getPackage_name()));
-                        startActivity(uninstallIntent);
-                        isRefreshRequired = true;
+                        appInstallManager.uninstall(finalI,onCompletionListener);
+                    } else if(newValue.equals("Permission")){
+                        appInstallManager.permission(finalI,onCompletionListener);
                     }
                     return false;
                 }
@@ -173,13 +207,28 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
             updatePreference(appInstallManager.getAppInstallList().get(i));
         }
     }
-
-    @Override
-    public void onResume() {
-        if (isRefreshRequired) {
+    OnCompletionListener onCompletionListener=new OnCompletionListener() {
+        @Override
+        public void OnCompleted(int status) {
             ModelManager.getInstance(getActivity()).clear();
             ModelManager.getInstance(getActivity()).set();
         }
+    };
+
+    @Override
+    public void onResume() {
+/*        if(isFixAll && fixIndex<appInstallManager.getAppInstallList().size()){
+            fix();
+        }else if(isFixAll && fixIndex==appInstallManager.getAppInstallList().size()){
+            isFixAll=false;
+            ModelManager.getInstance(getActivity()).clear();
+            ModelManager.getInstance(getActivity()).set();
+        }
+        else if (isRefreshRequired) {
+            ModelManager.getInstance(getActivity()).clear();
+            ModelManager.getInstance(getActivity()).set();
+        }
+*/
         setupAppInstall();
         super.onResume();
     }

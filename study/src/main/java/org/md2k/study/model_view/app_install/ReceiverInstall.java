@@ -1,4 +1,9 @@
-package org.md2k.study.config;
+package org.md2k.study.model_view.app_install;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -8,7 +13,7 @@ package org.md2k.study.config;
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * <p/>
- * * Redistributions of source code must retain the above copyright notice, this
+ * * Redistributions of source status must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
  * <p/>
  * * Redistributions in binary form must reproduce the above copyright notice,
@@ -26,55 +31,20 @@ package org.md2k.study.config;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConfigApp {
-    private String id;
-    private String name;
-    private boolean enable;
-    private String package_name;
-    private String service;
-    private String settings;
-    private String config;
-    private String default_config;
-    private String download_link;
-    private String permission;
+public class ReceiverInstall extends BroadcastReceiver
+{
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Intent intentSend=new Intent();
+        intentSend.setAction(intent.getAction());
+        switch(intent.getAction()){
+            case Intent.ACTION_PACKAGE_ADDED:
+            case Intent.ACTION_PACKAGE_REMOVED:
+            case Intent.ACTION_PACKAGE_CHANGED:
+            case Intent.ACTION_PACKAGE_REPLACED:
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intentSend);
+                break;
 
-    public String getId() {
-        return id;
+        }
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getPackage_name() {
-        return package_name;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public String getSettings() {
-        return settings;
-    }
-
-    public String getConfig() {
-        return config;
-    }
-
-    public String getDefault_config() {
-        return default_config;
-    }
-
-    public String getDownload_link() {
-        return download_link;
-    }
-
-    public boolean isEnable() {
-        return enable;
-    }
-
-    public String getPermission() {
-        return permission;
-    }
-};
+}

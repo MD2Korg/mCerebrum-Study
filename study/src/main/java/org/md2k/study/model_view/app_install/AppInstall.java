@@ -1,8 +1,12 @@
 package org.md2k.study.model_view.app_install;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
 import org.md2k.study.Constants;
@@ -14,6 +18,7 @@ import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.FileManager;
+import org.md2k.utilities.Report.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -58,6 +63,7 @@ public class AppInstall {
     private String curVersion;
     private String latestVersion;
     private boolean installed;
+    private OnCompletionListener onCompletionListener;
 
     AppInstall(Context context, ConfigApp app) {
         this.context = context;
@@ -76,11 +82,33 @@ public class AppInstall {
     public void clear() {
     }
 
-    public void downloadAndInstallApp(final Context context) {
+    public void uninstall(OnCompletionListener onCompletionListener){
+        Log.d(TAG,"uninstall.."+app.getPackage_name());
+        this.onCompletionListener=onCompletionListener;
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addDataScheme("package");
+        context.registerReceiver(br, intentFilter);
+        Intent uninstallIntent = new Intent(Intent.ACTION_DELETE,
+                Uri.parse("package:" + getPackage_name()));
+        uninstallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(uninstallIntent);
+    }
+
+    public void install(final Context context, OnCompletionListener onCompletionListenerr) {
+        Log.d(TAG,"install.."+app.getPackage_name());
+        this.onCompletionListener=onCompletionListenerr;
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        intentFilter.addDataScheme("package");
+        context.registerReceiver(br, intentFilter);
         final String filename = "file_" + app.getId() + latestVersion + ".apk";
         if (app.getDownload_link().startsWith("market")) {
             Intent goToMarket = new Intent(Intent.ACTION_VIEW)
                     .setData(Uri.parse(app.getDownload_link()));
+            goToMarket.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(goToMarket);
         } else if (app.getDownload_link().endsWith(".apk")) {
             String link = app.getDownload_link();
@@ -93,6 +121,8 @@ public class AppInstall {
                         intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY + filename)), "application/vnd.android.package-archive");
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
+                    }else{
+                        onCompletionListener.OnCompleted(Status.DOWNLOAD_ERROR);
                     }
                 }
             });
@@ -113,6 +143,8 @@ public class AppInstall {
                                 intent.setDataAndType(Uri.fromFile(new File(Constants.TEMP_DIRECTORY + filename)), "application/vnd.android.package-archive");
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 context.startActivity(intent);
+                            }else{
+                                onCompletionListener.OnCompleted(Status.DOWNLOAD_ERROR);
                             }
                         }
                     });
@@ -127,8 +159,9 @@ public class AppInstall {
     }
 
     public void run(Context context) {
-        Intent LaunchIntent = context.getPackageManager().getLaunchIntentForPackage(app.getPackage_name());
-        context.startActivity(LaunchIntent);
+        Intent intent = context.getPackageManager().getLaunchIntentForPackage(app.getPackage_name());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     public boolean isInstalled() {
@@ -243,4 +276,62 @@ public class AppInstall {
     public String getLatestVersion() {
         return latestVersion;
     }
+
+    BroadcastReceiver br = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG,"broadcast...package install/uninstall status = "+intent.getAction());
+            switch (intent.getAction()) {
+                case Intent.ACTION_PACKAGE_ADDED:
+                case Intent.ACTION_PACKAGE_CHANGED:
+                case Intent.ACTION_PACKAGE_REPLACED:
+                case Intent.ACTION_PACKAGE_REMOVED:
+                    MySharedPref.getInstance(context).write(app.getPackage_name()+"_"+getCurVersion(),"false");
+                    set();
+                    onCompletionListener.OnCompleted(Status.SUCCESS);
+                    context.unregisterReceiver(br);
+                    break;
+            }
+        }
+    };
+
+    public boolean hasPermission() {
+        if (app.getPermission() == null)
+            return true;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            return true;
+        String str = MySharedPref.getInstance(context).read(app.getPackage_name() + "_" + this.getCurVersion());
+        if (str != null && str.equals("true")) return true;
+        else return false;
+    }
+
+    public void permission(OnCompletionListener onCompletionListener) {
+        Log.d(TAG,"permission.."+app.getPackage_name());
+        if(hasPermission()) {
+            onCompletionListener.OnCompleted(Status.SUCCESS);
+            return;
+        }
+        this.onCompletionListener=onCompletionListener;
+        LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiverPermission, new IntentFilter("permission_data"));
+        Intent intent=new Intent(context, ActivityPermissionGet.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("package_name",app.getPackage_name());
+        intent.putExtra("permission", app.getPermission());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+    BroadcastReceiver broadcastReceiverPermission=new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int result=intent.getIntExtra("result",Status.APP_PERMISSION_NOT_APPROVED);
+            Log.d(TAG,"broadcast permission..."+app.getPackage_name()+" ... result = "+result);
+            if(result==Status.SUCCESS)
+                MySharedPref.getInstance(context).write(app.getPackage_name()+"_"+getCurVersion(),"true");
+            else
+                MySharedPref.getInstance(context).write(app.getPackage_name()+"_"+getCurVersion(),"false");
+            onCompletionListener.OnCompleted(result);
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(broadcastReceiverPermission);
+        }
+    };
 }

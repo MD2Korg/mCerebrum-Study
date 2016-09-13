@@ -16,4 +16,5 @@
     <string name="button_day_ended">Day Ended</string>
     <string name="button_end_day">End Day</string>
     <string name="button_start_day">Start Day</string>
+    <string name="buton_fix_all">Fix All</string>
 </resources>

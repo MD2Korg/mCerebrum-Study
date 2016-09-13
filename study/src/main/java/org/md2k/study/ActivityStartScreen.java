@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
+import org.md2k.datakitapi.messagehandler.ResultCallback;
 import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
@@ -29,11 +30,13 @@ import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.Report.LogStorage;
 import org.md2k.utilities.UI.AlertDialogs;
+import org.md2k.utilities.permission.PermissionInfo;
 
 import io.fabric.sdk.android.Fabric;
 
 public class ActivityStartScreen extends AppCompatActivity {
     private static final String TAG = ActivityStartScreen.class.getSimpleName();
+    boolean isPermission=false;
     Handler handler;
     ProgressDialog progressDialog;
     boolean isAlertDialogShown;
@@ -43,10 +46,25 @@ public class ActivityStartScreen extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         handler = new Handler();
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start_screen);
+        final PermissionInfo permissionInfo=new PermissionInfo();
+        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+            @Override
+            public void onResult(Boolean result) {
+                if(result){
+                    isPermission=true;
+                    load();
+                }else{
+                    isPermission=false;
+                    finish();
+                }
+            }
+        });
+    }
+    private void load(){
+        LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         modelManager = ModelManager.getInstance(getApplicationContext());
         progressDialog = new ProgressDialog(this, android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
         progressDialog.setMessage("Loading...");
@@ -57,17 +75,18 @@ public class ActivityStartScreen extends AppCompatActivity {
         } else {
             loadModelManager();
         }
-
     }
 
     @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart()...");
-        if (isStudyRunning()) {
-            startStudy();
-        } else {
-            setUI();
+        if(isPermission) {
+            if (isStudyRunning()) {
+                startStudy();
+            } else {
+                setUI();
+            }
         }
     }
 
@@ -88,7 +107,8 @@ public class ActivityStartScreen extends AppCompatActivity {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
-        modelManager.clear();
+        if(isPermission)
+            modelManager.clear();
         super.onDestroy();
     }
 

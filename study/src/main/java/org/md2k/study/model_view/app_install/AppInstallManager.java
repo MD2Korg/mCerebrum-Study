@@ -1,5 +1,6 @@
 package org.md2k.study.model_view.app_install;
 
+import android.content.Context;
 import android.widget.Toast;
 
 import org.md2k.study.OnDataChangeListener;
@@ -7,6 +8,7 @@ import org.md2k.study.Status;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
+import org.md2k.study.utilities.OnCompletionListener;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -38,18 +40,27 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AppInstallManager extends Model {
-    private static final String TAG = AppInstallManager.class.getSimpleName() ;
-    ArrayList<AppInstall> appInstallList;
+    private static final String TAG = AppInstallManager.class.getSimpleName();
+    private ArrayList<AppInstall> appInstallList;
+
     public ArrayList<AppInstall> getAppInstallList() {
         return appInstallList;
     }
-    public AppInstall getAppInstallList(String id){
-        for(int i=0;i<appInstallList.size();i++)
-            if(appInstallList.get(i).app.getId().equals(id))
+/*
+    public AppInstall getAppInstallList(String id) {
+        for (int i = 0; i < appInstallList.size(); i++)
+            if (appInstallList.get(i).app.getId().equals(id))
                 return appInstallList.get(i);
         return null;
     }
 
+    public AppInstall getAppInstallByPackageName(String packageName) {
+        for (int i = 0; i < appInstallList.size(); i++)
+            if (appInstallList.get(i).app.getPackage_name().equals(packageName))
+                return appInstallList.get(i);
+        return null;
+    }
+*/
     public AppInstallManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
@@ -59,53 +70,71 @@ public class AppInstallManager extends Model {
             AppInstall appInstall = new AppInstall(modelManager.getContext(), apps.get(i));
             appInstallList.add(appInstall);
         }
-        status=new Status(rank, Status.APP_NOT_INSTALLED);
+        status = new Status(rank, Status.APP_NOT_INSTALLED);
     }
 
 
-    public void set()  {
+    public void set() {
         Log.d(TAG, "set()...");
         Status curStatus;
-        for(int i=0;i<appInstallList.size();i++)
+        for (int i = 0; i < appInstallList.size(); i++)
             appInstallList.get(i).set();
         int total = size();
         int install = sizeInstalled();
         int update = sizeUpdate();
-        if (update == 0 && total == install)
-            curStatus= new Status(rank,Status.SUCCESS);
+        int permissionNotApproved = sizePermissionNotApproved();
+        if (update == 0 && permissionNotApproved == 0 && total == install)
+            curStatus = new Status(rank, Status.SUCCESS);
         else if (total != install)
-            curStatus= new Status(rank,Status.APP_NOT_INSTALLED);
-        else curStatus= new Status(rank,Status.APP_UPDATE_AVAILABLE);
-        Log.d(TAG,"status = "+status.log()+" latestStatus="+curStatus.log());
+            curStatus = new Status(rank, Status.APP_NOT_INSTALLED);
+        else if (update != 0)
+            curStatus = new Status(rank, Status.APP_UPDATE_AVAILABLE);
+        else
+            curStatus = new Status(rank, Status.APP_PERMISSION_NOT_APPROVED);
+        Log.d(TAG, "status = " + status.log() + " latestStatus=" + curStatus.log());
         notifyIfRequired(curStatus);
     }
-    public void clear(){
-        status=new Status(rank,Status.APP_NOT_INSTALLED);
+
+    public void clear() {
+        status = new Status(rank, Status.APP_NOT_INSTALLED);
     }
-    private int size(){
+
+    private int size() {
         return appInstallList.size();
     }
-    private int sizeInstalled(){
-        int count=0;
-        for(int i=0;i< appInstallList.size();i++){
-            if(appInstallList.get(i).isInstalled())
+
+    private int sizeInstalled() {
+        int count = 0;
+        for (int i = 0; i < appInstallList.size(); i++) {
+            if (appInstallList.get(i).isInstalled())
                 count++;
         }
         return count;
     }
-    private int sizeUpdate(){
-        int count=0;
-        for(int i=0;i< appInstallList.size();i++){
-            if(appInstallList.get(i).isUpdateAvailable())
+
+    private int sizeUpdate() {
+        int count = 0;
+        for (int i = 0; i < appInstallList.size(); i++) {
+            if (appInstallList.get(i).isUpdateAvailable())
                 count++;
         }
         return count;
     }
+
+    private int sizePermissionNotApproved() {
+        int count = 0;
+        for (int i = 0; i < appInstallList.size(); i++) {
+            if (!appInstallList.get(i).hasPermission())
+                count++;
+        }
+        return count;
+    }
+
     public void updateVersionAll(final int now, final OnDataChangeListener onDataChangeListener) {
         Log.d(TAG, "updateVersionAll()...now=" + now);
         if (now >= getAppInstallList().size()) {
             set();
-            if(onDataChangeListener!=null)
+            if (onDataChangeListener != null)
                 onDataChangeListener.onDataChange(getAppInstallList().size(), String.valueOf(status.getStatus()));
             return;
         }
@@ -113,15 +142,15 @@ public class AppInstallManager extends Model {
             getAppInstallList().get(now).setLatestVersionName(modelManager.getContext(), new OnDataChangeListener() {
                 @Override
                 public void onDataChange(int i, String str) {
-                    if(str==null){
+                    if (str == null) {
                         Toast.makeText(modelManager.getContext(), "Error: Internet Connection Error", Toast.LENGTH_LONG).show();
                         onDataChangeListener.onDataChange(now, null);
                         updateVersionAll(getAppInstallList().size(), onDataChangeListener);
-                    }else if(str.equals("no_version")) {
+                    } else if (str.equals("no_version")) {
                         Log.d(TAG, "updateVersionAll()..." + str);
                         onDataChangeListener.onDataChange(now, null);
                         updateVersionAll(now + 1, onDataChangeListener);
-                    }else{
+                    } else {
                         onDataChangeListener.onDataChange(now, str);
                         updateVersionAll(now + 1, onDataChangeListener);
                     }
@@ -131,5 +160,60 @@ public class AppInstallManager extends Model {
         } else {
             updateVersionAll(now + 1, onDataChangeListener);
         }
+    }
+
+    public void install(Context context, int id, OnCompletionListener onCompletionListener) {
+        appInstallList.get(id).install(context, onCompletionListener);
+    }
+
+    public void uninstall(int id, OnCompletionListener onCompletionListener) {
+        appInstallList.get(id).uninstall(onCompletionListener);
+    }
+
+    public void fix(Context context, OnCompletionListener onCompletionListener) {
+        fixRecursive(context, 0,onCompletionListener);
+    }
+    private void fixRecursive(final Context context, final int now, final OnCompletionListener onCompletionListener){
+        Log.d(TAG,"fixRecursive...now="+now);
+        if(now>=appInstallList.size()) onCompletionListener.OnCompleted(Status.SUCCESS);
+        else{
+            if(!appInstallList.get(now).isInstalled() || appInstallList.get(now).isUpdateAvailable()){
+                appInstallList.get(now).install(context, new OnCompletionListener() {
+                    @Override
+                    public void OnCompleted(int status) {
+                        if(status!=Status.SUCCESS)
+                            onCompletionListener.OnCompleted(status);
+                        else {
+                            appInstallList.get(now).permission(new OnCompletionListener() {
+                                @Override
+                                public void OnCompleted(int status) {
+                                    if(status!=Status.SUCCESS){
+                                        onCompletionListener.OnCompleted(status);
+                                    }else{
+                                        fixRecursive(context, now + 1, onCompletionListener);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            }else{
+                appInstallList.get(now).permission(new OnCompletionListener() {
+                    @Override
+                    public void OnCompleted(int status) {
+                        if(status!=Status.SUCCESS){
+                            onCompletionListener.OnCompleted(status);
+                        }else{
+                            fixRecursive(context, now + 1, onCompletionListener);
+                        }
+                    }
+                });
+
+            }
+        }
+    }
+
+    public void permission(int finalI, OnCompletionListener onCompletionListener) {
+        appInstallList.get(finalI).permission(onCompletionListener);
     }
 }

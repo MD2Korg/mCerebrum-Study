@@ -54,6 +54,7 @@ public class Status implements Parcelable {
     public static final int APP_UPDATE_AVAILABLE = 698;
     public static final int APP_CONFIG_ERROR = 697;
     public static final int APP_NOT_ACTIVE = 696;
+    public static final int APP_PERMISSION_NOT_APPROVED = 695;
     public static final int DATAKIT_NOT_AVAILABLE = 599;
     public static final int DATABASE_NOT_AVAILABLE = 598;
     public static final int CLEAR_OLD_DATA = 499;
@@ -89,6 +90,8 @@ public class Status implements Parcelable {
                 return "Error: Application not installed properly";
             case APP_UPDATE_AVAILABLE:
                 return "Warning: Update available for application";
+            case APP_PERMISSION_NOT_APPROVED:
+                return "Warning: Permission not approved";
             case USERID_NOT_DEFINED:
                 return "Error: UserID not defined";
             case WAKEUP_NOT_DEFINED:
