@@ -24,6 +24,7 @@ import org.md2k.study.model_view.sleep_info.SleepInfoManager;
 import org.md2k.study.model_view.study_info.StudyInfoManager;
 import org.md2k.study.model_view.study_start_end.StudyStartEndInfoManager;
 import org.md2k.study.model_view.user_app.UserAppManager;
+import org.md2k.study.model_view.user_app_external.UserAppExternalManager;
 import org.md2k.study.model_view.user_info.UserInfoManager;
 import org.md2k.study.model_view.user_status.UserStatusManager;
 import org.md2k.study.model_view.wakeup_info.WakeupInfoManager;
@@ -47,17 +48,18 @@ public class ModelFactory {
     public static final String MODEL_INTERVENTION = "intervention";
     public static final String MODEL_SELF_REPORT = "self_report";
     public static final String MODEL_PLOTTER = "plotter";
+    public static final String MODEL_USER_APP_EXTERNAL = "user_app_external";
     public static final String MODEL_EMA_TEST = "EMA_test";
     public static final String MODEL_DAY_START_END = "day_start_end";
-    public static final String MODEL_STUDY_START_END="study_start_end";
-    public static final String MODEL_CLEAR_DATABASE="clear_database";
-    public static final String MODEL_DATAKIT_CONNECT="datakit_connect";
-    public static final String MODEL_DAY_TYPE="day_type";
-    public static final String MODEL_USER_APP="user_app";
-    public static final String MODEL_USER_STATUS="user_status";
-    public static final String MODEL_APP_RESET="app_reset";
-    public static final String MODEL_APP_START="app_start";
-    public static final String MODEL_APP_STOP="app_stop";
+    public static final String MODEL_STUDY_START_END = "study_start_end";
+    public static final String MODEL_CLEAR_DATABASE = "clear_database";
+    public static final String MODEL_DATAKIT_CONNECT = "datakit_connect";
+    public static final String MODEL_DAY_TYPE = "day_type";
+    public static final String MODEL_USER_APP = "user_app";
+    public static final String MODEL_USER_STATUS = "user_status";
+    public static final String MODEL_APP_RESET = "app_reset";
+    public static final String MODEL_APP_START = "app_start";
+    public static final String MODEL_APP_STOP = "app_stop";
 
     public static Model getModel(ModelManager modelManager, String id, int rank) {
         switch (id) {
@@ -66,21 +68,21 @@ public class ModelFactory {
             case MODEL_DATAKIT_CONNECT:
                 return new DataKitConnectManager(modelManager, id, rank);
             case MODEL_STUDY_INFO:
-                return new StudyInfoManager(modelManager, id,rank);
+                return new StudyInfoManager(modelManager, id, rank);
             case MODEL_APP_INSTALL:
                 return new AppInstallManager(modelManager, id, rank);
             case MODEL_APP_SETTINGS:
-                return new AppSettingsManager(modelManager, id,rank);
+                return new AppSettingsManager(modelManager, id, rank);
             case MODEL_USER_INFO:
                 return new UserInfoManager(modelManager, id, rank);
             case MODEL_WAKEUP_INFO:
-                return new WakeupInfoManager(modelManager, id,rank);
+                return new WakeupInfoManager(modelManager, id, rank);
             case MODEL_SLEEP_INFO:
-                return new SleepInfoManager(modelManager, id,rank);
+                return new SleepInfoManager(modelManager, id, rank);
             case MODEL_CLEAR_DATABASE:
-                return new ClearDataManager(modelManager,id,rank);
+                return new ClearDataManager(modelManager, id, rank);
             case MODEL_DAY_TYPE:
-                return new DayTypeManager(modelManager,id,rank);
+                return new DayTypeManager(modelManager, id, rank);
             case MODEL_CLEAR_CONFIG:
                 return new ClearConfigManager(modelManager, id, rank);
             case MODEL_CONFIG_DOWNLOAD:
@@ -88,17 +90,17 @@ public class ModelFactory {
             case MODEL_DATA_QUALITY:
                 return new DataQualityManager(modelManager, id, rank);
             case MODEL_USER_APP:
-                return new UserAppManager(modelManager,id,rank);
+                return new UserAppManager(modelManager, id, rank);
             case MODEL_INTERVENTION:
-                return new InterventionManager(modelManager,id,rank);
+                return new InterventionManager(modelManager, id, rank);
             case MODEL_SELF_REPORT:
-                return new SelfReportManager(modelManager,id,rank);
+                return new SelfReportManager(modelManager, id, rank);
             case MODEL_PLOTTER:
-                return new PlotterManager(modelManager,id,rank);
+                return new PlotterManager(modelManager, id, rank);
             case MODEL_PRIVACY:
                 return new PrivacyControlManager(modelManager, id, rank);
             case MODEL_EMA_TEST:
-                return new EMATestManager(modelManager,id,rank);
+                return new EMATestManager(modelManager, id, rank);
             case MODEL_DAY_START_END:
                 return new DayStartEndInfoManager(modelManager, id, rank);
             case MODEL_STUDY_START_END:
@@ -108,15 +110,17 @@ public class ModelFactory {
             case MODEL_USER_STATUS:
                 return new UserStatusManager(modelManager, id, rank);
             case MODEL_APP_RESET:
-                return new AppResetManager(modelManager,id,rank);
+                return new AppResetManager(modelManager, id, rank);
             case MODEL_APP_START:
-                return new AppStartManager(modelManager,id,rank);
+                return new AppStartManager(modelManager, id, rank);
             case MODEL_APP_STOP:
-                return new AppStopManager(modelManager,id,rank);
+                return new AppStopManager(modelManager, id, rank);
         }
-        if(id.endsWith(MODEL_SELF_REPORT))
-            return new SelfReportManager(modelManager,id,rank);
-        return null;
+        if (id.endsWith(MODEL_SELF_REPORT))
+            return new SelfReportManager(modelManager, id, rank);
+        else {
+            return new UserAppExternalManager(modelManager, id, rank);
+        }
     }
 
 }

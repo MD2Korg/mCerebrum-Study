@@ -59,20 +59,24 @@ public class Download extends AsyncTask<String, Integer, Integer> {
         this.isProgressShow = isProgressShow;
 
         this.onCompletionListener = onCompletionListener;
-        if (isProgressShow) {
-            mProgressDialog = new ProgressDialog(new ContextThemeWrapper(context, R.style.app_theme_teal_light_dialog));
-            mProgressDialog.setTitle("Download");
-            mProgressDialog.setMessage("Download in progress...");
-            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            mProgressDialog.setProgress(0);
-            mProgressDialog.setMax(100);
-            mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    cancel(true);
-                }
-            });
-            mProgressDialog.show();
+        try {
+            if (isProgressShow) {
+                mProgressDialog = new ProgressDialog(new ContextThemeWrapper(context, R.style.app_theme_teal_light_dialog));
+                mProgressDialog.setTitle("Download");
+                mProgressDialog.setMessage("Download in progress...");
+                mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                mProgressDialog.setProgress(0);
+                mProgressDialog.setMax(100);
+                mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        cancel(true);
+                    }
+                });
+                mProgressDialog.show();
+            }
+        }catch(Exception e){
+            mProgressDialog=null;
         }
     }
 
@@ -80,7 +84,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
     protected void onCancelled() {
         Log.d(TAG,"onCancelled()...");
         mWakeLock.release();
-        if(isProgressShow)
+        if(isProgressShow && mProgressDialog!=null)
             mProgressDialog.dismiss();
         onCompletionListener.OnCompleted(org.md2k.study.Status.DOWNLOAD_ERROR);
         super.onCancelled();
@@ -129,7 +133,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
                     return status;
                 }
                 total += count;
-                if (isProgressShow) {
+                if (isProgressShow && mProgressDialog!=null) {
                     if (fileLength > 0)
                         mProgressDialog.setProgress((int) (total * 100.0 / fileLength));
                 }
@@ -170,7 +174,7 @@ public class Download extends AsyncTask<String, Integer, Integer> {
     @Override
     protected void onPostExecute(Integer status) {
         mWakeLock.release();
-        if(isProgressShow)
+        if(isProgressShow && mProgressDialog!=null)
             mProgressDialog.dismiss();
         onCompletionListener.OnCompleted(status);
     }

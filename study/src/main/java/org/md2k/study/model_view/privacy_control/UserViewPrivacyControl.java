@@ -78,28 +78,42 @@ public class UserViewPrivacyControl extends UserView {
             activity.findViewById(R.id.button_privacy).setEnabled(true);
             Log.d(TAG, "updateView()...");
             PrivacyControlManager privacyControlManager = (PrivacyControlManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_PRIVACY);
-            if(privacyControlManager==null)  handler.postDelayed(this, 1000);
-
-            Status status = privacyControlManager.getCurrentStatusDetails();
-            if (status.getStatus() == Status.PRIVACY_ACTIVE) {
-                long remainingTime = privacyControlManager.getPrivacyData().getStartTimeStamp() + privacyControlManager.getPrivacyData().getDuration().getValue() - DateTime.getDateTime();
-                if (remainingTime > 0) {
-                    remainingTime /= 1000;
-                    int sec = (int) (remainingTime % 60);
-                    int min = (int) (remainingTime / 60);
-                    ((TextView) activity.findViewById(R.id.text_view_privacy)).setText("Resumed after " + String.format("%02d:%02d", min, sec));
-                    ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.red_700));
-                    activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_red));
-                    ((Button) activity.findViewById(R.id.button_privacy)).setTextColor(Color.WHITE);
-                    ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn Off");
-                    handler.postDelayed(this, 1000);
-                    isActive = true;
+            if (privacyControlManager == null) handler.postDelayed(this, 1000);
+            else {
+                Status status = privacyControlManager.getCurrentStatusDetails();
+                if (status.getStatus() == Status.PRIVACY_ACTIVE) {
+                    long remainingTime = privacyControlManager.getPrivacyData().getStartTimeStamp() + privacyControlManager.getPrivacyData().getDuration().getValue() - DateTime.getDateTime();
+                    if (remainingTime > 0) {
+                        remainingTime /= 1000;
+                        int sec = (int) (remainingTime % 60);
+                        int min = (int) (remainingTime / 60);
+                        ((TextView) activity.findViewById(R.id.text_view_privacy)).setText("Resumed after " + String.format("%02d:%02d", min, sec));
+                        ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.red_700));
+                        activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_red));
+                        ((Button) activity.findViewById(R.id.button_privacy)).setTextColor(Color.WHITE);
+                        ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn Off");
+                        handler.postDelayed(this, 1000);
+                        isActive = true;
+                    } else {
+                        String text = "Not Active";
+                        long remainingUsage = privacyControlManager.getRemainingTime();
+                        if (remainingUsage != Long.MAX_VALUE) {
+                            remainingUsage = remainingUsage / (1000 * 60);
+                            text = text + String.format(Locale.ENGLISH, "\n(Daily Remaining Usage: %0d Minutes)", remainingUsage);
+                        }
+                        ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
+                        ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
+                        activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
+                        ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn On");
+                        ((Button) activity.findViewById(R.id.button_privacy)).setTextColor(Color.BLACK);
+                        isActive = false;
+                    }
                 } else {
-                    String text="Not Active";
+                    String text = "Not Active";
                     long remainingUsage = privacyControlManager.getRemainingTime();
-                    if(remainingUsage!=Long.MAX_VALUE) {
+                    if (remainingUsage != Long.MAX_VALUE) {
                         remainingUsage = remainingUsage / (1000 * 60);
-                        text = text+String.format(Locale.ENGLISH, "\n(Daily Remaining Usage: %0d Minutes)", remainingUsage);
+                        text = text + String.format(Locale.ENGLISH, "\n(Daily Usage Remaining: %d Minutes)", remainingUsage);
                     }
                     ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
                     ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
@@ -108,29 +122,16 @@ public class UserViewPrivacyControl extends UserView {
                     ((Button) activity.findViewById(R.id.button_privacy)).setTextColor(Color.BLACK);
                     isActive = false;
                 }
-            } else {
-                String text="Not Active";
-                long remainingUsage = privacyControlManager.getRemainingTime();
-                if(remainingUsage!=Long.MAX_VALUE) {
-                    remainingUsage = remainingUsage / (1000 * 60);
-                    text = text+String.format(Locale.ENGLISH, "\n(Daily Usage Remaining: %d Minutes)", remainingUsage);
-                }
-                ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
-                ((TextView) activity.findViewById(R.id.text_view_privacy)).setTextColor(ContextCompat.getColor(activity, R.color.teal_700));
-                activity.findViewById(R.id.button_privacy).setBackground(ContextCompat.getDrawable(activity, R.drawable.button_teal));
-                ((Button) activity.findViewById(R.id.button_privacy)).setText("Turn On");
-                ((Button) activity.findViewById(R.id.button_privacy)).setTextColor(Color.BLACK);
-                isActive = false;
-            }
-            if (!isActive) {
-                long timeLeft = privacyControlManager.getRemainingTime();
-                if (timeLeft < 5 * 60 * 1000) {
-                    String text="Not Active\n(Daily Usage Remaining: 0 Minute)";
-                    ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
+                if (!isActive) {
+                    long timeLeft = privacyControlManager.getRemainingTime();
+                    if (timeLeft < 5 * 60 * 1000) {
+                        String text = "Not Active\n(Daily Usage Remaining: 0 Minute)";
+                        ((TextView) activity.findViewById(R.id.text_view_privacy)).setText(text);
 
-                    ((Button) activity.findViewById(R.id.button_privacy)).setText("Max Used");
-                    ((Button) activity.findViewById(R.id.button_privacy)).setEnabled(false);
-                    ((Button) activity.findViewById(R.id.button_privacy)).setTextColor(Color.GRAY);
+                        ((Button) activity.findViewById(R.id.button_privacy)).setText("Max Used");
+                        ((Button) activity.findViewById(R.id.button_privacy)).setEnabled(false);
+                        ((Button) activity.findViewById(R.id.button_privacy)).setTextColor(Color.GRAY);
+                    }
                 }
             }
         }

@@ -114,13 +114,21 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     }
 
     void setupButtons() {
-        final Button button1 = (Button) getActivity().findViewById(R.id.button_1);
-        button1.setText("Close");
-        button1.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        try {
+            final Button button1 = (Button) getActivity().findViewById(R.id.button_1);
+            if (button1 == null) {
                 getActivity().finish();
+                return;
             }
-        });
+            button1.setText(R.string.button_close);
+            button1.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    getActivity().finish();
+                }
+            });
+        }catch (Exception ignored){
+
+        }
     }
 
     @Override

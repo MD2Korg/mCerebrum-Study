@@ -74,6 +74,7 @@ public class UserViewUserApp extends UserView {
         Log.d(TAG, "addUserApp()...");
         final UserAppManager userAppManager = (UserAppManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_USER_APP);
         gridViewApplication = (ExpandableHeightGridView) activity.findViewById(R.id.gridview);
+        if(userAppManager==null || userAppManager.getUserApps()==null) return;
         Log.d(TAG, "addUserApp()...size=" + userAppManager.getUserApps().size());
         AppAdapter appAdapter = new AppAdapter(activity, userAppManager.getUserApps());
         gridViewApplication.setAdapter(appAdapter);
