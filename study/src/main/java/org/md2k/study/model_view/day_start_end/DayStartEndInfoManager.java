@@ -140,14 +140,13 @@ public class DayStartEndInfoManager extends Model {
             long showNotificationTime = getShowTime(DAY_START, NOTIFICATION);
             long showSystemTime = getShowTime(DAY_START, SYSTEM);
             long minTime = Long.MAX_VALUE;
-            Log.d(TAG,"runnableDayStart...showButton="+showButton+" showButtonTime="+showButtonTime);
-            Log.d(TAG,"runnableDayStart...showPrompt="+showPrompt+" showPromptTime="+showPromptTime);
-            Log.d(TAG,"runnableDayStart...showNotification="+showNotification+" showNotificationTime="+showNotificationTime);
-            Log.d(TAG,"runnableDayStart...showSystem="+showSystem+" showSystemTime="+showSystemTime);
-            if(showSystem){
+            Log.d(TAG, "runnableDayStart...showButton=" + showButton + " showButtonTime=" + showButtonTime);
+            Log.d(TAG, "runnableDayStart...showPrompt=" + showPrompt + " showPromptTime=" + showPromptTime);
+            Log.d(TAG, "runnableDayStart...showNotification=" + showNotification + " showNotificationTime=" + showNotificationTime);
+            Log.d(TAG, "runnableDayStart...showSystem=" + showSystem + " showSystemTime=" + showSystemTime);
+            if (showSystem) {
                 setDayStartTime(DateTime.getDateTime());
-            }
-            else if (showNotification) {
+            } else if (showNotification) {
                 stateDayStart = START_BUTTON;
                 showPrompt(DAY_START, modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getParameters());
             } else if (showPrompt) {
@@ -164,7 +163,7 @@ public class DayStartEndInfoManager extends Model {
                 minTime = showNotificationTime;
             if (showSystemTime != -1 && minTime > showSystemTime)
                 minTime = showSystemTime;
-            Log.d(TAG,"runnableDayStart: min_time="+minTime);
+            Log.d(TAG, "runnableDayStart: min_time=" + minTime);
             if (minTime != Long.MAX_VALUE) {
                 handler.postDelayed(this, minTime);
             }
@@ -174,10 +173,10 @@ public class DayStartEndInfoManager extends Model {
         @Override
         public void run() {
             stateDayEnd = NO_BUTTON;
-            if(!isDayStarted()) {
+            if (!isDayStarted()) {
                 stateDayEnd = NO_BUTTON;
                 return;
-            }else if (isDayEnded()) {
+            } else if (isDayEnded()) {
                 stateDayEnd = COMPLETE_BUTTON;
                 return;
             }
@@ -190,14 +189,13 @@ public class DayStartEndInfoManager extends Model {
             long showNotificationTime = getShowTime(DAY_END, NOTIFICATION);
             long showSystemTime = getShowTime(DAY_END, SYSTEM);
             long minTime = Long.MAX_VALUE;
-            Log.d(TAG,"runnableDayEnd...showButton="+showButton+" showButtonTime="+showButtonTime);
-            Log.d(TAG,"runnableDayEnd...showPrompt="+showPrompt+" showPromptTime="+showPromptTime);
-            Log.d(TAG,"runnableDayEnd...showNotification="+showNotification+" showNotificationTime="+showNotificationTime);
-            Log.d(TAG,"runnableDayEnd...showSystem="+showSystem+" showSystemTime="+showSystemTime);
-            if(showSystem){
+            Log.d(TAG, "runnableDayEnd...showButton=" + showButton + " showButtonTime=" + showButtonTime);
+            Log.d(TAG, "runnableDayEnd...showPrompt=" + showPrompt + " showPromptTime=" + showPromptTime);
+            Log.d(TAG, "runnableDayEnd...showNotification=" + showNotification + " showNotificationTime=" + showNotificationTime);
+            Log.d(TAG, "runnableDayEnd...showSystem=" + showSystem + " showSystemTime=" + showSystemTime);
+            if (showSystem) {
                 setDayEndTime(DateTime.getDateTime());
-            }
-            else if (showNotification) {
+            } else if (showNotification) {
                 stateDayEnd = END_BUTTON;
                 showPrompt(DAY_END, modelManager.getConfigManager().getConfig().getDay_end().getNotify(NOTIFICATION).getParameters());
             } else if (showPrompt) {
@@ -216,7 +214,7 @@ public class DayStartEndInfoManager extends Model {
                 minTime = showNotificationTime;
             if (showSystemTime != -1 && minTime > showSystemTime)
                 minTime = showSystemTime;
-            Log.d(TAG,"runnableDayEndTime...minTime="+minTime);
+            Log.d(TAG, "runnableDayEndTime...minTime=" + minTime);
             if (minTime != Long.MAX_VALUE) {
                 handler.postDelayed(this, minTime);
             }
@@ -266,8 +264,8 @@ public class DayStartEndInfoManager extends Model {
     public long getWakeupShowTimestamp() {
         long offset = modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getOffset();
         String base = modelManager.getConfigManager().getConfig().getDay_start().getNotify(PROMPT).getBase();
-        long nextDayStart= getTime(base, offset);
-        if(nextDayStart<dayStartTime || nextDayStart<dayEndTime) nextDayStart+=DAY_IN_MILLIS;
+        long nextDayStart = getTime(base, offset);
+        if (nextDayStart < dayStartTime || nextDayStart < dayEndTime) nextDayStart += DAY_IN_MILLIS;
         return nextDayStart;
     }
 
@@ -308,6 +306,7 @@ public class DayStartEndInfoManager extends Model {
 
 
     protected long getTime(String base, long offset) {
+        long curBase;
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -317,7 +316,9 @@ public class DayStartEndInfoManager extends Model {
             case WAKEUP:
                 return calendar.getTimeInMillis() + wakeupOffset + offset;
             case SLEEP:
-                return calendar.getTimeInMillis() + sleepOffset + offset;
+                if (wakeupOffset > sleepOffset) curBase = DAY_IN_MILLIS;
+                else curBase = 0;
+                return calendar.getTimeInMillis() + sleepOffset + offset + curBase;
             case DAY_START:
                 return dayStartTime + offset;
             case DAY_END:

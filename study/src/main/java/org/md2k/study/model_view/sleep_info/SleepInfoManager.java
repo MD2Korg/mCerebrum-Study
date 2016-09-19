@@ -23,6 +23,7 @@ import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -57,27 +58,29 @@ public class SleepInfoManager extends Model {
     long sleepTimeNew;
 
     public SleepInfoManager(ModelManager modelManager, String id, int rank) {
-        super(modelManager,id,rank);
+        super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-        status=new Status(rank, Status.SLEEP_NOT_DEFINED);
+        status = new Status(rank, Status.SLEEP_NOT_DEFINED);
         sleepTimeNew = -1;
         sleepTimeDB = -1;
     }
 
-    public void clear(){
+    public void clear() {
         sleepTimeNew = -1;
         sleepTimeDB = -1;
-        status=new Status(rank, Status.SLEEP_NOT_DEFINED);
+        status = new Status(rank, Status.SLEEP_NOT_DEFINED);
     }
+
     public void set() {
         readSleepInfoFromDataKit();
         update();
     }
+
     public void update() {
         Status lastStatus;
         if (sleepTimeDB == -1)
-            lastStatus= new Status(rank,Status.SLEEP_NOT_DEFINED);
-        else lastStatus= new Status(rank,Status.SUCCESS);
+            lastStatus = new Status(rank, Status.SLEEP_NOT_DEFINED);
+        else lastStatus = new Status(rank, Status.SUCCESS);
         notifyIfRequired(lastStatus);
     }
 
@@ -88,7 +91,7 @@ public class SleepInfoManager extends Model {
         return true;
     }
 
-    private void readSleepInfoFromDataKit(){
+    private void readSleepInfoFromDataKit() {
         try {
             sleepTimeDB = -1;
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
@@ -120,6 +123,7 @@ public class SleepInfoManager extends Model {
             return false;
         }
     }
+
     DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.SLEEP).setPlatform(platform);
@@ -146,17 +150,19 @@ public class SleepInfoManager extends Model {
         dataDescriptor.put(METADATA.DATA_TYPE, long.class.getName());
         return dataDescriptor;
     }
+
     public void save() {
-        if(writeToDataKit())
+        if (writeToDataKit())
             sleepTimeDB = sleepTimeNew;
         set();
     }
-    public Status getStatus(){
-        String msg="";
-        if(sleepTimeNew!=-1) msg=formatTime(sleepTimeNew);
-        else if(sleepTimeDB!=-1) msg=formatTime(sleepTimeDB);
-        if(sleepTimeDB!=-1 || sleepTimeNew!=-1) return new Status(rank,Status.SUCCESS, msg);
-        return new Status(rank,Status.SLEEP_NOT_DEFINED);
+
+    public Status getStatus() {
+        String msg = "";
+        if (sleepTimeNew != -1) msg = formatTime(sleepTimeNew);
+        else if (sleepTimeDB != -1) msg = formatTime(sleepTimeDB);
+        if (sleepTimeDB != -1 || sleepTimeNew != -1) return new Status(rank, Status.SUCCESS, msg);
+        return new Status(rank, Status.SLEEP_NOT_DEFINED);
     }
 
     public long getSleepTimeDB() {
@@ -178,14 +184,14 @@ public class SleepInfoManager extends Model {
         timestamp /= 60;
         hourOfDay = timestamp;
         if (hourOfDay > 12)
-            return String.format("%02d:%02d pm", hourOfDay - 12, minute);
+            return String.format(Locale.US, "%02d:%02d pm", hourOfDay - 12, minute);
         else if (hourOfDay == 12)
-            return String.format("%02d:%02d pm", 12, minute);
+            return String.format(Locale.US, "%02d:%02d pm", 12, minute);
         else {
             if (hourOfDay != 0)
-                return String.format("%02d:%02d am", hourOfDay, minute);
+                return String.format(Locale.US, "%02d:%02d am", hourOfDay, minute);
             else
-                return String.format("%02d:%02d am", 12, minute);
+                return String.format(Locale.US, "%02d:%02d am", 12, minute);
         }
     }
 
