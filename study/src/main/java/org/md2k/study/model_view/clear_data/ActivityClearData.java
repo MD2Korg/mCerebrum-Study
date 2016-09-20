@@ -1,11 +1,15 @@
 package org.md2k.study.model_view.clear_data;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.Button;
 
+import org.md2k.study.R;
 import org.md2k.study.controller.ModelManager;
-import org.md2k.utilities.Report.Log;
 
 
 /**
@@ -36,12 +40,26 @@ import org.md2k.utilities.Report.Log;
  */
 public class ActivityClearData extends Activity {
     private static final String TAG = ActivityClearData.class.getSimpleName();
-    int resume = 0;
-
+    ProgressDialog ringProgressDialog=null;
+    Handler handler;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ModelManager.getInstance(this).clear();
+        setContentView(R.layout.activity_clear_data);
+        handler=new Handler();
+
+        Button button= (Button) findViewById(R.id.button_1);
+        button.setText(R.string.button_close);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ModelManager.getInstance(ActivityClearData.this).set();
+                ringProgressDialog = ProgressDialog.show(ActivityClearData.this, "Please wait ...", "System is resetting ...", true);
+                ringProgressDialog.setCancelable(false);
+                handler.postDelayed(runnable, 1000);
+            }
+        });
         Intent intent = new Intent();
         intent.putExtra("delete", true);
 /*
@@ -54,38 +72,15 @@ public class ActivityClearData extends Activity {
         intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettings");
         startActivity(intent);
     }
-
-    @Override
-    public void onResume() {
-        Log.d(TAG, "onResume...");
-        resume++;
-        if (resume == 2) {
-            ModelManager.getInstance(this).set();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    Runnable runnable=new Runnable() {
+        @Override
+        public void run() {
+            if(ringProgressDialog!=null && ringProgressDialog.isShowing()) ringProgressDialog.dismiss();
             finish();
         }
-        super.onResume();
-    }
-
+    };
     @Override
-    public void onPause() {
-        Log.d(TAG, "onPause...");
-        super.onPause();
-    }
+    public void onBackPressed(){
 
-    @Override
-    public void onStop() {
-        Log.d(TAG, "onStop...");
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy...");
-        super.onDestroy();
     }
 }

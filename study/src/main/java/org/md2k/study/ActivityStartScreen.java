@@ -1,5 +1,6 @@
 package org.md2k.study;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import org.md2k.datakitapi.messagehandler.ResultCallback;
 import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
+import org.md2k.study.model_view.app_install.ActivityInstallApp;
 import org.md2k.study.model_view.app_install.AppInstallManager;
 import org.md2k.study.model_view.config_info.ActivityConfigDownload;
 import org.md2k.study.view.admin.ActivityAdmin;
@@ -196,6 +198,11 @@ public class ActivityStartScreen extends AppCompatActivity {
         FileManager.copyAssets(ActivityStartScreen.this, "default.zip", Constants.TEMP_DIRECTORY);
         FileManager.unzip(Constants.TEMP_DIRECTORY + "default.zip", Constants.CONFIG_DIRECTORY_ROOT);
     }
+    @Override
+    public void onResume(){
+        setUI();
+        super.onResume();
+    }
 
     void setUI() {
         Log.d(TAG, "setUI()...");
@@ -255,8 +262,17 @@ public class ActivityStartScreen extends AppCompatActivity {
                             if (appInstallManager.getAppInstallList().size() == index) {
                                 int status = Integer.parseInt(str);
                                 if (status != Status.SUCCESS) {
-                                    Toast.makeText(ActivityStartScreen.this, "mCerebrum update available...", Toast.LENGTH_SHORT).show();
-                                    setUI();
+                                    AlertDialogs.AlertDialog(ActivityStartScreen.this, "Update Available", "Do you want to update?", R.drawable.ic_info_teal_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            if(which== Dialog.BUTTON_POSITIVE){
+                                                Intent intent=new Intent(ActivityStartScreen.this, ActivityInstallApp.class);
+                                                startActivity(intent);
+                                            }else{
+                                                setUI();
+                                            }
+                                        }
+                                    });
                                 } else {
                                     Toast.makeText(ActivityStartScreen.this, "mCerebrum is up-to-date...", Toast.LENGTH_SHORT).show();
                                 }
