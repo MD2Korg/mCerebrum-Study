@@ -31,7 +31,7 @@ import android.content.SharedPreferences;
  */
 public class MySharedPref {
     private static MySharedPref instance;
-    SharedPreferences sharedPref;
+    private SharedPreferences sharedPref;
     public static MySharedPref getInstance(Context context){
         if(instance==null)
             instance=new MySharedPref(context);
