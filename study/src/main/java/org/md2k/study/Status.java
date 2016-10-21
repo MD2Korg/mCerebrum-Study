@@ -34,9 +34,9 @@ import org.md2k.utilities.Report.Log;
  */
 public class Status implements Parcelable {
     private static final String TAG = Status.class.getSimpleName();
-    int status;
-    int rank;
-    String message;
+    private int status;
+    private int rank;
+    private String message;
 
     public static final int RANK_BEGIN = 8;
     public static final int RANK_CONFIG = 7;
@@ -53,10 +53,10 @@ public class Status implements Parcelable {
     public static final int APP_NOT_INSTALLED = 699;
     public static final int APP_UPDATE_AVAILABLE = 698;
     public static final int APP_CONFIG_ERROR = 697;
-    public static final int APP_NOT_ACTIVE = 696;
+    private static final int APP_NOT_ACTIVE = 696;
     public static final int APP_PERMISSION_NOT_APPROVED = 695;
     public static final int DATAKIT_NOT_AVAILABLE = 599;
-    public static final int DATABASE_NOT_AVAILABLE = 598;
+    private static final int DATABASE_NOT_AVAILABLE = 598;
     public static final int CLEAR_OLD_DATA = 499;
     public static final int USERID_NOT_DEFINED = 498;
     public static final int WAKEUP_NOT_DEFINED = 497;
@@ -64,8 +64,8 @@ public class Status implements Parcelable {
     public static final int DAY_TYPE_NOT_DEFINED = 495;
     public static final int APP_NOT_RUNNING = 299;
     public static final int DAY_START_NOT_AVAILABLE = 298;
-    public static final int DAY_COMPLETED = 297;
-    public static final int DAY_ERROR = 296;
+    private static final int DAY_COMPLETED = 297;
+    private static final int DAY_ERROR = 296;
     public static final int STUDY_START_NOT_AVAILABLE = 295;
     public static final int STUDY_RUNNING = 294;
     public static final int STUDY_COMPLETED = 293;
@@ -79,7 +79,7 @@ public class Status implements Parcelable {
     public static final int DATAQUALITY_BAD = 193;
     public static final int CONNECTION_ERROR = 22;
     public static final int DOWNLOAD_ERROR = 23;
-    public static final int SYSTEM_ERROR = 27;
+    private static final int SYSTEM_ERROR = 27;
     public static final int NOT_DEFINED = 1;
 
     private String retrieveMessage(int id) {

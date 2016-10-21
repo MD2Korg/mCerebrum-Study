@@ -58,8 +58,8 @@ import java.util.HashMap;
 public class DayTypeManager extends Model {
     private static final String TAG = DayTypeManager.class.getSimpleName();
 
-    DayTypeInfo dayTypeDB;
-    DayTypeInfo dayTypeNew;
+    private DayTypeInfo dayTypeDB;
+    private DayTypeInfo dayTypeNew;
 
     public DayTypeManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -75,7 +75,7 @@ public class DayTypeManager extends Model {
         status = new Status(rank, Status.DAY_TYPE_NOT_DEFINED);
     }
 
-    public void setDayType(int dayType) {
+    void setDayType(int dayType) {
         dayTypeNew = new DayTypeInfo(dayType);
     }
 
@@ -92,7 +92,7 @@ public class DayTypeManager extends Model {
         notifyIfRequired(lastStatus);
     }
 
-    public boolean isValid() {
+    private boolean isValid() {
         if (dayTypeNew == null) return false;
         if (dayTypeDB == null) return true;
         if (dayTypeDB.equals(dayTypeNew)) return false;
@@ -135,7 +135,7 @@ public class DayTypeManager extends Model {
         return true;
     }
 
-    DataSourceBuilder createDataSourceBuilder() {
+    private DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.TYPE_OF_DAY).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Pre/Post Quit Day");
@@ -145,13 +145,13 @@ public class DayTypeManager extends Model {
         return dataSourceBuilder;
     }
 
-    ArrayList<HashMap<String, String>> createDataDescriptors() {
+    private ArrayList<HashMap<String, String>> createDataDescriptors() {
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         dataDescriptors.add(createDescriptor("Pre/Post Quit Day"));
         return dataDescriptors;
     }
 
-    HashMap<String, String> createDescriptor(String name) {
+    private HashMap<String, String> createDescriptor(String name) {
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, name);
         dataDescriptor.put(METADATA.UNIT, "String");
