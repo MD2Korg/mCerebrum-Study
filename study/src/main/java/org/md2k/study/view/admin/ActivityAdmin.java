@@ -50,7 +50,7 @@ public class ActivityAdmin extends AppCompatActivity {
             startActivityForResult(intent,1);
         }
         else {
-            if (!passwordFirst && isPasswordRequired() && isAlertDialogShown==false) {
+            if (!passwordFirst && isPasswordRequired() && !isAlertDialogShown) {
                 showPasswordWindow();
             }
         }
