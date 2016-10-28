@@ -64,6 +64,7 @@ public class PrefsFragmentConfigureApp extends PreferenceFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(Status.class.getSimpleName()));
         modelManager= ModelManager.getInstance(getActivity());
         addPreferencesFromResource(R.xml.pref_system);
+        setupCloseButton();
         ArrayList<String> views= modelManager.getConfigManager().getConfig().getAdmin_view().getView_contents(ConfigView.CONFIGURE_APP).getValues();
         preferences=new ArrayList<>();
         for(int i=0;i<views.size();i++){
@@ -92,7 +93,6 @@ public class PrefsFragmentConfigureApp extends PreferenceFragment {
             ((PreferenceCategory)findPreference(model.getAction().getType())).addPreference(preference);
             preferences.add(preference);
         }
-        setupCloseButton();
     }
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
