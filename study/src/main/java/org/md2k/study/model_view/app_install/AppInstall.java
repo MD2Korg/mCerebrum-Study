@@ -197,7 +197,7 @@ public class AppInstall {
         String curLatestVersion = retrieveLatestVersion(filename);
         if (curLatestVersion == null) return curLatestVersion;
         String[] vals1 = curLatestVersion.split("\\.");
-        if (vals1.length != 3) return null;
+//        if (vals1.length != 3) return null;
         return curLatestVersion;
     }
 
