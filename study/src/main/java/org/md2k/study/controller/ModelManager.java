@@ -121,7 +121,7 @@ public class ModelManager {
     public void update() {
         if (isUpdating) return;
         isUpdating = true;
-        org.md2k.utilities.Report.Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.update()");
+        Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",modelManager.update()");
         Log.d(TAG, "update()...");
         Status lastStatus = status;
         while (true) {

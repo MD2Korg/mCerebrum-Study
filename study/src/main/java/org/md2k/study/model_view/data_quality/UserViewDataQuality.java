@@ -176,7 +176,7 @@ public class UserViewDataQuality extends UserView {
         }
     }
 
-    Runnable runnableUpdateView = new Runnable() {
+    private Runnable runnableUpdateView = new Runnable() {
         @Override
         public void run() {
             updateView();
