@@ -69,7 +69,8 @@ public class DayStartEndInfoManager extends Model {
     private static final String DAY_START = "day_start";
     private static final String DAY_END = "day_end";
     private static final long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
-    private Handler handler;
+    private Handler handlerDayStart;
+    private Handler handlerDayEnd;
 
     private long dayStartTime;
     private long dayEndTime;
@@ -81,7 +82,8 @@ public class DayStartEndInfoManager extends Model {
 
     public DayStartEndInfoManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
-        handler = new Handler();
+        handlerDayStart = new Handler();
+        handlerDayEnd = new Handler();
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
         dayStartTime = -1;
         dayEndTime = -1;
@@ -93,21 +95,21 @@ public class DayStartEndInfoManager extends Model {
     }
 
     public void set() {
-        Status lastStatus;
         readDayStartFromDataKit();
         readDayEndFromDataKit();
         readWakeupTimeFromDataKit();
         readSleepTimeFromDataKit();
         notifierManager.set();
         Log.d(TAG, "dayStartTime=" + dayStartTime + " dayEndTime=" + dayEndTime + " curTime=" + DateTime.getDateTime() + " diff=" + (DateTime.getDateTime() - dayStartTime));
-        if (!isDayStarted())
-            lastStatus = new Status(rank, Status.DAY_START_NOT_AVAILABLE);
-        else lastStatus = new Status(rank, Status.SUCCESS);
-        notifyIfRequired(lastStatus);
-        handler.removeCallbacks(runnableDayStart);
-        handler.removeCallbacks(runnableDayEnd);
-        handler.post(runnableDayStart);
-        handler.post(runnableDayEnd);
+  //      if (!isDayStarted())
+  //          status = new Status(rank, Status.DAY_START_NOT_AVAILABLE);
+  //      else status = new Status(rank, Status.SUCCESS);
+        status = new Status(rank, Status.SUCCESS);
+        notifyIfRequired(status);
+        handlerDayStart.removeCallbacks(runnableDayStart);
+        handlerDayEnd.removeCallbacks(runnableDayEnd);
+        handlerDayStart.post(runnableDayStart);
+        handlerDayEnd.post(runnableDayEnd);
         Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
         LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
     }
@@ -123,8 +125,8 @@ public class DayStartEndInfoManager extends Model {
         status = new Status(rank, Status.NOT_DEFINED);
         if (notifierManager != null)
             notifierManager.clear();
-        handler.removeCallbacks(runnableDayStart);
-        handler.removeCallbacks(runnableDayEnd);
+        handlerDayStart.removeCallbacks(runnableDayStart);
+        handlerDayEnd.removeCallbacks(runnableDayEnd);
     }
 
     private Runnable runnableDayStart = new Runnable() {
@@ -146,6 +148,7 @@ public class DayStartEndInfoManager extends Model {
             Log.d(TAG, "runnableDayStart...showSystem=" + showSystem + " showSystemTime=" + showSystemTime);
             if (showSystem) {
                 setDayStartTime(DateTime.getDateTime());
+                return;
             } else if (showNotification) {
                 stateDayStart = START_BUTTON;
                 showPrompt(DAY_START, modelManager.getConfigManager().getConfig().getDay_start().getNotify(NOTIFICATION).getParameters());
@@ -165,7 +168,7 @@ public class DayStartEndInfoManager extends Model {
                 minTime = showSystemTime;
             Log.d(TAG, "runnableDayStart: min_time=" + minTime);
             if (minTime != Long.MAX_VALUE) {
-                handler.postDelayed(this, minTime);
+                handlerDayStart.postDelayed(this, minTime);
             }
         }
     };
@@ -195,6 +198,7 @@ public class DayStartEndInfoManager extends Model {
             Log.d(TAG, "runnableDayEnd...showSystem=" + showSystem + " showSystemTime=" + showSystemTime);
             if (showSystem) {
                 setDayEndTime(DateTime.getDateTime());
+                return;
             } else if (showNotification) {
                 stateDayEnd = END_BUTTON;
                 showPrompt(DAY_END, modelManager.getConfigManager().getConfig().getDay_end().getNotify(NOTIFICATION).getParameters());
@@ -216,7 +220,7 @@ public class DayStartEndInfoManager extends Model {
                 minTime = showSystemTime;
             Log.d(TAG, "runnableDayEndTime...minTime=" + minTime);
             if (minTime != Long.MAX_VALUE) {
-                handler.postDelayed(this, minTime);
+                handlerDayEnd.postDelayed(this, minTime);
             }
         }
     };
@@ -288,7 +292,6 @@ public class DayStartEndInfoManager extends Model {
                         setDayStartTime(DateTime.getDateTime());
                     else if (type.equals(DAY_END))
                         setDayEndTime(DateTime.getDateTime());
-                    reset();
                 }
             }, notificationRequests);
         } catch (DataKitException e) {
