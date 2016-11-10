@@ -16,7 +16,7 @@ import org.md2k.study.R;
 public class ActivityYouTube extends YouTubeBaseActivity implements
         YouTubePlayer.OnInitializedListener {
     private static final int RECOVERY_DIALOG_REQUEST = 10;
-    public static final String API_KEY = "AIzaSyCxbfW38QiMdp5St96IhYUtDCSvDO8cNfA";
+    private static final String API_KEY = "AIzaSyCxbfW38QiMdp5St96IhYUtDCSvDO8cNfA";
 
     //From URL -> https://www.youtube.com/watch?v=kHue-HaXXzg
     // Let It Go : "Frozen"
@@ -66,7 +66,7 @@ public class ActivityYouTube extends YouTubeBaseActivity implements
         }
     }
 
-    protected YouTubePlayer.Provider getYouTubePlayerProvider() {
+    private YouTubePlayer.Provider getYouTubePlayerProvider() {
         return (YouTubePlayerView) findViewById(R.id.youtube_view);
     }
 
@@ -176,7 +176,7 @@ public class ActivityYouTube extends YouTubeBaseActivity implements
         }
 
     }
-    void setupButtons() {
+    private void setupButtons() {
         final Button button1 = (Button) findViewById(R.id.button_1);
         button1.setText("Close");
         button1.setOnClickListener(new View.OnClickListener() {

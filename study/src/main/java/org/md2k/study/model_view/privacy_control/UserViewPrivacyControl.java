@@ -51,8 +51,8 @@ import java.util.Locale;
  */
 public class UserViewPrivacyControl extends UserView {
     private static final String TAG = UserViewPrivacyControl.class.getSimpleName();
-    Handler handler;
-    boolean isActive;
+    private Handler handler;
+    private boolean isActive;
 
     public UserViewPrivacyControl(Activity activity, Model model) {
         super(activity, model);
@@ -72,7 +72,7 @@ public class UserViewPrivacyControl extends UserView {
         handler.post(runnablePrivacy);
     }
 
-    Runnable runnablePrivacy = new Runnable() {
+    private Runnable runnablePrivacy = new Runnable() {
         @Override
         public void run() {
             activity.findViewById(R.id.button_privacy).setEnabled(true);
@@ -145,7 +145,7 @@ public class UserViewPrivacyControl extends UserView {
         prepareButton();
     }
 
-    void prepareButton() {
+    private void prepareButton() {
         Button button = (Button) activity.findViewById(R.id.button_privacy);
         button.setOnClickListener(new View.OnClickListener() {
             @Override

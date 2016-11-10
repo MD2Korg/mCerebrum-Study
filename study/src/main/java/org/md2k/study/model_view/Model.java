@@ -34,14 +34,14 @@ import org.md2k.utilities.Report.Log;
  */
 public abstract class Model {
     private static final String TAG = Model.class.getSimpleName();
-    protected String id;
+    private String id;
     protected ModelManager modelManager;
     protected int rank;
     protected Status status;
     protected ConfigAction action;
     protected boolean isSet;
 
-    public Model(ModelManager modelManager, String id, int rank) {
+    protected Model(ModelManager modelManager, String id, int rank) {
         this.id = id;
         this.modelManager = modelManager;
         this.rank = rank;
@@ -75,7 +75,7 @@ public abstract class Model {
         set();
     }
 
-    public void notifyIfRequired(Status curStatus) {
+    protected void notifyIfRequired(Status curStatus) {
         if (curStatus == null) return;
         Log.d(TAG, "notifyIfRequired...old_status=" + status.log() + " cur_status=" + curStatus.log());
         if (status == null || status.getRank() != curStatus.getRank() || status.getStatus() != curStatus.getStatus()) {

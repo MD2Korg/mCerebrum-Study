@@ -73,10 +73,7 @@ public class Status implements Parcelable {
     public static final int PRIVACY_ACTIVE = 199;
     public static final int DATAQUALITY_GOOD = 198;
     public static final int DATAQUALITY_OFF = 197;
-    public static final int DATAQUALITY_LOOSE = 196;
-    public static final int DATAQUALITY_NOISY = 195;
     public static final int DATAQUALITY_NOT_WORN = 194;
-    public static final int DATAQUALITY_BAD = 193;
     public static final int CONNECTION_ERROR = 22;
     public static final int DOWNLOAD_ERROR = 23;
     private static final int SYSTEM_ERROR = 27;
@@ -116,14 +113,8 @@ public class Status implements Parcelable {
                 return "OK";
             case DATAQUALITY_OFF:
                 return "Device is off/Not connected";
-            case DATAQUALITY_LOOSE:
-                return "Not properly worn";
-            case DATAQUALITY_NOISY:
-                return "Noisy";
             case DATAQUALITY_NOT_WORN:
-                return "Not Worn";
-            case DATAQUALITY_BAD:
-                return "Bad Quality";
+                return "Not Properly Worn";
             case DAY_START_NOT_AVAILABLE:
                 return "Warning: Day is not started";
             case DAY_COMPLETED:

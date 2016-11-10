@@ -57,8 +57,8 @@ import java.util.ArrayList;
  */
 public class StudyInfoManager extends Model {
     private static final String TAG = StudyInfoManager.class.getSimpleName();
-    StudyInfo studyInfoDB;
-    StudyInfo studyInfoFile;
+    private StudyInfo studyInfoDB;
+    private StudyInfo studyInfoFile;
 
 
     public StudyInfoManager(ModelManager modelManager, String id, int rank) {
@@ -87,7 +87,7 @@ public class StudyInfoManager extends Model {
         status = new Status(rank, Status.CLEAR_OLD_DATA);
     }
 
-    public void update() {
+    private void update() {
         Log.d(TAG, "update()...");
         Status lastStatus;
         if (studyInfoDB == null) lastStatus = new Status(rank, Status.DATAKIT_NOT_AVAILABLE);
@@ -118,7 +118,7 @@ public class StudyInfoManager extends Model {
         return studyInfo;
     }
 
-    public boolean writeToDataKit() {
+    private boolean writeToDataKit() {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
             Log.d(TAG, "StudyInfoManager...writeToDataKit()");
@@ -137,7 +137,7 @@ public class StudyInfoManager extends Model {
         }
     }
 
-    DataSourceBuilder createDataSourceBuilder() {
+    private DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.STUDY_INFO).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Study Info");

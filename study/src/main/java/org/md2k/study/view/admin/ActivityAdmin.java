@@ -24,9 +24,9 @@ import org.md2k.study.model_view.config_info.ActivityConfigDownload;
 import org.md2k.utilities.UI.AlertDialogs;
 
 public class ActivityAdmin extends AppCompatActivity {
-    AlertDialog alertDialog;
-    boolean passwordFirst=false;
-    boolean isAlertDialogShown;
+    private AlertDialog alertDialog;
+    private boolean passwordFirst=false;
+    private boolean isAlertDialogShown;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,17 +64,17 @@ public class ActivityAdmin extends AppCompatActivity {
         }
     }
 
-    boolean isPasswordRequired() {
+    private boolean isPasswordRequired() {
         String password = getPassword();
         if (password == null || password.length() == 0) return false;
         return true;
     }
 
-    String getPassword() {
+    private String getPassword() {
         return ModelManager.getInstance(this).getConfigManager().getConfig().getAdmin_view().getPassword();
     }
 
-    public void showPasswordWindow() {
+    private void showPasswordWindow() {
         isAlertDialogShown=true;
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(this, org.md2k.utilities.R.style.app_theme_teal_light_dialog));
         alertDialogBuilder.setTitle("Admin Access Required");

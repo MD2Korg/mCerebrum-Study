@@ -13,14 +13,12 @@ import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.study.Constants;
-import org.md2k.study.config.ConfigApp;
+import org.md2k.study.Status;
 import org.md2k.study.config.ConfigDataQualityView;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
 
@@ -51,37 +49,47 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DataQuality {
+class DataQuality {
     private static final String TAG = DataQuality.class.getSimpleName();
-    public static final long RESTART_TIME = 120000;
-    DataSource dataSource;
-    ReceiveCallBack receiveCallBack;
-    Context context;
-    DataSourceClient dataSourceClient;
-    Handler handler;
-    long lastReceivedTimeStamp;
-    DataQualityInfo dataQualityInfo;
+    private static final long DELAY_TIME = 3500;
+    private DataSource dataSource;
+    private ReceiveCallBack receiveCallBack;
+    private Context context;
+    private DataSourceClient dataSourceClient;
+    private Handler handlerSubscribe;
+    private DataQualityInfo dataQualityInfo;
+    private Handler handlerNoData;
 
-    public DataQuality(Context context, DataSource dataSource, DataQualityInfo dataQualityInfo, ReceiveCallBack receiveCallBack) {
+    DataQuality(Context context, DataSource dataSource, DataQualityInfo dataQualityInfo, ReceiveCallBack receiveCallBack) {
         this.dataSource = dataSource;
         this.receiveCallBack = receiveCallBack;
         this.context = context;
         this.dataQualityInfo=dataQualityInfo;
-        handler = new Handler();
+        handlerSubscribe = new Handler();
+        handlerNoData=new Handler();
     }
 
-    public DataSource createDataSource(DataSource dataSource) {
+    private DataSource createDataSource(DataSource dataSource) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
         return dataSourceBuilder.build();
     }
 
     public void start() {
         Log.d(TAG,"DataQuality start()..."+dataSource.getType()+" "+dataSource.getId());
-        handler.removeCallbacks(runnableSubscribe);
-        handler.post(runnableSubscribe);
+        handlerSubscribe.removeCallbacks(runnableSubscribe);
+        handlerSubscribe.post(runnableSubscribe);
+        handlerNoData.postDelayed(runnableNoData,DELAY_TIME);
     }
+    private Runnable runnableNoData=new Runnable() {
+        @Override
+        public void run() {
+            DataTypeInt sample = new DataTypeInt(DateTime.getDateTime(), Status.DATAQUALITY_OFF);
+            receiveCallBack.onReceive(sample);
+            handlerNoData.postDelayed(this,DELAY_TIME);
+        }
+    };
 
-    Runnable runnableSubscribe = new Runnable() {
+    private Runnable runnableSubscribe = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG,"runnableSubscribe..."+dataSource.getType()+" "+dataSource.getId());
@@ -91,32 +99,30 @@ public class DataQuality {
             try {
                 ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(context).find(new DataSourceBuilder(createDataSource(dataSource)));
                 if (dataSourceClientArrayList.size() == 0)
-                    handler.postDelayed(this, 1000);
+                    handlerSubscribe.postDelayed(this, 1000);
                 else {
-                    lastReceivedTimeStamp = DateTime.getDateTime();
                     dataSourceClient = dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
                     final ArrayList<ConfigDataQualityView> configDataQualityViews = ModelManager.getInstance(context).getConfigManager().getConfig().getData_quality_view();
                     dataQualityInfo.setConfigDataQualityView(configDataQualityViews, dataSourceClient.getDataSource());
-//                    handler.removeCallbacks(runnableCheckAvailability);
-//                    handler.postDelayed(runnableCheckAvailability, RESTART_TIME);
                     DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
                         @Override
                         public void onReceived(final DataType dataType) {
                             if(dataType instanceof DataTypeInt) {
+                                handlerNoData.removeCallbacks(runnableNoData);
+
                                 Thread t = new Thread(new Runnable() {
                                     @Override
                                     public void run() {
                                         try {
-                                            int sample = ((DataTypeInt) dataType).getSample();
-                                            if (sample != DATA_QUALITY.BAND_OFF)
-                                                lastReceivedTimeStamp = DateTime.getDateTime();
-                                            receiveCallBack.onReceive(dataSourceClient, sample);
+                                            DataTypeInt sample = ((DataTypeInt) dataType);
+                                            receiveCallBack.onReceive(sample);
                                         }catch (Exception ignored){
 
                                         }
                                     }
                                 });
                                 t.start();
+                                handlerNoData.postDelayed(runnableNoData, DELAY_TIME);
                             }
                         }
                     });
@@ -126,37 +132,11 @@ public class DataQuality {
             }
         }
     };
-/*    Runnable runnableCheckAvailability = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "runnableCheckAvailability()...check if data received..in time..");
-            if (DateTime.getDateTime() - lastReceivedTimeStamp > RESTART_TIME) {
-                try {
-                    if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_CHEST) || dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.AUTOSENSE_WRIST)) {
-                        Log.d(TAG, "runnableCheckAvailability()...autosense restart");
-                        Intent intent = new Intent();
-                        ConfigApp app = ModelManager.getInstance(context).getConfigManager().getConfig().getApps("autosense");
-                        intent.setClassName(app.getPackage_name(), app.getService());
-                        context.stopService(intent);
-                    } else if (dataSourceClient.getDataSource().getPlatform().getType().equals(PlatformType.MICROSOFT_BAND)) {
-                        Log.d(TAG, "runnableCheckAvailability()... microsoft_band restart");
-                        Intent intent = new Intent();
-                        ConfigApp app = ModelManager.getInstance(context).getConfigManager().getConfig().getApps("microsoftband");
-                        intent.setClassName(app.getPackage_name(), app.getService());
-                        context.stopService(intent);
-                    }
-                }catch (Exception ignored){
-
-                }
-            }
-            handler.postDelayed(this, RESTART_TIME);
-        }
-    };
-*/
-    public void stop() {
+    void stop() {
         try {
-            handler.removeCallbacks(runnableSubscribe);
-//            handler.removeCallbacks(runnableCheckAvailability);
+            handlerSubscribe.removeCallbacks(runnableSubscribe);
+            handlerNoData.removeCallbacks(runnableNoData);
+//            handlerSubscribe.removeCallbacks(runnableCheckAvailability);
             if (dataSourceClient != null && DataKitAPI.getInstance(context).isConnected()) {
                 DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
                 dataSourceClient=null;

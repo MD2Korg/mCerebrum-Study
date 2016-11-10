@@ -1,8 +1,8 @@
 package org.md2k.study.model_view.config_info;
 
+import org.md2k.datakitapi.utils.storage.SharedPreference;
 import org.md2k.study.Constants;
 import org.md2k.study.Status;
-import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
@@ -48,7 +48,7 @@ public class ConfigInfoManager extends Model {
         Status curStatus;
         if(modelManager.getConfigManager().isValid()) {
             curStatus = new Status(rank, Status.SUCCESS, modelManager.getConfigManager().getConfig().getConfig_info().getName() + "(" + modelManager.getConfigManager().getConfig().getConfig_info().getVersion() + ")");
-            MySharedPref.getInstance(modelManager.getContext()).write(Constants.CONFIG_ZIP_FILENAME, modelManager.getConfigManager().getConfig().getConfig_info().getFilename());
+            SharedPreference.write(modelManager.getContext(),Constants.CONFIG_ZIP_FILENAME, modelManager.getConfigManager().getConfig().getConfig_info().getFilename());
         }
         else
             curStatus=new Status(rank,Status.CONFIG_FILE_NOT_EXIST);

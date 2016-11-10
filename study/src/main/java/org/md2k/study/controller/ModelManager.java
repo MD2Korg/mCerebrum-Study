@@ -44,10 +44,10 @@ import java.util.HashMap;
 public class ModelManager {
     private static final String TAG = ModelManager.class.getSimpleName();
     private static ModelManager instance = null;
-    Context context;
-    HashMap<String, Model> modelHashMap;
-    ConfigManager configManager;
-    Status status;
+    private Context context;
+    private HashMap<String, Model> modelHashMap;
+    private ConfigManager configManager;
+    private Status status;
     private boolean isUpdating;
     public static int RANK_LIMIT;
 

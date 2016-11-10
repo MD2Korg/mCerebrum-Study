@@ -45,7 +45,7 @@ public class ActivityClearConfig extends Activity {
         showDeleteDirectory();
     }
 
-    public void showDeleteDirectory() {
+    private void showDeleteDirectory() {
         Log.d(TAG, "showDeleteDirectory()...");
         AlertDialogs.AlertDialog(this, "Reset the System", "Do you want to reset the system?", org.md2k.utilities.R.drawable.ic_warning_red_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
             @Override

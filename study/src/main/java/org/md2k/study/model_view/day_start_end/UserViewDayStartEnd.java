@@ -174,7 +174,7 @@ public class UserViewDayStartEnd extends UserView {
         });
     }
 
-    public void showAlertDialog(final int status) {
+    private void showAlertDialog(final int status) {
         final DayStartEndInfoManager dayStartEndInfoManager = (DayStartEndInfoManager) ModelManager.getInstance(activity).getModel(ModelFactory.MODEL_DAY_START_END);
         if (status == Status.DAY_START_NOT_AVAILABLE) {
             AlertDialogs.AlertDialog(activity, "Start Day", "Do you want to start the day?", R.drawable.ic_info_teal_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {

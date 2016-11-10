@@ -84,7 +84,7 @@ public class DayTypeManager extends Model {
         update();
     }
 
-    public void update() {
+    private void update() {
         Status lastStatus;
         if (dayTypeDB == null)
             lastStatus = new Status(rank, Status.DAY_TYPE_NOT_DEFINED);

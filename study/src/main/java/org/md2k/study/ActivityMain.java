@@ -32,8 +32,8 @@ import java.util.ArrayList;
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
     public static final String EXIT = "EXIT";
-    ArrayList<UserView> userViews;
-    MenuItem menuItemStatus;
+    private ArrayList<UserView> userViews;
+    private MenuItem menuItemStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
 
-    void updateMenu() {
+    private void updateMenu() {
         if (menuItemStatus == null) return;
         Status status = ModelManager.getInstance(ActivityMain.this).getStatus();
         if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
@@ -65,7 +65,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
 
-    public void addUserView() {
+    private void addUserView() {
         Log.d(TAG, "addUserView()...");
         ArrayList<ConfigViewContent> viewContents = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getUser_view().getView_contents();
         LinearLayout linearLayoutMain = (LinearLayout) findViewById(R.id.linear_layout_main);
@@ -165,7 +165,7 @@ public class ActivityMain extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    void showStatus() {
+    private void showStatus() {
         Status status = ModelManager.getInstance(this).getStatus();
         if (status.getRank() > Status.RANK_ADMIN_OPTIONAL) {
             AlertDialogs.AlertDialog(this, "System Status", status.getMessage(), R.drawable.ic_error_red_48dp, "Ok", null, null, new DialogInterface.OnClickListener() {
@@ -184,7 +184,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    void openPDF() {
+    private void openPDF() {
         if (!FileManager.isExist(Constants.CONFIG_DIRECTORY + "tutorial.pdf"))
             return;
         Intent intent = new Intent();
@@ -194,7 +194,7 @@ public class ActivityMain extends AppCompatActivity {
         startActivity(intent);
     }
 
-    void setTitleBar() {
+    private void setTitleBar() {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             setLogo();
@@ -202,7 +202,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    void setLogo() {
+    private void setLogo() {
         try {
             if (getSupportActionBar() != null) {
                 String logoName = ModelManager.getInstance(ActivityMain.this).getConfigManager().getConfig().getConfig_info().getLogo();
@@ -216,7 +216,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    void setTitle() {
+    private void setTitle() {
         try {
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle("mCerebrum");

@@ -49,8 +49,8 @@ import org.md2k.utilities.Report.Log;
 public class PrefsFragmentAppSettings extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentAppSettings.class.getSimpleName();
-    AppSettingsManager appSettingsManager;
-    boolean isRefreshRequired;
+    private AppSettingsManager appSettingsManager;
+    private boolean isRefreshRequired;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +70,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
         return v;
     }
 
-    void updatePreference(AppSettings settingsApp) {
+    private void updatePreference(AppSettings settingsApp) {
         Preference preference = findPreference(settingsApp.getName());
         Status status = settingsApp.getStatus();
         if (status.getStatus() != Status.SUCCESS) {
@@ -83,7 +83,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
     }
 
 
-    void setupAppSettings() {
+    private void setupAppSettings() {
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_settings");
         preferenceCategory.removeAll();
         Log.d(TAG, "appsettings...size=" + appSettingsManager.getAppSettingsList().size());
@@ -113,7 +113,7 @@ public class PrefsFragmentAppSettings extends PreferenceFragment {
         }
     }
 
-    void setupButtons() {
+    private void setupButtons() {
         try {
             final Button button1 = (Button) getActivity().findViewById(R.id.button_1);
             if (button1 == null) {

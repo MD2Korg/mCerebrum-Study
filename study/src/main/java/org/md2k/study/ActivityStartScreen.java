@@ -21,7 +21,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 
 import org.md2k.datakitapi.messagehandler.ResultCallback;
-import org.md2k.study.cache.MySharedPref;
+import org.md2k.datakitapi.utils.storage.SharedPreference;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.app_install.ActivityInstallApp;
@@ -38,12 +38,12 @@ import io.fabric.sdk.android.Fabric;
 
 public class ActivityStartScreen extends AppCompatActivity {
     private static final String TAG = ActivityStartScreen.class.getSimpleName();
-    boolean isPermission=false;
-    Handler handler;
-    ProgressDialog progressDialog;
-    boolean isAlertDialogShown;
-    ModelManager modelManager;
-    boolean isWaitLoading;
+    private boolean isPermission=false;
+    private Handler handler;
+    private ProgressDialog progressDialog;
+    private boolean isAlertDialogShown;
+    private ModelManager modelManager;
+    private boolean isWaitLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,17 +92,17 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void startStudy() {
+    private void startStudy() {
         Intent intent = new Intent(ActivityStartScreen.this, ActivityMain.class);
         startActivity(intent);
     }
 
-    void startSettings() {
+    private void startSettings() {
         Intent intent = new Intent(ActivityStartScreen.this, ActivityAdmin.class);
         startActivity(intent);
     }
 
-    boolean isStudyRunning() {
+    private boolean isStudyRunning() {
         return ModelManager.RANK_LIMIT == Status.RANK_SUCCESS && (ModelManager.getInstance(this).getStatus().getRank() <= Status.RANK_ADMIN_OPTIONAL);
     }
 
@@ -114,7 +114,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         super.onDestroy();
     }
 
-    void loadModelManager() {
+    private void loadModelManager() {
         ModelManager.RANK_LIMIT = Status.RANK_ADMIN_OPTIONAL;
         modelManager.clear();
         modelManager.read();
@@ -125,7 +125,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
 
-    void fixConfigIfRequired() {
+    private void fixConfigIfRequired() {
         if (!modelManager.getConfigManager().isExist()) {
             modelManager.clear();
             copyDefaultConfig();
@@ -133,9 +133,9 @@ public class ActivityStartScreen extends AppCompatActivity {
             setUI();
         } else if (!ModelManager.getInstance(this).getConfigManager().isValid() && !isAlertDialogShown) {
             try {
-                MySharedPref.getInstance(this).write(Constants.CONFIG_ZIP_FILENAME, ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getFilename());
+                SharedPreference.write(this, Constants.CONFIG_ZIP_FILENAME, ModelManager.getInstance(this).getConfigManager().getConfig().getConfig_info().getFilename());
             } catch (Exception e) {
-                MySharedPref.getInstance(this).write(Constants.CONFIG_ZIP_FILENAME, "default");
+                SharedPreference.write(this, Constants.CONFIG_ZIP_FILENAME, "default");
             }
 
             isAlertDialogShown = true;
@@ -144,7 +144,7 @@ public class ActivityStartScreen extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     if (DialogInterface.BUTTON_POSITIVE == which) {
                         modelManager.clear();
-                        String filename=MySharedPref.getInstance(ActivityStartScreen.this).read(Constants.CONFIG_ZIP_FILENAME);
+                        String filename=SharedPreference.readString(getBaseContext(), Constants.CONFIG_ZIP_FILENAME, null);
                         if(filename!=null && !filename.equals("default")){
                             FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
                             Intent intent = new Intent(ActivityStartScreen.this, ActivityConfigDownload.class);
@@ -174,7 +174,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void showProgressBar() {
+    private void showProgressBar() {
         try {
             progressDialog.show();
         } catch (Exception ignored) {
@@ -182,7 +182,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void hideProgressBar() {
+    private void hideProgressBar() {
         try {
             if (progressDialog.isShowing())
                 progressDialog.dismiss();
@@ -192,7 +192,7 @@ public class ActivityStartScreen extends AppCompatActivity {
     }
 
 
-    void copyDefaultConfig() {
+    private void copyDefaultConfig() {
         Log.d(TAG, "copyDefaultConfig()...");
         FileManager.deleteDirectory(Constants.CONFIG_DIRECTORY_BASE);
         FileManager.copyAssets(ActivityStartScreen.this, "default.zip", Constants.TEMP_DIRECTORY);
@@ -204,7 +204,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         super.onResume();
     }
 
-    void setUI() {
+    private void setUI() {
         Log.d(TAG, "setUI()...");
         try {
             setButtonStartStudy();
@@ -219,7 +219,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void setButtonStartStudy() {
+    private void setButtonStartStudy() {
         Button button = (Button) findViewById(R.id.button_start_study);
         if (modelManager.getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL)
             disableButton((Button) findViewById(R.id.button_start_study));
@@ -234,7 +234,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         });
     }
 
-    void setButtonSettings() {
+    private void setButtonSettings() {
         Button button = (Button) findViewById(R.id.button_settings);
         if (modelManager.getStatus().getRank() > Status.RANK_ADMIN_OPTIONAL)
             activeButton((Button) findViewById(R.id.button_settings));
@@ -247,7 +247,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         });
     }
 
-    void setButtonUpdatemCerebrum() {
+    private void setButtonUpdatemCerebrum() {
         Button button = (Button) findViewById(R.id.button_update);
         if (modelManager.getConfigManager().getConfig().getStart_screen().isUpdate_app()) {
             button.setVisibility(View.VISIBLE);
@@ -287,7 +287,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void setButtonExit() {
+    private void setButtonExit() {
         Button button = (Button) findViewById(R.id.button_exit);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -298,7 +298,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         });
     }
 
-    void setImageViewLogo() {
+    private void setImageViewLogo() {
         ImageView imageView = (ImageView) findViewById(R.id.imageView_logo);
         if (ModelManager.getInstance(this).getConfigManager().getConfig().getStart_screen().isMd2k_logo()) {
             imageView.setVisibility(View.VISIBLE);
@@ -318,7 +318,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         } else imageView.setVisibility(View.INVISIBLE);
     }
 
-    void setTextVersion() {
+    private void setTextVersion() {
         try {
             ((TextView) findViewById(R.id.text_view_version)).setMovementMethod(LinkMovementMethod.getInstance());
             String version = "Version: " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
@@ -328,7 +328,7 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void setTextConfigFileName() {
+    private void setTextConfigFileName() {
         try {
             if (ModelManager.getInstance(this).getConfigManager().getConfig().getStart_screen().isConfig_text()) {
                 findViewById(R.id.text_view_config).setVisibility(View.VISIBLE);
@@ -343,25 +343,25 @@ public class ActivityStartScreen extends AppCompatActivity {
         }
     }
 
-    void disableButton(Button button) {
+    private void disableButton(Button button) {
         button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
         button.setEnabled(false);
         button.setTextColor(Color.GRAY);
     }
 
-    void enableButton(Button button) {
+    private void enableButton(Button button) {
         button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_teal));
         button.setEnabled(true);
         button.setTextColor(Color.BLACK);
     }
 
-    void activeButton(Button button) {
+    private void activeButton(Button button) {
         button.setBackground(ContextCompat.getDrawable(ActivityStartScreen.this, R.drawable.button_red));
         button.setEnabled(true);
         button.setTextColor(Color.WHITE);
     }
 
-    Runnable runnableWaitLoading = new Runnable() {
+    private Runnable runnableWaitLoading = new Runnable() {
         @Override
         public void run() {
             if (isWaitLoading) {

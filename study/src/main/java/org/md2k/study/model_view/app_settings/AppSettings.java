@@ -39,10 +39,10 @@ import java.util.HashMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class AppSettings {
+class AppSettings {
     private static final String TAG = AppSettings.class.getSimpleName();
-    ConfigApp app;
-    int rank;
+    private ConfigApp app;
+    private int rank;
 
     public AppSettings(ConfigApp app, int rank) {
         this.app = app;
@@ -53,14 +53,14 @@ public class AppSettings {
         if(!isEqual()) return new Status(rank,Status.APP_CONFIG_ERROR);
         return new Status(rank,Status.SUCCESS);
     }
-    boolean isDataSourceMatch(DataSource dataSource, ArrayList<DataSource> dataSourcesDefault){
+    private boolean isDataSourceMatch(DataSource dataSource, ArrayList<DataSource> dataSourcesDefault){
         for(int i=0;i<dataSourcesDefault.size();i++){
             DataSource dataSourceDefault=dataSourcesDefault.get(i);
             if(isEqualDataSource(dataSource, dataSourceDefault)) return true;
         }
         return false;
     }
-    boolean isEqualDataSource(DataSource dataSource, DataSource dataSourceDefault){
+    private boolean isEqualDataSource(DataSource dataSource, DataSource dataSourceDefault){
         if(!isFieldMatch(dataSource.getId(), dataSourceDefault.getId())) return false;
         if(!isFieldMatch(dataSource.getType(), dataSourceDefault.getType())) return false;
         if(!isMetaDataMatch(dataSource.getMetadata(), dataSourceDefault.getMetadata())) return false;
@@ -69,14 +69,14 @@ public class AppSettings {
         if(!isObjectMatch(dataSource.getApplication(), dataSourceDefault.getApplication())) return false;
         return true;
     }
-    boolean isObjectMatch(AbstractObject object,AbstractObject objectDefault){
+    private boolean isObjectMatch(AbstractObject object, AbstractObject objectDefault){
         if(objectDefault==null) return true;
         if(object==null) return false;
         if(!isFieldMatch(object.getId(), objectDefault.getId())) return false;
         if(!isFieldMatch(object.getType(), objectDefault.getType())) return false;
         return true;
     }
-    boolean isMetaDataMatch(HashMap<String, String> metadata, HashMap<String,String> metadataDefault){
+    private boolean isMetaDataMatch(HashMap<String, String> metadata, HashMap<String, String> metadataDefault){
         String valueDefault, value;
         if(metadataDefault==null) return true;
         if(metadata==null) return false;
@@ -88,7 +88,7 @@ public class AppSettings {
         }
         return true;
     }
-    boolean isFieldMatch(String value, String valueDefault){
+    private boolean isFieldMatch(String value, String valueDefault){
         if(valueDefault==null) return true;
         if(value==null) return false;
         if(value.equals(valueDefault)) return true;

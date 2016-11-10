@@ -48,8 +48,8 @@ import org.md2k.study.utilities.OnCompletionListener;
  */
 public class PrefsFragmentInstallApp extends PreferenceFragment {
 
-    Context context;
-    AppInstallManager appInstallManager;
+    private Context context;
+    private AppInstallManager appInstallManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +70,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         return v;
     }
 
-    void setupButtons() {
+    private void setupButtons() {
         final Button buttonClose = (Button) getActivity().findViewById(R.id.button_1);
         buttonClose.setText(R.string.button_close);
         buttonClose.setOnClickListener(new View.OnClickListener() {
@@ -137,7 +137,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         }
     }
 */
-    void updatePreference(AppInstall appInstall) {
+private void updatePreference(AppInstall appInstall) {
         Preference preference = findPreference(appInstall.getName());
         if (!appInstall.isInstalled()) {
             preference.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_error_red_50dp));
@@ -157,7 +157,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
         setEntries((ListPreference) preference, appInstall);
     }
 
-    void setEntries(ListPreference listPreference, AppInstall appInstall) {
+    private void setEntries(ListPreference listPreference, AppInstall appInstall) {
         if (!appInstall.isInstalled()) {
             String options[] = {"Install"};
             listPreference.setEntries(options);
@@ -178,7 +178,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
 
     }
 
-    void setupAppInstall() {
+    private void setupAppInstall() {
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_app");
         preferenceCategory.removeAll();
         for (int i = 0; i < appInstallManager.getAppInstallList().size(); i++) {
@@ -207,7 +207,7 @@ public class PrefsFragmentInstallApp extends PreferenceFragment {
             updatePreference(appInstallManager.getAppInstallList().get(i));
         }
     }
-    OnCompletionListener onCompletionListener=new OnCompletionListener() {
+    private OnCompletionListener onCompletionListener=new OnCompletionListener() {
         @Override
         public void OnCompleted(int status) {
             ModelManager.getInstance(getActivity()).clear();

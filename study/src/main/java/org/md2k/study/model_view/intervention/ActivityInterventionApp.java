@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityInterventionApp extends AppCompatActivity {
-    public static final String TAG = ActivityInterventionApp.class.getSimpleName();
-    List<ConfigApp> items = new ArrayList<>();
+    private static final String TAG = ActivityInterventionApp.class.getSimpleName();
+    private List<ConfigApp> items = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

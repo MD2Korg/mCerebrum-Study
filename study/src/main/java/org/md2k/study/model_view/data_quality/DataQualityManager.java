@@ -1,12 +1,11 @@
 package org.md2k.study.model_view.data_quality;
 
+import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
 
@@ -38,7 +37,7 @@ import java.util.ArrayList;
  */
 public class DataQualityManager extends Model {
     private static final String TAG = DataQualityManager.class.getSimpleName();
-    ArrayList<DataQuality> dataQualities;
+    private ArrayList<DataQuality> dataQualities;
     ArrayList<DataQualityInfo> dataQualityInfos;
 
     public DataQualityManager(ModelManager modelManager, String id, int rank) {
@@ -61,9 +60,8 @@ public class DataQualityManager extends Model {
             final int finalI = i;
             dataQualities.add(new DataQuality(modelManager.getContext(), dataQuality.get(i),dataQualityInfos.get(i),  new ReceiveCallBack() {
                 @Override
-                public void onReceive(DataSourceClient dataSourceClient, int sample) {
-                    if (dataQualityInfos == null || dataQualityInfos.size() <= finalI) return;
-                    dataQualityInfos.get(finalI).set(dataSourceClient, translate(sample));
+                public void onReceive(DataTypeInt sample) {
+                    dataQualityInfos.get(finalI).set(sample);
                 }
             }));
         }
@@ -83,24 +81,5 @@ public class DataQualityManager extends Model {
         }
         if (dataQualityInfos != null)
             dataQualityInfos.clear();
-    }
-
-    int translate(int value) {
-        switch (value) {
-            case DATA_QUALITY.GOOD:
-                return Status.DATAQUALITY_GOOD;
-            case DATA_QUALITY.BAND_OFF:
-                return Status.DATAQUALITY_OFF;
-            case DATA_QUALITY.BAND_LOOSE:
-                return Status.DATAQUALITY_LOOSE;
-            case DATA_QUALITY.NOISE:
-            case DATA_QUALITY.MISSING:
-                return Status.DATAQUALITY_LOOSE;
-            case DATA_QUALITY.NOT_WORN:
-            case DATA_QUALITY.BAD:
-                return Status.DATAQUALITY_NOT_WORN;
-            default:
-                return Status.DATAQUALITY_OFF;
-        }
     }
 }

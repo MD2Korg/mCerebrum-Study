@@ -48,11 +48,11 @@ import java.net.URL;
 public class Download extends AsyncTask<String, Integer, Integer> {
     private static final String TAG = Download.class.getSimpleName();
     public static final int SUCCESS = 0;
-    ProgressDialog mProgressDialog;
+    private ProgressDialog mProgressDialog;
     private Context context;
     private PowerManager.WakeLock mWakeLock;
-    OnCompletionListener onCompletionListener;
-    boolean isProgressShow;
+    private OnCompletionListener onCompletionListener;
+    private boolean isProgressShow;
 
     public Download(Context context, boolean isProgressShow, OnCompletionListener onCompletionListener) {
         this.context = context;

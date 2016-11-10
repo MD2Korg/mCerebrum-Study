@@ -36,7 +36,7 @@ import java.util.ArrayList;
  */
 public class AppSettingsManager extends Model {
     private static final String TAG = AppSettingsManager.class.getSimpleName();
-    ArrayList<AppSettings> appSettingsList;
+    private ArrayList<AppSettings> appSettingsList;
 
     public AppSettingsManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);

@@ -162,15 +162,15 @@ public class AppInstallManager extends Model {
         }
     }
 
-    public void install(Context context, int id, OnCompletionListener onCompletionListener) {
+    void install(Context context, int id, OnCompletionListener onCompletionListener) {
         appInstallList.get(id).install(context, onCompletionListener);
     }
 
-    public void uninstall(int id, OnCompletionListener onCompletionListener) {
+    void uninstall(int id, OnCompletionListener onCompletionListener) {
         appInstallList.get(id).uninstall(onCompletionListener);
     }
 
-    public void fix(Context context, OnCompletionListener onCompletionListener) {
+    void fix(Context context, OnCompletionListener onCompletionListener) {
         fixRecursive(context, 0,onCompletionListener);
     }
     private void fixRecursive(final Context context, final int now, final OnCompletionListener onCompletionListener){

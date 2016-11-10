@@ -52,8 +52,8 @@ import java.util.HashMap;
  */
 public class WakeupInfoManager extends Model {
     private static final String TAG = WakeupInfoManager.class.getSimpleName();
-    long wakeupTimeDB;
-    long wakeupTimeNew;
+    private long wakeupTimeDB;
+    private long wakeupTimeNew;
 
     public WakeupInfoManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -74,7 +74,7 @@ public class WakeupInfoManager extends Model {
         update();
     }
 
-    public void update(){
+    private void update(){
         Status lastStatus;
         if (wakeupTimeDB == -1)
             lastStatus = new Status(rank, Status.WAKEUP_NOT_DEFINED);
@@ -83,7 +83,7 @@ public class WakeupInfoManager extends Model {
     }
 
 
-    public boolean isValid() {
+    private boolean isValid() {
         if (wakeupTimeNew == -1) return false;
         if (wakeupTimeDB == -1) return true;
         if (wakeupTimeDB == wakeupTimeNew) return false;
@@ -124,7 +124,7 @@ public class WakeupInfoManager extends Model {
         }
     }
 
-    DataSourceBuilder createDataSourceBuilder() {
+    private DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.WAKEUP).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Wake Up");
@@ -134,13 +134,13 @@ public class WakeupInfoManager extends Model {
         return dataSourceBuilder;
     }
 
-    ArrayList<HashMap<String, String>> createDataDescriptors() {
+    private ArrayList<HashMap<String, String>> createDataDescriptors() {
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         dataDescriptors.add(createDescriptor("Wakeup time"));
         return dataDescriptors;
     }
 
-    HashMap<String, String> createDescriptor(String name) {
+    private HashMap<String, String> createDescriptor(String name) {
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, name);
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
@@ -177,7 +177,7 @@ public class WakeupInfoManager extends Model {
         this.wakeupTimeNew = wakeupTimeNew;
     }
 
-    String formatTime(long timestamp) {
+    private String formatTime(long timestamp) {
         long hourOfDay, minute;
         timestamp = timestamp / (60 * 1000);
         minute = timestamp % 60;

@@ -53,8 +53,8 @@ import java.util.HashMap;
  */
 public class StudyStartEndInfoManager extends Model {
     private static final String TAG = StudyStartEndInfoManager.class.getSimpleName();
-    long studyStartTime;
-    long studyEndTime;
+    private long studyStartTime;
+    private long studyEndTime;
 
     public StudyStartEndInfoManager(ModelManager modelManager, String id, int rank) {
         super(modelManager,id,rank);
@@ -117,7 +117,7 @@ public class StudyStartEndInfoManager extends Model {
             LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
     }
-    boolean isToday(long timestamp) {
+    private boolean isToday(long timestamp) {
         Calendar calendar = Calendar.getInstance();
         Calendar calendarNow = Calendar.getInstance();
         calendar.setTimeInMillis(timestamp);
@@ -155,7 +155,7 @@ public class StudyStartEndInfoManager extends Model {
         }
     }
 
-    DataSourceBuilder createDataSourceBuilderStudyStart() {
+    private DataSourceBuilder createDataSourceBuilderStudyStart() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.STUDY_START).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Study Start");
@@ -174,7 +174,7 @@ public class StudyStartEndInfoManager extends Model {
         return dataSourceBuilder;
     }
 
-    DataSourceBuilder createDataSourceBuilderStudyEnd() {
+    private DataSourceBuilder createDataSourceBuilderStudyEnd() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.STUDY_END).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Study End");

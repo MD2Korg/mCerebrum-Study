@@ -42,7 +42,7 @@ import org.md2k.utilities.Report.Log;
  */
 public class UserViewUserApp extends UserView {
     private static final String TAG = UserViewUserApp.class.getSimpleName();
-    public ExpandableHeightGridView gridViewApplication;
+    private ExpandableHeightGridView gridViewApplication;
 
     public UserViewUserApp(Activity activity, Model model) {
         super(activity, model);

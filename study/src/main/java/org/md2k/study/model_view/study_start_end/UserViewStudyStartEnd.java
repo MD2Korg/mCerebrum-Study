@@ -100,7 +100,7 @@ public class UserViewStudyStartEnd extends UserView {
         });
     }
 
-    String formatTime(long timestamp) {
+    private String formatTime(long timestamp) {
         try {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(timestamp);

@@ -33,10 +33,10 @@ public class ConfigAction {
     private String type;
     private String name;
     private String icon;
-    protected int rank;
+    private int rank;
     private String package_name;
     private String class_name;
-    protected boolean enable;
+    private boolean enable;
     private HashMap<String, String> parameters;
     private ConfigAction(){}
 

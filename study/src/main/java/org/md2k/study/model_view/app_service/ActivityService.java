@@ -8,7 +8,7 @@ import org.md2k.study.R;
 import org.md2k.utilities.Report.Log;
 
 public class ActivityService extends AppCompatActivity {
-    public static final String TAG = ActivityService.class.getSimpleName();
+    private static final String TAG = ActivityService.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

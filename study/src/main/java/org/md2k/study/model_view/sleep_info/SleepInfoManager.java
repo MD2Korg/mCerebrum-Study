@@ -54,8 +54,8 @@ import java.util.Locale;
 public class SleepInfoManager extends Model {
     private static final String TAG = SleepInfoManager.class.getSimpleName();
 
-    long sleepTimeDB;
-    long sleepTimeNew;
+    private long sleepTimeDB;
+    private long sleepTimeNew;
 
     public SleepInfoManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -76,7 +76,7 @@ public class SleepInfoManager extends Model {
         update();
     }
 
-    public void update() {
+    private void update() {
         Status lastStatus;
         if (sleepTimeDB == -1)
             lastStatus = new Status(rank, Status.SLEEP_NOT_DEFINED);
@@ -84,7 +84,7 @@ public class SleepInfoManager extends Model {
         notifyIfRequired(lastStatus);
     }
 
-    public boolean isValid() {
+    private boolean isValid() {
         if (sleepTimeNew == -1) return false;
         if (sleepTimeDB == -1) return true;
         if (sleepTimeDB == sleepTimeNew) return false;
@@ -124,7 +124,7 @@ public class SleepInfoManager extends Model {
         }
     }
 
-    DataSourceBuilder createDataSourceBuilder() {
+    private DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.SLEEP).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Sleep");
@@ -134,13 +134,13 @@ public class SleepInfoManager extends Model {
         return dataSourceBuilder;
     }
 
-    ArrayList<HashMap<String, String>> createDataDescriptors() {
+    private ArrayList<HashMap<String, String>> createDataDescriptors() {
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         dataDescriptors.add(createDescriptor("Sleep time"));
         return dataDescriptors;
     }
 
-    HashMap<String, String> createDescriptor(String name) {
+    private HashMap<String, String> createDescriptor(String name) {
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, name);
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
@@ -177,7 +177,7 @@ public class SleepInfoManager extends Model {
         this.sleepTimeNew = sleepTimeNew;
     }
 
-    String formatTime(long timestamp) {
+    private String formatTime(long timestamp) {
         long hourOfDay, minute;
         timestamp = timestamp / (60 * 1000);
         minute = timestamp % 60;

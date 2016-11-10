@@ -43,7 +43,7 @@ import org.md2k.utilities.Report.Log;
 
 import java.util.List;
 
-public class AppAdapter extends BaseAdapter {
+class AppAdapter extends BaseAdapter {
 
     private static final String TAG = AppAdapter.class.getSimpleName();
     private LayoutInflater layoutinflater;

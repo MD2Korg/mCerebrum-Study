@@ -9,10 +9,10 @@ import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.utils.storage.SharedPreference;
 import org.md2k.study.Constants;
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.Status;
-import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.config.ConfigApp;
 import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
@@ -56,10 +56,10 @@ import java.util.regex.Pattern;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class AppInstall {
+class AppInstall {
     private static final String TAG = AppInstall.class.getSimpleName();
-    ConfigApp app;
-    Context context;
+    private ConfigApp app;
+    private Context context;
     private String curVersion;
     private String latestVersion;
     private boolean installed;
@@ -76,13 +76,13 @@ public class AppInstall {
     public void set() {
         installed = Apps.isPackageInstalled(context, app.getPackage_name());
         curVersion = setVersionName();
-        latestVersion = MySharedPref.getInstance(context).read(app.getId());
+        latestVersion = SharedPreference.readString(context,app.getId(),null);
     }
 
     public void clear() {
     }
 
-    public void uninstall(OnCompletionListener onCompletionListener){
+    void uninstall(OnCompletionListener onCompletionListener){
         Log.d(TAG,"uninstall.."+app.getPackage_name());
         this.onCompletionListener=onCompletionListener;
         IntentFilter intentFilter = new IntentFilter();
@@ -95,7 +95,7 @@ public class AppInstall {
         context.startActivity(uninstallIntent);
     }
 
-    public void install(final Context context, OnCompletionListener onCompletionListenerr) {
+    void install(final Context context, OnCompletionListener onCompletionListenerr) {
         Log.d(TAG,"install.."+app.getPackage_name());
         this.onCompletionListener=onCompletionListenerr;
         IntentFilter intentFilter = new IntentFilter();
@@ -180,7 +180,7 @@ public class AppInstall {
                 public void OnCompleted(int curStatus) {
                     if (curStatus == Status.SUCCESS) {
                         latestVersion = retrieveAndVerifyLatestVersion(Constants.TEMP_DIRECTORY + filename);
-                        MySharedPref.getInstance(context).write(app.getId(), latestVersion);
+                        SharedPreference.write(context, app.getId(), latestVersion);
                         onDataChangeListener.onDataChange(0, latestVersion);
                     } else {
                         latestVersion = curVersion;
@@ -251,7 +251,7 @@ public class AppInstall {
         }
     }
 
-    public String setVersionName() {
+    private String setVersionName() {
         if (installed)
             return Apps.getVersionName(context, app.getPackage_name());
         else return null;
@@ -261,23 +261,23 @@ public class AppInstall {
         return app.getName();
     }
 
-    public String getPackage_name() {
+    private String getPackage_name() {
         return app.getPackage_name();
     }
 
-    public String getDownload_link() {
+    String getDownload_link() {
         return app.getDownload_link();
     }
 
-    public String getCurVersion() {
+    String getCurVersion() {
         return curVersion;
     }
 
-    public String getLatestVersion() {
+    String getLatestVersion() {
         return latestVersion;
     }
 
-    BroadcastReceiver br = new BroadcastReceiver() {
+    private BroadcastReceiver br = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -287,7 +287,7 @@ public class AppInstall {
                 case Intent.ACTION_PACKAGE_CHANGED:
                 case Intent.ACTION_PACKAGE_REPLACED:
                 case Intent.ACTION_PACKAGE_REMOVED:
-                    MySharedPref.getInstance(context).write(app.getPackage_name()+"_"+getCurVersion(),"false");
+                    SharedPreference.write(context, app.getPackage_name()+"_"+getCurVersion(),"false");
                     set();
                     onCompletionListener.OnCompleted(Status.SUCCESS);
                     context.unregisterReceiver(br);
@@ -296,14 +296,13 @@ public class AppInstall {
         }
     };
 
-    public boolean hasPermission() {
+    boolean hasPermission() {
         if (app.getPermission() == null)
             return true;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             return true;
-        String str = MySharedPref.getInstance(context).read(app.getPackage_name() + "_" + this.getCurVersion());
-        if (str != null && str.equals("true")) return true;
-        else return false;
+        String str = SharedPreference.readString(context,app.getPackage_name() + "_" + this.getCurVersion(),null);
+        return str != null && str.equals("true");
     }
 
     public void permission(OnCompletionListener onCompletionListener) {
@@ -321,15 +320,15 @@ public class AppInstall {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
-    BroadcastReceiver broadcastReceiverPermission=new BroadcastReceiver() {
+    private BroadcastReceiver broadcastReceiverPermission=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             int result=intent.getIntExtra("result",Status.APP_PERMISSION_NOT_APPROVED);
             Log.d(TAG,"broadcast permission..."+app.getPackage_name()+" ... result = "+result);
             if(result==Status.SUCCESS)
-                MySharedPref.getInstance(context).write(app.getPackage_name()+"_"+getCurVersion(),"true");
+                SharedPreference.write(context, app.getPackage_name()+"_"+getCurVersion(),"true");
             else
-                MySharedPref.getInstance(context).write(app.getPackage_name()+"_"+getCurVersion(),"false");
+                SharedPreference.write(context, app.getPackage_name()+"_"+getCurVersion(),"false");
             onCompletionListener.OnCompleted(result);
             LocalBroadcastManager.getInstance(context).unregisterReceiver(broadcastReceiverPermission);
         }

@@ -44,7 +44,7 @@ public abstract class UserView {
     protected Model model;
     protected Activity activity;
 
-    public UserView(Activity activity, Model model){
+    protected UserView(Activity activity, Model model){
         this.activity=activity;
         this.model=model;
     }

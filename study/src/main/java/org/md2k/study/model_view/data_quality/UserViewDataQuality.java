@@ -50,9 +50,9 @@ import java.util.ArrayList;
  */
 public class UserViewDataQuality extends UserView {
     private static final String TAG = UserViewDataQuality.class.getSimpleName();
-    ImageView[] imageView;
-    TextView[] textViews;
-    Handler handler;
+    private ImageView[] imageView;
+    private TextView[] textViews;
+    private Handler handler;
 
     public UserViewDataQuality(Activity activity, Model model) {
         super(activity, model);
@@ -91,9 +91,6 @@ public class UserViewDataQuality extends UserView {
                         isAllGood = false;
                         break;
                     case Status.DATAQUALITY_NOT_WORN:
-                    case Status.DATAQUALITY_BAD:
-                    case Status.DATAQUALITY_LOOSE:
-                    case Status.DATAQUALITY_NOISY:
                         if (message == null) message = dataQualityInfos.get(i).getMessage();
                         imageView[i].setImageResource(R.drawable.ic_warning_red_48dp);
                         isAllGood = false;

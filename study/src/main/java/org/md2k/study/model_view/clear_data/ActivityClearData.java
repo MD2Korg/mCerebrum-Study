@@ -40,8 +40,8 @@ import org.md2k.study.controller.ModelManager;
  */
 public class ActivityClearData extends Activity {
     private static final String TAG = ActivityClearData.class.getSimpleName();
-    ProgressDialog ringProgressDialog=null;
-    Handler handler;
+    private ProgressDialog ringProgressDialog=null;
+    private Handler handler;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +72,7 @@ public class ActivityClearData extends Activity {
         intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettings");
         startActivity(intent);
     }
-    Runnable runnable=new Runnable() {
+    private Runnable runnable=new Runnable() {
         @Override
         public void run() {
             if(ringProgressDialog!=null && ringProgressDialog.isShowing()) ringProgressDialog.dismiss();

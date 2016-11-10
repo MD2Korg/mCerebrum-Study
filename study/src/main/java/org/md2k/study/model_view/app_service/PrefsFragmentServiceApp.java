@@ -48,8 +48,8 @@ import org.md2k.study.controller.ModelManager;
 public class PrefsFragmentServiceApp extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentServiceApp.class.getSimpleName();
-    Context context;
-    Handler handler;
+    private Context context;
+    private Handler handler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +76,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
         return v;
     }
 
-    void setupButtons() {
+    private void setupButtons() {
         final Button button3 = (Button) getActivity().findViewById(R.id.button_1);
         button3.setText("Close");
         button3.setOnClickListener(new View.OnClickListener() {
@@ -102,7 +102,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
         });
     }
 
-    void updatePreference(int i) {
+    private void updatePreference(int i) {
         AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelFactory.MODEL_APP_SERVICE);
         SwitchPreference switchPreference = (SwitchPreference) findPreference(String.valueOf(i));
         Status status = appServiceManager.appServiceList.get(i).getStatus();
@@ -123,7 +123,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
             switchPreference.setSummary(status.getMessage());
         }
     }
-    void setupServiceApp() {
+    private void setupServiceApp() {
         AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelFactory.MODEL_APP_SERVICE);
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("key_app");
         preferenceCategory.removeAll();
@@ -155,7 +155,7 @@ public class PrefsFragmentServiceApp extends PreferenceFragment {
             updatePreference(i);
         }
     }
-    Runnable serviceRunning=new Runnable() {
+    private Runnable serviceRunning=new Runnable() {
         @Override
         public void run() {
             AppServiceManager appServiceManager= (AppServiceManager) ModelManager.getInstance(getActivity()).getModel(ModelFactory.MODEL_APP_SERVICE);

@@ -34,14 +34,14 @@ import org.md2k.utilities.Report.Log;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class AppService {
+class AppService {
     private static final String TAG = AppService.class.getSimpleName();
     private String name;
     private String package_name;
     private String service;
     private boolean active;
-    Context context;
-    int rank;
+    private Context context;
+    private int rank;
 
     public AppService(Context context, String name, String package_name, String service, int rank) {
         this.context = context;
@@ -78,11 +78,11 @@ public class AppService {
         else return new Status(rank, Status.SUCCESS);
     }
 
-    public boolean isInstalled() {
+    private boolean isInstalled() {
         return Apps.isPackageInstalled(context, package_name);
     }
 
-    public boolean isRunning() {
+    private boolean isRunning() {
         return Apps.isServiceRunning(context, service);
 
     }

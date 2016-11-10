@@ -13,10 +13,10 @@ import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.permission.PermissionInfo;
 
 public class ActivityPermissionGet extends AppCompatActivity {
-    public static final String TAG = ActivityPermissionGet.class.getSimpleName();
+    private static final String TAG = ActivityPermissionGet.class.getSimpleName();
     private static final int PERMISSION_REQUEST = 5321;
-    String packageName;
-    String permissionName;
+    private String packageName;
+    private String permissionName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -47,7 +47,7 @@ public class ClearConfigManager extends Model {
         ArrayList<String> requiredFiles=modelManager.getConfigManager().getConfig().getConfig_info().getRequired_files();
         deleteDirectoryExcept(Constants.CONFIG_DIRECTORY_BASE, requiredFiles);
     }
-    public void deleteDirectoryExcept(String directory, ArrayList<String> requiredFiles){
+    private void deleteDirectoryExcept(String directory, ArrayList<String> requiredFiles){
         deleteRecursiveExcept(new File(directory), requiredFiles);
     }
     private void deleteRecursiveExcept(File fileOrDirectory, ArrayList<String> requiredFiles){

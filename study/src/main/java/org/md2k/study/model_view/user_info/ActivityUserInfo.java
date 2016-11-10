@@ -43,7 +43,7 @@ import org.md2k.utilities.UI.OnClickListener;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ActivityUserInfo extends AppCompatActivity {
-    AlertDialog alertDialog;
+    private AlertDialog alertDialog;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +55,7 @@ public class ActivityUserInfo extends AppCompatActivity {
             showAlertDialog();
     }
 
-    void showAlertDialog() {
+    private void showAlertDialog() {
         alertDialogEditText(this, "User ID", "Enter User ID", org.md2k.utilities.R.drawable.ic_user_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, String result) {
@@ -72,7 +72,7 @@ public class ActivityUserInfo extends AppCompatActivity {
             }
         });
     }
-    public void alertDialogEditText(final Context context, String title, String message, int iconId, String positive, String negative, final OnClickListener onClickListener){
+    private void alertDialogEditText(final Context context, String title, String message, int iconId, String positive, String negative, final OnClickListener onClickListener){
         AlertDialog.Builder alertDialogBuilder= new AlertDialog.Builder(new ContextThemeWrapper(context, org.md2k.utilities.R.style.app_theme_teal_light_dialog))
                 .setTitle(title)
                 .setIcon(iconId)

@@ -59,7 +59,7 @@ import java.util.UUID;
  */
 public class UserInfoManager extends Model {
     private static final String TAG = UserInfoManager.class.getSimpleName();
-    UserInfo userInfo;
+    private UserInfo userInfo;
     boolean isInDatabase;
 
     public UserInfoManager(ModelManager modelManager, String id, int rank) {
@@ -82,7 +82,7 @@ public class UserInfoManager extends Model {
         update();
     }
 
-    public void update() {
+    private void update() {
         Status lastStatus;
         if (isInDatabase) lastStatus = new Status(rank, Status.SUCCESS);
         else lastStatus = new Status(rank, Status.USERID_NOT_DEFINED);
@@ -148,7 +148,7 @@ public class UserInfoManager extends Model {
         }
     }
 
-    DataSourceBuilder createDataSourceBuilder() {
+    private DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.USER_INFO).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "User Info");

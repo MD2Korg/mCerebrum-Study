@@ -45,7 +45,7 @@ public class ConfigManager {
     private Config config;
     private NotificationRequests notificationRequests;
     private boolean isExist;
-    Context context;
+    private Context context;
 
     public ConfigManager(Context context) {
         Log.d(TAG, "ConfigManager()...");

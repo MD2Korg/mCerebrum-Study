@@ -55,8 +55,8 @@ import java.util.ArrayList;
 public class PrefsFragmentConfigureApp extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentConfigureApp.class.getSimpleName();
-    ModelManager modelManager;
-    ArrayList<Preference> preferences;
+    private ModelManager modelManager;
+    private ArrayList<Preference> preferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -131,7 +131,7 @@ public class PrefsFragmentConfigureApp extends PreferenceFragment {
         updatePreference();
         super.onResume();
     }
-    void updatePreference(){
+    private void updatePreference(){
         try {
             for (int i = 0; i < preferences.size(); i++) {
                 Model model=modelManager.getModel(preferences.get(i).getKey());

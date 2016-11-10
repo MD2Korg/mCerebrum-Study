@@ -58,7 +58,7 @@ import java.util.ArrayList;
 public class PrefsFragmentAdmin extends PreferenceFragment {
 
     private static final String TAG = PrefsFragmentAdmin.class.getSimpleName();
-    ModelManager modelManager;
+    private ModelManager modelManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,7 +94,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         }
     }
 
-    void prepareStartStudy(ConfigViewContent viewContent) {
+    private void prepareStartStudy(ConfigViewContent viewContent) {
         Preference preference = findPreference(ConfigView.START_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -109,7 +109,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         });
     }
 
-    void prepareStopStudy(ConfigViewContent viewContent) {
+    private void prepareStopStudy(ConfigViewContent viewContent) {
         Preference preference = findPreference(ConfigView.STOP_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -124,7 +124,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         });
     }
 
-    void prepareConfigureApp(ConfigViewContent viewContent) {
+    private void prepareConfigureApp(ConfigViewContent viewContent) {
         Preference preference = findPreference(ConfigView.CONFIGURE_APP);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -137,7 +137,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         });
     }
 
-    void prepareConfigureStudy(ConfigViewContent viewContent) {
+    private void prepareConfigureStudy(ConfigViewContent viewContent) {
         Preference preference = findPreference(ConfigView.CONFIGURE_STUDY);
         preference.setTitle(viewContent.getName());
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -149,7 +149,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
             }
         });
     }
-    void prepareOther(ConfigViewContent viewContent){
+    private void prepareOther(ConfigViewContent viewContent){
         PreferenceCategory preferenceCategory= (PreferenceCategory) findPreference(viewContent.getId());
         preferenceCategory.removeAll();
         ArrayList<String> views= viewContent.getValues();
@@ -195,7 +195,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         super.onResume();
     }
 
-    public void updatePreference() {
+    private void updatePreference() {
         Status status = modelManager.getStatus();
         Log.d(TAG, "updatePreference()...status=" + status.log());
         if (status.getRank() >= Status.RANK_SYSTEM) {
@@ -226,7 +226,7 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
         }
     }
 
-    void updatePreference(String key, boolean enable, boolean status, String message) {
+    private void updatePreference(String key, boolean enable, boolean status, String message) {
         try {
             Preference preference = findPreference(key);
             if (preference == null) return;

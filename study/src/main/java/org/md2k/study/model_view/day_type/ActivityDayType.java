@@ -44,7 +44,7 @@ public class ActivityDayType extends AppCompatActivity {
         showAlertDialog();
     }
 
-    void showAlertDialog() {
+    private void showAlertDialog() {
         final String[] items = {DayTypeInfo.PRE_QUIT_NAME, DayTypeInfo.POST_QUIT_NAME};
         AlertDialogs.AlertDialogSingleChoice(this, "Pre/Post Quit Day", items, -1, "Select", "Cancel", new DialogInterface.OnClickListener() {
             @Override

@@ -53,7 +53,7 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class NotifierManager {
+class NotifierManager {
     private static final String TAG = NotifierManager.class.getSimpleName();
     private Context context;
     private Handler handler;
@@ -64,8 +64,8 @@ public class NotifierManager {
     private ArrayList<DataSourceClient> dataSourceClientAcks;
     private NotificationRequests notificationRequests;
     private Callback callback;
-    long lastAckTimeStamp = 0;
-    long lastRequestTimeStamp = 0;
+    private long lastAckTimeStamp = 0;
+    private long lastRequestTimeStamp = 0;
 
     public NotifierManager(Context context) {
         Log.d(TAG, "NotifierManager()...");
@@ -117,7 +117,7 @@ public class NotifierManager {
         }
     }
 
-    Runnable runnableNotify = new Runnable() {
+    private Runnable runnableNotify = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "runnableNotify...");
@@ -128,7 +128,7 @@ public class NotifierManager {
 
         }
     };
-    Runnable runnableSubscribeResponse = new Runnable() {
+    private Runnable runnableSubscribeResponse = new Runnable() {
         @Override
         public void run() {
             try {
@@ -148,7 +148,7 @@ public class NotifierManager {
             }
         }
     };
-    Runnable runnableSubscribeAcknowledge = new Runnable() {
+    private Runnable runnableSubscribeAcknowledge = new Runnable() {
         @Override
         public void run() {
             try {
@@ -169,7 +169,7 @@ public class NotifierManager {
     };
 
 
-    void subscribeNotificationResponse() throws DataKitException {
+    private void subscribeNotificationResponse() throws DataKitException {
         Log.d(TAG, "subscribeNotificationResponse...");
         for (int i = 0; i < dataSourceClientResponses.size(); i++) {
             DataKitAPI.getInstance(context).subscribe(dataSourceClientResponses.get(i), new OnReceiveListener() {
@@ -208,7 +208,7 @@ public class NotifierManager {
         }
     }
 
-    void subscribeNotificationAck() throws DataKitException {
+    private void subscribeNotificationAck() throws DataKitException {
         for (int i = 0; i < dataSourceClientAcks.size(); i++) {
             DataKitAPI.getInstance(context).subscribe(dataSourceClientAcks.get(i), new OnReceiveListener() {
                 @Override

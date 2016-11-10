@@ -44,7 +44,7 @@ public class ActivityWakeUp extends AppCompatActivity {
 
     }
 
-    void showTimePicker() {
+    private void showTimePicker() {
         int hour, minute;
         hour = 8;
         minute = 0;

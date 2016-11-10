@@ -39,7 +39,7 @@ import java.util.ArrayList;
 public class AppServiceManager extends Model {
     private static final String TAG = AppServiceManager.class.getSimpleName();
     public ArrayList<AppService> appServiceList;
-    Handler handler;
+    private Handler handler;
 
     public AppServiceManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -93,7 +93,7 @@ public class AppServiceManager extends Model {
 //        appServiceList.clear();
         status=new Status(rank,Status.NOT_DEFINED);
     }
-    Runnable runnableServiceRun=new Runnable() {
+    private Runnable runnableServiceRun=new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "runnable ServiceRun...");
@@ -131,7 +131,7 @@ public class AppServiceManager extends Model {
 
     }
 
-    public Status getCurrentStatus() {
+    private Status getCurrentStatus() {
         for(int i=0;i<appServiceList.size();i++) {
             Status temp = appServiceList.get(i).getStatus();
             if (temp.getStatus() == Status.APP_NOT_RUNNING)

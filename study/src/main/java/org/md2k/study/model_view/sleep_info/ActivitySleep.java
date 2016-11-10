@@ -44,7 +44,7 @@ public class ActivitySleep extends AppCompatActivity {
 
     }
 
-    void showTimePicker() {
+    private void showTimePicker() {
         int hour, minute;
         hour = 22;
         minute = 0;

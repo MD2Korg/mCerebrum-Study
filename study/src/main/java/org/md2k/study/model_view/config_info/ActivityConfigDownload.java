@@ -12,10 +12,10 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.md2k.datakitapi.utils.storage.SharedPreference;
 import org.md2k.study.Constants;
 import org.md2k.study.R;
 import org.md2k.study.Status;
-import org.md2k.study.cache.MySharedPref;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.utilities.Download;
 import org.md2k.study.utilities.OnCompletionListener;
@@ -53,7 +53,7 @@ import org.md2k.utilities.UI.OnClickListener;
  */
 public class ActivityConfigDownload extends Activity {
     private static final String TAG = ActivityConfigDownload.class.getSimpleName();
-    AlertDialog alertDialog;
+    private AlertDialog alertDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,9 +71,9 @@ public class ActivityConfigDownload extends Activity {
         }
     }
 
-    public void showDownloadConfig() {
+    private void showDownloadConfig() {
         Log.d(TAG, "showDownloadConfig()...");
-        String filename=MySharedPref.getInstance(this).read(Constants.CONFIG_ZIP_FILENAME);
+        String filename= SharedPreference.readString(this, Constants.CONFIG_ZIP_FILENAME, null);
         if(filename==null) filename="";
         alertDialogEditText(this, "Download Configuration File", "Please enter the file name (example: default)", filename, R.drawable.ic_download_teal_48dp, "Ok", "Cancel", new OnClickListener() {
             @Override
@@ -118,7 +118,7 @@ public class ActivityConfigDownload extends Activity {
         });
     }
 
-    public void alertDialogEditText(final Context context, String title, String message, String filename, int iconId, String positive, String negative, final OnClickListener onClickListener) {
+    private void alertDialogEditText(final Context context, String title, String message, String filename, int iconId, String positive, String negative, final OnClickListener onClickListener) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(context, org.md2k.utilities.R.style.app_theme_teal_light_dialog))
                 .setTitle(title)
                 .setIcon(iconId)
@@ -154,7 +154,7 @@ public class ActivityConfigDownload extends Activity {
     public void onBackPressed() {
     }
 
-    public void showDeleteDirectory() {
+    private void showDeleteDirectory() {
         Log.d(TAG, "showDeleteDirectory()...");
         AlertDialogs.AlertDialog(this, "Delete configuration files?", "Do you want to delete configuration files?", R.drawable.ic_delete_red_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
             @Override

@@ -34,7 +34,7 @@ import org.md2k.study.model_view.Model;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AppResetManager extends Model {
-    Handler handlerReset;
+    private Handler handlerReset;
 
     public AppResetManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);

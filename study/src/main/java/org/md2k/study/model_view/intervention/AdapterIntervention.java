@@ -19,7 +19,7 @@ import org.md2k.study.config.ConfigApp;
 
 import java.util.List;
 
-public class AdapterIntervention extends BaseAdapter {
+class AdapterIntervention extends BaseAdapter {
 
     private LayoutInflater layoutinflater;
     private List<ConfigApp> listStorage;

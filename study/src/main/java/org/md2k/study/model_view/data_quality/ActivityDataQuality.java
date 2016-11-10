@@ -47,7 +47,7 @@ public class ActivityDataQuality extends AppCompatActivity {
             finish();
         }
     }
-    void setupButtonPlotter(final DataQualityInfo dataQualityInfo) {
+    private void setupButtonPlotter(final DataQualityInfo dataQualityInfo) {
         try {
             final Button button = (Button) findViewById(R.id.button_plotter);
             if (!dataQualityInfo.configDataQualityView.getPlotter().isEnable()) {
@@ -77,7 +77,7 @@ public class ActivityDataQuality extends AppCompatActivity {
         }
     }
 
-    DataSourceClient getDataSourceClient(DataQualityInfo dataQualityInfo) throws DataKitException {
+    private DataSourceClient getDataSourceClient(DataQualityInfo dataQualityInfo) throws DataKitException {
         ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(ActivityDataQuality.this).find(new DataSourceBuilder(dataQualityInfo.configDataQualityView.getPlotter().getDatasource()));
         if (dataSourceClientArrayList.size() > 0)
             return dataSourceClientArrayList.get(dataSourceClientArrayList.size() - 1);
@@ -85,7 +85,7 @@ public class ActivityDataQuality extends AppCompatActivity {
     }
 
 
-    void setupButtonVideo(final DataQualityInfo dataQualityInfo) {
+    private void setupButtonVideo(final DataQualityInfo dataQualityInfo) {
         final Button button = (Button) findViewById(R.id.button_video);
         if (!dataQualityInfo.configDataQualityView.getVideo().isEnable()) {
             button.setVisibility(View.INVISIBLE);
@@ -101,7 +101,7 @@ public class ActivityDataQuality extends AppCompatActivity {
         });
     }
 
-    void setupMessage(DataQualityInfo dataQualityInfo) {
+    private void setupMessage(DataQualityInfo dataQualityInfo) {
         TextView textView = (TextView) findViewById(R.id.textView_message);
         textView.setText(dataQualityInfo.configDataQualityView.getMessage().getText());
         TextView textView1 = (TextView) findViewById(R.id.textView_message_header);
@@ -109,7 +109,7 @@ public class ActivityDataQuality extends AppCompatActivity {
 
     }
 
-    void setupButtonClose() {
+    private void setupButtonClose() {
         final Button buttonClose = (Button) findViewById(R.id.button_1);
         buttonClose.setText("Close");
         buttonClose.setOnClickListener(new View.OnClickListener() {

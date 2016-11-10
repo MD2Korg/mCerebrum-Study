@@ -52,8 +52,8 @@ import java.util.ArrayList;
  */
 public class PrivacyControlManager extends Model {
     private static final String TAG = PrivacyControlManager.class.getSimpleName();
-    PrivacyData privacyData;
-    public static final String MAX_TIME="max_time";
+    private PrivacyData privacyData;
+    private static final String MAX_TIME="max_time";
 
     public PrivacyControlManager(ModelManager modelManager, String id, int rank) {
         super(modelManager, id, rank);
@@ -77,7 +77,7 @@ public class PrivacyControlManager extends Model {
         long maxTime= Long.parseLong(action.getParameters().get(MAX_TIME));
         return maxTime-getRunningTime();
     }
-    public long getRunningTime(){
+    private long getRunningTime(){
         long runningTime = 0;
         try {
             PrivacyData lastPrivacyData = null;
