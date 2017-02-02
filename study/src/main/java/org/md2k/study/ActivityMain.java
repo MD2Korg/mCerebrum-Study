@@ -201,6 +201,10 @@ public class ActivityMain extends AppCompatActivity {
             setTitle();
         }
     }
+    @Override
+    public void onBackPressed(){
+
+    }
 
     private void setLogo() {
         try {

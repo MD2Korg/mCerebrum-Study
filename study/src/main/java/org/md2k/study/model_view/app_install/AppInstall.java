@@ -9,7 +9,6 @@ import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
-import org.md2k.datakitapi.utils.storage.SharedPreference;
 import org.md2k.study.Constants;
 import org.md2k.study.OnDataChangeListener;
 import org.md2k.study.Status;
@@ -19,6 +18,7 @@ import org.md2k.study.utilities.OnCompletionListener;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.sharedpreference.SharedPreference;
 
 import java.io.BufferedReader;
 import java.io.File;

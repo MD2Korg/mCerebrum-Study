@@ -12,7 +12,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.md2k.datakitapi.utils.storage.SharedPreference;
 import org.md2k.study.Constants;
 import org.md2k.study.R;
 import org.md2k.study.Status;
@@ -23,6 +22,7 @@ import org.md2k.utilities.FileManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.AlertDialogs;
 import org.md2k.utilities.UI.OnClickListener;
+import org.md2k.utilities.sharedpreference.SharedPreference;
 
 
 /**

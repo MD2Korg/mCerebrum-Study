@@ -1,11 +1,11 @@
 package org.md2k.study.model_view.config_info;
 
-import org.md2k.datakitapi.utils.storage.SharedPreference;
 import org.md2k.study.Constants;
 import org.md2k.study.Status;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.sharedpreference.SharedPreference;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center

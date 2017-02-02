@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 
 import org.md2k.datakitapi.messagehandler.ResultCallback;
-import org.md2k.datakitapi.utils.storage.SharedPreference;
 import org.md2k.study.controller.ModelFactory;
 import org.md2k.study.controller.ModelManager;
 import org.md2k.study.model_view.app_install.ActivityInstallApp;
@@ -33,6 +32,7 @@ import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.Report.LogStorage;
 import org.md2k.utilities.UI.AlertDialogs;
 import org.md2k.utilities.permission.PermissionInfo;
+import org.md2k.utilities.sharedpreference.SharedPreference;
 
 import io.fabric.sdk.android.Fabric;
 
