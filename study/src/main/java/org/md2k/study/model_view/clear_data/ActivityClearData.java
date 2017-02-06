@@ -57,7 +57,7 @@ public class ActivityClearData extends Activity {
                 ModelManager.getInstance(ActivityClearData.this).set();
                 ringProgressDialog = ProgressDialog.show(ActivityClearData.this, "Please wait ...", "System is resetting ...", true);
                 ringProgressDialog.setCancelable(false);
-                handler.postDelayed(runnable, 1000);
+                handler.postDelayed(runnable, 3000);
             }
         });
         Intent intent = new Intent();
@@ -70,6 +70,8 @@ public class ActivityClearData extends Activity {
         startActivity(intent);
         */
         intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettings");
+        startActivity(intent);
+        intent.setClassName("org.md2k.streamprocessor", "org.md2k.streamprocessor.ActivitySettings");
         startActivity(intent);
     }
     private Runnable runnable=new Runnable() {
