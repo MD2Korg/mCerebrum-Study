@@ -69,10 +69,18 @@ public class ActivityClearData extends Activity {
         intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettingsDatabase");
         startActivity(intent);
         */
-        intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettings");
-        startActivity(intent);
-        intent.setClassName("org.md2k.streamprocessor", "org.md2k.streamprocessor.ActivitySettings");
-        startActivity(intent);
+        try {
+            intent.setClassName("org.md2k.datakit", "org.md2k.datakit.ActivitySettings");
+            startActivity(intent);
+        }catch (Exception ignored){
+
+        }
+        try {
+            intent.setClassName("org.md2k.streamprocessor", "org.md2k.streamprocessor.ActivitySettings");
+            startActivity(intent);
+        }catch (Exception ignored){
+
+        }
     }
     private Runnable runnable=new Runnable() {
         @Override
