@@ -161,7 +161,6 @@ public class PrefsFragmentAdmin extends PreferenceFragment {
             preference.setKey(model.getAction().getId());
             preference.setTitle(model.getAction().getName());
             Resources resources=getActivity().getResources();
-            Log.d(TAG, "id=" + model.getAction().getId() + " " + model.getAction().getIcon());
             int resourceId=resources.getIdentifier(model.getAction().getIcon(),"drawable",getActivity().getPackageName());
             preference.setIcon(ContextCompat.getDrawable(getActivity(), resourceId));
             preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

@@ -30,6 +30,7 @@ package org.md2k.study.model_view.user_app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,9 +38,11 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.md2k.study.Constants;
 import org.md2k.study.R;
 import org.md2k.study.model_view.Model;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.icons.Icon;
 
 import java.util.List;
 
@@ -85,18 +88,31 @@ class AppAdapter extends BaseAdapter {
             listViewHolder = (ViewHolder) convertView.getTag();
         }
         listViewHolder.textInListView.setText(models.get(position).getAction().getName());
-        listViewHolder.imageInListView.setImageDrawable(getIconFromApplication(models.get(position).getAction().getIcon()));
+        Drawable drawable=getIconFromApplication(models.get(position).getAction().getIcon());
+        if(drawable!=null)
+            listViewHolder.imageInListView.setImageDrawable(drawable);
         return convertView;
     }
 
     private Drawable getIconFromApplication(String icon) {
-        Resources resources=context.getResources();
-        Log.d(TAG, "icon=" + icon);
-        int resourceId=resources.getIdentifier(icon,"drawable",context.getPackageName());
-        return resources.getDrawable(resourceId);
+        try {
+            Drawable myIcon = Icon.get(context, icon, ContextCompat.getColor(context, R.color.teal_700), Icon.Size.MEDIUM);
+            if (myIcon != null) return myIcon;
+            Resources resources = context.getResources();
+            Log.d(TAG, "icon=" + icon);
+            int resourceId = resources.getIdentifier(icon, "drawable", context.getPackageName());
+            if (resourceId != 0)
+                return ContextCompat.getDrawable(context, resourceId);
+            else {
+                String path = Constants.CONFIG_DIRECTORY + icon;
+                return Drawable.createFromPath(path);
+            }
+        }catch (Exception e){
+            return null;
+        }
     }
 
-    static class ViewHolder {
+    private static class ViewHolder {
         TextView textInListView;
         ImageView imageInListView;
     }
