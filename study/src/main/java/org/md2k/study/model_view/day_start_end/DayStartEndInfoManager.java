@@ -108,10 +108,24 @@ public class DayStartEndInfoManager extends Model {
         notifyIfRequired(status);
         handlerDayStart.removeCallbacks(runnableDayStart);
         handlerDayEnd.removeCallbacks(runnableDayEnd);
+        long time=isInsertEndOfDayImportant();
+        if(time!=-1)
+            setDayEndTime(time);
+
         handlerDayStart.post(runnableDayStart);
         handlerDayEnd.post(runnableDayEnd);
+
         Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
         LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
+    }
+    private long isInsertEndOfDayImportant(){
+        long sleepTime = getTime(SLEEP, 0);
+        long curTime=DateTime.getDateTime();
+        if(dayStartTime==-1 || dayEndTime>dayStartTime) return -1;
+        if(sleepTime-DAY_IN_MILLIS>dayStartTime && curTime>sleepTime-DAY_IN_MILLIS) return sleepTime-DAY_IN_MILLIS;
+        if(sleepTime>dayStartTime && curTime>sleepTime) return sleepTime;
+        if(sleepTime+DAY_IN_MILLIS>dayStartTime && curTime>sleepTime+DAY_IN_MILLIS) return sleepTime+DAY_IN_MILLIS;
+        return -1;
     }
 
     public void clear() {
