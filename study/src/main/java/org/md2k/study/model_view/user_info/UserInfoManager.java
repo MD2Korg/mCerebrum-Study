@@ -107,7 +107,6 @@ public class UserInfoManager extends Model {
     private void readFromDataKit() {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-            if (!dataKitAPI.isConnected()) return;
             DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
             if (dataTypes.size() != 0) {
@@ -129,7 +128,6 @@ public class UserInfoManager extends Model {
     private boolean writeToDataKit(){
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-            if (!dataKitAPI.isConnected()) return false;
             if (isInDatabase) return false;
             if (userInfo == null) return false;
             if (userInfo.getUser_id() == null) return false;

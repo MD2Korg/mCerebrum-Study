@@ -171,10 +171,15 @@ class AppInstall {
     public void setLatestVersionName(final Context context, final OnDataChangeListener onDataChangeListener) {
         String link = app.getDownload_link() + "/latest";
         final String filename = "version_" + UUID.randomUUID().toString() + ".txt";
-        if (app.getDownload_link().startsWith("market") || app.getDownload_link().endsWith(".apk")) {
+        if (app.getDownload_link().startsWith("market")){
             latestVersion = curVersion;
             onDataChangeListener.onDataChange(0, "no_version");
-        } else {
+        } else if(app.getDownload_link().endsWith(".apk")) {
+            String[] linkPart=app.getDownload_link().split("/");
+            latestVersion=linkPart[linkPart.length-2];
+            SharedPreference.write(context, app.getId(), latestVersion);
+            onDataChangeListener.onDataChange(0, latestVersion);
+        } else{
             download(context, filename, link, false, new OnCompletionListener() {
                 @Override
                 public void OnCompleted(int curStatus) {

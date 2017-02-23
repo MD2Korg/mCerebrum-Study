@@ -57,11 +57,11 @@ public class StudyStartEndInfoManager extends Model {
     private long studyEndTime;
 
     public StudyStartEndInfoManager(ModelManager modelManager, String id, int rank) {
-        super(modelManager,id,rank);
+        super(modelManager, id, rank);
         Log.d(TAG, "constructor..id=" + id + " rank=" + rank);
-        studyStartTime=-1;
-        studyEndTime=-1;
-        status=new Status(rank, Status.NOT_DEFINED);
+        studyStartTime = -1;
+        studyEndTime = -1;
+        status = new Status(rank, Status.NOT_DEFINED);
     }
 
     public void set() {
@@ -69,32 +69,30 @@ public class StudyStartEndInfoManager extends Model {
         readStudyStartFromDataKit();
         readStudyEndFromDataKit();
         if (studyStartTime == -1)
-            lastStatus= new Status(rank, Status.STUDY_START_NOT_AVAILABLE);
+            lastStatus = new Status(rank, Status.STUDY_START_NOT_AVAILABLE);
         else if (studyStartTime < studyEndTime) {
-            lastStatus= new Status(rank, Status.SUCCESS);
-        }
-        else lastStatus=new Status(rank,Status.SUCCESS);
+            lastStatus = new Status(rank, Status.SUCCESS);
+        } else lastStatus = new Status(rank, Status.SUCCESS);
         notifyIfRequired(lastStatus);
 
     }
-    public void clear(){
+
+    public void clear() {
         studyStartTime = -1;
         studyEndTime = -1;
-        status=new Status(rank, Status.NOT_DEFINED);
+        status = new Status(rank, Status.NOT_DEFINED);
     }
 
-    private void readStudyStartFromDataKit()  {
+    private void readStudyStartFromDataKit() {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
             studyStartTime = -1;
-            if (dataKitAPI.isConnected()) {
-                DataSourceClient dataSourceClientStudyStart = dataKitAPI.register(createDataSourceBuilderStudyStart());
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyStart, 1);
-                if (dataTypes.size() != 0) {
-                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                    studyStartTime = dataTypeLong.getSample();
-                    if (!isToday(studyStartTime)) studyStartTime = -1;
-                }
+            DataSourceClient dataSourceClientStudyStart = dataKitAPI.register(createDataSourceBuilderStudyStart());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyStart, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                studyStartTime = dataTypeLong.getSample();
+                if (!isToday(studyStartTime)) studyStartTime = -1;
             }
         } catch (DataKitException e) {
             LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
@@ -105,18 +103,17 @@ public class StudyStartEndInfoManager extends Model {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
             studyEndTime = -1;
-            if (dataKitAPI.isConnected()) {
-                DataSourceClient dataSourceClientStudyEnd = dataKitAPI.register(createDataSourceBuilderStudyEnd());
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyEnd, 1);
-                if (dataTypes.size() != 0) {
-                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                    studyEndTime = dataTypeLong.getSample();
-                }
+            DataSourceClient dataSourceClientStudyEnd = dataKitAPI.register(createDataSourceBuilderStudyEnd());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientStudyEnd, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                studyEndTime = dataTypeLong.getSample();
             }
         } catch (DataKitException e) {
             LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
         }
     }
+
     private boolean isToday(long timestamp) {
         Calendar calendar = Calendar.getInstance();
         Calendar calendarNow = Calendar.getInstance();
@@ -128,10 +125,9 @@ public class StudyStartEndInfoManager extends Model {
         return true;
     }
 
-    private boolean writeStudyStartToDataKit()  {
+    private boolean writeStudyStartToDataKit() {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-            if (!dataKitAPI.isConnected()) return false;
             DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyStartTime);
             DataSourceClient dataSourceClientStudyStart = dataKitAPI.register(createDataSourceBuilderStudyStart());
             dataKitAPI.insert(dataSourceClientStudyStart, dataTypeLong);
@@ -144,7 +140,6 @@ public class StudyStartEndInfoManager extends Model {
     private boolean writeStudyEndToDataKit() {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-            if (!dataKitAPI.isConnected()) return false;
             DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), studyEndTime);
             DataSourceClient dataSourceClientStudyEnd = dataKitAPI.register(createDataSourceBuilderStudyEnd());
             dataKitAPI.insert(dataSourceClientStudyEnd, dataTypeLong);
@@ -213,9 +208,10 @@ public class StudyStartEndInfoManager extends Model {
     public long getStudyEndTime() {
         return studyEndTime;
     }
-    public Status getCurrentStatusDetails(){
-        if(studyStartTime==-1 ) return new Status(rank,Status.STUDY_START_NOT_AVAILABLE);
-        if(studyEndTime>studyStartTime) return new Status(rank,Status.STUDY_COMPLETED);
+
+    public Status getCurrentStatusDetails() {
+        if (studyStartTime == -1) return new Status(rank, Status.STUDY_START_NOT_AVAILABLE);
+        if (studyEndTime > studyStartTime) return new Status(rank, Status.STUDY_COMPLETED);
         return new Status(rank, Status.STUDY_RUNNING);
     }
 

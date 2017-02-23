@@ -99,18 +99,16 @@ public class DayTypeManager extends Model {
         return true;
     }
 
-    private void readFromDataKit(){
+    private void readFromDataKit() {
         try {
             dayTypeDB = null;
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-            if (dataKitAPI.isConnected()) {
-                DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-                if (dataTypes.size() != 0) {
-                    DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                    Gson gson = new Gson();
-                    dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
-                }
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                Gson gson = new Gson();
+                dayTypeDB = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
             }
         } catch (DataKitException e) {
             LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
@@ -120,7 +118,6 @@ public class DayTypeManager extends Model {
     private boolean writeToDataKit() {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-            if (!dataKitAPI.isConnected()) return false;
             if (!isValid()) return false;
             Gson gson = new Gson();
             JsonObject sample = new JsonParser().parse(gson.toJson(dayTypeNew)).getAsJsonObject();

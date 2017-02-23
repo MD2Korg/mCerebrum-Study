@@ -108,24 +108,11 @@ public class DayStartEndInfoManager extends Model {
         notifyIfRequired(status);
         handlerDayStart.removeCallbacks(runnableDayStart);
         handlerDayEnd.removeCallbacks(runnableDayEnd);
-        long time=isInsertEndOfDayImportant();
-        if(time!=-1)
-            setDayEndTime(time);
-
         handlerDayStart.post(runnableDayStart);
         handlerDayEnd.post(runnableDayEnd);
 
         Intent intent = new Intent(DayStartEndInfoManager.class.getSimpleName());
         LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(intent);
-    }
-    private long isInsertEndOfDayImportant(){
-        long sleepTime = getTime(SLEEP, 0);
-        long curTime=DateTime.getDateTime();
-        if(dayStartTime==-1 || dayEndTime>dayStartTime) return -1;
-        if(sleepTime-DAY_IN_MILLIS>dayStartTime && curTime>sleepTime-DAY_IN_MILLIS) return sleepTime-DAY_IN_MILLIS;
-        if(sleepTime>dayStartTime && curTime>sleepTime) return sleepTime;
-        if(sleepTime+DAY_IN_MILLIS>dayStartTime && curTime>sleepTime+DAY_IN_MILLIS) return sleepTime+DAY_IN_MILLIS;
-        return -1;
     }
 
     public void clear() {
@@ -357,7 +344,6 @@ public class DayStartEndInfoManager extends Model {
     private void readDayStartFromDataKit() {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayStartTime = -1;
-        if (!dataKitAPI.isConnected()) return;
         try {
             DataSourceClient dataSourceClientDayStart = dataKitAPI.register(createDataSourceBuilderDayStart());
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
@@ -373,7 +359,6 @@ public class DayStartEndInfoManager extends Model {
     private void readWakeupTimeFromDataKit() {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         wakeupOffset = -1;
-        if (!dataKitAPI.isConnected()) return;
         try {
             ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.WAKEUP));
             if (dataSourceClients.size() > 0) {
@@ -391,7 +376,6 @@ public class DayStartEndInfoManager extends Model {
     private void readSleepTimeFromDataKit() {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         sleepOffset = -1;
-        if (!dataKitAPI.isConnected()) return;
         try {
             ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.SLEEP));
             if (dataSourceClients.size() > 0) {
@@ -410,7 +394,6 @@ public class DayStartEndInfoManager extends Model {
     private void readDayEndFromDataKit() {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
         dayEndTime = -1;
-        if (!dataKitAPI.isConnected()) return;
         try {
             DataSourceClient dataSourceClientDayEnd = dataKitAPI.register(createDataSourceBuilderDayEnd());
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);

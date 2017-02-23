@@ -103,14 +103,12 @@ public class StudyInfoManager extends Model {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
 
-            if (dataKitAPI.isConnected()) {
-                DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-                if (dataTypes.size() != 0) {
-                    DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
-                    Gson gson = new Gson();
-                    studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), StudyInfo.class);
-                }
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+                Gson gson = new Gson();
+                studyInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), StudyInfo.class);
             }
         } catch (Exception ignored) {
             LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
@@ -122,7 +120,6 @@ public class StudyInfoManager extends Model {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
             Log.d(TAG, "StudyInfoManager...writeToDataKit()");
-            if (!dataKitAPI.isConnected()) return false;
             Gson gson = new Gson();
             JsonObject sample = new JsonParser().parse(gson.toJson(studyInfoFile)).getAsJsonObject();
 
@@ -147,7 +144,7 @@ public class StudyInfoManager extends Model {
     }
 
     public String getStudy_id() {
-        if(studyInfoFile==null) {
+        if (studyInfoFile == null) {
             ConfigInfo configInfo = modelManager.getConfigManager().getConfig().getConfig_info();
             studyInfoFile = new StudyInfo(configInfo.getId(), configInfo.getName(), configInfo.getVersion(), configInfo.getFilename());
         }

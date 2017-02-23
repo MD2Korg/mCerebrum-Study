@@ -55,9 +55,11 @@ public class DataKitConnectManager extends Model {
     public void set() {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
         Log.d(TAG,"DataKitConnectManager...set()..before...isConnected="+dataKitAPI.isConnected());
+
         if (dataKitAPI.isConnected()) {
             notifyIfRequired(new Status(rank, Status.SUCCESS));
         }else{
+            status=new Status(rank, Status.DATAKIT_NOT_AVAILABLE);
             dataKitAPI=DataKitAPI.getInstance(modelManager.getContext());
             try {
                 dataKitAPI.connect(new OnConnectionListener() {

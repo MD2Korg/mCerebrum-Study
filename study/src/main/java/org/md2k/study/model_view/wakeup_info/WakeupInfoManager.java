@@ -23,6 +23,7 @@ import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -74,7 +75,7 @@ public class WakeupInfoManager extends Model {
         update();
     }
 
-    private void update(){
+    private void update() {
         Status lastStatus;
         if (wakeupTimeDB == -1)
             lastStatus = new Status(rank, Status.WAKEUP_NOT_DEFINED);
@@ -90,28 +91,25 @@ public class WakeupInfoManager extends Model {
         return true;
     }
 
-    private void readStudyInfoFromDataKit(){
+    private void readStudyInfoFromDataKit() {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-            if (dataKitAPI.isConnected()) {
-                DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
-                ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
-                if (dataTypes.size() != 0) {
-                    DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
-                    wakeupTimeDB = dataTypeLong.getSample();
-                }
+            DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClient, 1);
+            if (dataTypes.size() != 0) {
+                DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
+                wakeupTimeDB = dataTypeLong.getSample();
             }
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
             LocalBroadcastManager.getInstance(modelManager.getContext()).sendBroadcast(new Intent(Constants.INTENT_RESTART));
 
         }
     }
 
 
-    private boolean writeToDataKit()  {
+    private boolean writeToDataKit() {
         try {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(modelManager.getContext());
-            if (!dataKitAPI.isConnected()) return false;
             if (!isValid()) return false;
             DataTypeLong dataTypeLong = new DataTypeLong(DateTime.getDateTime(), wakeupTimeNew);
             DataSourceClient dataSourceClient = dataKitAPI.register(createDataSourceBuilder());
@@ -184,14 +182,14 @@ public class WakeupInfoManager extends Model {
         timestamp /= 60;
         hourOfDay = timestamp;
         if (hourOfDay > 12)
-            return String.format("%02d:%02d pm", hourOfDay - 12, minute);
+            return String.format(Locale.US, "%02d:%02d pm", hourOfDay - 12, minute);
         else if (hourOfDay == 12)
-            return String.format("%02d:%02d pm", 12, minute);
+            return String.format(Locale.US, "%02d:%02d pm", 12, minute);
         else {
             if (hourOfDay != 0)
-                return String.format("%02d:%02d am", hourOfDay, minute);
+                return String.format(Locale.US, "%02d:%02d am", hourOfDay, minute);
             else
-                return String.format("%02d:%02d am", 12, minute);
+                return String.format(Locale.US, "%02d:%02d am", 12, minute);
         }
     }
 
