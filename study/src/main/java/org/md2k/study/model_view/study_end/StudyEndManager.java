@@ -158,7 +158,7 @@ public class StudyEndManager extends Model {
     public Status getStatus() {
         String msg = "";
         if (studyEndNew != -1) msg = DateTime.convertTimeStampToDateTime(studyEndNew,"EEE, d MMM yyyy, HH:mm:ss");
-        else if (studyEndDB != -1) msg = DateTime.convertTimeStampToDateTime(studyEndNew,"EEE, d MMM yyyy, HH:mm:ss");
+        else if (studyEndDB != -1) msg = DateTime.convertTimeStampToDateTime(studyEndDB,"EEE, d MMM yyyy, HH:mm:ss");
         if (studyEndDB != -1 || studyEndNew != -1) return new Status(rank, Status.SUCCESS, msg);
         return new Status(rank, Status.STUDY_END_NOT_DEFINED);
     }

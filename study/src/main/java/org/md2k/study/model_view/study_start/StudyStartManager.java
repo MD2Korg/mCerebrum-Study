@@ -158,7 +158,7 @@ public class StudyStartManager extends Model {
     public Status getStatus() {
         String msg = "";
         if (studyStartNew != -1) msg = DateTime.convertTimeStampToDateTime(studyStartNew,"EEE, d MMM yyyy, HH:mm:ss");
-        else if (studyStartDB != -1) msg = DateTime.convertTimeStampToDateTime(studyStartNew,"EEE, d MMM yyyy, HH:mm:ss");
+        else if (studyStartDB != -1) msg = DateTime.convertTimeStampToDateTime(studyStartDB,"EEE, d MMM yyyy, HH:mm:ss");
         if (studyStartDB != -1 || studyStartNew != -1) return new Status(rank, Status.SUCCESS, msg);
         return new Status(rank, Status.STUDY_START_NOT_DEFINED);
     }

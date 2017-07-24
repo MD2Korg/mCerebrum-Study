@@ -158,7 +158,7 @@ public class PostQuitManager extends Model {
     public Status getStatus() {
         String msg = "";
         if (dataNew != -1) msg = DateTime.convertTimeStampToDateTime(dataNew,"EEE, d MMM yyyy, HH:mm:ss");
-        else if (dataDB != -1) msg = DateTime.convertTimeStampToDateTime(dataNew,"EEE, d MMM yyyy, HH:mm:ss");
+        else if (dataDB != -1) msg = DateTime.convertTimeStampToDateTime(dataDB,"EEE, d MMM yyyy, HH:mm:ss");
         if (dataDB != -1 || dataNew != -1) return new Status(rank, Status.SUCCESS, msg);
         return new Status(rank, Status.POST_QUIT_NOT_DEFINED);
     }
