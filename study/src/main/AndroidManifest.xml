@@ -158,6 +158,10 @@
             android:exported="true"
             android:label="Permission"
             android:screenOrientation="portrait"/>
+        <activity android:name=".model_view.study_start.ActivityStudyStart"/>
+        <activity android:name=".model_view.study_end.ActivityStudyEnd"/>
+        <activity android:name=".model_view.pre_quit.ActivityPreQuit"/>
+        <activity android:name=".model_view.post_quit.ActivityPostQuit"/>
 
         <receiver android:name=".BootReceiver">
             <intent-filter>

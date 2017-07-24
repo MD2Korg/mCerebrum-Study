@@ -62,6 +62,10 @@ public class Status implements Parcelable {
     public static final int WAKEUP_NOT_DEFINED = 497;
     public static final int SLEEP_NOT_DEFINED = 496;
     public static final int DAY_TYPE_NOT_DEFINED = 495;
+    public static final int STUDY_START_NOT_DEFINED = 494;
+    public static final int STUDY_END_NOT_DEFINED = 493;
+    public static final int PRE_QUIT_NOT_DEFINED = 492;
+    public static final int POST_QUIT_NOT_DEFINED = 491;
     public static final int APP_NOT_RUNNING = 299;
     public static final int DAY_START_NOT_AVAILABLE = 298;
     private static final int DAY_COMPLETED = 297;
@@ -97,6 +101,14 @@ public class Status implements Parcelable {
                 return "Error: Sleep time not defined";
             case DAY_TYPE_NOT_DEFINED:
                 return "Error: Pre/Post Quit Day is not defined";
+            case STUDY_START_NOT_DEFINED:
+                return "Error: Start of the Study is not defined";
+            case STUDY_END_NOT_DEFINED:
+                return "Error: End of the Study is not defined";
+            case PRE_QUIT_NOT_DEFINED:
+                return "Error: Pre Quit Day is not defined";
+            case POST_QUIT_NOT_DEFINED:
+                return "Error: Post Quit Day is not defined";
             case APP_NOT_RUNNING:
                 return "Error: Application not running";
             case APP_CONFIG_ERROR:

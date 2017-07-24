@@ -18,10 +18,14 @@ import org.md2k.study.model_view.day_start_end.DayStartEndInfoManager;
 import org.md2k.study.model_view.day_type.DayTypeManager;
 import org.md2k.study.model_view.intervention.InterventionManager;
 import org.md2k.study.model_view.plotter.PlotterManager;
+import org.md2k.study.model_view.post_quit.PostQuitManager;
+import org.md2k.study.model_view.pre_quit.PreQuitManager;
 import org.md2k.study.model_view.privacy_control.PrivacyControlManager;
 import org.md2k.study.model_view.selfreport.SelfReportManager;
 import org.md2k.study.model_view.sleep_info.SleepInfoManager;
+import org.md2k.study.model_view.study_end.StudyEndManager;
 import org.md2k.study.model_view.study_info.StudyInfoManager;
+import org.md2k.study.model_view.study_start.StudyStartManager;
 import org.md2k.study.model_view.study_start_end.StudyStartEndInfoManager;
 import org.md2k.study.model_view.user_app.UserAppManager;
 import org.md2k.study.model_view.user_app_external.UserAppExternalManager;
@@ -55,6 +59,10 @@ public class ModelFactory {
     private static final String MODEL_CLEAR_DATABASE = "clear_database";
     private static final String MODEL_DATAKIT_CONNECT = "datakit_connect";
     public static final String MODEL_DAY_TYPE = "day_type";
+    public static final String MODEL_STUDY_START = "study_start";
+    public static final String MODEL_STUDY_END = "study_end";
+    public static final String MODEL_PRE_QUIT = "pre_quit";
+    public static final String MODEL_POST_QUIT = "post_quit";
     public static final String MODEL_USER_APP = "user_app";
     public static final String MODEL_USER_STATUS = "user_status";
     public static final String MODEL_APP_RESET = "app_reset";
@@ -83,6 +91,14 @@ public class ModelFactory {
                 return new ClearDataManager(modelManager, id, rank);
             case MODEL_DAY_TYPE:
                 return new DayTypeManager(modelManager, id, rank);
+            case MODEL_STUDY_START:
+                return new StudyStartManager(modelManager, id, rank);
+            case MODEL_STUDY_END:
+                return new StudyEndManager(modelManager, id, rank);
+            case MODEL_PRE_QUIT:
+                return new PreQuitManager(modelManager, id, rank);
+            case MODEL_POST_QUIT:
+                return new PostQuitManager(modelManager, id, rank);
             case MODEL_CLEAR_CONFIG:
                 return new ClearConfigManager(modelManager, id, rank);
             case MODEL_CONFIG_DOWNLOAD:
